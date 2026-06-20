@@ -1,0 +1,205 @@
+/* Full Page */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Poppins", sans-serif;
+  background: #f8f6f3;
+}
+:root {
+  --color-primary: #1ba6b2;       
+  --color-primary-hover: #148d97;
+  --on-primary: #ffffff;           
+
+  --radius-button: 30px;
+  --radius-full: 999px;
+}
+
+/* Main Container */
+.login-container {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+}
+
+/* Left Side Image Section */
+.left-side {
+  flex: 1;
+  background: linear-gradient(
+      rgba(218, 221, 221, 0.35),
+      rgba(203, 205, 206, 0.35)
+    ),
+    url('https://lh3.googleusercontent.com/aida-public/AB6AXuBSnYGdanF0GYhv0vCxLzPcHcKTIzsyWHGMBv9agRIlHAXHLiLRIKpquL8JMbhuAoqsTDkdGDTELSWmxXQi4_Z96O5DbrRXRxkNqqEENu95HT90prKHhQ7l7pPvfa7VaHSJqm0L9KwHEwYoXXTx1dAlvGt1y2YFnpL7A59XleADEloG4hmHU5edTw9cFXygFzUj3uLLnksJ1SUiXDcbqG-jNDJeNpmPu6AnMJg3gH197CC5qNo_bu41kyK9cULkpYyk1BpAXK2g0zoT')
+      center/cover no-repeat;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  padding: 50px;
+  color: white;
+}
+
+.overlay-text h1 {
+  font-size: 60px;
+  margin: 0;
+  color: #1b5f49;
+  font-style: italic;
+  font-weight: 700;
+}
+
+.overlay-text p {
+  margin-top: 10px;
+  font-size: 18px;
+  color: #f1f1f1;
+}
+
+/* Right Side Form */
+.right-side {
+  flex: 0.55;
+  background: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.card {
+  width: 80%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Logo */
+.logo {
+  font-size: 35px;
+  font-family: serif;
+  font-style: italic;
+  margin-bottom: 10px;
+  color: #222;
+}
+
+/* Heading */
+.card h2 {
+  font-size: 38px;
+  margin-bottom: 30px;
+  color: #222;
+  font-weight: 500;
+}
+
+/* Labels */
+.card label {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+  color: #777;
+  margin-top: 18px;
+}
+
+/* Inputs */
+.card input {
+  padding: 16px;
+  border: none;
+  border-radius: 30px;
+  background: #f5f5f5;
+  font-size: 15px;
+  outline: none;
+}
+
+/* Forgot Password */
+.forgot {
+  text-align: right;
+  margin-top: 10px;
+  font-size: 14px;
+  color: #555;
+  cursor: pointer;
+}
+
+.card button {
+  width: 100%;
+  margin-top: 35px;
+  padding: 16px;
+  border: none;
+  border-radius: 999px;
+
+  background: #23785c; 
+  color: white;
+
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+
+  transition: 0.3s ease;
+}
+
+.card button:hover {
+  background: #1b5f49;   
+}
+
+.card button:active {
+  transform: scale(0.98);
+}
+/* OR Text */
+.or {
+  text-align: center;
+  margin: 25px 0;
+  color: #999;
+}
+
+/* Google Button */
+.google-btn {
+  border: 1px solid #ddd;
+  padding: 14px;
+  border-radius: 30px;
+  text-align: center;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.google-btn:hover {
+  background: #f5f5f5;
+}
+
+/* Signup Text */
+.signup-text {
+  text-align: center;
+  margin-top: 30px;
+  color: #777;
+}
+
+.signup-text a {
+  color: #1b5f49;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+/* Error Messages */
+.error {
+  color: red;
+  font-size: 13px;
+  margin-top: 5px;
+}
+
+/* Success */
+.success {
+  text-align: center;
+  color: green;
+  margin-top: 40px;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .login-container {
+    flex-direction: column;
+  }
+
+  .left-side {
+    height: 40vh;
+  }
+
+  .right-side {
+    height: 60vh;
+  }
+
+  .overlay-text h1 {
+    font-size: 42px;
+  }
+}

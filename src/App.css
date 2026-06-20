@@ -1,0 +1,19 @@
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root{
+  width: 100%;
+  overflow-x: hidden;
+}
+.app-container {
+  min-height: 100vh;
+  display:flex;
+  flex-direction: column;
+}
+.main-content {
+  flex: 1;
+  padding-bottom: 100px;
+}
