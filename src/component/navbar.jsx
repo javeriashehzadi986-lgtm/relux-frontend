@@ -6,6 +6,7 @@ import { ShoppingCart, Bell } from "lucide-react"
 const Navbar = () => {
     return (
         <nav className='navbar'>
+            <div className="navbar-inner">
             <h1 className='logo'> Relux Hub</h1>
             <ul className='navlinks'>
                 <li> <Link to="/home">Home  </Link> </li>
@@ -22,6 +23,7 @@ const Navbar = () => {
                 <Link to="/notification"> <Bell size={22} /> </Link>
             </div>
             <button className='signup-btn'><Link to="/signup"> Sign up</Link></button>
+            </div>
             </div>
         </nav>
     )

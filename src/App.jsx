@@ -14,6 +14,8 @@ import Sustainability from './component/sustainability';
 import Terms from './component/terms';
 import Privacy from './component/privacy';
 import ContactUs from './component/contactUs';
+import Cart from './component/cart';
+import Notification from './component/notification';
 
 const AUTH_ROUTES = ["/login", "/signup"];
 
@@ -56,6 +58,8 @@ function App() {
           <Route path="/terms" element={<Terms />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/contactUs" element={<ContactUs />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/notification" element={<Notification />} />
         </Routes>
       </main>
       <Footer />

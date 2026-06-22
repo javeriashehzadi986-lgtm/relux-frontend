@@ -144,19 +144,22 @@ const Signup = () => {
                           placeholder="••••••••"
                           value={password}
                           aria-invalid={!!passworderror}
+                          autoComplete="new-password"
                           onChange={(e) => {
                             setpassword(e.target.value);
                             setpassworderror("");
                           }}
                         />
-                        <button
+                        <Button
                           type="button"
+                          variant="ghost"
                           className="signup-password-toggle"
                           onClick={() => setShowPassword((prev) => !prev)}
                           aria-label={showPassword ? "Hide password" : "Show password"}
+                          aria-pressed={showPassword}
                         >
-                          {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                        </button>
+                          {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
+                        </Button>
                       </div>
                       <FieldError>{passworderror}</FieldError>
                     </Field>
@@ -170,11 +173,12 @@ const Signup = () => {
                       </FieldLabel>
                       <Input
                         id="signup-confirm-password"
-                        type="password"
+                        type={showPassword ? "text" : "password"}
                         className="signup-input"
                         placeholder="••••••••"
                         value={confirmPassword}
                         aria-invalid={!!confirmError}
+                        autoComplete="new-password"
                         onChange={(e) => {
                           setconfirmPassword(e.target.value);
                           setconfirmError("");
