@@ -14,27 +14,30 @@ import Sustainability from './component/sustainability';
 import Terms from './component/terms';
 import Privacy from './component/privacy';
 import ContactUs from './component/contactUs';
+import Help from './component/help';
 
+const HIDE_NAVBAR_ROUTES = ["/login", "/signup", "/sustainability", "/terms", "/privacy", "/contactUs", "/help"];
 const AUTH_ROUTES = ["/login", "/signup"];
+const FULL_PAGE_ROUTES = ["/sustainability", "/terms", "/privacy", "/contactUs", "/help"];
 
 function App() {
-  const location = useLocation();
-  const isAuthPage = AUTH_ROUTES.includes(location.pathname);
-  const isSustainabilityPage = location.pathname === "/sustainability";
-  const hideNavbar = isAuthPage || isSustainabilityPage;
+  const { pathname } = useLocation();
+  const hideNavbar = HIDE_NAVBAR_ROUTES.includes(pathname);
+  const isAuthPage = AUTH_ROUTES.includes(pathname);
+  const isFullPage = FULL_PAGE_ROUTES.includes(pathname);
 
   const containerClass = [
     "app-container",
-    isAuthPage ? "app-container--auth" : "",
-    isSustainabilityPage ? "app-container--sustainability" : "",
+    isAuthPage && "app-container--auth",
+    isFullPage && "app-container--full-page",
   ]
     .filter(Boolean)
     .join(" ");
 
   const mainClass = [
     "main-content",
-    isAuthPage ? "main-content--auth" : "",
-    isSustainabilityPage ? "main-content--sustainability" : "",
+    isAuthPage && "main-content--auth",
+    isFullPage && "main-content--full-page",
   ]
     .filter(Boolean)
     .join(" ");
@@ -56,6 +59,7 @@ function App() {
           <Route path="/terms" element={<Terms />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/contactUs" element={<ContactUs />} />
+          <Route path="/help" element={<Help />} />
         </Routes>
       </main>
       <Footer />

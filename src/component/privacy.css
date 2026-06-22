@@ -1,0 +1,357 @@
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap");
+
+.privacy-page {
+  --privacy-primary: #3a6758;
+  --privacy-primary-container: #a7d7c5;
+  --privacy-on-primary: #ffffff;
+  --privacy-on-surface: #1b1c1c;
+  --privacy-on-surface-variant: #404945;
+  --privacy-surface: #fbf9f9;
+  --privacy-surface-lowest: #ffffff;
+  --privacy-secondary-container: #e3e3dc;
+  --privacy-outline-variant: #c0c8c3;
+  --privacy-tertiary: #506164;
+  --privacy-surface-high: #e9e8e7;
+
+  min-height: 100vh;
+  background-color: var(--privacy-surface);
+  color: var(--privacy-on-surface);
+  font-family: "DM Sans", sans-serif;
+}
+
+.privacy-page ::selection {
+  background-color: var(--privacy-primary-container);
+  color: #325f51;
+}
+
+/* Brand header — same as terms page */
+.privacy-brand-header {
+  background-color: #ffffff;
+  border-bottom: 1px solid #eae8e7;
+  padding: 20px 40px;
+}
+
+.privacy-logo {
+  font-family: "Geist variable", sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  font-style: italic;
+  color: #1b5f49;
+  text-decoration: none;
+}
+
+/* Hero — screenshot top part */
+.privacy-hero {
+  padding: 48px 20px 56px;
+  background-color: var(--privacy-surface);
+}
+
+@media (min-width: 768px) {
+  .privacy-hero {
+    padding: 64px 64px 72px;
+  }
+}
+
+.privacy-hero-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px;
+  align-items: center;
+}
+
+@media (min-width: 900px) {
+  .privacy-hero-inner {
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+  }
+}
+
+.privacy-hero-title {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: clamp(2.75rem, 6vw, 4.25rem);
+  font-weight: 700;
+  line-height: 1.05;
+  color: var(--privacy-on-surface);
+  margin-bottom: 24px;
+}
+
+.privacy-hero-desc {
+  font-size: 17px;
+  line-height: 1.65;
+  color: var(--privacy-on-surface-variant);
+  max-width: 34rem;
+}
+
+.privacy-hero-visual-wrap {
+  overflow: hidden;
+  border-radius: 12px;
+  min-height: 280px;
+  background-color: #f5f3ef;
+}
+
+@media (min-width: 900px) {
+  .privacy-hero-visual-wrap {
+    min-height: 380px;
+  }
+}
+
+.privacy-hero-visual {
+  width: 100%;
+  height: 100%;
+  min-height: 280px;
+  object-fit: cover;
+  object-position: center center;
+}
+
+@media (min-width: 900px) {
+  .privacy-hero-visual {
+    min-height: 380px;
+  }
+}
+
+/* Main content */
+.privacy-main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px 64px;
+}
+
+@media (min-width: 768px) {
+  .privacy-main {
+    padding: 0 64px 80px;
+  }
+}
+
+/* Card grid — 3 per row on desktop */
+.privacy-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+@media (min-width: 768px) {
+  .privacy-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .privacy-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.privacy-grid--full {
+  grid-template-columns: 1fr;
+}
+
+.privacy-card {
+  padding: 2rem !important;
+  height: 100%;
+  background-color: var(--privacy-surface-lowest) !important;
+  border: 1px solid rgba(192, 200, 195, 0.2) !important;
+  box-shadow: 0 1px 3px rgba(45, 62, 64, 0.04);
+  transition: box-shadow 0.2s ease;
+  --tw-ring-shadow: 0 0 #0000;
+}
+
+.privacy-card:hover {
+  box-shadow: 0 4px 16px rgba(45, 62, 64, 0.08);
+}
+
+.privacy-card--wide {
+  grid-column: 1 / -1;
+}
+
+.privacy-card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 9999px;
+  background-color: rgba(167, 215, 197, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--privacy-primary);
+  margin-bottom: 16px;
+}
+
+.privacy-card-title {
+  font-size: 20px;
+  line-height: 1.4;
+  font-weight: 500;
+  color: var(--privacy-primary);
+  margin-bottom: 8px;
+}
+
+.privacy-card-text {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--privacy-on-surface-variant);
+}
+
+.privacy-card-list {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.privacy-card-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--privacy-tertiary);
+}
+
+.privacy-card-list li::before {
+  content: "";
+  width: 4px;
+  height: 4px;
+  border-radius: 9999px;
+  background-color: var(--privacy-primary);
+  flex-shrink: 0;
+}
+
+.privacy-highlight {
+  color: var(--privacy-primary);
+  font-weight: 500;
+}
+
+/* Payments card */
+.privacy-card--payments {
+  background-color: rgba(227, 227, 220, 0.5) !important;
+  border-color: transparent !important;
+}
+
+.privacy-payments-row {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+@media (min-width: 768px) {
+  .privacy-payments-row {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.privacy-payments-icon {
+  width: 80px;
+  height: 80px;
+  flex-shrink: 0;
+  border-radius: 1rem;
+  background-color: var(--privacy-surface-lowest);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--privacy-primary);
+  box-shadow: 0 1px 3px rgba(45, 62, 64, 0.06);
+}
+
+/* Policy updates card */
+.privacy-card--updates {
+  background-color: rgba(167, 215, 197, 0.1) !important;
+  border: none !important;
+  border-left: 4px solid var(--privacy-primary) !important;
+  border-radius: 0.75rem !important;
+}
+
+.privacy-updates-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.privacy-updates-icon {
+  color: var(--privacy-primary);
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+/* Contact section */
+.privacy-contact {
+  margin-top: 32px;
+  background-color: var(--privacy-surface-high);
+  border-radius: 1rem;
+  padding: 48px 24px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .privacy-contact {
+    padding: 48px;
+  }
+}
+
+.privacy-contact-inner {
+  position: relative;
+  z-index: 1;
+}
+
+.privacy-contact-title {
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--privacy-primary);
+  margin-bottom: 8px;
+}
+
+.privacy-contact-desc {
+  font-size: 18px;
+  line-height: 1.6;
+  color: var(--privacy-on-surface-variant);
+  max-width: 28rem;
+  margin: 0 auto 8px;
+}
+
+.privacy-contact-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+  width: 100%;
+  justify-content: center;
+}
+
+@media (min-width: 640px) {
+  .privacy-contact-buttons {
+    flex-direction: row;
+    width: auto;
+  }
+}
+
+.privacy-contact-blur {
+  position: absolute;
+  width: 160px;
+  height: 160px;
+  border-radius: 9999px;
+  filter: blur(48px);
+  pointer-events: none;
+}
+
+.privacy-contact-blur--1 {
+  bottom: -40px;
+  right: -40px;
+  background-color: rgba(167, 215, 197, 0.2);
+}
+
+.privacy-contact-blur--2 {
+  top: -40px;
+  left: -40px;
+  background-color: rgba(189, 208, 210, 0.2);
+}
+
+/* Button overrides */
+.privacy-page .relux-btn--default:hover {
+  background-color: #2f5548;
+}

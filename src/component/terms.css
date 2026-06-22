@@ -1,0 +1,297 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap");
+
+.terms-page {
+  --terms-primary: #3a6758;
+  --terms-primary-container: #a7d7c5;
+  --terms-primary-fixed: #bcedda;
+  --terms-on-primary: #ffffff;
+  --terms-on-primary-fixed-variant: #214f41;
+  --terms-secondary: #5e5f5a;
+  --terms-secondary-container: #e3e3dc;
+  --terms-on-secondary-container: #64655f;
+  --terms-tertiary-fixed: #d3e6e8;
+  --terms-on-tertiary-fixed-variant: #394a4c;
+  --terms-on-surface: #1b1c1c;
+  --terms-on-surface-variant: #404945;
+  --terms-surface: #fbf9f9;
+  --terms-surface-lowest: #ffffff;
+  --terms-surface-container-low: #f5f3f3;
+  --terms-outline-variant: #c0c8c3;
+  --terms-error-container: #ffdad6;
+  --terms-on-error-container: #93000a;
+
+  min-height: 100vh;
+  background-color: var(--terms-surface);
+  color: var(--terms-on-surface);
+  font-family: "DM Sans", sans-serif;
+  scroll-behavior: smooth;
+}
+
+.terms-page ::selection {
+  background-color: var(--terms-primary-container);
+  color: #325f51;
+}
+
+/* Brand header — same as sustainability page */
+.terms-brand-header {
+  background-color: #ffffff;
+  border-bottom: 1px solid #eae8e7;
+  padding: 20px 40px;
+}
+
+.terms-logo {
+  font-family: "Geist variable", sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  font-style: italic;
+  color: #1b5f49;
+  text-decoration: none;
+}
+
+/* Main page heading */
+.terms-page-title {
+  font-size: 32px;
+  line-height: 1.2;
+  font-weight: 500;
+  color: var(--terms-primary);
+  letter-spacing: -0.01em;
+  margin-bottom: 8px;
+}
+
+@media (min-width: 768px) {
+  .terms-page-title {
+    font-size: 48px;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+}
+
+/* shadcn Button overrides on terms page */
+.terms-page .relux-btn--default {
+  background-color: var(--terms-primary);
+}
+
+.terms-page .relux-btn--default:hover {
+  background-color: #2f5548;
+}
+
+.terms-page .relux-btn--outline {
+  color: var(--terms-secondary);
+  border-color: var(--terms-secondary);
+}
+
+.terms-page .relux-btn--outline:hover {
+  background-color: rgba(94, 95, 90, 0.05);
+  color: var(--terms-secondary);
+}
+
+/* Main */
+.terms-main {
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 32px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+@media (min-width: 768px) {
+  .terms-main {
+    padding: 5rem 64px;
+  }
+}
+
+.terms-header {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.terms-header-accent {
+  width: 4rem;
+  height: 0.25rem;
+  background-color: var(--terms-primary-container);
+  border-radius: 9999px;
+}
+
+.terms-header-title {
+  font-size: 22px;
+  line-height: 1.3;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--terms-primary);
+}
+
+@media (min-width: 768px) {
+  .terms-header-title {
+    font-size: 28px;
+    line-height: 1.3;
+    letter-spacing: -0.015em;
+  }
+}
+
+.terms-header-desc {
+  font-size: 18px;
+  line-height: 1.6;
+  font-weight: 400;
+  color: var(--terms-secondary);
+  max-width: 42rem;
+}
+
+.terms-sections {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+/* shadcn Card overrides */
+.terms-card {
+  padding: 2rem !important;
+  background-color: var(--terms-surface-lowest) !important;
+  box-shadow: 0 10px 30px rgba(45, 62, 64, 0.05);
+  border: 1px solid rgba(192, 200, 195, 0.1) !important;
+  --tw-ring-shadow: 0 0 #0000;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.terms-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 35px rgba(45, 62, 64, 0.08);
+}
+
+.terms-card--highlight {
+  background-color: rgba(167, 215, 197, 0.2) !important;
+  border-color: rgba(58, 103, 88, 0.1) !important;
+}
+
+.terms-card-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.terms-icon {
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.terms-icon--mint {
+  background-color: var(--terms-primary-fixed);
+  color: var(--terms-on-primary-fixed-variant);
+}
+
+.terms-icon--teal {
+  background-color: var(--terms-tertiary-fixed);
+  color: var(--terms-on-tertiary-fixed-variant);
+}
+
+.terms-icon--gray {
+  background-color: var(--terms-secondary-container);
+  color: var(--terms-on-secondary-container);
+}
+
+.terms-icon--green {
+  background-color: var(--terms-primary);
+  color: var(--terms-on-primary);
+}
+
+.terms-icon--red {
+  background-color: var(--terms-error-container);
+  color: var(--terms-on-error-container);
+}
+
+.terms-card-title {
+  font-size: 20px;
+  line-height: 1.4;
+  font-weight: 500;
+  color: var(--terms-primary);
+}
+
+.terms-card-text {
+  font-size: 16px;
+  line-height: 1.6;
+  font-weight: 400;
+  color: var(--terms-on-surface-variant);
+  margin-top: 8px;
+}
+
+/* Image interstitial */
+.terms-image-wrap {
+  height: 16rem;
+  width: 100%;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(45, 62, 64, 0.05);
+}
+
+@media (min-width: 768px) {
+  .terms-image-wrap {
+    height: 24rem;
+  }
+}
+
+.terms-image-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(58, 103, 88, 0.4),
+    transparent
+  );
+  z-index: 10;
+}
+
+.terms-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* CTA */
+.terms-cta {
+  margin-top: 32px;
+  padding: 3rem 0;
+  border-top: 1px solid rgba(192, 200, 195, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+}
+
+.terms-cta-title {
+  font-size: 20px;
+  line-height: 1.4;
+  font-weight: 500;
+  color: var(--terms-primary);
+}
+
+.terms-cta-desc {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--terms-secondary);
+  max-width: 28rem;
+}
+
+.terms-cta-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .terms-cta-buttons {
+    flex-direction: row;
+    width: auto;
+  }
+}
