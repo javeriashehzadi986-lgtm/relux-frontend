@@ -81,12 +81,36 @@
   max-width: 28rem;
 }
 
-.login-brand {
+.login-card {
+  width: 100%;
+  max-width: 28rem;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  gap: 0;
+  --tw-ring-shadow: none;
+}
+
+.login-card-header {
+  padding: 0;
   margin-bottom: 3rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
+}
+
+.login-card-title {
+  font-family: "Newsreader", serif;
+  font-size: 1.875rem;
+  font-weight: 500;
+  margin: 0;
+  color: #303333;
+}
+
+.login-card-content {
+  padding: 0;
 }
 
 .login-brand-mark {
@@ -96,14 +120,6 @@
   letter-spacing: -0.03em;
   color: #31685d;
   margin-bottom: 0.5rem;
-}
-
-.login-brand h2 {
-  font-family: "Newsreader", serif;
-  font-size: 1.875rem;
-  font-weight: 500;
-  margin: 0;
-  color: #303333;
 }
 
 .login-form {
@@ -144,16 +160,12 @@
   font-weight: 500;
   color: #31685d;
   text-decoration: none;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  font-family: inherit;
 }
 
 .login-forgot-link:hover {
   text-decoration: underline;
   text-underline-offset: 4px;
+  color: #31685d;
 }
 
 .login-input {
@@ -164,10 +176,12 @@
 
 .login-divider {
   margin: 2.5rem 0;
+  width: 100%;
 }
 
 .login-divider [data-slot="field-separator-content"] {
   font-size: 0.75rem;
+  line-height: 1;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: #a8a29e;
@@ -220,7 +234,7 @@
     padding: 4rem;
   }
 
-  .login-brand {
+  .login-card-header {
     align-items: flex-start;
     text-align: left;
   }

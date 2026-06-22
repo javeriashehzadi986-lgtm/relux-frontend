@@ -171,10 +171,12 @@
 
 .signup-divider {
   margin-bottom: 2rem;
+  width: 100%;
 }
 
 .signup-divider [data-slot="field-separator-content"] {
   font-size: 0.625rem;
+  line-height: 1;
   font-weight: 700;
   letter-spacing: 0.2em;
   text-transform: uppercase;
