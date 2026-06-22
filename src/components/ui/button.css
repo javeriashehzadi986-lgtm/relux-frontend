@@ -24,9 +24,20 @@
 
 /* Sizes — matched to reference page, slightly larger for visibility */
 .relux-btn--sm {
-  padding: 0.75rem 1.75rem;
-  font-size: 0.9375rem;
-  min-height: 2.75rem;
+  padding: 0.625rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  min-height: auto;
+}
+
+.relux-btn--buy {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  min-height: auto;
 }
 
 .relux-btn--lg {
@@ -121,4 +132,42 @@
 
 .relux-btn--destructive:hover {
   background: #b91c1c;
+}
+
+.relux-btn--ghost {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  color: inherit;
+  min-height: auto;
+  padding: 0;
+  box-shadow: none;
+  font-family: inherit;
+}
+
+.relux-btn--ghost:hover {
+  background: transparent;
+  box-shadow: none;
+}
+
+.relux-btn--icon {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(8px);
+  color: #31685d;
+  border: none;
+  border-radius: 50%;
+  min-height: auto;
+  padding: 0;
+}
+
+.relux-btn--icon:hover {
+  background: #31685d;
+  color: #fff;
+  box-shadow: none;
+}
+
+.relux-btn--icon-size {
+  width: 2.5rem;
+  height: 2.5rem;
+  min-height: 2.5rem;
 }

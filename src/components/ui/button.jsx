@@ -9,17 +9,25 @@ const variantClass = {
   secondary: "relux-btn--secondary",
   google: "relux-btn--google",
   destructive: "relux-btn--destructive",
+
+  // Sustainability variants (coordinator)
   sustainabilityPrimary: "sustainability-btn sustainability-btn-primary",
   sustainabilitySecondary: "sustainability-btn sustainability-btn-secondary",
   sustainabilityOutline: "sustainability-btn sustainability-btn-outline",
+
+  // Your added variants
+  ghost: "relux-btn--ghost",
+  icon: "relux-btn--icon",
 };
 
 const sizeClass = {
   sm: "relux-btn--sm",
+  buy: "relux-btn--buy",
   default: "relux-btn--lg",
   lg: "relux-btn--lg",
   full: "relux-btn--full",
   auth: "relux-btn--auth",
+  icon: "relux-btn--icon-size",
 };
 
 const isSustainabilityVariant = (variant) =>

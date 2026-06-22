@@ -3,6 +3,12 @@ import { Link } from "react-router-dom";
 import "./login.css";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import GoogleIcon from "@/components/GoogleIcon";
 import {
   Field,
@@ -51,77 +57,79 @@ const Login = () => {
       </section>
 
       <section className="login-panel">
-        <div className="login-panel-inner">
-          <div className="login-brand">
+        <Card className="login-card">
+          <CardHeader className="login-card-header">
             <span className="login-brand-mark">ATELIER</span>
-            <h2>Login to Relux Hub</h2>
-          </div>
+            <CardTitle className="login-card-title">Login to Relux Hub</CardTitle>
+          </CardHeader>
 
-          <form className="login-form" onSubmit={onsubmitted}>
-            <FieldGroup className="login-field-group">
-              <Field data-invalid={!!emailerror} className="login-field">
-                <FieldLabel htmlFor="login-email" className="login-field-label">
-                  Email Address
-                </FieldLabel>
-                <Input
-                  id="login-email"
-                  type="email"
-                  className="login-input"
-                  placeholder="name@example.com"
-                  value={email}
-                  aria-invalid={!!emailerror}
-                  onChange={(e) => {
-                    setemail(e.target.value);
-                    setemailerror("");
-                  }}
-                />
-                <FieldError>{emailerror}</FieldError>
-              </Field>
-
-              <Field data-invalid={!!passworderror} className="login-field">
-                <div className="login-password-header">
-                  <FieldLabel
-                    htmlFor="login-password"
-                    className="login-field-label login-field-label--inline"
-                  >
-                    Password
+          <CardContent className="login-card-content">
+            <form className="login-form" onSubmit={onsubmitted}>
+              <FieldGroup className="login-field-group">
+                <Field data-invalid={!!emailerror} className="login-field">
+                  <FieldLabel htmlFor="login-email" className="login-field-label">
+                    Email Address
                   </FieldLabel>
-                  <button type="button" className="login-forgot-link">
-                    Forgot Password?
-                  </button>
-                </div>
-                <Input
-                  id="login-password"
-                  type="password"
-                  className="login-input"
-                  value={password}
-                  aria-invalid={!!passworderror}
-                  onChange={(e) => {
-                    setpassword(e.target.value);
-                    setpassworderror("");
-                  }}
-                />
-                <FieldError>{passworderror}</FieldError>
-              </Field>
+                  <Input
+                    id="login-email"
+                    type="email"
+                    className="login-input"
+                    placeholder="name@example.com"
+                    value={email}
+                    aria-invalid={!!emailerror}
+                    onChange={(e) => {
+                      setemail(e.target.value);
+                      setemailerror("");
+                    }}
+                  />
+                  <FieldError>{emailerror}</FieldError>
+                </Field>
 
-              <Button type="submit" size="auth">
-                Login
-              </Button>
-            </FieldGroup>
-          </form>
+                <Field data-invalid={!!passworderror} className="login-field">
+                  <div className="login-password-header">
+                    <FieldLabel
+                      htmlFor="login-password"
+                      className="login-field-label login-field-label--inline"
+                    >
+                      Password
+                    </FieldLabel>
+                    <Button type="button" variant="ghost" className="login-forgot-link">
+                      Forgot Password?
+                    </Button>
+                  </div>
+                  <Input
+                    id="login-password"
+                    type="password"
+                    className="login-input"
+                    value={password}
+                    aria-invalid={!!passworderror}
+                    onChange={(e) => {
+                      setpassword(e.target.value);
+                      setpassworderror("");
+                    }}
+                  />
+                  <FieldError>{passworderror}</FieldError>
+                </Field>
 
-          <FieldSeparator className="login-divider">OR</FieldSeparator>
+                <Button type="submit" size="auth">
+                  Login
+                </Button>
+              </FieldGroup>
+            </form>
 
-          <Button type="button" variant="google" size="auth">
-            <GoogleIcon />
-            Continue with Google
-          </Button>
+            <FieldSeparator className="login-divider">OR</FieldSeparator>
 
-          <p className="login-signup-pivot">
-            Don&apos;t have an account?
-            <Link to="/signup">Sign Up</Link>
-          </p>
-        </div>
+            <Button type="button" variant="google" size="auth">
+              <GoogleIcon />
+              Continue with Google
+            </Button>
+
+            <p className="login-signup-pivot">
+              Don&apos;t have an account?
+              <Link to="/signup">Sign Up</Link>
+            </p>
+          </CardContent>
+        </Card>
       </section>
     </div>
   );

@@ -19,15 +19,18 @@ body,
 
 .main-content {
   flex: 1;
+  padding-top: 5.5rem;
   padding-bottom: 100px;
 }
 
 .main-content--full-page {
+  padding-top: 0;
   padding-bottom: 0;
   flex: 1;
 }
 
 .main-content--auth {
+  padding-top: 0;
   padding-bottom: 0;
   display: flex;
   flex-direction: column;

@@ -1,0 +1,220 @@
+@import url("https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Plus+Jakarta+Sans:wght@200..800&display=swap");
+
+.notification-page {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  background: #faf9f8;
+  color: #303333;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 5rem;
+  min-height: calc(100vh - 72px);
+}
+
+.notification-header {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.notification-header-copy h1 {
+  margin: 0 0 0.5rem;
+  font-family: "Newsreader", serif;
+  font-size: clamp(2.5rem, 5vw, 3rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #303333;
+}
+
+.notification-header-copy p {
+  margin: 0;
+  font-size: 1rem;
+  color: #5d605f;
+}
+
+.notification-mark-read-btn {
+  width: fit-content;
+  padding: 0.75rem 1.5rem !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  min-height: auto !important;
+  border-radius: 9999px !important;
+}
+
+.notification-filters {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.notification-filter-btn {
+  white-space: nowrap;
+  padding: 0.5rem 1.5rem !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  min-height: auto !important;
+  border-radius: 9999px !important;
+  border: none !important;
+}
+
+.notification-filter-btn.is-active {
+  background: #31685d !important;
+  color: #e3fff6 !important;
+}
+
+.notification-filter-btn:not(.is-active) {
+  background: #f3f4f3 !important;
+  color: #5d605f !important;
+}
+
+.notification-filter-btn:not(.is-active):hover {
+  background: #e7e8e7 !important;
+}
+
+.notification-list-card {
+  background: #f3f4f3;
+  border: none;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.notification-list-content {
+  padding: 0;
+}
+
+.notification-item {
+  display: flex;
+  gap: 1.25rem;
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(176, 178, 177, 0.1);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.notification-item.is-last {
+  border-bottom: none;
+}
+
+.notification-item.is-unread {
+  background: #ffffff;
+}
+
+.notification-item:hover {
+  background: #ffffff;
+  box-shadow: 0 4px 40px rgba(48, 51, 51, 0.06);
+}
+
+.notification-icon {
+  flex-shrink: 0;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notification-icon--primary {
+  background: #b4eedf;
+  color: #31685d;
+}
+
+.notification-icon--secondary {
+  background: #fbdbde;
+  color: #71595c;
+}
+
+.notification-icon--tertiary {
+  background: #fefccf;
+  color: #61613e;
+}
+
+.notification-icon--muted {
+  background: #e1e3e2;
+  color: #31685d;
+}
+
+.notification-icon--image {
+  overflow: hidden;
+  background: rgba(180, 238, 223, 0.4);
+}
+
+.notification-icon--image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.8;
+}
+
+.notification-item-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.notification-item-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.notification-item-title {
+  font-family: "Newsreader", serif;
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: #303333;
+  margin: 0;
+}
+
+.notification-item-title.is-bold {
+  font-weight: 700;
+}
+
+.notification-time {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  color: #5d605f;
+}
+
+.notification-time.is-unread {
+  color: #31685d;
+  font-weight: 700;
+}
+
+.notification-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: #31685d;
+}
+
+.notification-item-text {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #5d605f;
+}
+
+.notification-highlight {
+  color: #31685d;
+  font-weight: 600;
+}
+
+.notification-italic {
+  font-family: "Newsreader", serif;
+  font-style: italic;
+}
+
+@media (min-width: 768px) {
+  .notification-header {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+}
