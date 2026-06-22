@@ -1,7 +1,8 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import "./Navbar.css";
+import "./navbar.css";
 import { ShoppingCart, Bell } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 const Navbar = () => {
     return (
@@ -21,7 +22,12 @@ const Navbar = () => {
 
                 <Link to="/notification"> <Bell size={22} /> </Link>
             </div>
-            <button className='signup-btn'><Link to="/signup"> Sign up</Link></button>
+            <Button asChild size="sm" variant="secondary" className="nav-login-btn">
+              <Link to="/login">Login</Link>
+            </Button>
+            <Button asChild size="sm">
+              <Link to="/signup">Sign up</Link>
+            </Button>
             </div>
         </nav>
     )

@@ -2,6 +2,20 @@
 @import "@fontsource-variable/geist";
 @import "tw-animate-css";
 
+@theme {
+  --color-card: #ffffff;
+  --color-card-foreground: #333333;
+  --color-muted-foreground: #787b7a;
+  --color-foreground: #333333;
+  --color-background: #faf9f8;
+  --color-border: #e1e3e2;
+  --color-destructive: #a83836;
+  --color-primary: #31685d;
+  --color-primary-foreground: #e3fff6;
+  --color-ring: #31685d;
+  --color-input: #e1e3e2;
+}
+
 html {
   font-family: "Geist Variable", sans-serif;
 }

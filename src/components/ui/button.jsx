@@ -1,24 +1,61 @@
-export function Button({ children, variant = "default", className = "" }) {
-  let variantClasses = "";
+import * as React from "react";
+import { cn } from "@/lib/utils";
+import "./button.css";
 
-  if (variant === "default") {
-    variantClasses =
-      "bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded transition";
+const variantClass = {
+  default: "relux-btn--default",
+  outline: "relux-btn--outline",
+  light: "relux-btn--light",
+  secondary: "relux-btn--secondary",
+  google: "relux-btn--google",
+  destructive: "relux-btn--destructive",
+};
+
+const sizeClass = {
+  sm: "relux-btn--sm",
+  default: "relux-btn--lg",
+  lg: "relux-btn--lg",
+  full: "relux-btn--full",
+  auth: "relux-btn--auth",
+};
+
+const Button = React.forwardRef(
+  (
+    {
+      className,
+      variant = "default",
+      size = "default",
+      asChild = false,
+      children,
+      ...props
+    },
+    ref
+  ) => {
+    const classes = cn(
+      "relux-btn",
+      variantClass[variant] ?? variantClass.default,
+      sizeClass[size] ?? sizeClass.default,
+      className
+    );
+
+    if (asChild) {
+      const child = React.Children.only(children);
+      return React.cloneElement(child, {
+        ...child.props,
+        ...props,
+        className: cn(classes, child.props.className),
+        ref,
+      });
+    }
+
+    return (
+      <button className={classes} ref={ref} {...props}>
+        {children}
+      </button>
+    );
   }
+);
 
-  if (variant === "outline") {
-    variantClasses =
-      "border border-black px-4 py-2 rounded hover:bg-gray-100 transition";
-  }
+Button.displayName = "Button";
 
-  if (variant === "destructive") {
-    variantClasses =
-      "bg-red-500 hover:bg-red-700 text-white px-4 py-2 rounded transition";
-  }
-
-  return (
-    <button className={`${variantClasses} ${className}`}>
-      {children}
-    </button>
-  );
-}
+export { Button };

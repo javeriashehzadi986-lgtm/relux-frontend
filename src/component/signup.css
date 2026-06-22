@@ -1,77 +1,222 @@
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #f7f2ef;
+@import url("https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap");
+
+.signup-page {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 72px);
+  font-family: "Plus Jakarta Sans", sans-serif;
+  background: #faf9f8;
+  color: #303333;
+  overflow: hidden;
+}
+
+.signup-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: rgba(250, 249, 248, 0.8);
+  backdrop-filter: blur(12px);
+}
+
+.signup-header-brand {
+  display: block;
+  text-align: center;
+  padding: 2rem 2rem 1.5rem;
+  font-family: "Newsreader", serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-style: italic;
+  letter-spacing: -0.02em;
+  color: #303333;
+}
+
+.signup-blur {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.signup-blur--left {
+  top: 15%;
+  left: -5%;
+  width: 40vw;
+  height: 40vw;
+  background: rgba(251, 219, 222, 0.1);
+  filter: blur(100px);
+}
+
+.signup-blur--right {
+  bottom: 10%;
+  right: -5%;
+  width: 30vw;
+  height: 30vw;
+  background: rgba(180, 238, 223, 0.2);
+  filter: blur(120px);
+}
+
+.signup-main {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 7rem 1.5rem 3rem;
+}
+
+.signup-card {
+  width: 100%;
+  max-width: 28rem;
+  background: #ffffff;
+  border: 1px solid rgba(176, 178, 177, 0.1);
+  border-radius: 0.75rem;
+  padding: 2rem;
+  gap: 0;
+  box-shadow: 0 40px 60px -15px rgba(49, 104, 93, 0.06);
+}
+
+.signup-card-header {
+  padding: 0;
+  margin-bottom: 2.5rem;
+  text-align: center;
+}
+
+.signup-card-content {
+  padding: 0;
+}
+
+.signup-title {
+  font-family: "Newsreader", serif;
+  font-size: 2.25rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: #303333;
+  margin-bottom: 0.75rem;
+}
+
+.signup-description {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: #5d605f;
+}
+
+.signup-field-group {
+  gap: 1.5rem;
+}
+
+.signup-field {
+  gap: 0.5rem;
+}
+
+.signup-field-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(93, 96, 95, 0.8);
+  margin: 0;
+  padding-left: 0.25rem;
+}
+
+.signup-input {
+  padding: 1rem 1.5rem;
+  border-radius: 0.375rem;
+  font-size: 1rem;
+}
+
+.signup-input--password {
+  padding-right: 3rem;
+}
+
+.signup-password-grid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.signup-password-wrap {
+  position: relative;
+}
+
+.signup-password-toggle {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  color: rgba(93, 96, 95, 0.6);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 0;
+}
+
+.signup-password-toggle:hover {
+  color: #31685d;
+}
+
+.signup-submit-btn {
+  margin-top: 1rem;
+}
+
+.signup-bottom {
+  margin-top: 2.5rem;
+}
+
+.signup-divider {
+  margin-bottom: 2rem;
+}
+
+.signup-divider [data-slot="field-separator-content"] {
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(93, 96, 95, 0.5);
+  background: #ffffff;
+}
+
+.google-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+}
+
+.signup-login-pivot {
+  margin: 2rem 0 0;
+  text-align: center;
+  font-size: 0.875rem;
+  color: #5d605f;
+}
+
+.signup-login-pivot a {
+  margin-left: 0.25rem;
+  color: #31685d;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.signup-login-pivot a:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.signup-success {
+  text-align: center;
+  color: #31685d;
+  font-size: 1.25rem;
+  font-weight: 600;
+  padding: 2rem 0;
+}
+
+@media (min-width: 768px) {
+  .signup-card {
+    padding: 3rem;
   }
-  
-  .main-container {
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .logo {
-    margin-bottom: 20px;
-    font-style: italic;
-  }
-  
-  .card {
-    background: white;
-    padding: 30px;
-    border-radius: 20px;
-    width: 350px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-  }
-  
-  .card h1 {
-    margin-bottom: 5px;
-  }
-  
-  .card p {
-    font-size: 14px;
-    color: gray;
-    margin-bottom: 20px;
-  }
-  
-  .card label {
-    font-size: 12px;
-    font-weight: bold;
-    text-align:left;
-    display: block;
-    margin-top: 10px;
-  }
-  
-  .card input {
-    width: 100%;
-    padding: 10px;
-    margin-top: 5px;
-    border-radius: 10px;
-    border: 1px solid #ccc;
-  }
-  
-  .card button {
-    width: 100%;
-    padding: 12px;
-    margin-top: 20px;
-    border: none;
-    border-radius: 20px;
-    background: #3aa6a0;
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
-  }
-  
-  .card button:hover {
-    background: #2c8d88;
-  }
-  
-  .error {
-    color: red;
-    font-size: 12px;
-  }
-  
-  .success {
-    color: green;
-  }
+}

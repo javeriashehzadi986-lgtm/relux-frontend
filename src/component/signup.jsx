@@ -1,6 +1,24 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react";
 import "./signup.css";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import GoogleIcon from "@/components/GoogleIcon";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldSeparator,
+} from "@/components/ui/field";
 
 const Signup = () => {
   const [submitted, setsubmitted] = useState(false);
@@ -8,6 +26,7 @@ const Signup = () => {
   const [email, setemail] = useState("");
   const [password, setpassword] = useState("");
   const [confirmPassword, setconfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const [nameerror, setnameerror] = useState("");
   const [emailerror, setemailerror] = useState("");
@@ -21,7 +40,6 @@ const Signup = () => {
     if (name.trim() === "") {
       setnameerror("Full name is required");
       valid = false;
-
     } else setnameerror("");
 
     if (!email.includes("@") || !email.includes(".")) {
@@ -32,82 +50,163 @@ const Signup = () => {
     if (password.length < 6) {
       setpassworderror("Password must be at least 6 characters");
       valid = false;
-
     } else setpassworderror("");
 
     if (confirmPassword !== password) {
       setconfirmError("Passwords do not match");
       valid = false;
     } else setconfirmError("");
+
     if (valid) {
       setsubmitted(true);
     }
   };
 
   return (
-    <div className="main-container">
+    <div className="signup-page">
+      <header className="signup-header">
+        <span className="signup-header-brand">Relux Hub</span>
+      </header>
 
-      <h2 className="logo">Relux Hub</h2>
+      <div className="signup-blur signup-blur--left" aria-hidden="true" />
+      <div className="signup-blur signup-blur--right" aria-hidden="true" />
 
-      {submitted ? (
-        <h2 className="success">Account Created </h2>
-      ) : (
-        <form className="card" onSubmit={onsubmitted}>
-          <h2>Create Your Account</h2>
-          <p>Join Relux Hub to rent or resell stylish outfits</p>
-          <label>Full Name</label>
-          <input
-            type="text"
-            placeholder="Enter your name"
-            value={name}
-            onChange={(e) => {
-              setname(e.target.value);
-              setnameerror("");
-            }}
-          />
-          {nameerror && <span className="error">{nameerror}</span>}
-          <label>Email Address</label>
-          <input
-            type="text"
-            placeholder="email"
-            value={email}
-            onChange={(e) => {
-              setemail(e.target.value);
-              setemailerror("");
-            }}
-          />
-          {emailerror && <span className="error">{emailerror}</span>}
+      <main className="signup-main">
+        {submitted ? (
+          <Card className="signup-card">
+            <CardContent className="signup-card-content">
+              <p className="signup-success">Account Created</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="signup-card">
+            <CardHeader className="signup-card-header">
+              <CardTitle className="signup-title">Create Your Account</CardTitle>
+              <CardDescription className="signup-description">
+                Join Relux Hub to rent or resell stylish outfits
+              </CardDescription>
+            </CardHeader>
 
-          <label>Password</label>
-          <input
-            type="password"
-            placeholder="password"
-            value={password}
-            onChange={(e) => {
-              setpassword(e.target.value);
-              setpassworderror("");
-            }}
-          />
-          {passworderror && <span className="error">{passworderror}</span>}
+            <CardContent className="signup-card-content">
+              <form className="signup-form" onSubmit={onsubmitted}>
+                <FieldGroup className="signup-field-group">
+                  <Field data-invalid={!!nameerror} className="signup-field">
+                    <FieldLabel htmlFor="signup-name" className="signup-field-label">
+                      Full Name
+                    </FieldLabel>
+                    <Input
+                      id="signup-name"
+                      type="text"
+                      className="signup-input"
+                      placeholder="E.g. Sophia Laurent"
+                      value={name}
+                      aria-invalid={!!nameerror}
+                      onChange={(e) => {
+                        setname(e.target.value);
+                        setnameerror("");
+                      }}
+                    />
+                    <FieldError>{nameerror}</FieldError>
+                  </Field>
 
-          <label>Confirm Password</label>
-          <input
-            type="password"
-            placeholder="password"
-            value={confirmPassword}
-            onChange={(e) => {
-              setconfirmPassword(e.target.value);
-              setconfirmError("");
-            }}
-          />
-          {confirmError && <span className="error">{confirmError}</span>}
-          <p>
-            Already have an account? <Link to="/login">Login</Link>
-          </p>
-          <button type="submit">Sign Up</button>
+                  <Field data-invalid={!!emailerror} className="signup-field">
+                    <FieldLabel htmlFor="signup-email" className="signup-field-label">
+                      Email Address
+                    </FieldLabel>
+                    <Input
+                      id="signup-email"
+                      type="email"
+                      className="signup-input"
+                      placeholder="hello@atelier.com"
+                      value={email}
+                      aria-invalid={!!emailerror}
+                      onChange={(e) => {
+                        setemail(e.target.value);
+                        setemailerror("");
+                      }}
+                    />
+                    <FieldError>{emailerror}</FieldError>
+                  </Field>
 
-        </form>
-      )}
+                  <div className="signup-password-grid">
+                    <Field data-invalid={!!passworderror} className="signup-field">
+                      <FieldLabel
+                        htmlFor="signup-password"
+                        className="signup-field-label"
+                      >
+                        Password
+                      </FieldLabel>
+                      <div className="signup-password-wrap">
+                        <Input
+                          id="signup-password"
+                          type={showPassword ? "text" : "password"}
+                          className="signup-input signup-input--password"
+                          placeholder="••••••••"
+                          value={password}
+                          aria-invalid={!!passworderror}
+                          onChange={(e) => {
+                            setpassword(e.target.value);
+                            setpassworderror("");
+                          }}
+                        />
+                        <button
+                          type="button"
+                          className="signup-password-toggle"
+                          onClick={() => setShowPassword((prev) => !prev)}
+                          aria-label={showPassword ? "Hide password" : "Show password"}
+                        >
+                          {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                        </button>
+                      </div>
+                      <FieldError>{passworderror}</FieldError>
+                    </Field>
+
+                    <Field data-invalid={!!confirmError} className="signup-field">
+                      <FieldLabel
+                        htmlFor="signup-confirm-password"
+                        className="signup-field-label"
+                      >
+                        Confirm Password
+                      </FieldLabel>
+                      <Input
+                        id="signup-confirm-password"
+                        type="password"
+                        className="signup-input"
+                        placeholder="••••••••"
+                        value={confirmPassword}
+                        aria-invalid={!!confirmError}
+                        onChange={(e) => {
+                          setconfirmPassword(e.target.value);
+                          setconfirmError("");
+                        }}
+                      />
+                      <FieldError>{confirmError}</FieldError>
+                    </Field>
+                  </div>
+
+                  <Button type="submit" size="auth" className="signup-submit-btn">
+                    Sign Up
+                  </Button>
+                </FieldGroup>
+              </form>
+
+              <div className="signup-bottom">
+                <FieldSeparator className="signup-divider">OR</FieldSeparator>
+
+                <Button type="button" variant="google" size="auth">
+                  <GoogleIcon />
+                  Continue with Google
+                </Button>
+
+                <p className="signup-login-pivot">
+                  Already have an account?
+                  <Link to="/login">Login</Link>
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </main>
     </div>
   );
 };

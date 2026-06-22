@@ -17,3 +17,9 @@ html, body, #root{
   flex: 1;
   padding-bottom: 100px;
 }
+
+.main-content--auth {
+  padding-bottom: 0;
+  display: flex;
+  flex-direction: column;
+}
