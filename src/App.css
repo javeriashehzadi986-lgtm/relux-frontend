@@ -17,3 +17,7 @@ html, body, #root{
   flex: 1;
   padding-bottom: 100px;
 }
+
+.main-content--sustainability {
+  padding-bottom: 0;
+}

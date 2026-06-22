@@ -1,0 +1,418 @@
+/* Sustainability page — explicit styles matching design mockup */
+
+.sustainability-page {
+  min-height: 100vh;
+  background-color: #fbf9f8;
+  color: #424843;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  overflow-x: hidden;
+}
+
+.sustainability-page h1,
+.sustainability-page h2,
+.sustainability-page h3 {
+  font-family: "Hanken Grotesk", sans-serif;
+  margin: 0;
+}
+
+.sustainability-page p {
+  margin: 0;
+}
+
+.sustainability-container {
+  width: 100%;
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 40px;
+  padding-right: 40px;
+}
+
+/* Header */
+.sustainability-header {
+  background-color: #ffffff;
+  border-bottom: 1px solid #eae8e7;
+  padding: 20px 40px;
+}
+
+.sustainability-logo {
+  font-family: "Hanken Grotesk", sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  font-style: italic;
+  color: #163826;
+  text-decoration: none;
+}
+
+/* Hero */
+.sustainability-hero {
+  padding: 32px 0 72px;
+}
+
+.sustainability-hero-grid {
+  display: flex;
+  align-items: stretch;
+  gap: 64px;
+}
+
+.sustainability-hero-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.sustainability-hero-image-wrap {
+  flex: 1;
+  position: relative;
+  min-height: 320px;
+  overflow: hidden;
+  border-radius: 24px;
+  box-shadow: 0 0 24px rgba(0, 0, 0, 0.06);
+  background-color: transparent;
+  line-height: 0;
+}
+
+.sustainability-hero-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  display: block;
+  border-radius: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.sustainability-hero-title {
+  font-size: 56px;
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #000000;
+  margin-bottom: 24px;
+  max-width: 620px;
+}
+
+.sustainability-hero-title-line {
+  display: block;
+  color: #000000;
+}
+
+.sustainability-hero-text {
+  font-size: 20px;
+  line-height: 32px;
+  font-weight: 600;
+  color: #424843;
+  margin-bottom: 0;
+  max-width: 520px;
+}
+
+.sustainability-hero-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+/* Buttons — shadcn sustainability variants */
+.sustainability-btn {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  border: none !important;
+  cursor: pointer;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 9999px !important;
+  padding: 14px 32px !important;
+  height: auto !important;
+  transition: all 0.25s ease !important;
+}
+
+.sustainability-btn:hover {
+  transform: translateY(-2px);
+}
+
+.sustainability-btn:active {
+  transform: translateY(0);
+}
+
+.sustainability-btn-primary {
+  background-color: #163826 !important;
+  color: #ffffff !important;
+}
+
+.sustainability-btn-primary:hover {
+  background-color: #0f2a1c !important;
+  box-shadow: 0 8px 24px rgba(22, 56, 38, 0.25);
+}
+
+.sustainability-btn-secondary {
+  background-color: #bdefbe !important;
+  color: #163826 !important;
+}
+
+.sustainability-btn-secondary:hover {
+  background-color: #a2d3a4 !important;
+  box-shadow: 0 8px 24px rgba(189, 239, 190, 0.5);
+}
+
+.sustainability-btn-outline {
+  background-color: #ffffff !important;
+  color: #163826 !important;
+  border: 1px solid #163826 !important;
+}
+
+.sustainability-btn-outline:hover {
+  background-color: #f0f7f1 !important;
+  border-color: #0f2a1c !important;
+  color: #0f2a1c !important;
+  box-shadow: 0 8px 24px rgba(22, 56, 38, 0.12);
+}
+
+/* Philosophy */
+.sustainability-philosophy {
+  background-color: #ffffff;
+  padding: 96px 24px;
+}
+
+.sustainability-philosophy-inner {
+  max-width: 720px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.sustainability-label {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #436651;
+  margin-bottom: 20px;
+}
+
+.sustainability-section-title {
+  font-size: 32px;
+  line-height: 40px;
+  font-weight: 500;
+  color: #163826;
+  margin-bottom: 32px;
+}
+
+.sustainability-body-text {
+  font-size: 18px;
+  line-height: 32px;
+  color: #424843;
+}
+
+/* Pillars */
+.sustainability-pillars {
+  padding: 96px 0;
+}
+
+.sustainability-pillars-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  width: 100%;
+  margin-bottom: 48px;
+}
+
+.sustainability-pillars-title {
+  font-size: 40px;
+  line-height: 48px;
+  font-weight: 700;
+  color: #163826;
+  margin-bottom: 16px;
+  text-align: center;
+  width: 100%;
+}
+
+.sustainability-pillars-desc {
+  font-size: 16px;
+  line-height: 26px;
+  font-weight: 400;
+  color: #5e5f5b;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.sustainability-pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+}
+
+.sustainability-pillar-card {
+  background-color: #ffffff !important;
+  border: none !important;
+  border-radius: 24px !important;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.04) !important;
+  padding: 32px !important;
+  height: 100%;
+}
+
+.sustainability-pillar-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  background-color: #bdefbe;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  color: #163826;
+}
+
+.sustainability-pillar-card h3 {
+  font-size: 20px;
+  font-weight: 500;
+  color: #163826;
+  margin-bottom: 16px;
+}
+
+.sustainability-pillar-card p {
+  font-size: 16px;
+  line-height: 28px;
+  color: #424843;
+}
+
+/* Commitment */
+.sustainability-commitment {
+  background-color: #163826;
+  color: #ffffff;
+  padding: 96px 24px;
+}
+
+.sustainability-commitment-inner {
+  max-width: 720px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.sustainability-commitment-inner h2 {
+  font-size: 32px;
+  line-height: 40px;
+  font-weight: 500;
+  color: #ffffff;
+  margin-bottom: 24px;
+}
+
+.sustainability-commitment-desc {
+  font-size: 18px;
+  line-height: 28px;
+  color: #d4e8da;
+  margin-bottom: 48px;
+}
+
+.sustainability-commitment-list {
+  list-style: none;
+  margin: 0 auto;
+  padding: 0;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+  text-align: left;
+}
+
+.sustainability-commitment-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.sustainability-check {
+  color: #bdefbe;
+  flex-shrink: 0;
+}
+
+/* CTA */
+.sustainability-cta {
+  background-color: #ffffff;
+  padding: 96px 24px;
+}
+
+.sustainability-cta-inner {
+  max-width: 720px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.sustainability-cta-inner h2 {
+  font-size: 32px;
+  line-height: 40px;
+  font-weight: 500;
+  color: #163826;
+  margin-bottom: 16px;
+}
+
+.sustainability-cta-desc {
+  font-size: 18px;
+  line-height: 28px;
+  color: #424843;
+  margin-bottom: 40px;
+}
+
+.sustainability-cta-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .sustainability-container {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .sustainability-header {
+    padding: 20px 24px;
+  }
+
+  .sustainability-hero-grid {
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .sustainability-hero {
+    padding: 32px 0 56px;
+  }
+
+  .sustainability-hero-title {
+    font-size: 40px;
+    line-height: 48px;
+  }
+
+  .sustainability-hero-image-wrap {
+    width: 100%;
+    min-height: 280px;
+  }
+
+  .sustainability-pillars-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .sustainability-philosophy,
+  .sustainability-pillars,
+  .sustainability-commitment,
+  .sustainability-cta {
+    padding-top: 64px;
+    padding-bottom: 64px;
+  }
+}

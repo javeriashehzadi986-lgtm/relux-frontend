@@ -7,7 +7,7 @@ const Categories = () => {
     <>
 
       <div><h1>Categories</h1>
-        <Button variant="default">Default</Button>
+        <Button variant="destructive">Default</Button>
         <Button variant="outline" className="hover:bg-pink-500 hover:text-white transition">Outline</Button>
         <h1 className="text-red-500 text-3xl">
           Hello
