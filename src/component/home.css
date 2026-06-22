@@ -1,0 +1,392 @@
+.home-container {
+  font-family: Arial, sans-serif;
+  color: #333;
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 25px;
+}
+
+/* HERO */
+.home-hero {
+  position: relative;
+  width: 100%;
+  height: 70vh;
+  min-height: 500px;
+  max-height: 819px;
+  border-radius: 24px;
+  overflow: hidden;
+  margin: 20px auto 0;
+}
+
+.home-hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.home-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right, rgba(48, 51, 51, 0.6), transparent);
+  display: flex;
+  align-items: center;
+  padding: 40px 60px;
+}
+
+.home-hero-content {
+  max-width: 640px;
+  color: #fff;
+}
+
+.home-hero-label {
+  display: block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  margin-bottom: 16px;
+  color: #b4eedf;
+}
+
+.home-hero-content h1 {
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  font-weight: 800;
+  line-height: 0.95;
+  margin-bottom: 24px;
+  letter-spacing: -0.02em;
+}
+
+.home-hero-content p {
+  font-size: 1.125rem;
+  line-height: 1.6;
+  margin-bottom: 32px;
+  opacity: 0.9;
+  max-width: 480px;
+}
+
+/* SECTIONS */
+.home-section {
+  padding: 60px 0;
+}
+
+.home-section-alt {
+  background: #f3f4f3;
+  padding: 80px 25px;
+  margin: 0 -25px;
+}
+
+.home-section-alt .home-section-inner {
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.home-section-header h2 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 800;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.home-section-header p {
+  color: #666;
+  font-size: 1rem;
+}
+
+.home-section-header-center {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.home-section-header-center h2 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.home-section-header-center p {
+  color: #666;
+}
+
+/* CATEGORIES */
+.home-categories-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 32px;
+  margin-top: 40px;
+}
+
+.home-category-card {
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.home-category-shadcn-card {
+  border: none;
+  box-shadow: none;
+  background: transparent;
+  padding: 0;
+  gap: 0;
+}
+
+.home-category-card-content {
+  padding: 0;
+  padding-top: 20px;
+}
+
+.home-category-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.home-category-subtitle {
+  font-size: 0.8rem;
+  color: #787b7a;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.home-category-image {
+  position: relative;
+  height: 500px;
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.home-category-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.7s ease;
+}
+
+.home-category-card:hover .home-category-image img {
+  transform: scale(1.08);
+}
+
+.home-category-image::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.1);
+  transition: background 0.3s ease;
+}
+
+.home-category-card:hover .home-category-image::after {
+  background: transparent;
+}
+
+/* FEATURED RENTALS */
+.home-products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 32px;
+}
+
+.home-product-card {
+  border: none;
+  border-radius: 24px;
+  overflow: hidden;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  padding: 0;
+  gap: 0;
+  box-shadow: none;
+}
+
+.home-product-card:hover {
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px);
+}
+
+.home-product-image {
+  position: relative;
+  height: 380px;
+  overflow: hidden;
+}
+
+.home-product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.home-product-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: #b4eedf;
+  color: #225b4f;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.home-product-body {
+  padding: 24px;
+}
+
+.home-product-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.home-product-price {
+  color: #23785c;
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin-bottom: 20px;
+}
+
+/* HOW IT WORKS */
+.home-step-card {
+  border: none;
+  box-shadow: none;
+  background: transparent;
+  padding: 0;
+  gap: 0;
+  text-align: center;
+}
+
+.home-step-card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0;
+}
+
+.home-steps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 48px;
+  text-align: center;
+}
+
+.home-step-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+}
+
+.home-step-icon.green {
+  background: #b4eedf;
+  color: #23785c;
+}
+
+.home-step-icon.pink {
+  background: #fbdbde;
+  color: #71595c;
+}
+
+.home-step-icon.yellow {
+  background: #fefccf;
+  color: #61613e;
+}
+
+.home-step-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.home-step-description {
+  color: #666;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+/* SELLER BANNER */
+.home-seller-banner {
+  display: flex;
+  flex-wrap: wrap;
+  background: #23785c;
+  border-radius: 24px;
+  overflow: hidden;
+  align-items: center;
+}
+
+.home-seller-content {
+  flex: 1;
+  min-width: 280px;
+  padding: 48px 60px;
+  color: #fff;
+}
+
+.home-seller-content h2 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 800;
+  margin-bottom: 20px;
+}
+
+.home-seller-content p {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  margin-bottom: 32px;
+  opacity: 0.9;
+}
+
+.home-seller-image {
+  flex: 1;
+  min-width: 280px;
+  height: 400px;
+  position: relative;
+}
+
+.home-seller-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.home-seller-image::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(35, 120, 92, 0.2);
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+  .home-container {
+    padding: 0 16px;
+  }
+
+  .home-hero {
+    height: 60vh;
+    min-height: 420px;
+    border-radius: 16px;
+  }
+
+  .home-hero-overlay {
+    padding: 24px;
+  }
+
+  .home-section {
+    padding: 40px 0;
+  }
+
+  .home-section-alt {
+    padding: 60px 16px;
+    margin: 0 -16px;
+  }
+
+  .home-category-image {
+    height: 360px;
+  }
+
+  .home-seller-content {
+    padding: 32px 24px;
+  }
+
+  .home-seller-image {
+    height: 280px;
+  }
+}

@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import "./Navbar.css";
+import "./navbar.css";
 import { ShoppingCart, Bell } from "lucide-react"
 
 const Navbar = () => {

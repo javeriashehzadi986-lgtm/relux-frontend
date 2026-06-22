@@ -15,14 +15,34 @@ import Terms from './component/terms';
 import Privacy from './component/privacy';
 import ContactUs from './component/contactUs';
 
+const AUTH_ROUTES = ["/login", "/signup"];
+
 function App() {
   const location = useLocation();
+  const isAuthPage = AUTH_ROUTES.includes(location.pathname);
   const isSustainabilityPage = location.pathname === "/sustainability";
+  const hideNavbar = isAuthPage || isSustainabilityPage;
+
+  const containerClass = [
+    "app-container",
+    isAuthPage ? "app-container--auth" : "",
+    isSustainabilityPage ? "app-container--sustainability" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  const mainClass = [
+    "main-content",
+    isAuthPage ? "main-content--auth" : "",
+    isSustainabilityPage ? "main-content--sustainability" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
-    <div className={`app-container${isSustainabilityPage ? " app-container--sustainability" : ""}`}>
-      {!isSustainabilityPage && <Navbar />}
-      <main className={`main-content${isSustainabilityPage ? " main-content--sustainability" : ""}`}>
+    <div className={containerClass}>
+      {!hideNavbar && <Navbar />}
+      <main className={mainClass}>
         <Routes>
           <Route path="/about" element={<About />} />
           <Route path="/becomeASeller" element={<BecomeASeller />} />

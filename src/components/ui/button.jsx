@@ -1,32 +1,71 @@
-import { cva } from "class-variance-authority";
+import * as React from "react";
 import { cn } from "@/lib/utils";
+import "./button.css";
 
-const buttonVariants = cva(
-  "inline-flex items-center justify-center rounded-md text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-  {
-    variants: {
-      variant: {
-        default:
-          "bg-blue-500 text-white hover:bg-blue-700 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0",
-        outline:
-          "border border-black bg-transparent hover:bg-gray-100 hover:shadow-sm hover:-translate-y-0.5 active:translate-y-0",
-        destructive:
-          "bg-red-500 text-white hover:bg-red-700 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0",
-        sustainabilityPrimary: "sustainability-btn sustainability-btn-primary",
-        sustainabilitySecondary: "sustainability-btn sustainability-btn-secondary",
-        sustainabilityOutline: "sustainability-btn sustainability-btn-outline",
-      },
+const variantClass = {
+  default: "relux-btn--default",
+  outline: "relux-btn--outline",
+  light: "relux-btn--light",
+  secondary: "relux-btn--secondary",
+  google: "relux-btn--google",
+  destructive: "relux-btn--destructive",
+  sustainabilityPrimary: "sustainability-btn sustainability-btn-primary",
+  sustainabilitySecondary: "sustainability-btn sustainability-btn-secondary",
+  sustainabilityOutline: "sustainability-btn sustainability-btn-outline",
+};
+
+const sizeClass = {
+  sm: "relux-btn--sm",
+  default: "relux-btn--lg",
+  lg: "relux-btn--lg",
+  full: "relux-btn--full",
+  auth: "relux-btn--auth",
+};
+
+const isSustainabilityVariant = (variant) =>
+  variant === "sustainabilityPrimary" ||
+  variant === "sustainabilitySecondary" ||
+  variant === "sustainabilityOutline";
+
+const Button = React.forwardRef(
+  (
+    {
+      className,
+      variant = "default",
+      size = "default",
+      asChild = false,
+      children,
+      ...props
     },
-    defaultVariants: {
-      variant: "default",
-    },
+    ref
+  ) => {
+    const sustainability = isSustainabilityVariant(variant);
+
+    const classes = cn(
+      !sustainability && "relux-btn",
+      variantClass[variant] ?? variantClass.default,
+      !sustainability && (sizeClass[size] ?? sizeClass.default),
+      className
+    );
+
+    if (asChild) {
+      const child = React.Children.only(children);
+      return React.cloneElement(child, {
+        ...child.props,
+        ...props,
+        className: cn(classes, child.props.className),
+        ref,
+      });
+    }
+
+    return (
+      <button className={classes} ref={ref} {...props}>
+        {children}
+      </button>
+    );
   }
 );
 
-export function Button({ children, variant = "default", className = "", ...props }) {
-  return (
-    <button className={cn(buttonVariants({ variant }), className)} {...props}>
-      {children}
-    </button>
-  );
-}
+Button.displayName = "Button";
+
+export { Button };

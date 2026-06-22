@@ -1,87 +1,130 @@
-import React from 'react'
-import { useState } from 'react';
-import "./login.css";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import "./login.css";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import GoogleIcon from "@/components/GoogleIcon";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldSeparator,
+} from "@/components/ui/field";
+
+const LOGIN_IMAGE =
+  "https://lh3.googleusercontent.com/aida-public/AB6AXuBSnYGdanF0GYhv0vCxLzPcHcKTIzsyWHGMBv9agRIlHAXHLiLRIKpquL8JMbhuAoqsTDkdGDTELSWmxXQi4_Z96O5DbrRXRxkNqqEENu95HT90prKHhQ7l7pPvfa7VaHSJqm0L9KwHEwYoXXTx1dAlvGt1y2YFnpL7A59XleADEloG4hmHU5edTw9cFXygFzUj3uLLnksJ1SUiXDcbqG-jNDJeNpmPu6AnMJg3gH197CC5qNo_bu41kyK9cULkpYyk1BpAXK2g0zoT";
 
 const Login = () => {
-    const [submitted, setsubmitted] = useState(false);
-    const [email, setemail] = useState("");
-    const [password, setpassword] = useState("");
+  const [email, setemail] = useState("");
+  const [password, setpassword] = useState("");
+  const [emailerror, setemailerror] = useState("");
+  const [passworderror, setpassworderror] = useState("");
 
-    const [emailerror, setemailerror] = useState("");
-    const [passworderror, setpassworderror] = useState("");
+  const onsubmitted = (e) => {
+    e.preventDefault();
 
-    const onsubmitted = (e) => {
-        e.preventDefault();
-         let valid = true;
+    if (!email.includes("@") || !email.includes(".")) {
+      setemailerror("Enter a valid email");
+    } else setemailerror("");
 
-        if (!email.includes("@") || !email.includes(".")) {
-            setemailerror("Enter a valid email");
-          valid = false;
-        } else setemailerror("");
+    if (password.length < 6) {
+      setpassworderror("Password must be at least 6 characters");
+    } else setpassworderror("");
+  };
 
-        if (password.length < 6) {
-            setpassworderror("Password must be at least 6 characters");
-           valid = false;
-        } else setpassworderror("");
-
-    };
-    return (
-        <div className="login-container">
-            <div className="left-side">
-                <div className="overlay-text">
-                    <h1>Welcome Back</h1>
-                    <p>Rent your favorite dresses and look stunning</p>
-                </div>
-            </div>
-            <div className="right-side">
-                {submitted ? (
-                    <h2 className="success">Account Created</h2>
-                ) : (
-                    <form className="card" onSubmit={onsubmitted}>
-                        <h2 className="logo">ATELIER</h2>
-                        <h2>Login to Relux Hub</h2>
-                        <label>EMAIL ADDRESS</label>
-                        <input
-                            type="text"
-                            placeholder="name@example.com"
-                            value={email}
-                            onChange={(e) => {
-                                setemail(e.target.value);
-                                setemailerror("");
-                            }}
-                        />
-                        {emailerror && (
-                            <span className="error">{emailerror}</span>
-                        )}
-                        <label>PASSWORD</label>
-                        <input
-                            type="password"
-                            placeholder="password"
-                            value={password}
-                            onChange={(e) => {
-                                setpassword(e.target.value);
-                                setpassworderror("");
-                            }}
-                        />
-                        <div className="forgot">Forgot Password?</div>
-                        {passworderror && (
-                            <span className="error">{passworderror}</span>
-                        )}
-                        <button type="submit">Login</button>
-                        <p className="or">OR</p>
-                        <div className="google-btn">
-                            Continue with Google
-                        </div>
-                        <p className="signup-text">
-                            Don&apos;t have an account?
-                            <Link to="/signup"> Sign Up</Link>
-                        </p>
-                    </form>
-                )}
-            </div>
+  return (
+    <div className="login-page">
+      <section className="login-visual">
+        <div className="login-visual-gradient" />
+        <img
+          className="login-visual-image"
+          alt="Premium Pakistani Bridal Wear"
+          src={LOGIN_IMAGE}
+        />
+        <div className="login-visual-copy">
+          <h1>Welcome Back</h1>
+          <p>
+            Rent your favorite dresses <strong>بسهولة</strong> and look stunning
+          </p>
         </div>
-    );
-}
+      </section>
 
-export default Login
+      <section className="login-panel">
+        <div className="login-panel-inner">
+          <div className="login-brand">
+            <span className="login-brand-mark">ATELIER</span>
+            <h2>Login to Relux Hub</h2>
+          </div>
+
+          <form className="login-form" onSubmit={onsubmitted}>
+            <FieldGroup className="login-field-group">
+              <Field data-invalid={!!emailerror} className="login-field">
+                <FieldLabel htmlFor="login-email" className="login-field-label">
+                  Email Address
+                </FieldLabel>
+                <Input
+                  id="login-email"
+                  type="email"
+                  className="login-input"
+                  placeholder="name@example.com"
+                  value={email}
+                  aria-invalid={!!emailerror}
+                  onChange={(e) => {
+                    setemail(e.target.value);
+                    setemailerror("");
+                  }}
+                />
+                <FieldError>{emailerror}</FieldError>
+              </Field>
+
+              <Field data-invalid={!!passworderror} className="login-field">
+                <div className="login-password-header">
+                  <FieldLabel
+                    htmlFor="login-password"
+                    className="login-field-label login-field-label--inline"
+                  >
+                    Password
+                  </FieldLabel>
+                  <button type="button" className="login-forgot-link">
+                    Forgot Password?
+                  </button>
+                </div>
+                <Input
+                  id="login-password"
+                  type="password"
+                  className="login-input"
+                  value={password}
+                  aria-invalid={!!passworderror}
+                  onChange={(e) => {
+                    setpassword(e.target.value);
+                    setpassworderror("");
+                  }}
+                />
+                <FieldError>{passworderror}</FieldError>
+              </Field>
+
+              <Button type="submit" size="auth">
+                Login
+              </Button>
+            </FieldGroup>
+          </form>
+
+          <FieldSeparator className="login-divider">OR</FieldSeparator>
+
+          <Button type="button" variant="google" size="auth">
+            <GoogleIcon />
+            Continue with Google
+          </Button>
+
+          <p className="login-signup-pivot">
+            Don&apos;t have an account?
+            <Link to="/signup">Sign Up</Link>
+          </p>
+        </div>
+      </section>
+    </div>
+  );
+};
+
+export default Login;

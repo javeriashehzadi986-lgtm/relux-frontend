@@ -1,18 +1,22 @@
-*{
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-html, body, #root{
+html,
+body,
+#root {
   width: 100%;
   overflow-x: hidden;
 }
+
 .app-container {
   min-height: 100vh;
-  display:flex;
+  display: flex;
   flex-direction: column;
 }
+
 .main-content {
   flex: 1;
   padding-bottom: 100px;
@@ -20,4 +24,20 @@ html, body, #root{
 
 .main-content--sustainability {
   padding-bottom: 0;
+  flex: 1;
+}
+
+.main-content--auth {
+  padding-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.app-container--auth {
+  min-height: 100vh;
+}
+
+.app-container--sustainability {
+  min-height: 100vh;
 }
