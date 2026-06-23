@@ -12,6 +12,7 @@ import {
 import {
   Search,
   RotateCcw,
+  Repeat,
   ShoppingBasket,
   Tag,
   User,
@@ -20,14 +21,43 @@ import {
 } from "lucide-react";
 import "./help.css";
 
-const popularTopics = ["Track order", "Returns policy", "Selling fees"];
-
 const categories = [
-  { label: "Returns", icon: RotateCcw },
-  { label: "Buying", icon: ShoppingBasket },
-  { label: "Selling", icon: Tag },
-  { label: "Account", icon: User },
-  { label: "Payments", icon: CreditCard },
+  {
+    label: "Returns",
+    icon: RotateCcw,
+    description:
+      "Return items within the allowed time. Your payment is released or refunded after seller confirmation.",
+  },
+  {
+    label: "Rentals",
+    icon: Repeat,
+    description:
+      "Pay rental fee with a refundable deposit. Deposit is returned after item is returned and verified by seller.",
+  },
+  {
+    label: "Buying",
+    icon: ShoppingBasket,
+    description:
+      "Your payment is securely held by Relux Hub and released to the seller only after you confirm the order. If not received, refund is issued.",
+  },
+  {
+    label: "Selling",
+    icon: Tag,
+    description:
+      "Sell your items safely. Payment is held until buyer confirms delivery, then released to your account.",
+  },
+  {
+    label: "Account",
+    icon: User,
+    description:
+      "Manage your profile, orders, and account settings for a smooth experience on Relux Hub.",
+  },
+  {
+    label: "Payments",
+    icon: CreditCard,
+    description:
+      "All transactions are securely held in the system. Buyers get refunds and sellers are paid after confirmation.",
+  },
 ];
 
 const faqs = [
@@ -75,32 +105,22 @@ function Help() {
             <Input
               className="help-search-input"
               type="text"
-              placeholder="Search for articles, guides, or questions..."
+              placeholder="Search for questions..."
               onFocus={() => setSearchFocused(true)}
               onBlur={() => setSearchFocused(false)}
             />
           </div>
-          <p className="help-popular">
-            Popular:{" "}
-            {popularTopics.map((topic, index) => (
-              <span key={topic}>
-                <button type="button" className="help-popular-link">
-                  {topic}
-                </button>
-                {index < popularTopics.length - 1 ? ", " : ""}
-              </span>
-            ))}
-          </p>
         </section>
 
         <section className="help-categories">
           <div className="help-categories-grid">
-            {categories.map(({ label, icon: Icon }) => (
+            {categories.map(({ label, description, icon: Icon }) => (
               <Card key={label} className="help-category-card">
                 <div className="help-category-icon">
                   <Icon size={28} strokeWidth={1.75} />
                 </div>
-                <span className="help-category-label">{label}</span>
+                <h3 className="help-category-label">{label}</h3>
+                <p className="help-category-desc">{description}</p>
               </Card>
             ))}
           </div>
