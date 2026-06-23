@@ -17,6 +17,7 @@ import ContactUs from './component/contactUs';
 import Help from './component/help';
 import Cart from './component/cart';
 import Notification from './component/notification';
+import SellerVerification from './component/sellerVerification';
 
 function App() {
   const location = useLocation();
@@ -50,6 +51,7 @@ function App() {
           <Route path="/" element={<Navigate to="/home" replace />} />
           <Route path="/about" element={<About />} />
           <Route path="/becomeASeller" element={<BecomeASeller />} />
+          <Route path="/sellerVerification" element={<SellerVerification />} />
           <Route path="/categories" element={<Categories />} />
           <Route path="/pre-owned" element={<Preowned />} />
           <Route path="/rentDresses" element={<RentDresses />} />

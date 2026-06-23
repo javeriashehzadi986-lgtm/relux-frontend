@@ -82,7 +82,6 @@ function Terms() {
         <h1 className="terms-page-title">Terms of Service</h1>
 
         <header className="terms-header">
-          <div className="terms-header-accent" />
           <h2 className="terms-header-title">Agreement Overview</h2>
           <p className="terms-header-desc">
             These terms explain how Relux Hub works and how users can safely use
