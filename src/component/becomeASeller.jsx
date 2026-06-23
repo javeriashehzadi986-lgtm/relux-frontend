@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import {
   UserPlus,
   HelpCircle,
@@ -29,8 +30,14 @@ const FINAL_IMAGE =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuAvXOxbNZwRLue7Cd1vXDegniMlrooj1hUjrCA4xXc0mACNn8sN7pWgQKG_mwbq6SeFPbqepII1ArI-qTLsnN677JA6m1B2DPklI-yCarg1SMIPCAsLTNuG9AXc_bfkO1r7NwXySjpuvOWPzheJdPg114JnKnWd5Lk8x6pKYoogmK9uxcGD6kFiy4UuV4T-7LhWlaVuhNUt8W34wMh5TLgtOESOJ0WHmxfbxQxqW7eH1FUmRbB0GoaaK6qjCmZhGCWi_Phhi7Dsj0iz";
 
 const sidebarLinks = [
-  { id: "become", label: "Become a Seller", icon: UserPlus, active: true },
-  { id: "help", label: "Help Center", icon: HelpCircle },
+  {
+    id: "become",
+    label: "Become a Seller",
+    icon: UserPlus,
+    to: "/sellerVerification",
+    active: true,
+  },
+  { id: "help", label: "Help Center", icon: HelpCircle, to: "/help" },
 ];
 
 const requirements = [
@@ -122,14 +129,16 @@ const BecomeASeller = () => {
                   return (
                     <li key={link.id}>
                       <Button
-                        type="button"
+                        asChild
                         variant="ghost"
                         className={`seller-sidebar-link ${
                           link.active ? "is-active" : ""
                         }`}
                       >
-                        <Icon size={20} />
-                        {link.label}
+                        <Link to={link.to}>
+                          <Icon size={20} />
+                          {link.label}
+                        </Link>
                       </Button>
                     </li>
                   );

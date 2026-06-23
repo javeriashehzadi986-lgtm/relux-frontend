@@ -98,7 +98,7 @@ const Signup = () => {
                       id="signup-name"
                       type="text"
                       className="signup-input"
-                      placeholder="E.g. Sophia Laurent"
+                      placeholder="Enter name"
                       value={name}
                       aria-invalid={!!nameerror}
                       onChange={(e) => {
@@ -117,7 +117,7 @@ const Signup = () => {
                       id="signup-email"
                       type="email"
                       className="signup-input"
-                      placeholder="hello@atelier.com"
+                      placeholder="Enter email"
                       value={email}
                       aria-invalid={!!emailerror}
                       onChange={(e) => {

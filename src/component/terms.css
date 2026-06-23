@@ -109,13 +109,6 @@
   margin-bottom: 32px;
 }
 
-.terms-header-accent {
-  width: 4rem;
-  height: 0.25rem;
-  background-color: var(--terms-primary-container);
-  border-radius: 9999px;
-}
-
 .terms-header-title {
   font-size: 22px;
   line-height: 1.3;
