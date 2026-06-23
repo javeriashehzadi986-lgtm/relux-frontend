@@ -174,8 +174,8 @@ const BecomeASeller = () => {
                   high-end experiences while ensuring your garments are handled
                   with professional care.
                 </CardDescription>
-                <Button type="button" size="lg" className="seller-apply-btn">
-                  Apply as Seller
+                <Button type="button" size="lg" className="seller-apply-btn" asChild>
+                  <Link to="/sellerVerification">Apply as Seller</Link>
                 </Button>
               </div>
               <div className="seller-intro-image-wrap">

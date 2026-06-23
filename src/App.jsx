@@ -6,7 +6,6 @@ import Footer from './component/footer';
 import Navbar from './component/navbar';
 import Home from './component/home';
 import RentDresses from './component/rentDresses';
-import Preowned from './component/pre-owned';
 import Categories from './component/categories';
 import BecomeASeller from './component/becomeASeller';
 import About from './component/about';
@@ -53,7 +52,6 @@ function App() {
           <Route path="/becomeASeller" element={<BecomeASeller />} />
           <Route path="/sellerVerification" element={<SellerVerification />} />
           <Route path="/categories" element={<Categories />} />
-          <Route path="/pre-owned" element={<Preowned />} />
           <Route path="/rentDresses" element={<RentDresses />} />
           <Route path="/home" element={<Home />} />
           <Route path="/signup" element={<Signup />} />
