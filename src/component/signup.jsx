@@ -64,8 +64,10 @@ const Signup = () => {
 
   return (
     <div className="signup-page">
-      <header className="signup-header">
-        <span className="signup-header-brand">Relux Hub</span>
+      <header className="signup-brand-header">
+        <Link to="/home" className="signup-logo">
+          Relux Hub
+        </Link>
       </header>
 
       <div className="signup-blur signup-blur--left" aria-hidden="true" />

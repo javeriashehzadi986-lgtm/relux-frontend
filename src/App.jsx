@@ -17,6 +17,7 @@ import Help from './component/help';
 import Cart from './component/cart';
 import Notification from './component/notification';
 import SellerVerification from './component/sellerVerification';
+import ForgotPassword from './component/forgotPassword';
 
 function App() {
   const location = useLocation();
@@ -29,10 +30,14 @@ function App() {
     "/help",
     "/signup",
     "/login",
+    "/forgot-password",
   ];
 
   const hideNavbar = hideNavbarRoutes.includes(location.pathname);
-  const isAuthPage = location.pathname === "/login" || location.pathname === "/signup";
+  const isAuthPage =
+    location.pathname === "/login" ||
+    location.pathname === "/signup" ||
+    location.pathname === "/forgot-password";
 
   const mainClass = [
     "main-content",
@@ -56,6 +61,7 @@ function App() {
           <Route path="/home" element={<Home />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/sustainability" element={<Sustainability />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/privacy" element={<Privacy />} />

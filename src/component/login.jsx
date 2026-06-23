@@ -93,8 +93,13 @@ const Login = () => {
                     >
                       Password
                     </FieldLabel>
-                    <Button type="button" variant="ghost" className="login-forgot-link">
-                      Forgot Password?
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="login-forgot-link"
+                      asChild
+                    >
+                      <Link to="/forgot-password">Forgot Password?</Link>
                     </Button>
                   </div>
                   <Input

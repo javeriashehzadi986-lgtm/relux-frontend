@@ -6,7 +6,9 @@ const Footer = () => {
   return (
     <footer className="footer">
       <div className="footer-left">
-        <h2>Relux Hub</h2>
+        <Link to="/home" className="footer-logo">
+          Relux Hub
+        </Link>
         <p>Relux Hub. Curating Timeless Elegance.</p>
       </div>
 

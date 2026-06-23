@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&display=swap");
+
 .footer {
   display: flex;
   justify-content: space-between;
@@ -5,13 +7,23 @@
   padding: 20px 60px;
   background-color: white;
   border-top: 1px solid lightgrey;
-  font-family: Arial;
+  font-family: Arial, sans-serif;
 }
 
-.footer-left h2 {
-  font-size: 18px;
+.footer-logo {
+  display: inline-block;
+  font-family: "Newsreader", serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-style: italic;
+  letter-spacing: -0.03em;
+  color: #31685d;
+  text-decoration: none;
   margin-bottom: 5px;
-  color: black;
+}
+
+.footer-logo:hover {
+  color: #235c51;
 }
 
 .footer-left p {
@@ -31,5 +43,5 @@
 }
 
 .footer-right a:hover {
-  color:#1b5f49 ; 
+  color: #1b5f49;
 }

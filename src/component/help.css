@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap");
 
 .help-page {
@@ -32,12 +33,17 @@
 }
 
 .help-logo {
-  font-family: "Geist variable", sans-serif;
-  font-size: 22px;
+  font-family: "Newsreader", serif;
+  font-size: 1.5rem;
   font-weight: 700;
   font-style: italic;
-  color: #1b5f49;
+  letter-spacing: -0.03em;
+  color: #31685d;
   text-decoration: none;
+}
+
+.help-logo:hover {
+  color: #235c51;
 }
 
 .help-main {
