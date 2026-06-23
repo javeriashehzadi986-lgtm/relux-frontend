@@ -124,7 +124,7 @@ function SellerVerification() {
                   id="phone"
                   name="phone"
                   type="tel"
-                  placeholder="+1 (555) 000-0000"
+                  placeholder=" enter phone number"
                   className="seller-input"
                   required
                 />
@@ -137,7 +137,7 @@ function SellerVerification() {
                   id="email"
                   name="email"
                   type="email"
-                  placeholder="sarah@example.com"
+                  placeholder="Enter email"
                   className="seller-input"
                   required
                 />
