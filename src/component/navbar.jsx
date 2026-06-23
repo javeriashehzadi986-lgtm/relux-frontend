@@ -7,13 +7,12 @@ const Navbar = () => {
     return (
         <nav className='navbar'>
             <div className="navbar-inner">
-            <h1 className='logo'> Relux Hub</h1>
+            <Link to="/home" className="logo">Relux Hub</Link>
             <ul className='navlinks'>
                 <li> <Link to="/home">Home  </Link> </li>
                 <li><Link to="/rentDresses">Rent Dresses</Link></li>
-                <li><Link to="/pre-owned">Pre-owned</Link></li>
                 <li><Link to="/categories">Categories</Link></li>
-                <li><Link to="/becomeASeller">Become a seller</Link></li>
+                <li><Link to="/becomeASeller">Become a Seller</Link></li>
                 <li><Link to="/about">About</Link></li>
             </ul>
             <div className='nav-right'>

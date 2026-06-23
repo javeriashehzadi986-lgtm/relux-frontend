@@ -66,10 +66,9 @@
 }
 
 .categories-card-subtitle {
-  font-size: 0.8rem;
+  font-size: 0.875rem;
   color: #787b7a;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  line-height: 1.5;
 }
 
 @media (max-width: 768px) {

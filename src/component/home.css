@@ -31,11 +31,11 @@
   background: linear-gradient(to right, rgba(48, 51, 51, 0.6), transparent);
   display: flex;
   align-items: center;
-  padding: 40px 60px;
+  padding: 48px 64px;
 }
 
 .home-hero-content {
-  max-width: 640px;
+  max-width: 720px;
   color: #fff;
 }
 
@@ -49,19 +49,19 @@
 }
 
 .home-hero-content h1 {
-  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  font-size: clamp(2rem, 4.5vw, 3.75rem);
   font-weight: 800;
-  line-height: 0.95;
-  margin-bottom: 24px;
+  line-height: 1.1;
+  margin-bottom: 20px;
   letter-spacing: -0.02em;
 }
 
 .home-hero-content p {
-  font-size: 1.125rem;
-  line-height: 1.6;
-  margin-bottom: 32px;
+  font-size: 1.05rem;
+  line-height: 1.65;
+  margin-bottom: 28px;
   opacity: 0.9;
-  max-width: 480px;
+  max-width: 560px;
 }
 
 /* SECTIONS */
@@ -142,10 +142,9 @@
 }
 
 .home-category-subtitle {
-  font-size: 0.8rem;
+  font-size: 0.875rem;
   color: #787b7a;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  line-height: 1.5;
 }
 
 .home-category-image {
@@ -182,8 +181,8 @@
 /* FEATURED RENTALS */
 .home-products-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 32px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 40px;
 }
 
 .home-product-card {
@@ -203,7 +202,7 @@
 
 .home-product-image {
   position: relative;
-  height: 380px;
+  height: 450px;
   overflow: hidden;
 }
 
@@ -217,12 +216,25 @@
   position: absolute;
   top: 16px;
   right: 16px;
-  background: #b4eedf;
-  color: #225b4f;
-  padding: 4px 12px;
+  padding: 4px 16px;
   border-radius: 999px;
   font-size: 0.75rem;
   font-weight: 700;
+}
+
+.home-product-badge--primary {
+  background: #31685d;
+  color: #e3fff6;
+}
+
+.home-product-badge--secondary {
+  background: #71595c;
+  color: #fff7f7;
+}
+
+.home-product-badge--tertiary {
+  background: #61613e;
+  color: #fdfbce;
 }
 
 .home-product-body {
@@ -236,10 +248,22 @@
 }
 
 .home-product-price {
-  color: #23785c;
+  color: #31685d;
   font-weight: 700;
-  font-size: 1.1rem;
+  font-size: 1.125rem;
   margin-bottom: 20px;
+}
+
+.home-product-price-suffix {
+  color: #5d605f;
+  font-weight: 400;
+  font-size: 0.875rem;
+}
+
+.home-featured-more {
+  display: flex;
+  justify-content: center;
+  margin-top: 48px;
 }
 
 /* HOW IT WORKS */
@@ -360,13 +384,31 @@
   }
 
   .home-hero {
-    height: 60vh;
-    min-height: 420px;
+    height: auto;
+    min-height: 520px;
     border-radius: 16px;
   }
 
   .home-hero-overlay {
-    padding: 24px;
+    padding: 32px 24px;
+    align-items: flex-end;
+  }
+
+  .home-hero-content h1 {
+    font-size: clamp(1.75rem, 7vw, 2.5rem);
+    line-height: 1.15;
+    margin-bottom: 16px;
+  }
+
+  .home-hero-content p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 24px;
+    max-width: 100%;
+  }
+
+  .home-featured-more {
+    margin-top: 32px;
   }
 
   .home-section {

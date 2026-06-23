@@ -36,6 +36,12 @@
   color: #31685d;
   margin: 0;
   flex-shrink: 0;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.logo:hover {
+  color: #235c51;
 }
 
 /* NAV LINKS */

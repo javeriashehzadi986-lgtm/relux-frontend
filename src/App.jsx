@@ -14,8 +14,6 @@ import Home from './component/home';
 
 import RentDresses from './component/rentDresses';
 
-import Preowned from './component/pre-owned';
-
 import Categories from './component/categories';
 
 import BecomeASeller from './component/becomeASeller';
@@ -107,8 +105,6 @@ function App() {
           <Route path="/becomeASeller" element={<BecomeASeller />} />
 
           <Route path="/categories" element={<Categories />} />
-
-          <Route path="/pre-owned" element={<Preowned />} />
 
           <Route path="/rentDresses" element={<RentDresses />} />
 

@@ -23,29 +23,7 @@ const SIDEBAR_IMAGE =
 const OFFER_IMAGE =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuCsJW9q0ehQxztpyVk8TOkBcng8RTq7Qh4TdywJTPiAOM2lGQBqGfYtwoLs4uC_UVN9gILc9vDP8CJpxjw4evmiNawetzZ2CjNMRLbrsughMuFGPTnk7Z3G6iIwuR2-arZ-HAEALvg6V3Hbh8IDFIc-9qORAMXEdWyRistTdcBnIK04jKAVCJxiS7aRuMe6F4MDdrJCcJ7SV3D2aas65yD2P3k1svVqyPB9T1jrhWwY4wCpMeYMltDXO72WkDBbwYa7Fa2E4luByhNd";
 
-const LOOKBOOK_IMAGES = [
-  {
-    title: "Bridal Heritage",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCMebu2ehY6GVEeYEvzMGphezDAwizE_gjDcSIzIxPBGhFxf-MZ-5Epz-D1H8GvrDVzOvlV5gDBCpAJoiLaA3DB4VjaaImmPGJdj7QMyYoHb2p7Ar42s6XRd8LXiDyc3V2w2fvC-NmCuwvJy3m7u3UPVO8GZpnSPnZtTdhTqVqj9JbMg_yDmyn7KX6h4tqIAfw4rGOxgDO8DUwSn7Nu-2LUx8i0dxanhpEtLBc7GrftVHsPWMKQclXSJlOC6AnZvY8YYHoJguBmNFap",
-    large: true,
-  },
-  {
-    title: "Formal Edit",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDbN0NdOZdg0_AbpYeOtUA0czta8ZD-tH3at6G5bUsM4V56KuPBNmPIQphmOLo8Dw7l0agRjWPlsDIMZFmEFnvB8PpFYdMILnecMwFRZiUe7HVyV6btPADs80jCI-5WgswfbyE4rDzDzgT0tXks3dkkPc6u_h22EYwJ6Ll_iXOfvFLJebya_vTJRVMmn-TPRFEup3VzcpNv6HmHGI9tp-pfnH6WOO7qLOb_i-WMJBTxNRxrMVbc9MsqEfl6yQN-4EOqJ12SoITrPJT9",
-    large: false,
-  },
-  {
-    title: "Mehndi Vibrance",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAgJZGcnuytPfwR_g4Zrls43JUovtgLS2wtBv-saVeR87K2h60IHJ_P-sL864aWt67FK_AUd4rbYq3aq-BmyudJ4QaSgwWEfEwfgTomwVqtNmx_ohnfN68te-hFAS4sUU4-2nBI7YLUuQ0i1hvyMQAEe4TSOQFw-8wZnjR9HMQjFhC12NG-FFvsR2zPELSFl_ikh0RlXfSdTjiHiOytIa-iPmPBP71vE06uTbeWPTKrKClvj92a9BHJU--XJqNkUn8v_9rwlJWZ3ktx",
-    large: false,
-  },
-];
-
 const sidebarLinks = [
-  { id: "preowned", label: "Pre-owned", href: "/pre-owned", isLink: true },
   { id: "how", label: "How it Works", icon: HelpCircle, href: "#how-it-works" },
   {
     id: "contact",
@@ -237,47 +215,6 @@ const About = () => {
           </Card>
         </div>
       </div>
-
-      <section className="about-editorial">
-        <div className="about-editorial-inner">
-          <div className="about-editorial-header">
-            <div className="about-editorial-copy">
-              <h2>The Editorial Edit</h2>
-              <p>
-                Experience our curated collections through the lens of modern
-                Pakistani high fashion.
-              </p>
-            </div>
-            <Button
-              type="button"
-              className="about-editorial-btn"
-              asChild
-            >
-              <Link to="/categories">View All Collections</Link>
-            </Button>
-          </div>
-
-          <div className="about-lookbook">
-            <div className="about-lookbook-feature">
-              <img
-                alt="Portrait of a woman in high-end Pakistani bridal jewelry"
-                src={LOOKBOOK_IMAGES[0].image}
-              />
-              <p className="about-lookbook-label about-lookbook-label--large">
-                {LOOKBOOK_IMAGES[0].title}
-              </p>
-            </div>
-            <div className="about-lookbook-stack">
-              {LOOKBOOK_IMAGES.slice(1).map((item) => (
-                <div key={item.title} className="about-lookbook-item">
-                  <img alt={item.title} src={item.image} />
-                  <p className="about-lookbook-label">{item.title}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
     </div>
   );
 };

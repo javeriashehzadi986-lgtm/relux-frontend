@@ -12,50 +12,52 @@ import "./home.css";
 
 const categories = [
   {
-    title: "Bridal Wear",
-    subtitle: "Majestic & Timeless",
+    title: "Female Fashion",
+    subtitle: "Elevate your wardrobe with consciously crafted feminine silhouettes.",
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCIqICAYYoVtfdiloBaEge9TZXU6GxClxvrCIF59fVDxQ4GeaEQztFo3OV8ka3Unk9GLy_GrnYkNmQAkyGkQ3lz6nbLKo4DFubUzwbwaf99Pz0DUuHaV1Mn7KAxbF0DmnPRjjgiKGzefhNK09KB-zGxQ0Dt3CMnY2haxXImcF_r9vRT5LCTaedkhLCIQj-R_Wtva-7jjAsyCc0kwbAXkZnvfsH2MqjDDxqH8RkwoV7CWKj8yrjirQRh_a_3MMcbIT2c870ZiwFnOO8o",
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuCiukL7lSowGGH1BNwfMAuup6a8qUrB5S2pBcM2k76YsM95ete1CKxoRlOz8gZYhKv9P7FSMnYvvQRfmXqbGHXDuS3T9-lgAALWZOlhXkvfnRk7biekOv8gkuW3HXT_RxXSwzGwHkgRW5bn4aAd-TQL8IYO2a6uTOX6DhXc4DmMq8pHr092RKKGkfmbTj7dzefQZWyaldzYKvWMeAlzzFwG2-ETdaCBmA8vuli47HBmfdUL5YEwQMj77rtmCVET6JJFJXMdpbqB0pXm",
   },
   {
-    title: "Party Wear",
-    subtitle: "Chic & Glamorous",
+    title: "Male Fashion",
+    subtitle: "Shop pre-loved men's fashion curated for timeless style.",
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBPv4v1nlt_b3sPdaUowyoCjAlDvTMnu-IOkCLAW67eAuLKaNFGVMUMCapiqEhdMbMVpsUKYsW0W7Z_q0WcPyAgAiL9kNgXeQ4ZxkU5Ki8rucHFn5tGvy-EdrQsn59GuzuuiVxAqP30JUxkNHQM0O2Xc3dvtF29_EvFN2zAiHfXm17EhDGdswsEOMixdJFgLRBcXenDBSzJ-Mhgr7PDoCI2mq_vIyE9kojqfOwJND-bfrhh7rQI9-CweCZDCUnC6xHCtADsZISYzAgd",
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuBaq_12MLIjP788-IcuyL49DoE_LqVyMo-bT2kI6tbfr1IRlATc7JAkbZvXTAJ5iSWIezBzWltEPOzV5rzcJ8Hsj6ynHOZGSRUB9tb-n90tbADlW5bbnSaVWxbwJwBHzrjd0sXY9iukLhUUwDiZ998w_h1mSMG2Q5Xv1njglITUncIDEjUcwdUVbcsa8PwVa-bPzA6EMX7cEWqqfgSOREUSRSw4ALLsAs6HhGg87ez0fvWMw3ecpvT30UeJImAlTyZQn2Ls4fVwYSHu",
   },
   {
-    title: "Casual Used Clothes",
-    subtitle: "Elegant & Comfortable",
+    title: "Kids Fashion",
+    subtitle: "Gentle on the planet, perfect for the next generation of style.",
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuATWKffXyZAtQsExY5-vJqikzxc1s0r5e74vGCGhzQZw-GPQTt0c_Cmh7IrttkPO3he03GV3Y8Q_H6P6HDSA_mjE9oG3YpqddKj8YnlzAMz96DVV6m0hA9vGvJVFrP-IPuYpA94Y5TCQRwUcGFeG01cHE1mZ6ojcyQTETTMDzMZRKeYFnb3UGdSFWy3nW1ObtpVIwJhdIbgAFZFqNDGjerBtGhmvjVQvKmic_WPXFSGAljHqDUTD1o34uw3mxYbgz93vILXOQU08FjL",
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuA2byFAgLoJ73OybxhWp_M92XJtCnNdZJ9CUqa73mYX6qoO-ood2-CpKvlk3Fh_cV1ajJM0dS2DZYq7SXGG3uh5rxeYjtJFiPBIm3GmVbxPZ7RUPz2lIWIEgeF9S2dVSN8vVYJ8FOIjthXFarAaCdDtzLg7a-oYSbMnfy0bK9kmi-nGi9lT6a9uLV3wZ1klYuJE_85sAwPs1CoA-F2OmSGcTCIeZxcr1pIGOVm2mc1NIVo91LRTj0DJSp6uP1PaHjmxtsB8KWmY64Sg",
   },
 ];
 
 const featuredRentals = [
   {
-    title: "Ruby Bridal Lehenga",
-    price: "Rs. 15,000 / day",
-    badge: "New",
+    title: "Hand-worked Bridal Lehenga",
+    price: "PKR 25,000",
+    priceSuffix: "/day",
+    badge: "Bridal",
+    badgeVariant: "primary",
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAnpnhYMlgA_Esra7XWpFq4a9Dp6bNa4vmQGbsG8SH6VuI6yuwGx7SiQwtKwwlY41P76VNMka8e2ySxnLCp1xfh4NqrQCfMgLvJgLk40GLxOAv7p6XMnIaIgRXjcgDyFXACGYEFzTxM-nvX7c8dvWA6s75RuJIdSuLTUElrmKPzS8FhJkxyy110iGGTJlGj16XFgUf2AwCaBmx06CX-GBf2L1CKDFrioehOHZFsi1joiVtj3bTMB3fOepPQ9JWEmZNgW2oyOvSLqtgN",
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuBt7NUnhgK0C16PPvLHU4uIAKfx5CVN_pVg5TFDLmem4ouSEN_Uy_bB16vJDFrxx1QEvls37p6ppI__UDgIZlMggdx-oYdo2EADHB0DBxlD4CRuK5RdtmEPpiIt33qGEakx_uALpVwDSM4kjbHZjXbmVQH1DhbeonE-fZd3GBb8mKfeJrelAs_OhLEPpKcPG65yJs0zWr4oPh59QAcYmJgpkla7UdrkRgk-VFXMY8XWqdfoM8SMa0tXLGvTYqL60I6czaeW7a5fSp1s",
   },
   {
-    title: "Emerald Silk Pishwas",
-    price: "Rs. 8,500 / day",
+    title: "Emerald Heritage Pishwas",
+    price: "PKR 12,000",
+    priceSuffix: "/day",
+    badge: "Festive",
+    badgeVariant: "secondary",
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuByc49fQ6wjxgD8ceWJqN_7RuyOyVxucnOSfvJPp6UoJC9T-1F6ATFC40ugr1e6LQVl1wU-lmLDkPQNAxX43V14bFeHDj8aFykUF_Ter9qxVn0Alwg7AhUompE5lNKoqGqyonj8youULKl4augSOXc3VyjtRu7d-v6CoR4PWBCBY3eWsaUaPpzfWf2zAYHMph2Se9KlpreaPy424J9Vpq4Rn6tqfT7tBEyUTISrq6_7o9pKSg2Ywq1z2ai5fLf1QjbztNKkKOZ_39ps",
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuDseSfchAa6Yw6IK2M-MKkXymNJvoL-cID5JHoONidTxi2tCUf12T4BrPX9UUomFeobQ8slPcSP3aXbs_5dgQuYjz8fnKJPqny84CU-AGeCAvjd3eMWDfVJ4sFMfzTwu93Zoo7XNh8aLVheXqE3apyy6pwhE3C2wztt3YR5oLZFm7k8lyiDuWL0equs3Dypdwo9UfNoxaevQG2AdofKyV8-hyWgTnxTCxfNY6St-dhZxA40P2lrD5ValWZG_OvyMmfCYhuUUmEfriik",
   },
   {
-    title: "Champagne Sequin Saree",
-    price: "Rs. 6,000 / day",
+    title: "Golden Zardozi Anarkali",
+    price: "PKR 15,000",
+    priceSuffix: "/day",
+    badge: "Formal",
+    badgeVariant: "tertiary",
     image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBGZ34R6RVKNDLns9guN33XbHPyS2jh7IWlbi0_7Z1n_KqaE8k_-K8IcN29zKTkTE1VBkAwNMGq4acmZ08WJuSCSnbDFndnwKEativTJYIHz6Aa8pc56Q0LfQZ-PywOma8sK8_Xt6anSdBaCtFulSPzMvzgUaW5x30n3euSqZZtXfcvCj4RED7Aj5zt1U4PbduAM4-Zf_erV8H4y6zeayA1Y3gwPphX_mQHShxEJfgE-l8I4foD3g6so6BX2PBu34_iTzppQuknSUDL",
-  },
-  {
-    title: "Dusty Rose Ensemble",
-    price: "Rs. 4,500 / day",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuD3TOfcZkuzUXY48CyaozTsB3n0KBzn640SYX5edkuHd1cGKdD9ikSMMTGFZ1x75LX9bTarT5HGaRvmiXXoqOxBjmXBL0uPwTvAtvAYccTQGPvmBVtcEkOS8sX6QOM38mUAdmQn9I39D1fCfID6YJ9tN0IKFqRdeKYCEUVrmklPxb0fZbTKXjnh5y6AgB0JzNIapaouOVnzL4G0UX9k6NdqxRanXzFPR2cCz5ESzMxeXQuf4HlEKA1MnrJxENn5S1foqdF9I1l87E9P",
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuAVuQO3M7twbez7dvvHttrX0U0x8v-kbrcetWGYcUhOxinoWnn7kgmFK_WsEG5vFXis_l36dUwl6XC6_I1NnufpUUw6qOm2s35xwA0a4-J7alfc8R_an8PB9960Mc7njUhvGJQP3S3dVpacZqxYMV3USvXruxluEdXqsTiRjNcb7xUFK4jiwk_UzuzgemA_GSjjxFLU_ctbnhTEF38Tb5lwDGA7D7tJVTRklmC1J8yq_AkXfjMuwMVgNltF0EYoaHq4GKnvwx6AO078",
   },
 ];
 
@@ -95,10 +97,9 @@ const Home = () => {
         <div className="home-hero-overlay">
           <div className="home-hero-content">
             <span className="home-hero-label">The Atelier Collection</span>
-            <h1>Rent Designer Dresses in Pakistan</h1>
+            <h1>Rent & Resell pre-owned  Dresses in Pakistan</h1>
             <p>
-              Affordable rentals for bridal and party wear. Experience high-end
-              fashion without the designer price tag.
+            Sustainable luxury for every occasion. Rent high-end fashion or give your premium wardrobe a second life by reselling.
             </p>
             <Button size="lg" asChild>
               <Link to="/rentDresses">Explore Dresses</Link>
@@ -151,20 +152,37 @@ const Home = () => {
                 <div className="home-product-image">
                   <img alt={product.title} src={product.image} />
                   {product.badge && (
-                    <span className="home-product-badge">{product.badge}</span>
+                    <span
+                      className={`home-product-badge home-product-badge--${product.badgeVariant ?? "primary"}`}
+                    >
+                      {product.badge}
+                    </span>
                   )}
                 </div>
                 <CardContent className="home-product-body">
                   <CardTitle className="home-product-title">
                     {product.title}
                   </CardTitle>
-                  <p className="home-product-price">{product.price}</p>
+                  <p className="home-product-price">
+                    {product.price}
+                    {product.priceSuffix && (
+                      <span className="home-product-price-suffix">
+                        {" "}
+                        {product.priceSuffix}
+                      </span>
+                    )}
+                  </p>
                   <Button variant="outline" size="full">
                     Rent Now
                   </Button>
                 </CardContent>
               </Card>
             ))}
+          </div>
+          <div className="home-featured-more">
+            <Button size="lg" asChild>
+              <Link to="/rentDresses">Explore More</Link>
+            </Button>
           </div>
         </div>
       </section>
@@ -198,10 +216,9 @@ const Home = () => {
       <section className="home-section">
         <div className="home-seller-banner">
           <div className="home-seller-content">
-            <h2>Earn by Renting Your Dresses</h2>
+            <h2>Earn by Renting & Reselling Your Dresses</h2>
             <p>
-              Give your expensive designer outfits a new life. Join our community
-              of sustainable fashionistas and earn from your wardrobe.
+            Join our community of stylish sellers. Give your bridal and formal outfits a second life while earning premium rental income.
             </p>
             <Button variant="light" size="lg" asChild>
               <Link to="/becomeASeller">Become a Seller</Link>
