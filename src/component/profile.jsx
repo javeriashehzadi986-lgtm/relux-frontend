@@ -5,6 +5,7 @@ import {
   Shirt,
   HandCoins,
   Heart,
+  HelpCircle,
   User,
   LogOut,
   Lock,
@@ -30,12 +31,14 @@ import ProfileMyRentals from "./profileMyRentals";
 import ProfileMyBids from "./profileMyBids";
 import ProfileMyOrders from "./profileMyOrders";
 import ProfileWishlist from "./profileWishlist";
+import ProfileSupportCenter from "./profileSupportCenter";
 
 const SIDEBAR_ITEMS = [
   { id: "orders", label: "My Orders", icon: ShoppingBag },
   { id: "rentals", label: "My Rentals", icon: Shirt },
   { id: "bids", label: "My Bids", icon: HandCoins },
   { id: "wishlist", label: "Wishlist", icon: Heart },
+  { id: "support", label: "Support Center", icon: HelpCircle },
   { id: "profile", label: "My Profile", icon: User },
 ];
 
@@ -136,6 +139,10 @@ const Profile = () => {
 
     if (activeSection === "wishlist") {
       return <ProfileWishlist />;
+    }
+
+    if (activeSection === "support") {
+      return <ProfileSupportCenter />;
     }
 
     if (activeSection === "profile") {
@@ -344,7 +351,8 @@ const Profile = () => {
           activeSection === "rentals" ||
           activeSection === "bids" ||
           activeSection === "orders" ||
-          activeSection === "wishlist"
+          activeSection === "wishlist" ||
+          activeSection === "support"
             ? "profile-main--wide"
             : ""
         }`.trim()}
