@@ -1,0 +1,269 @@
+.profile-rentals {
+  width: 100%;
+  max-width: 72rem;
+  margin: 0 auto;
+}
+
+.profile-rentals-header {
+  position: sticky;
+  top: 5.5rem;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  margin: -1.5rem -1.5rem 2rem;
+  padding: 2rem 1.5rem;
+  background: rgba(250, 249, 248, 0.85);
+  backdrop-filter: blur(24px);
+  border-bottom: 1px solid rgba(225, 227, 226, 0.6);
+}
+
+.profile-rentals-header-top {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.profile-rentals-title {
+  margin: 0;
+  font-family: "Newsreader", serif;
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #303333;
+}
+
+.profile-rentals-subtitle {
+  margin: 0.5rem 0 0;
+  font-size: 1rem;
+  color: #5d605f;
+}
+
+.profile-rentals-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.profile-rentals-search-wrap {
+  position: relative;
+  flex: 1;
+  max-width: 18rem;
+}
+
+.profile-rentals-search-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #5d605f;
+  pointer-events: none;
+}
+
+.profile-rentals-search {
+  padding: 0.75rem 1.5rem 0.75rem 2.75rem !important;
+  border-radius: 9999px !important;
+  font-size: 0.875rem !important;
+}
+
+.profile-rentals-filter-btn {
+  width: 3rem !important;
+  height: 3rem !important;
+  min-height: 3rem !important;
+  border-radius: 9999px !important;
+  background: #e7e8e7 !important;
+  color: #303333 !important;
+  flex-shrink: 0;
+}
+
+.profile-rentals-filter-btn:hover {
+  background: #31685d !important;
+  color: #e3fff6 !important;
+}
+
+.profile-rentals-tabs {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+  scrollbar-width: none;
+}
+
+.profile-rentals-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.profile-rentals-tab {
+  padding: 0.5rem 1.5rem !important;
+  min-height: auto !important;
+  border-radius: 9999px !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  white-space: nowrap;
+  color: #5d605f !important;
+  background: #f3f4f3 !important;
+  box-shadow: none !important;
+}
+
+.profile-rentals-tab:hover {
+  background: #e7e8e7 !important;
+  color: #303333 !important;
+}
+
+.profile-rentals-tab--active {
+  background: #31685d !important;
+  color: #e3fff6 !important;
+  font-weight: 600 !important;
+}
+
+.profile-rentals-tab--active:hover {
+  background: #31685d !important;
+  color: #e3fff6 !important;
+}
+
+.profile-rentals-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+.profile-rental-card {
+  display: grid;
+  grid-template-columns: 1fr;
+  overflow: hidden;
+  border: 1px solid rgba(225, 227, 226, 0.8);
+  border-radius: 1rem;
+  background: #ffffff;
+  padding: 0;
+  gap: 0;
+  box-shadow: 0 16px 32px -20px rgba(49, 104, 93, 0.1);
+}
+
+.profile-rental-image-wrap {
+  position: relative;
+  height: 14rem;
+  overflow: hidden;
+}
+
+.profile-rental-image-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-rental-badge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.profile-rental-badge--active {
+  background: #b4eedf;
+  color: #225b4f;
+}
+
+.profile-rental-badge--upcoming-return {
+  background: #fefccf;
+  color: #61613e;
+}
+
+.profile-rental-badge--returned {
+  background: #e7e8e7;
+  color: #5d605f;
+}
+
+.profile-rental-badge--cancelled {
+  background: #fbdbde;
+  color: #71595c;
+}
+
+.profile-rental-content {
+  padding: 1.25rem 1.5rem 1.5rem;
+}
+
+.profile-rental-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #303333;
+}
+
+.profile-rental-dates {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #5d605f;
+  margin-bottom: 0.5rem;
+}
+
+.profile-rental-note {
+  margin: 0 0 1rem;
+  font-size: 0.875rem;
+  color: #787b7a;
+}
+
+.profile-rental-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.profile-rental-price {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #31685d;
+}
+
+.profile-rentals-empty {
+  grid-column: 1 / -1;
+  border: 1px dashed #e1e3e2;
+  background: #ffffff;
+  box-shadow: none;
+}
+
+.profile-rentals-empty-content {
+  padding: 2.5rem;
+  text-align: center;
+  color: #5d605f;
+}
+
+@media (min-width: 768px) {
+  .profile-rentals-header {
+    margin: -2rem -2.5rem 2rem;
+    padding: 2rem 2.5rem;
+  }
+
+  .profile-rentals-header-top {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+
+  .profile-rental-card {
+    grid-template-columns: 12rem 1fr;
+  }
+
+  .profile-rental-image-wrap {
+    height: auto;
+    min-height: 100%;
+  }
+
+  .profile-rentals-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .profile-rentals-header {
+    margin: -3rem -3rem 2.5rem;
+    padding: 2rem 3rem;
+  }
+}

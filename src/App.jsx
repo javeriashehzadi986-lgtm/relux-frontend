@@ -18,6 +18,7 @@ import Cart from './component/cart';
 import Notification from './component/notification';
 import SellerVerification from './component/sellerVerification';
 import ForgotPassword from './component/forgotPassword';
+import Profile from './component/profile';
 
 function App() {
   const location = useLocation();
@@ -69,6 +70,7 @@ function App() {
           <Route path="/help" element={<Help />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/notification" element={<Notification />} />
+          <Route path="/profile" element={<Profile />} />
         </Routes>
       </main>
       <Footer />
