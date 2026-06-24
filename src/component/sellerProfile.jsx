@@ -1,0 +1,368 @@
+import React, { useMemo, useState } from "react";
+import {
+  IdCard,
+  CheckCircle2,
+  Star,
+  StarHalf,
+  Lock,
+  Shield,
+  Pencil,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import SellerDashboardLayout from "./sellerDashboardLayout";
+import "./sellerDashboard.css";
+import "./sellerProfile.css";
+
+const defaultProfile = {
+  fullName: "Zarish",
+  email: "zarish@example.com",
+  phone: "+92 300 1234567",
+  city: "Lahore",
+  address: "Gulberg III, Lahore",
+};
+
+const accountSettings = [
+  { id: "password", label: "Change Password", icon: Lock },
+  { id: "privacy", label: "Privacy Settings", icon: Shield },
+];
+
+const verificationDocs = [
+  { id: "cnic-front", label: "CNIC Front", icon: IdCard },
+  { id: "cnic-back", label: "CNIC Back", icon: IdCard },
+];
+
+const reviews = [
+  {
+    id: "review-1",
+    stars: 5,
+    text: '"The quality was even better than described. Zarish is a fantastic seller..."',
+  },
+  {
+    id: "review-2",
+    stars: 4.5,
+    text: '"Beautifully packaged and shipped very fast. Will definitely buy again!"',
+  },
+];
+
+function getInitials(name) {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "Z";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+}
+
+function StarRating({ rating }) {
+  const fullStars = Math.floor(rating);
+  const hasHalf = rating % 1 >= 0.5;
+
+  return (
+    <div className="seller-profile-stars" aria-hidden="true">
+      {Array.from({ length: fullStars }).map((_, index) => (
+        <Star key={`full-${index}`} size={14} fill="currentColor" />
+      ))}
+      {hasHalf && <StarHalf size={14} fill="currentColor" />}
+    </div>
+  );
+}
+
+const SellerProfile = () => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [profile, setProfile] = useState(defaultProfile);
+  const [draft, setDraft] = useState(defaultProfile);
+
+  const initials = useMemo(() => getInitials(profile.fullName), [profile.fullName]);
+  const draftInitials = useMemo(() => getInitials(draft.fullName), [draft.fullName]);
+
+  const viewFields = [
+    { id: "fullName", label: "Full Name", value: profile.fullName },
+    { id: "email", label: "Email Address", value: profile.email },
+    { id: "phone", label: "Phone Number", value: profile.phone },
+    { id: "city", label: "City", value: profile.city },
+    {
+      id: "address",
+      label: "Delivery Address",
+      value: profile.address,
+      fullWidth: true,
+    },
+  ];
+
+  const handleEditClick = () => {
+    setDraft(profile);
+    setIsEditing(true);
+  };
+
+  const handleDraftChange = (field) => (event) => {
+    setDraft((current) => ({ ...current, [field]: event.target.value }));
+  };
+
+  const handleSave = (event) => {
+    event.preventDefault();
+    setProfile(draft);
+    setIsEditing(false);
+  };
+
+  return (
+    <SellerDashboardLayout active="profile">
+      <div className="seller-profile-page">
+        {isEditing ? (
+          <section className="seller-profile-top seller-profile-edit">
+            <div className="seller-profile-hero-copy seller-profile-edit-heading">
+              <h1 className="seller-dashboard-page-title">My Profile</h1>
+              <p className="seller-profile-subtitle">
+                Update your personal details and delivery information.
+              </p>
+            </div>
+
+            <div className="seller-dashboard-user seller-profile-user">
+              <div className="seller-dashboard-avatar">{draftInitials}</div>
+              <div>
+                <h2 className="seller-profile-user-name">{draft.fullName}</h2>
+                <p className="seller-dashboard-account-type">Seller account</p>
+              </div>
+            </div>
+
+            <form className="seller-profile-edit-form" onSubmit={handleSave}>
+              <FieldGroup className="seller-dashboard-form-grid seller-profile-edit-grid">
+                <Field className="seller-dashboard-field">
+                  <FieldLabel htmlFor="edit-fullName">Full Name</FieldLabel>
+                  <Input
+                    id="edit-fullName"
+                    value={draft.fullName}
+                    onChange={handleDraftChange("fullName")}
+                    className="seller-dashboard-input"
+                  />
+                </Field>
+                <Field className="seller-dashboard-field">
+                  <FieldLabel htmlFor="edit-email">Email Address</FieldLabel>
+                  <Input
+                    id="edit-email"
+                    type="email"
+                    value={draft.email}
+                    onChange={handleDraftChange("email")}
+                    className="seller-dashboard-input"
+                  />
+                </Field>
+                <Field className="seller-dashboard-field">
+                  <FieldLabel htmlFor="edit-phone">Phone Number</FieldLabel>
+                  <Input
+                    id="edit-phone"
+                    type="tel"
+                    value={draft.phone}
+                    onChange={handleDraftChange("phone")}
+                    className="seller-dashboard-input"
+                  />
+                </Field>
+                <Field className="seller-dashboard-field">
+                  <FieldLabel htmlFor="edit-city">City</FieldLabel>
+                  <Input
+                    id="edit-city"
+                    value={draft.city}
+                    onChange={handleDraftChange("city")}
+                    className="seller-dashboard-input"
+                  />
+                </Field>
+                <Field className="seller-dashboard-field seller-dashboard-field--full">
+                  <FieldLabel htmlFor="edit-address">Delivery Address</FieldLabel>
+                  <Input
+                    id="edit-address"
+                    value={draft.address}
+                    onChange={handleDraftChange("address")}
+                    className="seller-dashboard-input"
+                  />
+                </Field>
+              </FieldGroup>
+
+              <Button type="submit" className="seller-dashboard-save-btn">
+                Save Changes
+              </Button>
+            </form>
+          </section>
+        ) : (
+          <>
+            <section className="seller-profile-top">
+              <div className="seller-profile-hero-top">
+                <div className="seller-profile-hero-copy">
+                  <h1 className="seller-dashboard-page-title">My Profile</h1>
+                  <p className="seller-profile-subtitle">
+                    View and manage your account details.
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  className="seller-profile-edit-top-btn"
+                  onClick={handleEditClick}
+                >
+                  <Pencil size={16} strokeWidth={1.75} />
+                  Edit Profile
+                </Button>
+              </div>
+
+              <div className="seller-dashboard-user seller-profile-user">
+                <div className="seller-dashboard-avatar">{initials}</div>
+                <div>
+                  <h2 className="seller-profile-user-name">{profile.fullName}</h2>
+                  <p className="seller-dashboard-account-type">Seller account</p>
+                </div>
+              </div>
+
+              <div className="seller-dashboard-form-grid seller-profile-details-grid">
+                {viewFields.map((field) => (
+                  <div
+                    key={field.id}
+                    className={`seller-dashboard-field seller-profile-detail-field ${
+                      field.fullWidth ? "seller-dashboard-field--full" : ""
+                    }`}
+                  >
+                    <span className="seller-profile-detail-label">{field.label}</span>
+                    <p className="seller-profile-detail-value">{field.value}</p>
+                  </div>
+                ))}
+              </div>
+
+              <Separator className="seller-profile-top-divider" />
+
+              <div className="seller-profile-account-settings">
+                <h3 className="seller-profile-account-settings-label">
+                  Account Settings
+                </h3>
+                <div className="seller-profile-account-settings-list">
+                  {accountSettings.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        className="seller-profile-account-settings-row"
+                      >
+                        <Icon size={20} strokeWidth={1.75} />
+                        <span>{item.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </section>
+
+            <Card className="seller-profile-card">
+              <CardHeader className="seller-profile-section-header">
+                <div>
+                  <CardTitle className="seller-profile-section-title">
+                    Identity Verification
+                  </CardTitle>
+                  <CardDescription className="seller-profile-section-desc">
+                    Required to earn your trust badge.
+                  </CardDescription>
+                </div>
+                <span className="seller-profile-status-badge seller-profile-status-badge--verified">
+                  Verified
+                </span>
+              </CardHeader>
+              <CardContent className="seller-profile-section-content">
+                <div className="seller-profile-docs-grid">
+                  {verificationDocs.map((doc) => {
+                    const Icon = doc.icon;
+                    return (
+                      <div key={doc.id} className="seller-profile-doc-slot">
+                        <Icon
+                          size={22}
+                          strokeWidth={1.75}
+                          className="seller-profile-doc-icon"
+                        />
+                        <span className="seller-profile-doc-label">{doc.label}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="seller-profile-outline-btn seller-profile-outline-btn--full"
+                >
+                  Update Documents
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="seller-profile-card">
+              <CardHeader className="seller-profile-section-header seller-profile-section-header--inline">
+                <CardTitle className="seller-profile-section-title">
+                  Stripe Payments
+                </CardTitle>
+                <div className="seller-profile-connected">
+                  <CheckCircle2 size={16} fill="currentColor" strokeWidth={0} />
+                  <span>Connected</span>
+                </div>
+              </CardHeader>
+              <CardContent className="seller-profile-section-content">
+                <div className="seller-profile-payout-box">
+                  <div className="seller-profile-payout-row">
+                    <span className="seller-profile-payout-label">Last Payout</span>
+                    <span className="seller-profile-payout-amount">$120.00</span>
+                  </div>
+                  <div className="seller-profile-payout-row">
+                    <span className="seller-profile-payout-date">Oct 20, 2023</span>
+                    <span className="seller-profile-payout-status">Completed</span>
+                  </div>
+                </div>
+                <p className="seller-profile-stripe-note">
+                  &ldquo;Payments are securely processed via Stripe and sent to your bank
+                  account.&rdquo;
+                </p>
+                <Button
+                  type="button"
+                  className="seller-profile-primary-btn seller-profile-primary-btn--full"
+                >
+                  Manage Stripe Account
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="seller-profile-card">
+              <CardHeader className="seller-profile-section-header seller-profile-section-header--inline">
+                <CardTitle className="seller-profile-section-title">
+                  Seller Reviews
+                </CardTitle>
+                <div className="seller-profile-rating-summary">
+                  <div className="seller-profile-rating-score">
+                    <span>4.8</span>
+                    <Star size={20} fill="currentColor" strokeWidth={0} />
+                  </div>
+                  <span className="seller-profile-rating-count">(124 reviews)</span>
+                </div>
+              </CardHeader>
+              <CardContent className="seller-profile-section-content">
+                <div className="seller-profile-reviews">
+                  {reviews.map((review) => (
+                    <div key={review.id} className="seller-profile-review">
+                      <StarRating rating={review.stars} />
+                      <p className="seller-profile-review-text">{review.text}</p>
+                    </div>
+                  ))}
+                </div>
+                <Button
+                  type="button"
+                  variant="link"
+                  className="seller-profile-reviews-link"
+                >
+                  View all reviews
+                </Button>
+              </CardContent>
+            </Card>
+          </>
+        )}
+      </div>
+    </SellerDashboardLayout>
+  );
+};
+
+export default SellerProfile;

@@ -18,6 +18,12 @@ import Cart from './component/cart';
 import Notification from './component/notification';
 import SellerVerification from './component/sellerVerification';
 import ForgotPassword from './component/forgotPassword';
+import MyListing from './component/myListing';
+import AddListing from './component/addListing';
+import OrdersRequests from './component/ordersRequests';
+import SellerProfile from './component/sellerProfile';
+import SupportCenter from './component/supportCenter';
+import Settings from './component/settings';
 
 function App() {
   const location = useLocation();
@@ -56,6 +62,16 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/becomeASeller" element={<BecomeASeller />} />
           <Route path="/sellerVerification" element={<SellerVerification />} />
+          <Route path="/sellerDashboard" element={<SellerProfile />} />
+          <Route
+            path="/sellerProfile"
+            element={<Navigate to="/sellerDashboard" replace />}
+          />
+          <Route path="/myListing" element={<MyListing />} />
+          <Route path="/addListing" element={<AddListing />} />
+          <Route path="/ordersRequests" element={<OrdersRequests />} />
+          <Route path="/supportCenter" element={<SupportCenter />} />
+          <Route path="/settings" element={<Settings />} />
           <Route path="/categories" element={<Categories />} />
           <Route path="/rentDresses" element={<RentDresses />} />
           <Route path="/home" element={<Home />} />

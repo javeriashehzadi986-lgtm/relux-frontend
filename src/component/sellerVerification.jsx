@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -22,7 +22,7 @@ const verificationSteps = [
   "You will receive an email and a push notification as soon as your account is approved.",
 ];
 
-function FileUploadZone({ id, label, file, error, onFileChange }) {
+function FileUploadZone({ id, label, file, onFileChange }) {
   return (
     <div className="seller-upload-field">
       <Label htmlFor={id} className="seller-field-label">
@@ -31,7 +31,7 @@ function FileUploadZone({ id, label, file, error, onFileChange }) {
       <div
         className={`seller-upload-zone ${
           file ? "seller-upload-zone--selected" : ""
-        } ${error ? "seller-upload-zone--error" : ""}`}
+        }`}
       >
         <CloudUpload className="seller-upload-icon" size={40} strokeWidth={1.5} />
         <p className="seller-upload-text">
@@ -43,44 +43,21 @@ function FileUploadZone({ id, label, file, error, onFileChange }) {
           type="file"
           accept="image/jpeg,image/png,image/jpg"
           className="seller-upload-input"
-          aria-invalid={!!error}
           onChange={(event) => onFileChange(event.target.files?.[0] ?? null)}
         />
       </div>
-      {error && <p className="seller-upload-error">{error}</p>}
     </div>
   );
 }
 
 function SellerVerification() {
-  const [showSuccess, setShowSuccess] = useState(false);
+  const navigate = useNavigate();
   const [cnicFront, setCnicFront] = useState(null);
   const [cnicBack, setCnicBack] = useState(null);
-  const [cnicFrontError, setCnicFrontError] = useState("");
-  const [cnicBackError, setCnicBackError] = useState("");
-
-  const handleCnicFrontChange = (file) => {
-    setCnicFront(file);
-    if (file) setCnicFrontError("");
-  };
-
-  const handleCnicBackChange = (file) => {
-    setCnicBack(file);
-    if (file) setCnicBackError("");
-  };
 
   const handleSubmit = (event) => {
     event.preventDefault();
-
-    const frontError = cnicFront ? "" : "CNIC front image is required.";
-    const backError = cnicBack ? "" : "CNIC back image is required.";
-
-    setCnicFrontError(frontError);
-    setCnicBackError(backError);
-
-    if (frontError || backError) return;
-
-    setShowSuccess(true);
+    navigate("/sellerDashboard");
   };
 
   return (
@@ -143,6 +120,21 @@ function SellerVerification() {
                 />
               </div>
               <div className="seller-field">
+                <Label htmlFor="password" className="seller-field-label">
+                  Password
+                </Label>
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  placeholder="Create a password"
+                  className="seller-input"
+                  autoComplete="new-password"
+                  minLength={6}
+                  required
+                />
+              </div>
+              <div className="seller-field">
                 <Label htmlFor="city" className="seller-field-label">
                   City
                 </Label>
@@ -170,15 +162,13 @@ function SellerVerification() {
                 id="cnic-front"
                 label="Upload CNIC Front Side"
                 file={cnicFront}
-                error={cnicFrontError}
-                onFileChange={handleCnicFrontChange}
+                onFileChange={setCnicFront}
               />
               <FileUploadZone
                 id="cnic-back"
                 label="Upload CNIC Back Side"
                 file={cnicBack}
-                error={cnicBackError}
-                onFileChange={handleCnicBackChange}
+                onFileChange={setCnicBack}
               />
             </div>
             <div className="seller-info-banner">
@@ -240,21 +230,6 @@ function SellerVerification() {
           </div>
         </form>
       </main>
-
-      {showSuccess && (
-        <div className="seller-modal-overlay" role="dialog" aria-modal="true">
-          <Card className="seller-modal">
-            <h3 className="seller-modal-title">Request Submitted!</h3>
-            <p className="seller-modal-desc">
-              Your verification request has been received. Our team will review
-              your documents and notify you via email shortly.
-            </p>
-            <Button asChild variant="default" className="seller-modal-btn">
-              <Link to="/home">Back to Marketplace</Link>
-            </Button>
-          </Card>
-        </div>
-      )}
     </div>
   );
 }
