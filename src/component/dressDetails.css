@@ -1,0 +1,645 @@
+@import url("https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Plus+Jakarta+Sans:wght@200..800&display=swap");
+
+.dress-details-page {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  background: #faf9f8;
+  color: #303333;
+  max-width: 90rem;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 8rem;
+}
+
+.dress-details-unavailable {
+  max-width: 32rem;
+  margin: 4rem auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+}
+
+.dress-details-unavailable h1 {
+  font-family: "Newsreader", serif;
+  font-size: 2rem;
+  margin: 0;
+}
+
+.dress-details-hero-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 4rem;
+  align-items: start;
+}
+
+.dress-details-gallery {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.dress-details-main-image {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  border-radius: 1rem;
+  overflow: hidden;
+  background: #ffffff;
+  box-shadow: 0 40px 80px rgba(48, 51, 51, 0.08);
+}
+
+.dress-details-main-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.7s ease;
+}
+
+.dress-details-main-image:hover img {
+  transform: scale(1.05);
+}
+
+.dress-details-live-badge {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  background: rgba(49, 104, 93, 0.9);
+  backdrop-filter: blur(8px);
+  color: #e3fff6;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.dress-details-live-badge--won {
+  background: #31685d;
+  box-shadow: 0 8px 20px rgba(49, 104, 93, 0.25);
+}
+
+.dress-details-thumbs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.dress-details-thumb {
+  aspect-ratio: 1;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background: #f3f4f3;
+  cursor: pointer;
+  transition: border-color 0.2s ease, opacity 0.2s ease;
+}
+
+.dress-details-thumb:hover {
+  opacity: 0.85;
+}
+
+.dress-details-thumb--active {
+  border-color: #31685d;
+}
+
+.dress-details-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.dress-details-thumb:hover img {
+  transform: scale(1.1);
+}
+
+.dress-details-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.dress-details-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.dress-details-header h1 {
+  margin: 0 0 0.5rem;
+  font-family: "Newsreader", serif;
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.dress-details-designer {
+  margin: 0;
+  font-family: "Newsreader", serif;
+  font-style: italic;
+  font-size: 1.25rem;
+  color: #5d605f;
+}
+
+.dress-details-favorite {
+  flex-shrink: 0;
+  width: 3rem !important;
+  height: 3rem !important;
+  min-height: 3rem !important;
+  border-radius: 9999px !important;
+  background: #f3f4f3 !important;
+  color: #31685d !important;
+}
+
+.dress-details-favorite:hover,
+.dress-details-favorite--active {
+  background: #e7e8e7 !important;
+}
+
+.dress-details-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  padding-top: 0.5rem;
+}
+
+.dress-details-stars {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+  color: #61613e;
+}
+
+.dress-details-stars span {
+  margin-left: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #303333;
+}
+
+.dress-details-meta-dot {
+  width: 0.25rem;
+  height: 0.25rem;
+  border-radius: 9999px;
+  background: #b0b2b1;
+}
+
+.dress-details-condition-pill {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  background: rgba(180, 238, 223, 0.3);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #31685d;
+}
+
+.dress-details-est-value {
+  font-size: 0.875rem;
+  color: #5d605f;
+}
+
+.dress-details-est-value s {
+  text-decoration: line-through;
+}
+
+.dress-details-auction-highlight {
+  padding: 1.5rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(180, 238, 223, 0.3);
+  background: rgba(180, 238, 223, 0.2);
+}
+
+.dress-details-auction-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+}
+
+.dress-details-auction-label {
+  margin: 0 0 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #31685d;
+}
+
+.dress-details-auction-label--end {
+  color: rgba(168, 56, 54, 0.8);
+}
+
+.dress-details-auction-bid {
+  margin: 0;
+  font-family: "Newsreader", serif;
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #225b4f;
+}
+
+.dress-details-auction-timer-wrap {
+  text-align: right;
+}
+
+.dress-details-auction-timer {
+  margin: 0;
+  font-family: ui-monospace, monospace;
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: #67040d;
+}
+
+.dress-details-min-bid {
+  margin: 1rem 0 0;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(180, 238, 223, 0.4);
+  font-size: 0.875rem;
+  font-style: italic;
+  color: rgba(34, 91, 79, 0.8);
+}
+
+.dress-details-competing {
+  margin: 0.75rem 0 0;
+  font-size: 0.8125rem;
+  color: rgba(34, 91, 79, 0.9);
+}
+
+.dress-details-competing strong {
+  color: #31685d;
+}
+
+.dress-details-bid-form {
+  padding: 2rem;
+  border-radius: 1rem;
+  background: #ffffff;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.dress-details-bid-field label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.dress-details-bid-input-wrap {
+  position: relative;
+}
+
+.dress-details-bid-prefix {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-weight: 500;
+  color: #5d605f;
+}
+
+.dress-details-bid-input {
+  padding: 1rem 1rem 1rem 3rem !important;
+  border-radius: 0.5rem !important;
+  font-size: 1.125rem !important;
+  font-weight: 700 !important;
+  background: #f3f4f3 !important;
+  border: none !important;
+}
+
+.dress-details-bid-input:focus {
+  background: #ffffff !important;
+  box-shadow: 0 0 0 2px rgba(49, 104, 93, 0.2) !important;
+}
+
+.dress-details-bid-hint {
+  margin: 0.5rem 0 0;
+  font-size: 0.75rem;
+  color: #5d605f;
+}
+
+.dress-details-terms {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: #5d605f;
+  cursor: pointer;
+}
+
+.dress-details-place-bid-btn {
+  width: 100%;
+  padding: 1.25rem 1.5rem !important;
+  min-height: auto !important;
+  border-radius: 9999px !important;
+  font-size: 1.125rem !important;
+  font-weight: 700 !important;
+  background: #31685d !important;
+  color: #e3fff6 !important;
+  box-shadow: 0 10px 25px rgba(49, 104, 93, 0.2);
+}
+
+.dress-details-place-bid-btn:disabled {
+  opacity: 0.5;
+}
+
+.dress-details-chat-btn {
+  width: 100%;
+  padding: 1rem 1.5rem !important;
+  min-height: auto !important;
+  border-radius: 9999px !important;
+  font-size: 0.875rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: 2px solid #31685d !important;
+  color: #31685d !important;
+  background: transparent !important;
+  gap: 0.5rem;
+}
+
+.dress-details-chat-btn:hover {
+  background: rgba(49, 104, 93, 0.05) !important;
+}
+
+.dress-details-bid-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  padding-top: 1rem;
+  text-align: center;
+}
+
+.dress-details-bid-stats p {
+  margin: 0 0 0.25rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+.dress-details-bid-stats span {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #303333;
+}
+
+.dress-details-bid-stats > div:nth-child(2) {
+  border-left: 1px solid #e1e3e2;
+  border-right: 1px solid #e1e3e2;
+}
+
+.dress-details-bid-status {
+  font-weight: 700 !important;
+}
+
+.dress-details-bid-status--active {
+  color: #31685d !important;
+}
+
+.dress-details-bid-status--open {
+  color: #235c51 !important;
+}
+
+.dress-details-bid-status--watching {
+  color: #5d605f !important;
+}
+
+.dress-details-bid-status--outbid {
+  color: #a83836 !important;
+}
+
+.dress-details-bid-status--won {
+  color: #31685d !important;
+  font-weight: 700 !important;
+}
+
+.dress-details-rules {
+  padding: 1.5rem;
+  border-radius: 1rem;
+  background: #f3f4f3;
+}
+
+.dress-details-rules h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 1rem;
+  font-family: "Newsreader", serif;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #31685d;
+}
+
+.dress-details-rules ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.dress-details-rules li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #5d605f;
+  line-height: 1.5;
+}
+
+.dress-details-rules li::before {
+  content: "";
+  width: 0.375rem;
+  height: 0.375rem;
+  margin-top: 0.5rem;
+  border-radius: 9999px;
+  background: #31685d;
+  flex-shrink: 0;
+}
+
+.dress-details-history {
+  max-width: 56rem;
+  margin-top: 6rem;
+}
+
+.dress-details-history-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.dress-details-history-header h2 {
+  margin: 0;
+  font-family: "Newsreader", serif;
+  font-size: 1.875rem;
+  font-weight: 700;
+}
+
+.dress-details-history-header span {
+  margin-bottom: 0.25rem;
+  font-style: italic;
+  color: #5d605f;
+}
+
+.dress-details-history-table-wrap {
+  overflow: hidden;
+  border-radius: 1rem;
+  border: 1px solid #e1e3e2;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(48, 51, 51, 0.06);
+}
+
+.dress-details-history-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.dress-details-history-table thead tr {
+  background: #f3f4f3;
+}
+
+.dress-details-history-table th {
+  padding: 1rem 2rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #5d605f;
+}
+
+.dress-details-history-table th:nth-child(2),
+.dress-details-history-table th:nth-child(3),
+.dress-details-history-table td:nth-child(2),
+.dress-details-history-table td:nth-child(3) {
+  text-align: right;
+}
+
+.dress-details-history-table tbody tr {
+  border-top: 1px solid #e1e3e2;
+  transition: background 0.2s ease;
+}
+
+.dress-details-history-table tbody tr:hover {
+  background: #f3f4f3;
+}
+
+.dress-details-history-row--winner:hover {
+  background: rgba(180, 238, 223, 0.1);
+}
+
+.dress-details-history-table td {
+  padding: 1.25rem 2rem;
+  font-size: 0.875rem;
+  color: #5d605f;
+}
+
+.dress-details-bidder-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.dress-details-bidder-avatar {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  background: #e7e8e7;
+  color: #5d605f;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.dress-details-bidder-avatar--winner {
+  background: #b4eedf;
+  color: #225b4f;
+}
+
+.dress-details-bidder-name {
+  font-weight: 500;
+  color: #303333;
+}
+
+.dress-details-winner-badge {
+  padding: 0.125rem 0.5rem;
+  border-radius: 0.25rem;
+  background: rgba(49, 104, 93, 0.1);
+  color: #31685d;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.dress-details-amount--winner {
+  font-weight: 700 !important;
+  color: #31685d !important;
+}
+
+.dress-details-history-empty {
+  padding: 2rem !important;
+  text-align: center;
+  color: #5d605f;
+  font-style: italic;
+}
+
+.dress-details-history-more {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.dress-details-history-more button {
+  padding: 0 0 0.25rem;
+  border: none;
+  border-bottom: 2px solid rgba(49, 104, 93, 0.2);
+  background: transparent;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #31685d;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.dress-details-history-more button:hover {
+  border-bottom-color: #31685d;
+}
+
+@media (max-width: 767px) {
+  .dress-details-history-table th,
+  .dress-details-history-table td {
+    padding: 1rem;
+  }
+
+  .dress-details-bidder-cell {
+    flex-wrap: wrap;
+  }
+}
+
+@media (min-width: 1024px) {
+  .dress-details-page {
+    padding: 3rem 3rem 8rem;
+  }
+
+  .dress-details-hero-grid {
+    grid-template-columns: 7fr 5fr;
+    gap: 4rem;
+  }
+}

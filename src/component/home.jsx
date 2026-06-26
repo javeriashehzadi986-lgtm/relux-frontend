@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { ClipboardList, CalendarDays, RotateCcw } from "lucide-react";
+import { ClipboardList, CalendarDays, RotateCcw, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,56 +8,33 @@ import {
   CardDescription,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  FEATURED_RENTAL_PRODUCTS,
+  FEATURED_RENTALS_EXPLORE_PATH,
+} from "@/data/featuredRentals";
 import "./home.css";
 
 const categories = [
   {
     title: "Female Fashion",
+    to: "/femaleFashion",
     subtitle: "Elevate your wardrobe with consciously crafted feminine silhouettes.",
     image:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuCiukL7lSowGGH1BNwfMAuup6a8qUrB5S2pBcM2k76YsM95ete1CKxoRlOz8gZYhKv9P7FSMnYvvQRfmXqbGHXDuS3T9-lgAALWZOlhXkvfnRk7biekOv8gkuW3HXT_RxXSwzGwHkgRW5bn4aAd-TQL8IYO2a6uTOX6DhXc4DmMq8pHr092RKKGkfmbTj7dzefQZWyaldzYKvWMeAlzzFwG2-ETdaCBmA8vuli47HBmfdUL5YEwQMj77rtmCVET6JJFJXMdpbqB0pXm",
   },
   {
     title: "Male Fashion",
+    to: "/maleFashion",
     subtitle: "Shop pre-loved men's fashion curated for timeless style.",
     image:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuBaq_12MLIjP788-IcuyL49DoE_LqVyMo-bT2kI6tbfr1IRlATc7JAkbZvXTAJ5iSWIezBzWltEPOzV5rzcJ8Hsj6ynHOZGSRUB9tb-n90tbADlW5bbnSaVWxbwJwBHzrjd0sXY9iukLhUUwDiZ998w_h1mSMG2Q5Xv1njglITUncIDEjUcwdUVbcsa8PwVa-bPzA6EMX7cEWqqfgSOREUSRSw4ALLsAs6HhGg87ez0fvWMw3ecpvT30UeJImAlTyZQn2Ls4fVwYSHu",
   },
   {
     title: "Kids Fashion",
+    to: "/kidsFashion",
     subtitle: "Gentle on the planet, perfect for the next generation of style.",
     image:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuA2byFAgLoJ73OybxhWp_M92XJtCnNdZJ9CUqa73mYX6qoO-ood2-CpKvlk3Fh_cV1ajJM0dS2DZYq7SXGG3uh5rxeYjtJFiPBIm3GmVbxPZ7RUPz2lIWIEgeF9S2dVSN8vVYJ8FOIjthXFarAaCdDtzLg7a-oYSbMnfy0bK9kmi-nGi9lT6a9uLV3wZ1klYuJE_85sAwPs1CoA-F2OmSGcTCIeZxcr1pIGOVm2mc1NIVo91LRTj0DJSp6uP1PaHjmxtsB8KWmY64Sg",
-  },
-];
-
-const featuredRentals = [
-  {
-    title: "Hand-worked Bridal Lehenga",
-    price: "PKR 25,000",
-    priceSuffix: "/day",
-    badge: "Bridal",
-    badgeVariant: "primary",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBt7NUnhgK0C16PPvLHU4uIAKfx5CVN_pVg5TFDLmem4ouSEN_Uy_bB16vJDFrxx1QEvls37p6ppI__UDgIZlMggdx-oYdo2EADHB0DBxlD4CRuK5RdtmEPpiIt33qGEakx_uALpVwDSM4kjbHZjXbmVQH1DhbeonE-fZd3GBb8mKfeJrelAs_OhLEPpKcPG65yJs0zWr4oPh59QAcYmJgpkla7UdrkRgk-VFXMY8XWqdfoM8SMa0tXLGvTYqL60I6czaeW7a5fSp1s",
-  },
-  {
-    title: "Emerald Heritage Pishwas",
-    price: "PKR 12,000",
-    priceSuffix: "/day",
-    badge: "Festive",
-    badgeVariant: "secondary",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDseSfchAa6Yw6IK2M-MKkXymNJvoL-cID5JHoONidTxi2tCUf12T4BrPX9UUomFeobQ8slPcSP3aXbs_5dgQuYjz8fnKJPqny84CU-AGeCAvjd3eMWDfVJ4sFMfzTwu93Zoo7XNh8aLVheXqE3apyy6pwhE3C2wztt3YR5oLZFm7k8lyiDuWL0equs3Dypdwo9UfNoxaevQG2AdofKyV8-hyWgTnxTCxfNY6St-dhZxA40P2lrD5ValWZG_OvyMmfCYhuUUmEfriik",
-  },
-  {
-    title: "Golden Zardozi Anarkali",
-    price: "PKR 15,000",
-    priceSuffix: "/day",
-    badge: "Formal",
-    badgeVariant: "tertiary",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAVuQO3M7twbez7dvvHttrX0U0x8v-kbrcetWGYcUhOxinoWnn7kgmFK_WsEG5vFXis_l36dUwl6XC6_I1NnufpUUw6qOm2s35xwA0a4-J7alfc8R_an8PB9960Mc7njUhvGJQP3S3dVpacZqxYMV3USvXruxluEdXqsTiRjNcb7xUFK4jiwk_UzuzgemA_GSjjxFLU_ctbnhTEF38Tb5lwDGA7D7tJVTRklmC1J8yq_AkXfjMuwMVgNltF0EYoaHq4GKnvwx6AO078",
   },
 ];
 
@@ -86,9 +63,19 @@ const steps = [
 ];
 
 const Home = () => {
+  const [favorites, setFavorites] = useState(() => new Set());
+
+  const toggleFavorite = (id) => {
+    setFavorites((current) => {
+      const next = new Set(current);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
   return (
     <div className="home-container">
-      {/* Hero */}
       <section className="home-hero">
         <img
           alt="Designer Pakistani Bridal Wear"
@@ -99,16 +86,16 @@ const Home = () => {
             <span className="home-hero-label">The Atelier Collection</span>
             <h1>Rent & Resell pre-owned  Dresses in Pakistan</h1>
             <p>
-            Sustainable luxury for every occasion. Rent high-end fashion or give your premium wardrobe a second life by reselling.
+              Sustainable luxury for every occasion. Rent high-end fashion or give your premium
+              wardrobe a second life by reselling.
             </p>
             <Button size="lg" asChild>
-              <Link to="/rentDresses">Explore Dresses</Link>
+              <Link to="/categories">Explore Dresses</Link>
             </Button>
           </div>
         </div>
       </section>
 
-      {/* Categories */}
       <section className="home-section">
         <div className="home-section-header">
           <h2>Curated Categories</h2>
@@ -118,7 +105,7 @@ const Home = () => {
           {categories.map((category) => (
             <Link
               key={category.title}
-              to="/categories"
+              to={category.to}
               className="home-category-card"
             >
               <Card className="home-category-shadcn-card">
@@ -139,7 +126,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Featured Rentals */}
       <section className="home-section-alt">
         <div className="home-section-inner">
           <div className="home-section-header-center">
@@ -147,33 +133,44 @@ const Home = () => {
             <p>Our most coveted pieces of the season</p>
           </div>
           <div className="home-products-grid">
-            {featuredRentals.map((product) => (
-              <Card key={product.title} className="home-product-card">
-                <div className="home-product-image">
+            {FEATURED_RENTAL_PRODUCTS.map((product) => (
+              <Card key={product.id} className="home-product-card">
+                <div className="home-product-image-wrap">
                   <img alt={product.title} src={product.image} />
-                  {product.badge && (
-                    <span
-                      className={`home-product-badge home-product-badge--${product.badgeVariant ?? "primary"}`}
-                    >
-                      {product.badge}
-                    </span>
-                  )}
+                  <span
+                    className={`home-product-badge home-product-badge--${product.badgeVariant}`}
+                  >
+                    {product.badge}
+                  </span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className={`home-product-favorite ${
+                      favorites.has(product.id) ? "home-product-favorite--active" : ""
+                    }`}
+                    aria-label={`Save ${product.title}`}
+                    onClick={() => toggleFavorite(product.id)}
+                  >
+                    <Heart
+                      size={18}
+                      fill={favorites.has(product.id) ? "currentColor" : "none"}
+                    />
+                  </Button>
                 </div>
                 <CardContent className="home-product-body">
-                  <CardTitle className="home-product-title">
-                    {product.title}
-                  </CardTitle>
-                  <p className="home-product-price">
-                    {product.price}
-                    {product.priceSuffix && (
-                      <span className="home-product-price-suffix">
-                        {" "}
-                        {product.priceSuffix}
-                      </span>
-                    )}
-                  </p>
-                  <Button variant="outline" size="full">
-                    Rent Now
+                  <div>
+                    <p className="home-product-brand">{product.brand}</p>
+                    <CardTitle className="home-product-title">{product.title}</CardTitle>
+                  </div>
+                  <div className="home-product-prices">
+                    <div>
+                      <span className="home-price-label">Rent</span>
+                      <span className="home-price-rental">{product.price}</span>
+                    </div>
+                  </div>
+                  <Button type="button" className="home-view-btn" asChild>
+                    <Link to={`/dress/${product.id}`}>View Details</Link>
                   </Button>
                 </CardContent>
               </Card>
@@ -181,13 +178,12 @@ const Home = () => {
           </div>
           <div className="home-featured-more">
             <Button size="lg" asChild>
-              <Link to="/rentDresses">Explore More</Link>
+              <Link to={FEATURED_RENTALS_EXPLORE_PATH}>Explore More</Link>
             </Button>
           </div>
         </div>
       </section>
 
-      {/* How It Works */}
       <section className="home-section">
         <div className="home-section-header-center">
           <h2>Simple. Seamless. Stylish.</h2>
@@ -212,13 +208,13 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Seller Banner */}
       <section className="home-section">
         <div className="home-seller-banner">
           <div className="home-seller-content">
             <h2>Earn by Renting & Reselling Your Dresses</h2>
             <p>
-            Join our community of stylish sellers. Give your bridal and formal outfits a second life while earning premium rental income.
+              Join our community of stylish sellers. Give your bridal and formal outfits a second
+              life while earning premium rental income.
             </p>
             <Button variant="light" size="lg" asChild>
               <Link to="/becomeASeller">Become a Seller</Link>

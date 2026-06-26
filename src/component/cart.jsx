@@ -104,7 +104,7 @@ const Cart = () => {
               className="cart-continue-link"
               asChild
             >
-              <Link to="/rentDresses">
+              <Link to="/categories">
                 <ArrowLeft size={16} />
                 Continue Shopping
               </Link>

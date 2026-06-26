@@ -1,7 +1,13 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import "./navbar.css";
-import { ShoppingCart, Bell, Menu } from "lucide-react";
+import {
+  ShoppingCart,
+  Heart,
+  Bell,
+  Menu,
+  MessageCircle,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Navbar = () => {
@@ -50,9 +56,10 @@ const Navbar = () => {
             Relux Hub
           </Link>
         </div>
+
         <ul className="navlinks">
           <li>
-            <Link to="/home">Home </Link>
+            <Link to="/home">Home</Link>
           </li>
           <li>
             <Link to="/rentDresses">Rent Dresses</Link>
@@ -67,16 +74,26 @@ const Navbar = () => {
             <Link to="/about">About</Link>
           </li>
         </ul>
+
         <div className="nav-right">
           <div className="nav-icons">
-            <Link to="/cart">
+            <Link to="/messages" aria-label="Messages">
+              <MessageCircle size={22} />
+            </Link>
+
+            <Link to="/wishlist" aria-label="Wishlist">
+              <Heart size={22} />
+            </Link>
+
+            <Link to="/cart" aria-label="Cart">
               <ShoppingCart size={22} />
             </Link>
 
-            <Link to="/notification">
+            <Link to="/notification" aria-label="Notifications">
               <Bell size={22} />
             </Link>
           </div>
+
           <Link to="/signup" className="signup-btn">
             Sign up
           </Link>

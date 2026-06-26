@@ -37,6 +37,24 @@ body,
   flex: 1;
 }
 
+.main-content--messages {
+  padding-top: 5.5rem;
+  padding-bottom: 0;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.app-container--messages {
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
 .app-container--auth {
   min-height: 100vh;
 }
