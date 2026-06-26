@@ -1,8 +1,7 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   ShoppingBag,
-  Shirt,
   HandCoins,
   Heart,
   HelpCircle,
@@ -27,7 +26,6 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import "./profile.css";
-import ProfileMyRentals from "./profileMyRentals";
 import ProfileMyBids from "./profileMyBids";
 import ProfileMyOrders from "./profileMyOrders";
 import ProfileWishlist from "./profileWishlist";
@@ -35,7 +33,6 @@ import ProfileSupportCenter from "./profileSupportCenter";
 
 const SIDEBAR_ITEMS = [
   { id: "orders", label: "My Orders", icon: ShoppingBag },
-  { id: "rentals", label: "My Rentals", icon: Shirt },
   { id: "bids", label: "My Bids", icon: HandCoins },
   { id: "wishlist", label: "Wishlist", icon: Heart },
   { id: "support", label: "Support Center", icon: HelpCircle },
@@ -58,14 +55,51 @@ const getInitials = (name) =>
     .map((part) => part[0]?.toUpperCase() ?? "")
     .join("");
 
-const Profile = () => {
+const VALID_SECTIONS = new Set([
+  "orders",
+  "bids",
+  "wishlist",
+  "support",
+  "profile",
+]);
+
+const resolveSection = (sectionProp, sectionFromQuery) => {
+  if (sectionProp && VALID_SECTIONS.has(sectionProp)) return sectionProp;
+  if (sectionFromQuery && VALID_SECTIONS.has(sectionFromQuery)) {
+    return sectionFromQuery;
+  }
+  return "profile";
+};
+
+const Profile = ({ section: sectionProp }) => {
   const navigate = useNavigate();
-  const [activeSection, setActiveSection] = useState("profile");
+  const [searchParams] = useSearchParams();
+  const sectionFromQuery = searchParams.get("section");
+  const [activeSection, setActiveSection] = useState(() =>
+    resolveSection(sectionProp, sectionFromQuery),
+  );
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [profile, setProfile] = useState(INITIAL_PROFILE);
   const [draft, setDraft] = useState(INITIAL_PROFILE);
   const [isEditing, setIsEditing] = useState(false);
   const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    setActiveSection(resolveSection(sectionProp, sectionFromQuery));
+  }, [sectionProp, sectionFromQuery]);
+
+  const handleSectionChange = (sectionId) => {
+    setActiveSection(sectionId);
+    if (sectionId === "wishlist") {
+      navigate("/wishlist", { replace: true });
+      return;
+    }
+    if (sectionId === "profile") {
+      navigate("/profile", { replace: true });
+      return;
+    }
+    navigate(`/profile?section=${sectionId}`, { replace: true });
+  };
 
   const handleEditProfile = () => {
     setDraft(profile);
@@ -110,7 +144,7 @@ const Profile = () => {
             className={`profile-sidebar-link ${
               isActive ? "profile-sidebar-link--active" : ""
             }`}
-            onClick={() => setActiveSection(item.id)}
+            onClick={() => handleSectionChange(item.id)}
           >
             <Icon
               size={20}
@@ -125,10 +159,6 @@ const Profile = () => {
   );
 
   const renderMainContent = () => {
-    if (activeSection === "rentals") {
-      return <ProfileMyRentals />;
-    }
-
     if (activeSection === "orders") {
       return <ProfileMyOrders />;
     }
@@ -348,7 +378,6 @@ const Profile = () => {
 
       <main
         className={`profile-main ${
-          activeSection === "rentals" ||
           activeSection === "bids" ||
           activeSection === "orders" ||
           activeSection === "wishlist" ||

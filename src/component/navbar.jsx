@@ -1,7 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import "./navbar.css";
-import { ShoppingCart, Bell, Menu } from "lucide-react"
+import { Heart, Bell, Menu, MessageCircle } from "lucide-react"
 import { Button } from "@/components/ui/button";
 
 const Navbar = () => {
@@ -24,14 +24,18 @@ const Navbar = () => {
             </div>
             <ul className='navlinks'>
                 <li> <Link to="/home">Home  </Link> </li>
-                <li><Link to="/rentDresses">Rent Dresses</Link></li>
                 <li><Link to="/categories">Categories</Link></li>
                 <li><Link to="/becomeASeller">Become a Seller</Link></li>
                 <li><Link to="/about">About</Link></li>
             </ul>
             <div className='nav-right'>
             <div className='nav-icons'>
-                <Link to="/cart"> <ShoppingCart size={22} /> </Link>
+                <Link to="/messages" aria-label="Messages">
+                  <MessageCircle size={22} />
+                </Link>
+                <Link to="/wishlist" aria-label="Wishlist">
+                  <Heart size={22} />
+                </Link>
 
                 <Link to="/notification"> <Bell size={22} /> </Link>
             </div>
