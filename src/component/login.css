@@ -194,6 +194,17 @@
   flex-shrink: 0;
 }
 
+.login-access-message {
+  margin: 0 0 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 0.75rem;
+  background: #fef3e8;
+  border: 1px solid #f5d5b8;
+  color: #8a4b12;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
 .login-signup-pivot {
   margin: 3rem 0 0;
   text-align: center;

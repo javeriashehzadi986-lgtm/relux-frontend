@@ -14,9 +14,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import SellerDashboardLayout from "./sellerDashboardLayout";
-import "./sellerDashboard.css";
-import "./myListing.css";
+import "./sellerMyListings.css";
 
 const summaryCards = [
   { label: "Active", value: "24", variant: "primary" },
@@ -82,7 +80,7 @@ const listings = [
   },
 ];
 
-function MyListing() {
+export function SellerMyListingsContent() {
   const [activeFilter, setActiveFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -106,7 +104,7 @@ function MyListing() {
   }, [activeFilter, searchQuery]);
 
   return (
-    <SellerDashboardLayout active="listings">
+    <>
       <CardHeader className="seller-dashboard-heading seller-dashboard-heading--with-action px-0">
         <div className="my-listing-header-text">
           <CardTitle className="seller-dashboard-page-title">My Listings</CardTitle>
@@ -247,8 +245,6 @@ function MyListing() {
           </Card>
         ))}
       </section>
-    </SellerDashboardLayout>
+    </>
   );
 }
-
-export default MyListing;

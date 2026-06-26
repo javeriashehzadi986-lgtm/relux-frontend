@@ -414,6 +414,18 @@
   text-decoration: underline;
 }
 
+.seller-back-link {
+  margin-top: 12px;
+  width: 100%;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--seller-outline);
+}
+
+.seller-back-link:hover {
+  color: var(--seller-primary);
+}
+
 /* Success modal */
 .seller-modal-overlay {
   position: fixed;

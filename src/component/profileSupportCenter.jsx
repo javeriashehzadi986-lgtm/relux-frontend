@@ -1,5 +1,5 @@
 import React from "react";
-import SupportCenterContent from "./supportCenterContent";
+import SellerSupportCenter from "./sellerSupportCenter";
 import "./profileSupportCenter.css";
 
 const ProfileSupportCenter = () => {
@@ -11,7 +11,7 @@ const ProfileSupportCenter = () => {
           Get help or report issues related to your orders and rentals.
         </p>
       </header>
-      <SupportCenterContent variant="buyer" />
+      <SellerSupportCenter variant="buyer" />
     </section>
   );
 };

@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   IdCard,
   CheckCircle2,
@@ -7,6 +8,12 @@ import {
   Lock,
   Shield,
   Pencil,
+  ClipboardList,
+  ShoppingBag,
+  HelpCircle,
+  Settings,
+  User,
+  LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,10 +26,26 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import SellerDashboardLayout from "./sellerDashboardLayout";
+import { SellerMyListingsContent } from "./sellerMyListings";
+import { SellerOrdersRequestsContent } from "./sellerOrdersRequests";
+import SellerSupportCenter from "./sellerSupportCenter";
+import "./profile.css";
 import "./sellerDashboard.css";
 import "./sellerProfile.css";
+import "./sellerMyListings.css";
+import "./sellerOrdersRequests.css";
+import "./sellerSupportCenter.css";
 
+const SIDEBAR_ITEMS = [
+  { id: "listings", label: "My Listings", icon: ClipboardList },
+  { id: "orders", label: "Orders & Requests", icon: ShoppingBag },
+  { id: "support", label: "Support Center", icon: HelpCircle },
+  { id: "settings", label: "Settings", icon: Settings },
+  { id: "profile", label: "My Profile", icon: User },
+];
+
+const SECTION_IDS = SIDEBAR_ITEMS.map((item) => item.id);
+const WIDE_SECTIONS = ["listings", "orders", "support"];
 const defaultProfile = {
   fullName: "Zarish",
   email: "zarish@example.com",
@@ -32,8 +55,8 @@ const defaultProfile = {
 };
 
 const accountSettings = [
-  { id: "password", label: "Change Password", icon: Lock },
-  { id: "privacy", label: "Privacy Settings", icon: Shield },
+  { id: "password", label: "Change Password", icon: Lock, to: "/forgot-password" },
+  { id: "privacy", label: "Privacy Settings", icon: Shield, to: "/privacy" },
 ];
 
 const verificationDocs = [
@@ -75,7 +98,7 @@ function StarRating({ rating }) {
   );
 }
 
-const SellerProfile = () => {
+function SellerProfileSection() {
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState(defaultProfile);
   const [draft, setDraft] = useState(defaultProfile);
@@ -112,8 +135,7 @@ const SellerProfile = () => {
   };
 
   return (
-    <SellerDashboardLayout active="profile">
-      <div className="seller-profile-page">
+    <div className="seller-profile-page">
         {isEditing ? (
           <section className="seller-profile-top seller-profile-edit">
             <div className="seller-profile-hero-copy seller-profile-edit-heading">
@@ -239,14 +261,14 @@ const SellerProfile = () => {
                   {accountSettings.map((item) => {
                     const Icon = item.icon;
                     return (
-                      <button
+                      <Link
                         key={item.id}
-                        type="button"
+                        to={item.to}
                         className="seller-profile-account-settings-row"
                       >
                         <Icon size={20} strokeWidth={1.75} />
                         <span>{item.label}</span>
-                      </button>
+                      </Link>
                     );
                   })}
                 </div>
@@ -287,8 +309,14 @@ const SellerProfile = () => {
                   type="button"
                   variant="outline"
                   className="seller-profile-outline-btn seller-profile-outline-btn--full"
+                  asChild
                 >
-                  Update Documents
+                  <Link
+                    to="/sellerVerification"
+                    state={{ updateDocuments: true }}
+                  >
+                    Update Documents
+                  </Link>
                 </Button>
               </CardContent>
             </Card>
@@ -361,7 +389,180 @@ const SellerProfile = () => {
           </>
         )}
       </div>
-    </SellerDashboardLayout>
+  );
+}
+
+function SellerSettingsSection() {
+  return (
+    <Card className="profile-card">
+      <CardHeader className="profile-card-header">
+        <CardTitle className="profile-card-title">Settings</CardTitle>
+        <CardDescription className="profile-card-description">
+          Manage your seller preferences and account settings.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="profile-card-content">
+        <p className="profile-card-description">
+          Notification and payout preferences will appear here.
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
+
+const SellerProfile = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [activeSection, setActiveSection] = useState("profile");
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
+  useEffect(() => {
+    if (SECTION_IDS.includes(location.state?.section)) {
+      setActiveSection(location.state.section);
+    }
+  }, [location.state]);
+
+  const handleLogoutConfirm = () => {
+    setShowLogoutConfirm(false);
+    navigate("/login");
+  };
+
+  const renderSidebarNav = (className = "") => (
+    <nav className={`profile-sidebar-nav ${className}`.trim()}>
+      {SIDEBAR_ITEMS.map((item) => {
+        const Icon = item.icon;
+        const isActive = activeSection === item.id;
+
+        return (
+          <Button
+            key={item.id}
+            type="button"
+            variant="ghost"
+            className={`profile-sidebar-link ${
+              isActive ? "profile-sidebar-link--active" : ""
+            }`}
+            onClick={() => setActiveSection(item.id)}
+          >
+            <Icon
+              size={20}
+              strokeWidth={isActive ? 2.25 : 1.75}
+              fill={item.id === "profile" && isActive ? "currentColor" : "none"}
+            />
+            <span>{item.label}</span>
+          </Button>
+        );
+      })}
+    </nav>
+  );
+
+  const renderMainContent = () => {
+    if (activeSection === "listings") {
+      return <SellerMyListingsContent />;
+    }
+
+    if (activeSection === "orders") {
+      return <SellerOrdersRequestsContent />;
+    }
+
+    if (activeSection === "support") {
+      return (
+        <>
+          <CardHeader className="seller-dashboard-heading px-0">
+            <CardTitle className="seller-dashboard-page-title">
+              Support Center
+            </CardTitle>
+            <CardDescription>
+              Get help or report issues related to your clothing listings.
+            </CardDescription>
+          </CardHeader>
+          <SellerSupportCenter variant="seller" />
+        </>
+      );
+    }
+
+    if (activeSection === "settings") {
+      return <SellerSettingsSection />;
+    }
+
+    if (activeSection === "profile") {
+      return <SellerProfileSection />;
+    }
+
+    return null;
+  };
+
+  return (
+    <div className="profile-page">
+      <aside className="profile-sidebar" aria-label="Seller navigation">
+        <h2 className="profile-sidebar-heading">Dashboard</h2>
+        {renderSidebarNav()}
+        <div className="profile-sidebar-footer">
+          <Button
+            type="button"
+            variant="ghost"
+            className="profile-sidebar-link profile-sidebar-link--logout"
+            onClick={() => setShowLogoutConfirm(true)}
+          >
+            <LogOut size={20} />
+            <span>Logout</span>
+          </Button>
+        </div>
+      </aside>
+
+      <div className="profile-mobile-nav">
+        <h2 className="profile-sidebar-heading">Dashboard</h2>
+        {renderSidebarNav("profile-sidebar-nav--mobile")}
+      </div>
+
+      <main
+        className={`profile-main ${
+          WIDE_SECTIONS.includes(activeSection) ? "profile-main--wide" : ""
+        }`.trim()}
+      >
+        {renderMainContent()}
+      </main>
+
+      {showLogoutConfirm && (
+        <div
+          className="profile-logout-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="seller-logout-title"
+          onClick={() => setShowLogoutConfirm(false)}
+        >
+          <Card
+            className="profile-logout-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <CardHeader className="profile-logout-modal-header">
+              <CardTitle id="seller-logout-title" className="profile-logout-modal-title">
+                Log out?
+              </CardTitle>
+              <CardDescription className="profile-logout-modal-description">
+                Are you sure you want to log out of your account?
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="profile-logout-modal-actions">
+              <Button
+                type="button"
+                variant="ghost"
+                className="profile-logout-cancel-btn"
+                onClick={() => setShowLogoutConfirm(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                className="profile-logout-confirm-btn"
+                onClick={handleLogoutConfirm}
+              >
+                Log Out
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    </div>
   );
 };
 

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -52,13 +52,88 @@ function FileUploadZone({ id, label, file, onFileChange }) {
 
 function SellerVerification() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isUpdateMode = location.state?.updateDocuments === true;
   const [cnicFront, setCnicFront] = useState(null);
   const [cnicBack, setCnicBack] = useState(null);
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    navigate("/sellerDashboard");
+    sessionStorage.setItem("userType", "seller");
+    navigate(
+      "/sellerProfile",
+      isUpdateMode ? { state: { section: "profile" } } : undefined
+    );
   };
+
+  const identityCard = (
+    <Card className="seller-card">
+      <div className="seller-card-heading">
+        <span className="seller-card-icon">
+          <IdCard size={22} strokeWidth={1.75} />
+        </span>
+        <h2 className="seller-card-title">Identity Verification</h2>
+      </div>
+      <div className="seller-upload-grid">
+        <FileUploadZone
+          id="cnic-front"
+          label="Upload CNIC Front Side"
+          file={cnicFront}
+          onFileChange={setCnicFront}
+        />
+        <FileUploadZone
+          id="cnic-back"
+          label="Upload CNIC Back Side"
+          file={cnicBack}
+          onFileChange={setCnicBack}
+        />
+      </div>
+      <div className="seller-info-banner">
+        <Info size={20} strokeWidth={1.75} />
+        <p>
+          Your CNIC images are used only for seller verification and are not
+          publicly displayed.
+        </p>
+      </div>
+    </Card>
+  );
+
+  if (isUpdateMode) {
+    return (
+      <div className="seller-verification-page">
+        <main className="seller-main">
+          <div className="seller-intro">
+            <h1 className="seller-title">Update Identity Documents</h1>
+            <p className="seller-desc">
+              Upload new CNIC front and back images. Our team will review your
+              updated documents within 24 to 48 business hours.
+            </p>
+          </div>
+
+          <form className="seller-form" onSubmit={handleSubmit}>
+            {identityCard}
+
+            <div className="seller-submit-wrap">
+              <Button type="submit" variant="default" className="seller-submit-btn">
+                Submit Updated Documents
+                <Send size={18} strokeWidth={1.75} />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                className="seller-back-link"
+                asChild
+              >
+                <Link to="/sellerProfile" state={{ section: "profile" }}>
+                  Back to Profile
+                </Link>
+              </Button>
+            </div>
+          </form>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="seller-verification-page">
@@ -150,35 +225,7 @@ function SellerVerification() {
             </div>
           </Card>
 
-          <Card className="seller-card">
-            <div className="seller-card-heading">
-              <span className="seller-card-icon">
-                <IdCard size={22} strokeWidth={1.75} />
-              </span>
-              <h2 className="seller-card-title">Identity Verification</h2>
-            </div>
-            <div className="seller-upload-grid">
-              <FileUploadZone
-                id="cnic-front"
-                label="Upload CNIC Front Side"
-                file={cnicFront}
-                onFileChange={setCnicFront}
-              />
-              <FileUploadZone
-                id="cnic-back"
-                label="Upload CNIC Back Side"
-                file={cnicBack}
-                onFileChange={setCnicBack}
-              />
-            </div>
-            <div className="seller-info-banner">
-              <Info size={20} strokeWidth={1.75} />
-              <p>
-                Your CNIC images are used only for seller verification and are
-                not publicly displayed.
-              </p>
-            </div>
-          </Card>
+          {identityCard}
 
           <Card className="seller-card">
             <div className="seller-stripe-row">

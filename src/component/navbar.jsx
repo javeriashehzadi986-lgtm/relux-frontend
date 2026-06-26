@@ -6,8 +6,15 @@ import { Button } from "@/components/ui/button";
 
 const Navbar = () => {
   const location = useLocation();
+  const userType = sessionStorage.getItem("userType");
+  const isSeller = userType === "seller";
+
   const showBuyerMenu =
-    location.pathname === "/home" || location.pathname === "/profile";
+    location.pathname === "/profile" ||
+    (location.pathname === "/home" && !isSeller);
+  const showSellerMenu =
+    location.pathname === "/sellerProfile" ||
+    (location.pathname === "/home" && isSeller);
 
   return (
     <nav className="navbar">
@@ -22,6 +29,19 @@ const Navbar = () => {
               asChild
             >
               <Link to="/profile" aria-label="Open buyer dashboard">
+                <Menu size={22} />
+              </Link>
+            </Button>
+          )}
+          {showSellerMenu && (
+            <Button
+              type="button"
+              variant="icon"
+              size="icon"
+              className="navbar-menu-btn"
+              asChild
+            >
+              <Link to="/sellerProfile" aria-label="Open seller dashboard">
                 <Menu size={22} />
               </Link>
             </Button>

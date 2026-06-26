@@ -5,9 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import SellerDashboardLayout from "./sellerDashboardLayout";
 import "./sellerDashboard.css";
-import "./addListing.css";
+import "./sellerAddListing.css";
 
 const clothingTypes = [
   "Select Type",
@@ -52,7 +51,7 @@ function ChipGroup({ options, value, onChange }) {
   );
 }
 
-const AddListing = () => {
+const SellerAddListing = () => {
   const navigate = useNavigate();
   const [listingType, setListingType] = useState("sale");
   const [biddingEnabled, setBiddingEnabled] = useState(false);
@@ -77,14 +76,16 @@ const AddListing = () => {
         ? `$${rentPrice} / day`
         : "$45 / day";
 
+  const goToListings = () =>
+    navigate("/sellerProfile", { state: { section: "listings" } });
+
   const handlePublish = (event) => {
     event.preventDefault();
-    navigate("/myListing");
+    goToListings();
   };
 
   return (
-    <SellerDashboardLayout active="listings">
-      <div className="add-listing-page">
+    <div className="add-listing-page">
         <header className="add-listing-header">
           <h1 className="seller-dashboard-page-title">Add New Listing</h1>
           <p className="add-listing-subtitle">
@@ -350,7 +351,7 @@ const AddListing = () => {
                 type="button"
                 variant="outline"
                 className="add-listing-draft-btn"
-                onClick={() => navigate("/myListing")}
+                onClick={goToListings}
               >
                 Save Draft
               </Button>
@@ -370,9 +371,8 @@ const AddListing = () => {
             </Card>
           </aside>
         </form>
-      </div>
-    </SellerDashboardLayout>
+    </div>
   );
 };
 
-export default AddListing;
+export default SellerAddListing;

@@ -15,7 +15,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import "./supportCenter.css";
+import "./sellerSupportCenter.css";
 
 const issueTypes = ["Listing", "Order", "Payment", "Other"];
 
@@ -78,7 +78,7 @@ const BUYER_FAQS = [
   },
 ];
 
-const SupportCenterContent = ({ variant = "buyer" }) => {
+const SellerSupportCenter = ({ variant = "buyer" }) => {
   const faqs = variant === "seller" ? SELLER_FAQS : BUYER_FAQS;
   const [issueType, setIssueType] = useState("Listing");
   const [subject, setSubject] = useState("");
@@ -216,4 +216,4 @@ const SupportCenterContent = ({ variant = "buyer" }) => {
   );
 };
 
-export default SupportCenterContent;
+export default SellerSupportCenter;

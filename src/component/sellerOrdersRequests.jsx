@@ -11,9 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import SellerDashboardLayout from "./sellerDashboardLayout";
-import "./sellerDashboard.css";
-import "./ordersRequests.css";
+import "./sellerOrdersRequests.css";
 
 const filterChips = [
   "All",
@@ -118,7 +116,7 @@ function OrderActions({ order }) {
   );
 }
 
-const OrdersRequests = () => {
+export function SellerOrdersRequestsContent() {
   const [activeFilter, setActiveFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -150,7 +148,7 @@ const OrdersRequests = () => {
   }, [activeFilter, searchQuery]);
 
   return (
-    <SellerDashboardLayout active="orders">
+    <>
       <CardHeader className="seller-dashboard-heading px-0">
         <CardTitle className="seller-dashboard-page-title">
           Orders &amp; Requests
@@ -245,8 +243,6 @@ const OrdersRequests = () => {
           </Card>
         ))}
       </section>
-    </SellerDashboardLayout>
+    </>
   );
 };
-
-export default OrdersRequests;
