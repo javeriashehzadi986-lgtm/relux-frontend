@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./login.css";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,7 @@ const LOGIN_IMAGE =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuBSnYGdanF0GYhv0vCxLzPcHcKTIzsyWHGMBv9agRIlHAXHLiLRIKpquL8JMbhuAoqsTDkdGDTELSWmxXQi4_Z96O5DbrRXRxkNqqEENu95HT90prKHhQ7l7pPvfa7VaHSJqm0L9KwHEwYoXXTx1dAlvGt1y2YFnpL7A59XleADEloG4hmHU5edTw9cFXygFzUj3uLLnksJ1SUiXDcbqG-jNDJeNpmPu6AnMJg3gH197CC5qNo_bu41kyK9cULkpYyk1BpAXK2g0zoT";
 
 const Login = () => {
+  const navigate = useNavigate();
   const [email, setemail] = useState("");
   const [password, setpassword] = useState("");
   const [emailerror, setemailerror] = useState("");
@@ -30,13 +31,24 @@ const Login = () => {
   const onsubmitted = (e) => {
     e.preventDefault();
 
-    if (!email.includes("@") || !email.includes(".")) {
-      setemailerror("Enter a valid email");
-    } else setemailerror("");
+    const isEmailValid = email.includes("@") && email.includes(".");
+    const isPasswordValid = password.length >= 6;
 
-    if (password.length < 6) {
+    if (!isEmailValid) {
+      setemailerror("Enter a valid email");
+    } else {
+      setemailerror("");
+    }
+
+    if (!isPasswordValid) {
       setpassworderror("Password must be at least 6 characters");
-    } else setpassworderror("");
+    } else {
+      setpassworderror("");
+    }
+
+    if (isEmailValid && isPasswordValid) {
+      navigate("/sellerDashboard");
+    }
   };
 
   return (

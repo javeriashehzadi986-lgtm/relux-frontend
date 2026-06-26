@@ -58,11 +58,11 @@ function Sustainability() {
               </p>
 
               <div className="sustainability-hero-buttons">
-                <Button variant="sustainabilityPrimary">
-                  Explore Collection
+                <Button variant="sustainabilityPrimary" asChild>
+                  <Link to="/categories">Explore Collection</Link>
                 </Button>
-                <Button variant="sustainabilitySecondary">
-                  Start Selling
+                <Button variant="sustainabilitySecondary" asChild>
+                  <Link to="/sellerVerification">Start Selling</Link>
                 </Button>
               </div>
             </div>
@@ -139,11 +139,11 @@ function Sustainability() {
             a second life with Relux Hub.
           </p>
           <div className="sustainability-cta-buttons">
-            <Button variant="sustainabilityPrimary">
-              Explore Collection
+            <Button variant="sustainabilityPrimary" asChild>
+              <Link to="/categories">Explore Collection</Link>
             </Button>
-            <Button variant="sustainabilityOutline">
-              Start Selling Clothes
+            <Button variant="sustainabilityOutline" asChild>
+              <Link to="/sellerVerification">Start Selling Clothes</Link>
             </Button>
           </div>
         </div>
