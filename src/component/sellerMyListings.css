@@ -145,18 +145,21 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  overflow: visible;
 }
 
 .my-listing-card {
   background: #faf9f8 !important;
   border: 1px solid #eceae8 !important;
   border-radius: 0.75rem !important;
+  overflow: visible !important;
 }
 
 .my-listing-card-content {
   display: flex !important;
   gap: 1rem;
   padding: 1rem !important;
+  overflow: visible !important;
 }
 
 .my-listing-card-top {
@@ -228,6 +231,81 @@
   color: #5d605f;
   cursor: pointer;
   padding: 0.15rem;
+}
+
+.my-listing-menu-wrap {
+  position: relative;
+  z-index: 1;
+}
+
+.my-listing-menu-wrap:has(.my-listing-menu) {
+  z-index: 30;
+}
+
+.my-listing-menu {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  z-index: 20;
+  min-width: 11.5rem;
+  margin: 0;
+  padding: 0.35rem;
+  list-style: none;
+  border: 1px solid #eceae8;
+  border-radius: 0.75rem;
+  background: #fff;
+  box-shadow: 0 12px 32px rgba(28, 25, 23, 0.12);
+}
+
+.my-listing-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border: none;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: #1c1917;
+  font-size: 0.875rem;
+  font-family: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.my-listing-menu-item:hover {
+  background: #f3f2f1;
+}
+
+.my-listing-menu-item--danger {
+  color: #ba1a1a;
+}
+
+.my-listing-menu-item--danger:hover {
+  background: #fff1f1;
+}
+
+.my-listing-menu-divider {
+  height: 1px;
+  margin: 0.25rem 0.5rem;
+  background: #eceae8;
+  list-style: none;
+}
+
+.my-listing-delete-confirm-btn {
+  flex: 1;
+  padding: 0.75rem 1rem !important;
+  min-height: auto !important;
+  border-radius: 9999px !important;
+  font-weight: 600 !important;
+  background: #ba1a1a !important;
+  color: #fff !important;
+}
+
+.my-listing-delete-confirm-btn:hover {
+  background: #991515 !important;
 }
 
 .my-listing-type {

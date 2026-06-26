@@ -1,6 +1,15 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { Search, MoreVertical, Plus } from "lucide-react";
+import {
+  Search,
+  MoreVertical,
+  Plus,
+  Eye,
+  Pencil,
+  Copy,
+  PauseCircle,
+  Trash2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,7 +34,7 @@ const summaryCards = [
 
 const filterChips = ["All", "Sale", "Rent", "Auctions"];
 
-const listings = [
+const INITIAL_LISTINGS = [
   {
     id: "silk-slip",
     title: "Vintage Silk Slip Dress",
@@ -80,9 +89,177 @@ const listings = [
   },
 ];
 
+function ListingActionsMenu({
+  item,
+  isOpen,
+  onToggle,
+  onClose,
+  onDuplicate,
+  onDeactivateRequest,
+  onDeleteRequest,
+}) {
+  const menuRef = useRef(null);
+  const canDeactivate =
+    item.statusVariant === "active" || item.statusVariant === "live";
+
+  useEffect(() => {
+    if (!isOpen) return undefined;
+
+    const handlePointerDown = (event) => {
+      if (!menuRef.current?.contains(event.target)) {
+        onClose();
+      }
+    };
+
+    const handleEscape = (event) => {
+      if (event.key === "Escape") onClose();
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [isOpen, onClose]);
+
+  return (
+    <div className="my-listing-menu-wrap" ref={menuRef}>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="my-listing-more-btn"
+        aria-label={`More options for ${item.title}`}
+        aria-expanded={isOpen}
+        aria-haspopup="menu"
+        onClick={onToggle}
+      >
+        <MoreVertical size={18} />
+      </Button>
+
+      {isOpen && (
+        <ul className="my-listing-menu" role="menu" aria-label={`Actions for ${item.title}`}>
+          <li role="none">
+            <Link
+              to={`/dress/${item.id}`}
+              className="my-listing-menu-item"
+              role="menuitem"
+              onClick={onClose}
+            >
+              <Eye size={16} />
+              View Details
+            </Link>
+          </li>
+          <li role="none">
+            <Link
+              to="/addListing"
+              state={{ editListingId: item.id }}
+              className="my-listing-menu-item"
+              role="menuitem"
+              onClick={onClose}
+            >
+              <Pencil size={16} />
+              Edit Listing
+            </Link>
+          </li>
+          <li role="none">
+            <button
+              type="button"
+              className="my-listing-menu-item"
+              role="menuitem"
+              onClick={() => {
+                onDuplicate(item.id);
+                onClose();
+              }}
+            >
+              <Copy size={16} />
+              Duplicate Listing
+            </button>
+          </li>
+          {canDeactivate && (
+            <li role="none">
+              <button
+                type="button"
+                className="my-listing-menu-item"
+                role="menuitem"
+                onClick={() => {
+                  onDeactivateRequest(item.id);
+                  onClose();
+                }}
+              >
+                <PauseCircle size={16} />
+                Deactivate Listing
+              </button>
+            </li>
+          )}
+          <li className="my-listing-menu-divider" role="separator" aria-hidden="true" />
+          <li role="none">
+            <button
+              type="button"
+              className="my-listing-menu-item my-listing-menu-item--danger"
+              role="menuitem"
+              onClick={() => {
+                onDeleteRequest(item.id);
+                onClose();
+              }}
+            >
+              <Trash2 size={16} />
+              Delete Listing
+            </button>
+          </li>
+        </ul>
+      )}
+    </div>
+  );
+}
+
 export function SellerMyListingsContent() {
+  const [listings, setListings] = useState(INITIAL_LISTINGS);
   const [activeFilter, setActiveFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [openMenuId, setOpenMenuId] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deactivateTarget, setDeactivateTarget] = useState(null);
+
+  const deleteListing = listings.find((item) => item.id === deleteTarget);
+  const deactivateListing = listings.find((item) => item.id === deactivateTarget);
+
+  const handleDuplicate = (listingId) => {
+    setListings((current) => {
+      const source = current.find((item) => item.id === listingId);
+      if (!source) return current;
+
+      const duplicate = {
+        ...source,
+        id: `${source.id}-copy-${Date.now()}`,
+        title: `${source.title} (Copy)`,
+        status: "Active",
+        statusVariant: "active",
+      };
+
+      return [duplicate, ...current];
+    });
+  };
+
+  const handleDeactivateConfirm = () => {
+    if (!deactivateTarget) return;
+    setListings((current) =>
+      current.map((item) =>
+        item.id === deactivateTarget
+          ? { ...item, status: "Inactive", statusVariant: "sold" }
+          : item
+      )
+    );
+    setDeactivateTarget(null);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (!deleteTarget) return;
+    setListings((current) => current.filter((item) => item.id !== deleteTarget));
+    setDeleteTarget(null);
+  };
 
   const filteredListings = useMemo(() => {
     const filterMap = {
@@ -101,7 +278,7 @@ export function SellerMyListingsContent() {
 
       return matchesFilter && matchesSearch;
     });
-  }, [activeFilter, searchQuery]);
+  }, [activeFilter, listings, searchQuery]);
 
   return (
     <>
@@ -192,15 +369,19 @@ export function SellerMyListingsContent() {
                     {item.title}
                   </CardTitle>
                   <CardAction className="my-listing-card-action">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="my-listing-more-btn"
-                      aria-label={`More options for ${item.title}`}
-                    >
-                      <MoreVertical size={18} />
-                    </Button>
+                    <ListingActionsMenu
+                      item={item}
+                      isOpen={openMenuId === item.id}
+                      onToggle={() =>
+                        setOpenMenuId((current) =>
+                          current === item.id ? null : item.id
+                        )
+                      }
+                      onClose={() => setOpenMenuId(null)}
+                      onDuplicate={handleDuplicate}
+                      onDeactivateRequest={setDeactivateTarget}
+                      onDeleteRequest={setDeleteTarget}
+                    />
                   </CardAction>
                   <div className="my-listing-card-meta">
                     <Button
@@ -245,6 +426,98 @@ export function SellerMyListingsContent() {
           </Card>
         ))}
       </section>
+
+      {deactivateTarget && (
+        <div
+          className="profile-logout-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="deactivate-listing-title"
+          onClick={() => setDeactivateTarget(null)}
+        >
+          <Card
+            className="profile-logout-modal my-listing-confirm-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <CardHeader className="profile-logout-modal-header">
+              <CardTitle
+                id="deactivate-listing-title"
+                className="profile-logout-modal-title"
+              >
+                Deactivate listing?
+              </CardTitle>
+              <CardDescription className="profile-logout-modal-description">
+                {deactivateListing
+                  ? `"${deactivateListing.title}" will be hidden from buyers until you activate it again.`
+                  : "This listing will be hidden from buyers until you activate it again."}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="profile-logout-modal-actions">
+              <Button
+                type="button"
+                variant="ghost"
+                className="profile-logout-cancel-btn"
+                onClick={() => setDeactivateTarget(null)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                className="profile-logout-confirm-btn"
+                onClick={handleDeactivateConfirm}
+              >
+                Deactivate
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {deleteTarget && (
+        <div
+          className="profile-logout-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-listing-title"
+          onClick={() => setDeleteTarget(null)}
+        >
+          <Card
+            className="profile-logout-modal my-listing-confirm-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <CardHeader className="profile-logout-modal-header">
+              <CardTitle
+                id="delete-listing-title"
+                className="profile-logout-modal-title"
+              >
+                Delete listing?
+              </CardTitle>
+              <CardDescription className="profile-logout-modal-description">
+                {deleteListing
+                  ? `"${deleteListing.title}" will be permanently removed from your listings. This action cannot be undone.`
+                  : "This listing will be permanently removed. This action cannot be undone."}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="profile-logout-modal-actions">
+              <Button
+                type="button"
+                variant="ghost"
+                className="profile-logout-cancel-btn"
+                onClick={() => setDeleteTarget(null)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                className="my-listing-delete-confirm-btn"
+                onClick={handleDeleteConfirm}
+              >
+                Delete
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </>
   );
 }

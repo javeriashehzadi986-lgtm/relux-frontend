@@ -20,7 +20,6 @@ import Terms from "./component/terms";
 import Privacy from "./component/privacy";
 import ContactUs from "./component/contactUs";
 import Help from "./component/help";
-import Cart from "./component/cart";
 import Notification from "./component/notification";
 import SellerVerification from "./component/sellerVerification";
 import ForgotPassword from "./component/forgotPassword";
@@ -152,7 +151,7 @@ function App() {
           <Route path="/contactUs" element={<ContactUs />} />
           <Route path="/help" element={<Help />} />
 
-          <Route path="/cart" element={<Cart />} />
+          <Route path="/cart" element={<Navigate to="/wishlist" replace />} />
           <Route path="/notification" element={<Notification />} />
         </Routes>
       </main>

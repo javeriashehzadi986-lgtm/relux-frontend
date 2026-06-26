@@ -413,7 +413,7 @@ function SellerSettingsSection() {
 const SellerProfile = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [activeSection, setActiveSection] = useState("profile");
+  const [activeSection, setActiveSection] = useState("listings");
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   useEffect(() => {

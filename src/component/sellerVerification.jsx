@@ -62,7 +62,7 @@ function SellerVerification() {
     sessionStorage.setItem("userType", "seller");
     navigate(
       "/sellerProfile",
-      isUpdateMode ? { state: { section: "profile" } } : undefined
+      isUpdateMode ? { state: { section: "profile" } } : { state: { section: "listings" } }
     );
   };
 

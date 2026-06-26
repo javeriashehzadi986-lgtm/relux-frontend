@@ -2,7 +2,6 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import "./navbar.css";
 import {
-  ShoppingCart,
   Heart,
   Bell,
   Menu,
@@ -62,9 +61,6 @@ const Navbar = () => {
             <Link to="/home">Home</Link>
           </li>
           <li>
-            <Link to="/rentDresses">Rent Dresses</Link>
-          </li>
-          <li>
             <Link to="/categories">Categories</Link>
           </li>
           <li>
@@ -83,10 +79,6 @@ const Navbar = () => {
 
             <Link to="/wishlist" aria-label="Wishlist">
               <Heart size={22} />
-            </Link>
-
-            <Link to="/cart" aria-label="Cart">
-              <ShoppingCart size={22} />
             </Link>
 
             <Link to="/notification" aria-label="Notifications">
