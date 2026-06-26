@@ -71,19 +71,13 @@ function App() {
           <Route path="/rentDresses" element={<RentDresses />} />
           <Route path="/becomeASeller" element={<BecomeASeller />} />
 
-          <Route
-            path="/sellerVerification"
-            element={<SellerVerification />}
+          <Route path="/sellerVerification" element={<SellerVerification />}
           />
 
-          <Route
-            path="/sellerDashboard"
-            element={<SellerProfile />}
+          <Route path="/sellerDashboard" element={<SellerProfile />}
           />
 
-          <Route
-            path="/sellerProfile"
-            element={<Navigate to="/sellerDashboard" replace />}
+          <Route path="/sellerProfile" element={<Navigate to="/sellerDashboard" replace />}
           />
 
           <Route path="/myListing" element={<MyListing />} />
