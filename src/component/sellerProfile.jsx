@@ -29,12 +29,14 @@ import { Separator } from "@/components/ui/separator";
 import { SellerMyListingsContent } from "./sellerMyListings";
 import { SellerOrdersRequestsContent } from "./sellerOrdersRequests";
 import SellerSupportCenter from "./sellerSupportCenter";
+import { SellerSettingsContent } from "./sellerSettings";
 import "./profile.css";
 import "./sellerDashboard.css";
 import "./sellerProfile.css";
 import "./sellerMyListings.css";
 import "./sellerOrdersRequests.css";
 import "./sellerSupportCenter.css";
+import "./sellerSettings.css";
 
 const SIDEBAR_ITEMS = [
   { id: "listings", label: "My Listings", icon: ClipboardList },
@@ -45,7 +47,7 @@ const SIDEBAR_ITEMS = [
 ];
 
 const SECTION_IDS = SIDEBAR_ITEMS.map((item) => item.id);
-const WIDE_SECTIONS = ["listings", "orders", "support"];
+const WIDE_SECTIONS = ["listings", "orders", "support", "settings"];
 
 const resolveSection = (sectionFromQuery, stateSection) => {
   if (sectionFromQuery && SECTION_IDS.includes(sectionFromQuery)) {
@@ -403,24 +405,6 @@ function SellerProfileSection() {
   );
 }
 
-function SellerSettingsSection() {
-  return (
-    <Card className="profile-card">
-      <CardHeader className="profile-card-header">
-        <CardTitle className="profile-card-title">Settings</CardTitle>
-        <CardDescription className="profile-card-description">
-          Manage your seller preferences and account settings.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="profile-card-content">
-        <p className="profile-card-description">
-          Notification and payout preferences will appear here.
-        </p>
-      </CardContent>
-    </Card>
-  );
-}
-
 const SellerProfile = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -503,7 +487,7 @@ const SellerProfile = () => {
     }
 
     if (activeSection === "settings") {
-      return <SellerSettingsSection />;
+      return <SellerSettingsContent />;
     }
 
     if (activeSection === "profile") {

@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Relux Hub | Privacy &amp; Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #f4fbf5;
+            -webkit-tap-highlight-color: transparent;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .premium-shadow {
+            box-shadow: 0 10px 40px rgba(47, 54, 50, 0.05);
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #446648;
+        }
+        .toggle-checkbox:checked + .toggle-label:after {
+            transform: translateX(1.25rem);
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface": "#161d1a",
+                        "tertiary": "#56642b",
+                        "background": "#f4fbf5",
+                        "inverse-primary": "#aad0ab",
+                        "surface-bright": "#f4fbf5",
+                        "on-secondary": "#ffffff",
+                        "secondary-fixed-dim": "#cac99f",
+                        "primary-fixed": "#c6ecc5",
+                        "on-tertiary-container": "#4f5d25",
+                        "on-primary-fixed": "#012109",
+                        "inverse-on-surface": "#ebf3ec",
+                        "error": "#ba1a1a",
+                        "primary": "#446648",
+                        "on-primary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "primary-container": "#b2d8b2",
+                        "surface-dim": "#d5dcd6",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed-dim": "#bdce89",
+                        "surface-container-highest": "#dde4de",
+                        "on-primary-fixed-variant": "#2d4e31",
+                        "surface": "#f4fbf5",
+                        "surface-container-high": "#e3eae4",
+                        "secondary-fixed": "#e6e5b9",
+                        "tertiary-container": "#c5d691",
+                        "on-secondary-container": "#666643",
+                        "on-secondary-fixed-variant": "#484828",
+                        "outline-variant": "#c2c8bf",
+                        "on-primary-container": "#3e5f41",
+                        "surface-variant": "#dde4de",
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface-variant": "#424841",
+                        "tertiary-fixed": "#d9eaa3",
+                        "surface-container": "#e9f0e9",
+                        "secondary-container": "#e6e5b9",
+                        "on-tertiary-fixed-variant": "#3e4c16",
+                        "primary-fixed-dim": "#aad0ab",
+                        "on-background": "#161d1a",
+                        "surface-container-low": "#eef5ef",
+                        "secondary": "#60603e",
+                        "surface-tint": "#446648",
+                        "outline": "#727970",
+                        "on-tertiary-fixed": "#161f00",
+                        "on-error-container": "#93000a",
+                        "on-error": "#ffffff",
+                        "on-secondary-fixed": "#1d1d03",
+                        "inverse-surface": "#2b322e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "unit": "8px",
+                        "gutter": "24px",
+                        "container-max": "1280px",
+                        "margin-mobile": "20px",
+                        "margin-desktop": "64px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "headline-md": ["Montserrat"],
+                        "display-lg": ["Montserrat"],
+                        "label-sm": ["Plus Jakarta Sans"],
+                        "label-md": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "headline-lg-mobile": ["Montserrat"],
+                        "headline-lg": ["Montserrat"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "500"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface">
+<!-- Top App Bar -->
+<header class="w-full sticky top-0 z-50 bg-background/80 backdrop-blur-md flex items-center justify-between px-margin-mobile md:px-margin-desktop py-4">
+<div class="flex items-center gap-4">
+<button class="active:scale-95 transition-transform hover:bg-surface-container-high p-2 rounded-full">
+<span class="material-symbols-outlined text-primary">arrow_back</span>
+</button>
+<div>
+<h1 class="font-headline-md text-headline-md text-on-surface">Settings</h1>
+</div>
+</div>
+<button class="active:scale-95 transition-transform hover:bg-surface-container-high p-2 rounded-full">
+<span class="material-symbols-outlined text-on-surface-variant">more_vert</span>
+</button>
+</header>
+<main class="max-w-[1280px] mx-auto px-margin-mobile md:px-margin-desktop pb-32 pt-8">
+<!-- Hero Intro -->
+<div class="mb-12">
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface mb-2">Privacy &amp; Settings</h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">
+                Manage your account preferences, maintain your security standards, and customize your circular fashion marketplace experience.
+            </p>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- Sidebar Navigation (Drawer Desktop) -->
+<aside class="hidden lg:flex flex-col col-span-3 h-fit py-6 pr-4 space-y-2 sticky top-24">
+<nav>
+<a class="flex items-center gap-3 px-6 py-4 bg-tertiary-container text-on-tertiary-container rounded-r-full font-bold transition-all duration-200" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-body-md text-body-md">Account Settings</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-4 text-on-surface-variant hover:bg-surface-container-high rounded-r-full transition-all duration-200" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-body-md text-body-md">Personal Info</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-4 text-on-surface-variant hover:bg-surface-container-high rounded-r-full transition-all duration-200" href="#">
+<span class="material-symbols-outlined">lock</span>
+<span class="font-body-md text-body-md">Security</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-4 text-on-surface-variant hover:bg-surface-container-high rounded-r-full transition-all duration-200" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span class="font-body-md text-body-md">Payments</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-4 text-on-surface-variant hover:bg-surface-container-high rounded-r-full transition-all duration-200" href="#">
+<span class="material-symbols-outlined">notifications</span>
+<span class="font-body-md text-body-md">Notifications</span>
+</a>
+</nav>
+<div class="mt-12 p-6 bg-surface-container-low rounded-xl border border-outline-variant/10">
+<div class="flex items-center gap-3 mb-4">
+<div class="w-12 h-12 rounded-full overflow-hidden bg-primary-fixed border-2 border-primary/20">
+<img class="w-full h-full object-cover" data-alt="A professional studio portrait of a high-end fashion reseller, dressed in a minimalist sage green linen blazer against a warm cream studio background. The lighting is soft and flattering, emphasizing a trustworthy and premium persona. High-key aesthetic consistent with a luxury boutique brand identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCRUuoGuw-p3mvUYjxNVpSI2xDXgxCsmNPPZ7Xu3WBbeQQV-eiwD76JAyP0XbfKLsfkyQblldLEQP8gVX6MfR67N8ZXLb0Om2yCSSMhqT3HyDXCKebftxW2QeKCW-rS2DZ9c4Nsc3my7bx2zX8ivaOZb81kIDjESJK-zAnUrhjQRUN_QCF_n-_v_c7cb91Dgn3M8ySA6TD7wPgGqoe-XtvtFw-f3VNzKF7ltVw3wjCiWw5OaAxhGZIVtD_ZLKI8q7-PKSg_WBiSoyC8"/>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface">Store Owner</p>
+<p class="text-[12px] text-primary font-bold uppercase tracking-wider">Verified Seller</p>
+</div>
+</div>
+<p class="text-[12px] text-on-surface-variant italic">Member since Jan 2023</p>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<div class="col-span-1 lg:col-span-9 space-y-8">
+<!-- Section 1: Privacy Settings -->
+<section class="bg-surface-container-lowest premium-shadow p-6 md:p-8 rounded-3xl">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-primary">visibility</span>
+<h3 class="font-headline-md text-headline-md text-on-surface">Privacy Settings</h3>
+</div>
+<div class="space-y-6">
+<!-- Toggle Row -->
+<div class="flex items-center justify-between py-2 border-b border-outline-variant/10">
+<div>
+<h4 class="font-label-md text-label-md text-on-surface">Profile Visibility</h4>
+<p class="font-body-md text-label-sm text-on-surface-variant">Make your storefront searchable and visible to everyone.</p>
+</div>
+<div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer border-outline-variant transition-all duration-300 shadow-sm outline-none checked:border-primary-container" id="toggle1" name="toggle1" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-5 rounded-full bg-surface-container-highest cursor-pointer transition-all duration-300" for="toggle1"></label>
+</div>
+</div>
+<!-- Toggle Row -->
+<div class="flex items-center justify-between py-2 border-b border-outline-variant/10">
+<div>
+<h4 class="font-label-md text-label-md text-on-surface">Show Seller Reviews</h4>
+<p class="font-body-md text-label-sm text-on-surface-variant">Display feedback from past buyers on your profile page.</p>
+</div>
+<div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer border-outline-variant transition-all duration-300 shadow-sm outline-none checked:border-primary-container" id="toggle2" name="toggle2" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-5 rounded-full bg-surface-container-highest cursor-pointer transition-all duration-300" for="toggle2"></label>
+</div>
+</div>
+<!-- Toggle Row -->
+<div class="flex items-center justify-between py-2">
+<div>
+<h4 class="font-label-md text-label-md text-on-surface">Allow Buyers to Contact Me</h4>
+<p class="font-body-md text-label-sm text-on-surface-variant">Enable the chat button for direct inquiries about listings.</p>
+</div>
+<div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+<input class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer border-outline-variant transition-all duration-300 shadow-sm outline-none checked:border-primary-container" id="toggle3" name="toggle3" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-5 rounded-full bg-surface-container-highest cursor-pointer transition-all duration-300" for="toggle3"></label>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 2: Security Settings -->
+<section class="bg-surface-container-lowest premium-shadow p-6 md:p-8 rounded-3xl">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-primary">security</span>
+<h3 class="font-headline-md text-headline-md text-on-surface">Security Settings</h3>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<button class="flex items-center justify-between p-5 rounded-2xl bg-surface-container-low border border-outline-variant/10 hover:bg-primary-container/20 transition-all active:scale-95 text-left">
+<div class="space-y-1">
+<p class="font-label-md text-label-md text-on-surface">Change Password</p>
+<p class="text-[12px] text-on-surface-variant">Updated 3 months ago</p>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+</button>
+<button class="flex items-center justify-between p-5 rounded-2xl bg-surface-container-low border border-outline-variant/10 hover:bg-primary-container/20 transition-all active:scale-95 text-left">
+<div class="space-y-1">
+<p class="font-label-md text-label-md text-on-surface">Update Email</p>
+<p class="text-[12px] text-on-surface-variant">s***@relux.com</p>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+</button>
+<button class="flex items-center justify-between p-5 rounded-2xl bg-surface-container-low border border-outline-variant/10 hover:bg-primary-container/20 transition-all active:scale-95 text-left">
+<div class="space-y-1">
+<p class="font-label-md text-label-md text-on-surface">Phone Number</p>
+<p class="text-[12px] text-on-surface-variant">+1 ••• ••• 44</p>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+</button>
+</div>
+</section>
+<!-- Section 4 & 5: Verification & Payment (Bento Style) -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<!-- Verification -->
+<div class="bg-surface-container-lowest premium-shadow p-6 md:p-8 rounded-3xl flex flex-col justify-between">
+<div>
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-primary">verified_user</span>
+<h3 class="font-headline-md text-headline-md text-on-surface">Verification</h3>
+</div>
+<div class="flex items-center gap-3 p-4 bg-primary-container/30 rounded-2xl mb-4 border border-primary/10">
+<span class="material-symbols-outlined text-primary fill-current">check_circle</span>
+<div>
+<p class="font-label-md text-label-md text-primary">Status: Verified</p>
+<p class="text-[12px] text-on-primary-container">CNIC Verification Completed</p>
+</div>
+</div>
+</div>
+<button class="w-full py-3 px-6 rounded-full border border-primary text-primary font-bold hover:bg-primary hover:text-white transition-colors active:scale-95">
+                            View Verification Details
+                        </button>
+</div>
+<!-- Payment -->
+<div class="bg-surface-container-lowest premium-shadow p-6 md:p-8 rounded-3xl flex flex-col justify-between">
+<div>
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-primary">account_balance_wallet</span>
+<h3 class="font-headline-md text-headline-md text-on-surface">Payment Settings</h3>
+</div>
+<div class="p-4 bg-surface-container-high rounded-2xl mb-4">
+<div class="flex items-center gap-2 mb-1">
+<div class="w-8 h-5 bg-indigo-600 rounded-sm flex items-center justify-center text-[10px] text-white font-bold">Stripe</div>
+<p class="font-label-md text-label-md text-on-surface">Connected</p>
+</div>
+<p class="text-[12px] text-on-surface-variant">Automatic payouts enabled.</p>
+</div>
+</div>
+<button class="w-full py-3 px-6 bg-primary text-white rounded-full font-bold hover:bg-on-primary-fixed-variant transition-all active:scale-95">
+                            Manage Stripe Account
+                        </button>
+</div>
+</div>
+<!-- Section 3: Notifications -->
+<section class="bg-surface-container-lowest premium-shadow p-6 md:p-8 rounded-3xl">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-primary">notifications_active</span>
+<h3 class="font-headline-md text-headline-md text-on-surface">Notification Preferences</h3>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
+<!-- Notify Item -->
+<div class="flex items-center justify-between">
+<div>
+<p class="font-label-md text-label-md text-on-surface">Order Notifications</p>
+<p class="text-[12px] text-on-surface-variant">Real-time alerts for new sales.</p>
+</div>
+<div class="relative inline-block w-10 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer border-outline-variant transition-all duration-300 shadow-sm outline-none checked:border-primary-container" id="n1" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-5 rounded-full bg-surface-container-highest cursor-pointer transition-all duration-300" for="n1"></label>
+</div>
+</div>
+<!-- Notify Item -->
+<div class="flex items-center justify-between">
+<div>
+<p class="font-label-md text-label-md text-on-surface">Rental Requests</p>
+<p class="text-[12px] text-on-surface-variant">When a customer wants to rent an item.</p>
+</div>
+<div class="relative inline-block w-10 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer border-outline-variant transition-all duration-300 shadow-sm outline-none checked:border-primary-container" id="n2" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-5 rounded-full bg-surface-container-highest cursor-pointer transition-all duration-300" for="n2"></label>
+</div>
+</div>
+<!-- Notify Item -->
+<div class="flex items-center justify-between">
+<div>
+<p class="font-label-md text-label-md text-on-surface">Auction/Bid Alerts</p>
+<p class="text-[12px] text-on-surface-variant">Updates on active auctions.</p>
+</div>
+<div class="relative inline-block w-10 align-middle select-none transition duration-200 ease-in">
+<input class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer border-outline-variant transition-all duration-300 shadow-sm outline-none checked:border-primary-container" id="n3" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-5 rounded-full bg-surface-container-highest cursor-pointer transition-all duration-300" for="n3"></label>
+</div>
+</div>
+<!-- Notify Item -->
+<div class="flex items-center justify-between">
+<div>
+<p class="font-label-md text-label-md text-on-surface">Email Newsletter</p>
+<p class="text-[12px] text-on-surface-variant">Weekly marketplace insights.</p>
+</div>
+<div class="relative inline-block w-10 align-middle select-none transition duration-200 ease-in">
+<input class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer border-outline-variant transition-all duration-300 shadow-sm outline-none checked:border-primary-container" id="n4" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-5 rounded-full bg-surface-container-highest cursor-pointer transition-all duration-300" for="n4"></label>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 6: Account Management -->
+<section class="bg-surface-container-lowest/50 border border-error/10 p-6 md:p-8 rounded-3xl">
+<div class="flex items-center gap-3 mb-4">
+<span class="material-symbols-outlined text-error">dangerous</span>
+<h3 class="font-headline-md text-headline-md text-error">Danger Zone</h3>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">
+                        Once you deactivate or delete your account, your active listings and rental contracts may be permanently affected. Please proceed with caution.
+                    </p>
+<div class="flex flex-col sm:flex-row gap-4">
+<button class="flex-1 py-3 px-6 rounded-full border border-error text-error font-bold hover:bg-error hover:text-white transition-colors active:scale-95">
+                            Deactivate Account
+                        </button>
+<button class="flex-1 py-3 px-6 bg-error text-white rounded-full font-bold hover:bg-on-error-container transition-colors active:scale-95 shadow-lg shadow-error/10">
+                            Delete Account
+                        </button>
+</div>
+<p class="mt-6 text-[12px] text-center text-on-surface-variant/60 italic">
+                        By deleting your account, you agree that Relux Hub may retain transaction records for tax and legal purposes as per the Privacy Policy.
+                    </p>
+</section>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Bar (Mobile) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-3 pb-6 bg-surface-container-lowest shadow-[0_-4px_20px_rgba(47,54,50,0.05)] rounded-t-3xl border-t border-outline-variant/5">
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all active:scale-90">
+<span class="material-symbols-outlined">styler</span>
+<span class="font-label-md text-[10px] mt-1">Inventory</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all active:scale-90">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="font-label-md text-[10px] mt-1">Orders</span>
+</button>
+<button class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-5 py-2 active:scale-90 transition-transform">
+<span class="material-symbols-outlined font-bold">settings</span>
+<span class="font-label-md text-[10px] mt-1">Settings</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all active:scale-90">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-md text-[10px] mt-1">Profile</span>
+</button>
+</nav>
+<!-- Micro-interaction Script -->
+<script>
+        // Simple hover effect for desktop aside items
+        document.querySelectorAll('aside nav a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                document.querySelectorAll('aside nav a').forEach(l => {
+                    l.classList.remove('bg-tertiary-container', 'text-on-tertiary-container', 'font-bold');
+                    l.classList.add('text-on-surface-variant', 'hover:bg-surface-container-high');
+                });
+                link.classList.add('bg-tertiary-container', 'text-on-tertiary-container', 'font-bold');
+                link.classList.remove('text-on-surface-variant', 'hover:bg-surface-container-high');
+            });
+        });
+
+        // Toggle interactivity logic (simplified for UI demo)
+        document.querySelectorAll('.toggle-checkbox').forEach(toggle => {
+            toggle.addEventListener('change', function() {
+                const parent = this.closest('div');
+                if (this.checked) {
+                    console.log('Preference Enabled');
+                } else {
+                    console.log('Preference Disabled');
+                }
+            });
+        });
+    </script>
+</body></html>
