@@ -61,8 +61,9 @@ function SellerVerification() {
     event.preventDefault();
     sessionStorage.setItem("userType", "seller");
     navigate(
-      "/sellerProfile",
-      isUpdateMode ? { state: { section: "profile" } } : { state: { section: "listings" } }
+      isUpdateMode
+        ? "/sellerProfile?section=profile"
+        : "/sellerProfile?section=listings",
     );
   };
 
@@ -124,7 +125,7 @@ function SellerVerification() {
                 className="seller-back-link"
                 asChild
               >
-                <Link to="/sellerProfile" state={{ section: "profile" }}>
+                <Link to="/sellerProfile">
                   Back to Profile
                 </Link>
               </Button>

@@ -23,6 +23,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { SELLER_LISTINGS } from "@/data/sellerListingsData";
 import "./sellerMyListings.css";
 
 const summaryCards = [
@@ -34,60 +35,7 @@ const summaryCards = [
 
 const filterChips = ["All", "Sale", "Rent", "Auctions"];
 
-const INITIAL_LISTINGS = [
-  {
-    id: "silk-slip",
-    title: "Vintage Silk Slip Dress",
-    type: "Rent",
-    typeVariant: "rent",
-    size: "Size S",
-    price: "$45 / day",
-    detail: "Excellent Condition",
-    status: "Active",
-    statusVariant: "active",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAV_Q58P3tOM_BdZ7FugrByF2hGdVkOd8ypdFq0Y6qIvVV6BLq0KVldQNMfN3odhTp9AZ-wksa4aF1F9PIYbiixuCt9YiQKjqQGV_keBYmXXn5IDem8QG7anjQ8D3yafRx3E2_ENGA52gsaVff0J29MmXG4kQxwxQyp_ZynHJBUyFfcznDVQIbanS-0DKHIMK_MEb6zB6p-zMAd6sj_efaIxsdXWnceCp7XJpKV2cAoJx4NAtBHM3MYMObKIbcvgVDB1ENKirXmYJbX",
-  },
-  {
-    id: "wool-blazer",
-    title: "Tailored Wool Blazer",
-    type: "Sale",
-    typeVariant: "sale",
-    size: "Size M",
-    price: "$280",
-    detail: "Like New",
-    status: "Sold",
-    statusVariant: "sold",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBQlU7p5bA5NVI6b4zFxcHYyPDo0PdZzBRaZ32I-fEPE1Kf346un0l1Ll18TKnXlFrcUqIFINZ_T9y8zBBXnPQFGv7xl8Woa64WcjOX8Itv8oSzHzRE9McEBEqmjtLYjk8ZVcO2C4Q1t5ZfIL1jGi5PKNy4WEG0RiSk1ydihmNy56AN43CpmfAJdSIJYyktUuG55aXi0bDQxaTNEM0PUQ7v2M2bmLmtAlR1AjB4pCFyHGMvFcmwYSI-egpGaB3iMbSryT7tIocxKVUU",
-  },
-  {
-    id: "walima-gown",
-    title: "Mint Pearl Walima Gown",
-    type: "Auction",
-    typeVariant: "auction",
-    size: "Size M",
-    price: "Current: $310",
-    detail: "2d 4h left",
-    status: "Live",
-    statusVariant: "live",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCpg8TzKIlJBFhyEUYqerMoEjBDiDqV0rpb4lQJuyr8wSrrXnBdPmGXiTxuy8RQ2INfNuIEI8mSmiHm3DxRCuiuzBjnobYo2KMjppce0_DqAsnNyqHqW0XvZGvlilOWRnLYpLARVEl90grSGeTTYVHki2aL08XFQ4kPtzXTRvOuzU-vola6Kct2i-lfkoD4Q1IXuzEXuHn2SSvK1AKkwnpyH6BGifQXc-CtofQyw4tiEQt5WxJBoPzwOOzrC2a6uHAflnWvvLWUQdGD",
-  },
-  {
-    id: "cashmere-knit",
-    title: "Cashmere Oversized Knit",
-    type: "Sale",
-    typeVariant: "sale",
-    size: "Size L",
-    price: "$195",
-    detail: "Good Condition",
-    status: "Active",
-    statusVariant: "active",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAQemD3e6BOZATewDckoKN6LGnMsltEY2gw2q8lUInmROjSEuYbIBlXLU9LUnCGJIGwNMXoNKyqeBcXytDaU5EI9HU4SsDZZzh8zPiKHd9ZgptgIA9vSmf2EVijv5Q65Z4SF_wE4V54whxi3f5U9mej7h0idCDMflF_MmbmFSiI6jigtowaWzcJQd8eQ8qHoXkLskRTeqv-DsFY0OYczzrRtmuKiRt8dqoNh-zIy4f85wyWtLtisvVC3LIzzo-_yP2PF2M4C_dnSjkz",
-  },
-];
+const INITIAL_LISTINGS = SELLER_LISTINGS;
 
 function ListingActionsMenu({
   item,

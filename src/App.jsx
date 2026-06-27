@@ -98,44 +98,20 @@ function App() {
           />
           <Route
             path="/myListing"
-            element={
-              <Navigate
-                to="/sellerProfile"
-                replace
-                state={{ section: "listings" }}
-              />
-            }
+            element={<Navigate to="/sellerProfile?section=listings" replace />}
           />
           <Route path="/addListing" element={<SellerAddListing />} />
           <Route
             path="/ordersRequests"
-            element={
-              <Navigate
-                to="/sellerProfile"
-                replace
-                state={{ section: "orders" }}
-              />
-            }
+            element={<Navigate to="/sellerProfile?section=orders" replace />}
           />
           <Route
             path="/supportCenter"
-            element={
-              <Navigate
-                to="/sellerProfile"
-                replace
-                state={{ section: "support" }}
-              />
-            }
+            element={<Navigate to="/sellerProfile?section=support" replace />}
           />
           <Route
             path="/settings"
-            element={
-              <Navigate
-                to="/sellerProfile"
-                replace
-                state={{ section: "settings" }}
-              />
-            }
+            element={<Navigate to="/sellerProfile?section=settings" replace />}
           />
 
           <Route path="/profile" element={<Profile />} />

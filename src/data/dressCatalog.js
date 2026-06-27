@@ -1,3 +1,8 @@
+import {
+  SELLER_AUCTION_BY_ID,
+  SELLER_LISTING_PRODUCTS,
+} from "./sellerListingsData";
+
 const parsePrice = (value) => {
   if (typeof value === "number") return value;
   return Number(String(value).replace(/[^\d]/g, "")) || 0;
@@ -158,6 +163,7 @@ const AUCTION_BY_ID = {
     ],
     breadcrumbCategory: "Bridal Couture",
   },
+  ...SELLER_AUCTION_BY_ID,
 };
 
 const enrichResaleDress = (dress) => {
@@ -539,7 +545,7 @@ const BASE_PRODUCTS = {
   },
 };
 
-const ALL_PRODUCTS = { ...RENT_PRODUCTS, ...BASE_PRODUCTS };
+const ALL_PRODUCTS = { ...RENT_PRODUCTS, ...BASE_PRODUCTS, ...SELLER_LISTING_PRODUCTS };
 
 const REFERENCE_DRESS = {
   id: "emerald-heritage-pishwas",

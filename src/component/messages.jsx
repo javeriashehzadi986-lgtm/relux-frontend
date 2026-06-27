@@ -5,6 +5,7 @@ import {
   getChatThread,
   getConversationById,
 } from "@/data/sellerChatData";
+import SellerInbox from "./sellerMessages";
 import "./sellerChat.css";
 
 const useIsDesktop = () => {
@@ -92,7 +93,7 @@ const getChatMenuOptions = ({ dressId, isMuted, hasUnread }) =>
     },
   ].filter((option) => option.show);
 
-const Messages = () => {
+const BuyerMessages = () => {
   const { conversationId } = useParams();
   const navigate = useNavigate();
   const isDesktop = useIsDesktop();
@@ -600,6 +601,12 @@ const Messages = () => {
       </div>
     </div>
   );
+};
+
+const Messages = () => {
+  const isSeller = sessionStorage.getItem("userType") === "seller";
+  if (isSeller) return <SellerInbox />;
+  return <BuyerMessages />;
 };
 
 export default Messages;

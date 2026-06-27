@@ -47,8 +47,7 @@ const Login = () => {
     }
 
     if (isEmailValid && isPasswordValid) {
-      sessionStorage.setItem("userType", "seller");
-      navigate("/sellerProfile");
+      navigate("/home");
     }
   };
 

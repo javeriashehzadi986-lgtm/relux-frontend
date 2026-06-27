@@ -62,6 +62,7 @@ const SellerAddListing = () => {
   const [description, setDescription] = useState("");
   const [salePrice, setSalePrice] = useState("");
   const [startingBid, setStartingBid] = useState("");
+  const [minBid, setMinBid] = useState("");
   const [auctionEndDate, setAuctionEndDate] = useState("");
   const [rentPrice, setRentPrice] = useState("");
   const [securityDeposit, setSecurityDeposit] = useState("");
@@ -77,7 +78,7 @@ const SellerAddListing = () => {
         : "$45 / day";
 
   const goToListings = () =>
-    navigate("/sellerProfile", { state: { section: "listings" } });
+    navigate("/sellerProfile?section=listings");
 
   const handlePublish = (event) => {
     event.preventDefault();
@@ -265,6 +266,19 @@ const SellerAddListing = () => {
                             className="add-listing-input"
                             value={startingBid}
                             onChange={(e) => setStartingBid(e.target.value)}
+                          />
+                        </Field>
+                        <Field className="add-listing-field">
+                          <FieldLabel htmlFor="min-bid">Minimum Bid ($)</FieldLabel>
+                          <Input
+                            id="min-bid"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            placeholder="0.00"
+                            className="add-listing-input"
+                            value={minBid}
+                            onChange={(e) => setMinBid(e.target.value)}
                           />
                         </Field>
                         <Field className="add-listing-field">

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import {
   IdCard,
   CheckCircle2,
@@ -46,6 +46,17 @@ const SIDEBAR_ITEMS = [
 
 const SECTION_IDS = SIDEBAR_ITEMS.map((item) => item.id);
 const WIDE_SECTIONS = ["listings", "orders", "support"];
+
+const resolveSection = (sectionFromQuery, stateSection) => {
+  if (sectionFromQuery && SECTION_IDS.includes(sectionFromQuery)) {
+    return sectionFromQuery;
+  }
+  if (stateSection && SECTION_IDS.includes(stateSection)) {
+    return stateSection;
+  }
+  return "profile";
+};
+
 const defaultProfile = {
   fullName: "Zarish",
   email: "zarish@example.com",
@@ -413,14 +424,25 @@ function SellerSettingsSection() {
 const SellerProfile = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [activeSection, setActiveSection] = useState("listings");
+  const [searchParams] = useSearchParams();
+  const sectionFromQuery = searchParams.get("section");
+  const [activeSection, setActiveSection] = useState(() =>
+    resolveSection(sectionFromQuery, location.state?.section),
+  );
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   useEffect(() => {
-    if (SECTION_IDS.includes(location.state?.section)) {
-      setActiveSection(location.state.section);
+    setActiveSection(resolveSection(sectionFromQuery, location.state?.section));
+  }, [sectionFromQuery, location.state]);
+
+  const handleSectionChange = (sectionId) => {
+    setActiveSection(sectionId);
+    if (sectionId === "profile") {
+      navigate("/sellerProfile", { replace: true });
+      return;
     }
-  }, [location.state]);
+    navigate(`/sellerProfile?section=${sectionId}`, { replace: true });
+  };
 
   const handleLogoutConfirm = () => {
     setShowLogoutConfirm(false);
@@ -441,7 +463,7 @@ const SellerProfile = () => {
             className={`profile-sidebar-link ${
               isActive ? "profile-sidebar-link--active" : ""
             }`}
-            onClick={() => setActiveSection(item.id)}
+            onClick={() => handleSectionChange(item.id)}
           >
             <Icon
               size={20}
