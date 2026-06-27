@@ -7,6 +7,13 @@ import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SellerDashboardShell } from "./sellerDashboardShell";
 import { getDressById } from "@/data/dressCatalog";
+import {
+  LISTING_CONDITION_OPTIONS,
+  LISTING_SIZE_OPTIONS,
+  normalizeListingCondition,
+  normalizeListingSize,
+} from "@/data/listingSpecs";
+import { saveSellerListing } from "@/data/sellerListingStore";
 import "./sellerDashboard.css";
 import "./sellerAddListing.css";
 import { getStyleOptionsForCategory } from "@/data/styleCategories";
@@ -21,8 +28,8 @@ const clothingTypes = [
 
 const categoryOptions = ["Female", "Male", "Kids"];
 
-const sizeOptions = ["XS", "S", "M", "L", "XL"];
-const conditionOptions = ["Like New", "Good", "Fair"];
+const sizeOptions = LISTING_SIZE_OPTIONS;
+const conditionOptions = LISTING_CONDITION_OPTIONS;
 
 const previewThumbs = [
   "https://lh3.googleusercontent.com/aida-public/AB6AXuAXxVIrbVCOCT82XNvkqWO0eEgioxMP5KllgqBRslb6p1K2vZG5_Al5fJ0WjpScR-NAIyW3SXOHm6WGzF2eEqHapcIqCMrJwzRgYJXTEXMBrf35OmZKCR64XYu0iC9vTZgRPFYwJXTh9_A_X_X4PEDUrmB3IYHftxGQ1MkknW6Cai6kwDxcX_3U9A-h9r2rNMbLE-VXd6Lj_biOHW-L3auwAj9iHsAJkA4Li7yl_SjiYQaQPEoRsFtv5fnSoUFkGjXP0Uq6bEpoQpqM",
@@ -123,22 +130,22 @@ const SellerAddListing = () => {
       setStartingBid(String(dress.currentBid ?? dress.price ?? ""));
       setMinBid(String(dress.minimumNextBid ?? ""));
     }
-    if (dress.sizes?.[0]) {
-      const sizeMatch = dress.sizes[0].replace(/^Size\s*/i, "").trim();
-      if (sizeOptions.includes(sizeMatch)) {
-        setSize(sizeMatch);
-      }
+    if (dress.listingSize) {
+      setSize(normalizeListingSize(dress.listingSize));
+    } else if (dress.sizes?.[0]) {
+      setSize(normalizeListingSize(dress.sizes[0]));
     }
     if (dress.mainImage ?? dress.image) {
       const hero = dress.mainImage ?? dress.image;
       setPreviewHeroImage(hero);
       setPreviewImages((current) => [hero, ...current.slice(1)]);
     }
-    if (dress.conditionStatus || dress.condition) {
-      const conditionText = dress.conditionStatus ?? dress.condition;
-      if (conditionText.toLowerCase().includes("like new")) setCondition("Like New");
-      else if (conditionText.toLowerCase().includes("good")) setCondition("Good");
-      else setCondition("Fair");
+    if (dress.listingCondition) {
+      setCondition(normalizeListingCondition(dress.listingCondition));
+    } else if (dress.conditionStatus || dress.condition) {
+      setCondition(
+        normalizeListingCondition(dress.conditionStatus ?? dress.condition),
+      );
     }
   }, [editListingId]);
 
@@ -188,6 +195,31 @@ const SellerAddListing = () => {
 
   const handlePublish = (event) => {
     event.preventDefault();
+    const listingId = editListingId ?? `seller-${Date.now()}`;
+
+    saveSellerListing({
+      id: listingId,
+      title: title.trim() || previewTitle,
+      brand: brand.trim(),
+      description: description.trim(),
+      listingType,
+      listingSize: size,
+      listingCondition: condition,
+      mainCategory,
+      style,
+      clothingType,
+      salePrice,
+      startingBid,
+      minBid,
+      auctionEndDate,
+      rentPrice,
+      itemPrice,
+      mainImage: previewHeroImage,
+      gallery: previewImages,
+      seller: "Zarish",
+      sellerName: "Zarish",
+    });
+
     goToListings();
   };
 

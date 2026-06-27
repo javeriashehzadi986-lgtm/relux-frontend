@@ -1,11 +1,13 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Gavel, Heart, MessageCircle, Star } from "lucide-react";
+import { Gavel, Heart, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { getDressById } from "@/data/dressCatalog";
 import RentalDressDetails from "./rentalDressDetails";
+import { DressDetailsBreadcrumb } from "./dressDetailsBreadcrumb";
+import { DressFitConditionSection } from "./dressFitCondition";
 import "./dressDetails.css";
 
 const formatCountdown = ({ hours, minutes, seconds }) =>
@@ -68,10 +70,13 @@ const DressDetails = () => {
 
   return (
     <div className="dress-details-page">
+      <DressDetailsBreadcrumb dress={dress} listingType="resale" />
+
       <div className="dress-details-hero-grid">
         <div className="dress-details-gallery">
           <div className="dress-details-main-image">
             <img alt={dress.title} src={gallery[activeImage]} />
+            <span className="dress-details-condition-badge">{dress.listingCondition}</span>
             <span
               className={`dress-details-live-badge ${
                 hasWonAuction ? "dress-details-live-badge--won" : ""
@@ -116,20 +121,13 @@ const DressDetails = () => {
               </Button>
             </div>
             <div className="dress-details-meta">
-              <div className="dress-details-stars" aria-label={`${dress.rating} out of 5 stars`}>
-                {Array.from({ length: 5 }).map((_, index) => (
-                  <Star key={index} size={16} fill="currentColor" />
-                ))}
-                <span>{dress.rating.toFixed(1)}</span>
-              </div>
-              <span className="dress-details-meta-dot" aria-hidden="true" />
-              <span className="dress-details-condition-pill">{dress.conditionStatus}</span>
-              <span className="dress-details-meta-dot" aria-hidden="true" />
               <span className="dress-details-est-value">
                 Est. Val. <s>{dress.estimatedValueFormatted}</s>
               </span>
             </div>
           </section>
+
+          <DressFitConditionSection dress={dress} allowSizeSelect={false} />
 
           <section className="dress-details-auction-highlight">
             <div className="dress-details-auction-row">

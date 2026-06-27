@@ -1,0 +1,41 @@
+.dress-details-breadcrumb {
+  margin-bottom: 2.5rem;
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: none;
+}
+
+.dress-details-breadcrumb::-webkit-scrollbar {
+  display: none;
+}
+
+.dress-details-breadcrumb ol {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.875rem;
+  color: #5d605f;
+}
+
+.dress-details-breadcrumb a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.dress-details-breadcrumb a:hover {
+  color: #31685d;
+}
+
+.dress-details-breadcrumb li:last-child {
+  color: #31685d;
+  font-weight: 600;
+}
+
+.dress-details-breadcrumb-sep {
+  opacity: 0.4;
+  flex-shrink: 0;
+}

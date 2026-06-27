@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import { BadgeCheck, ShieldCheck, Truck, Verified } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getDressById } from "@/data/dressCatalog";
+import { getDressById, getDressConditionLabel } from "@/data/dressCatalog";
 import "./finalizePurchase.css";
 
 const CITIES = ["Lahore", "Karachi", "Islamabad", "Faisalabad"];
@@ -170,7 +170,7 @@ const FinalizePurchase = () => {
                   </span>
                 )}
                 <span className="finalize-purchase-summary-tag">
-                  {dress.condition ?? dress.conditionStatus}
+                  {getDressConditionLabel(dress)}
                 </span>
               </div>
 

@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import {
   IdCard,
+  AlertTriangle,
   CheckCircle2,
   Star,
   StarHalf,
@@ -11,7 +12,6 @@ import {
   ClipboardList,
   ShoppingBag,
   HelpCircle,
-  Settings,
   User,
   LogOut,
 } from "lucide-react";
@@ -29,32 +29,34 @@ import { Separator } from "@/components/ui/separator";
 import { SellerMyListingsContent } from "./sellerMyListings";
 import { SellerOrdersRequestsContent } from "./sellerOrdersRequests";
 import SellerSupportCenter from "./sellerSupportCenter";
-import { SellerSettingsContent } from "./sellerSettings";
 import "./profile.css";
 import "./sellerDashboard.css";
 import "./sellerProfile.css";
 import "./sellerMyListings.css";
 import "./sellerOrdersRequests.css";
 import "./sellerSupportCenter.css";
-import "./sellerSettings.css";
 
 const SIDEBAR_ITEMS = [
   { id: "listings", label: "My Listings", icon: ClipboardList },
   { id: "orders", label: "Orders & Requests", icon: ShoppingBag },
   { id: "support", label: "Support Center", icon: HelpCircle },
-  { id: "settings", label: "Settings", icon: Settings },
   { id: "profile", label: "My Profile", icon: User },
 ];
 
 const SECTION_IDS = SIDEBAR_ITEMS.map((item) => item.id);
-const WIDE_SECTIONS = ["listings", "orders", "support", "settings"];
+const WIDE_SECTIONS = ["listings", "orders", "support"];
 
 const resolveSection = (sectionFromQuery, stateSection) => {
-  if (sectionFromQuery && SECTION_IDS.includes(sectionFromQuery)) {
-    return sectionFromQuery;
+  const section =
+    sectionFromQuery === "settings" ? "profile" : sectionFromQuery;
+  const state =
+    stateSection === "settings" ? "profile" : stateSection;
+
+  if (section && SECTION_IDS.includes(section)) {
+    return section;
   }
-  if (stateSection && SECTION_IDS.includes(stateSection)) {
-    return stateSection;
+  if (state && SECTION_IDS.includes(state)) {
+    return state;
   }
   return "profile";
 };
@@ -122,10 +124,20 @@ function StarRating({ rating }) {
 }
 
 function SellerProfileSection() {
+  const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
+  const [showDeactivateConfirm, setShowDeactivateConfirm] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [profile, setProfile] = useState(defaultProfile);
   const [draft, setDraft] = useState(defaultProfile);
+
+  useEffect(() => {
+    if (window.location.hash !== "#seller-profile-stripe") return;
+    document
+      .getElementById("seller-profile-stripe")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
 
   const initials = useMemo(() => getInitials(profile.fullName), [profile.fullName]);
   const draftInitials = useMemo(() => getInitials(draft.fullName), [draft.fullName]);
@@ -357,7 +369,7 @@ function SellerProfileSection() {
               </CardContent>
             </Card>
 
-            <Card className="seller-profile-card">
+            <Card id="seller-profile-stripe" className="seller-profile-card">
               <CardHeader className="seller-profile-section-header seller-profile-section-header--inline">
                 <CardTitle className="seller-profile-section-title">
                   Stripe Payments
@@ -387,10 +399,54 @@ function SellerProfileSection() {
                   className="seller-profile-primary-btn seller-profile-primary-btn--full"
                   asChild
                 >
-                  <Link to="/sellerProfile?section=settings#seller-settings-payments">
+                  <Link to="/sellerProfile#seller-profile-stripe">
                     Manage Stripe Account
                   </Link>
                 </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="seller-profile-card seller-profile-card--danger">
+              <CardHeader className="seller-profile-section-header">
+                <div className="seller-profile-danger-heading">
+                  <AlertTriangle
+                    size={22}
+                    strokeWidth={1.75}
+                    className="seller-profile-danger-icon"
+                    aria-hidden="true"
+                  />
+                  <CardTitle className="seller-profile-section-title seller-profile-section-title--danger">
+                    Account Status
+                  </CardTitle>
+                </div>
+                <CardDescription className="seller-profile-danger-desc">
+                  Deactivating hides your listings until you sign in again. Deleting
+                  permanently removes your seller account and listings.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="seller-profile-section-content">
+                <div className="seller-profile-danger-actions">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="seller-profile-deactivate-btn"
+                    onClick={() => setShowDeactivateConfirm(true)}
+                  >
+                    Deactivate Account
+                  </Button>
+                  <Button
+                    type="button"
+                    className="seller-profile-delete-btn"
+                    onClick={() => setShowDeleteConfirm(true)}
+                  >
+                    Delete Account
+                  </Button>
+                </div>
+                <p className="seller-profile-danger-footnote">
+                  By deleting your account, you agree that Relux Hub may retain
+                  transaction records for tax and legal purposes as per the Privacy
+                  Policy.
+                </p>
               </CardContent>
             </Card>
 
@@ -428,6 +484,100 @@ function SellerProfileSection() {
             </Card>
           </>
         )}
+
+      {showDeactivateConfirm && (
+        <div
+          className="profile-logout-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="seller-deactivate-account-title"
+          onClick={() => setShowDeactivateConfirm(false)}
+        >
+          <Card
+            className="profile-logout-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <CardHeader className="profile-logout-modal-header">
+              <CardTitle
+                id="seller-deactivate-account-title"
+                className="profile-logout-modal-title"
+              >
+                Deactivate account?
+              </CardTitle>
+              <CardDescription className="profile-logout-modal-description">
+                Your listings will be hidden until you sign in and reactivate your account.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="profile-logout-modal-actions">
+              <Button
+                type="button"
+                variant="ghost"
+                className="profile-logout-cancel-btn"
+                onClick={() => setShowDeactivateConfirm(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                className="profile-logout-confirm-btn"
+                onClick={() => {
+                  setShowDeactivateConfirm(false);
+                  navigate("/login");
+                }}
+              >
+                Deactivate
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {showDeleteConfirm && (
+        <div
+          className="profile-logout-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="seller-delete-account-title"
+          onClick={() => setShowDeleteConfirm(false)}
+        >
+          <Card
+            className="profile-logout-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <CardHeader className="profile-logout-modal-header">
+              <CardTitle
+                id="seller-delete-account-title"
+                className="profile-logout-modal-title"
+              >
+                Delete account permanently?
+              </CardTitle>
+              <CardDescription className="profile-logout-modal-description">
+                This action cannot be undone. Your listings and seller data will be removed.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="profile-logout-modal-actions">
+              <Button
+                type="button"
+                variant="ghost"
+                className="profile-logout-cancel-btn"
+                onClick={() => setShowDeleteConfirm(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                className="seller-profile-delete-confirm-btn"
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                  navigate("/login");
+                }}
+              >
+                Delete Account
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      )}
       </div>
   );
 }
@@ -511,10 +661,6 @@ const SellerProfile = () => {
           <SellerSupportCenter variant="seller" />
         </>
       );
-    }
-
-    if (activeSection === "settings") {
-      return <SellerSettingsContent />;
     }
 
     if (activeSection === "profile") {

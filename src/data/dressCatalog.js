@@ -2,6 +2,16 @@ import {
   SELLER_AUCTION_BY_ID,
   SELLER_LISTING_PRODUCTS,
 } from "./sellerListingsData";
+import {
+  LISTING_SIZE_OPTIONS,
+  normalizeListingCondition,
+  normalizeListingSize,
+} from "./listingSpecs";
+import {
+  getSellerListingOverride,
+  getSellerListingIdsForCategory,
+  mapSellerListingToProduct,
+} from "./sellerListingStore";
 
 const parsePrice = (value) => {
   if (typeof value === "number") return value;
@@ -166,6 +176,38 @@ const AUCTION_BY_ID = {
   ...SELLER_AUCTION_BY_ID,
 };
 
+const getCategoryBreadcrumb = (categoryLabel) => {
+  if (categoryLabel === "Male Fashion") return "Men";
+  if (categoryLabel === "Kids Fashion") return "Kids";
+  return "Women";
+};
+
+const resolveDressConditionLabel = (dress, listingType = dress.listingType) => {
+  if (dress.listingCondition) return dress.listingCondition;
+  const label = dress.conditionStatus ?? dress.condition;
+  if (label) return normalizeListingCondition(label);
+  return "Like New";
+};
+
+export const getDressConditionLabel = (dress) =>
+  dress.conditionLabel ??
+  resolveDressConditionLabel(dress, dress.listingType);
+
+const applyListingSpecs = (dress) => {
+  const listingSize = normalizeListingSize(dress.listingSize ?? dress.sizes?.[0]);
+  const listingCondition = resolveDressConditionLabel(dress, dress.listingType);
+
+  return {
+    listingSize,
+    listingCondition,
+    conditionLabel: listingCondition,
+    conditionStatus: listingCondition,
+    condition: listingCondition,
+    sizes: LISTING_SIZE_OPTIONS,
+    sizeOptions: LISTING_SIZE_OPTIONS,
+  };
+};
+
 const enrichResaleDress = (dress) => {
   const price = parsePrice(dress.price);
   const estimatedValue =
@@ -186,7 +228,6 @@ const enrichResaleDress = (dress) => {
     listingType: "resale",
     gallery,
     mainImage: gallery[0],
-    conditionStatus: dress.conditionStatus ?? "Excellent Condition",
     rating: dress.rating ?? 5.0,
     estimatedValue,
     estimatedValueFormatted: formatRs(estimatedValue),
@@ -199,10 +240,12 @@ const enrichResaleDress = (dress) => {
     auctionRules: dress.auctionRules ?? AUCTION_RULES,
     breadcrumbCategory:
       auction.breadcrumbCategory ?? dress.breadcrumbCategory ?? dress.categoryLabel ?? "Pre-owned",
+    categoryBreadcrumb: dress.categoryBreadcrumb ?? getCategoryBreadcrumb(dress.categoryLabel),
     countdown: auction.countdown ?? dress.countdown ?? { hours: 12, minutes: 0, seconds: 0 },
     currentBidFormatted: formatRs(currentBid),
     minimumNextBidFormatted: formatRs(minimumNextBid),
     priceFormatted: formatRs(price),
+    ...applyListingSpecs(dress),
   };
 };
 
@@ -363,12 +406,7 @@ const enrichRentalDress = (dress) => {
     card.securityDeposit ?? dress.securityDeposit ?? dress.fullDressPrice ?? 45000;
   const mainImage = card.image ?? dress.image ?? RENTAL_GALLERY[0];
   const gallery = dress.gallery ?? [mainImage, ...RENTAL_GALLERY.slice(1, 4)];
-  const categoryBreadcrumb =
-    dress.categoryLabel === "Male Fashion"
-      ? "Men"
-      : dress.categoryLabel === "Kids Fashion"
-        ? "Kids"
-        : "Women";
+  const categoryBreadcrumb = dress.categoryBreadcrumb ?? getCategoryBreadcrumb(dress.categoryLabel);
 
   return {
     ...dress,
@@ -381,8 +419,6 @@ const enrichRentalDress = (dress) => {
     securityDepositFormatted: formatRs(securityDeposit),
     fullDressPrice: securityDeposit,
     fullDressPriceFormatted: formatRs(securityDeposit),
-    condition: dress.condition ?? "Excellent",
-    sizes: dress.sizes ?? ["XS", "S", "M", "L", "XL"],
     fabric:
       dress.fabric ?? "Pure Organza Silk with Zardozi and Tilla embroidery.",
     occasion: dress.occasion ?? "Wedding, Reception, Bridal Shower.",
@@ -403,6 +439,7 @@ const enrichRentalDress = (dress) => {
       length: "58 inches",
       shoulder: "14.5 inches",
     },
+    ...applyListingSpecs(dress),
   };
 };
 
@@ -586,12 +623,51 @@ const PRODUCT_STYLES = {
   "cashmere-knit": "Formal",
 };
 
+const PRODUCT_MULTI_STYLES = {
+  "male-3": ["Party", "Traditional"],
+};
+
+const getProductPriceValue = (dress) => {
+  if (dress.listingType === "rent") {
+    return dress.dailyRate ?? parsePrice(dress.rentPrice) ?? 0;
+  }
+  return parsePrice(dress.price ?? dress.currentBid);
+};
+
+const productMatchesStyle = (product, style) => {
+  if (!style) return true;
+  const styles =
+    product.styles?.length > 0
+      ? product.styles
+      : product.style
+        ? [product.style]
+        : [];
+  return styles.includes(style);
+};
+
+const sortCategoryProducts = (products, sortBy) => {
+  if (sortBy === "price-low") {
+    return [...products].sort((a, b) => a.priceValue - b.priceValue);
+  }
+  if (sortBy === "price-high") {
+    return [...products].sort((a, b) => b.priceValue - a.priceValue);
+  }
+  if (sortBy === "newest") {
+    return [...products].sort(
+      (a, b) =>
+        new Date(b.updatedAt ?? 0).getTime() -
+        new Date(a.updatedAt ?? 0).getTime(),
+    );
+  }
+  return products;
+};
+
 const deriveBadge = (dress) => {
   if (dress.listingType === "rent") {
     return { badge: "Pristine", badgeVariant: "primary" };
   }
 
-  const condition = dress.conditionStatus ?? dress.condition ?? "";
+  const condition = dress.listingCondition ?? dress.conditionStatus ?? dress.condition ?? "";
   if (/brand new|never worn/i.test(condition)) {
     return { badge: "Brand New", badgeVariant: "primary" };
   }
@@ -609,7 +685,11 @@ const deriveBadge = (dress) => {
 };
 
 export const getDressById = (id) => {
-  const dress = ALL_PRODUCTS[id] ?? REFERENCE_DRESS;
+  const stored = getSellerListingOverride(id);
+  const catalogDress = ALL_PRODUCTS[id];
+  const dress = stored
+    ? { ...(catalogDress ?? {}), ...mapSellerListingToProduct(stored), id }
+    : (catalogDress ?? REFERENCE_DRESS);
 
   if (dress.listingType === "rent") {
     return enrichRentalDress(dress);
@@ -619,40 +699,68 @@ export const getDressById = (id) => {
 };
 
 export const toProductCardView = (dress) => {
-  const enriched = dress.mainImage ? dress : getDressById(dress.id);
+  const enriched = getDressById(dress.id);
   const { badge, badgeVariant } = deriveBadge(enriched);
+  const style = enriched.style ?? PRODUCT_STYLES[enriched.id];
+  const styles =
+    enriched.styles ??
+    PRODUCT_MULTI_STYLES[enriched.id] ??
+    (style ? [style] : []);
+  const priceValue = getProductPriceValue(enriched);
 
   return {
     id: enriched.id,
     brand: enriched.brand,
     title: enriched.title,
-    style: PRODUCT_STYLES[enriched.id],
+    style,
+    styles,
     listingType: enriched.listingType,
+    listingSize: enriched.listingSize,
+    listingCondition: enriched.listingCondition ?? getDressConditionLabel(enriched),
     price:
       enriched.listingType === "rent"
         ? enriched.dailyRateFormatted
         : enriched.priceFormatted,
+    priceValue,
     badge,
     badgeVariant,
     image: enriched.mainImage ?? enriched.image,
     categoryPath: enriched.categoryPath,
     seller: enriched.seller ?? enriched.sellerName,
+    updatedAt: enriched.updatedAt,
   };
 };
 
+const getDressIdsForCategory = (categoryPath) => {
+  const catalogIds = Object.values(ALL_PRODUCTS)
+    .filter((product) => product.categoryPath === categoryPath)
+    .map((product) => product.id);
+  const sellerIds = getSellerListingIdsForCategory(categoryPath);
+  return [...new Set([...catalogIds, ...sellerIds])];
+};
+
 export const getDressesByCategory = (categoryPath, filters = {}) => {
-  const { listingType, style, search } = filters;
+  const { listingType, style, size, priceMax, search, sortBy } = filters;
   const query = search?.trim().toLowerCase() ?? "";
 
-  return Object.values(ALL_PRODUCTS)
-    .filter((product) => product.categoryPath === categoryPath)
-    .map((product) => getDressById(product.id))
+  const products = getDressIdsForCategory(categoryPath)
+    .map((id) => getDressById(id))
     .map(toProductCardView)
     .filter((product) => {
-      if (listingType && listingType !== "all" && product.listingType !== listingType) {
+      if (
+        listingType &&
+        listingType !== "all" &&
+        product.listingType !== listingType
+      ) {
         return false;
       }
-      if (style && product.style !== style) {
+      if (!productMatchesStyle(product, style)) {
+        return false;
+      }
+      if (size && product.listingSize !== size) {
+        return false;
+      }
+      if (priceMax != null && product.priceValue > priceMax) {
         return false;
       }
       if (
@@ -664,6 +772,8 @@ export const getDressesByCategory = (categoryPath, filters = {}) => {
       }
       return true;
     });
+
+  return sortCategoryProducts(products, sortBy);
 };
 
 export const hydrateBuyerOrder = (order) => {
@@ -726,18 +836,42 @@ export const hydrateSellerListing = (meta) => {
     brand: dress.brand,
     type: meta.type,
     typeVariant: meta.typeVariant,
-    size: meta.size,
+    size: meta.size ?? `Size ${dress.listingSize ?? "M"}`,
     price:
       dress.listingType === "rent"
         ? `${dress.dailyRateFormatted} / day`
         : isAuction
           ? `Current: ${dress.currentBidFormatted}`
           : dress.priceFormatted,
-    detail: dress.conditionStatus ?? dress.condition ?? meta.detail,
+    detail: dress.listingCondition ?? getDressConditionLabel(dress),
     status: meta.status,
     statusVariant: meta.statusVariant,
     image: dress.mainImage ?? dress.image,
     listingType: dress.listingType,
+  };
+};
+
+export const hydratePublishedSellerListing = (listing) => {
+  const dress = getDressById(listing.id);
+  const isRent = listing.listingType === "rent";
+  const isAuction = Boolean(listing.startingBid && listing.listingType === "sale");
+
+  return {
+    id: listing.id,
+    title: dress.title,
+    brand: dress.brand,
+    type: isRent ? "Rent" : isAuction ? "Auction" : "Sale",
+    typeVariant: isRent ? "rent" : isAuction ? "auction" : "sale",
+    size: `Size ${dress.listingSize ?? listing.listingSize ?? "M"}`,
+    price: isRent
+      ? `${dress.dailyRateFormatted} / day`
+      : dress.priceFormatted ?? formatRs(parsePrice(listing.salePrice)),
+    detail: getDressConditionLabel(dress),
+    status: "Active",
+    statusVariant: "active",
+    image: dress.mainImage ?? dress.image,
+    listingType: dress.listingType,
+    isPublished: true,
   };
 };
 

@@ -4,7 +4,6 @@ import {
   ArrowRight,
   BadgeCheck,
   CheckCircle2,
-  ChevronRight,
   Heart,
   Lock,
   Sparkles,
@@ -13,6 +12,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatPkr } from "@/data/dressCatalog";
+import { DressDetailsBreadcrumb } from "./dressDetailsBreadcrumb";
+import { DressFitConditionSection } from "./dressFitCondition";
 import "./rentalDressDetails.css";
 
 const REVIEWS = [
@@ -52,7 +53,7 @@ const RentalDressDetails = ({ dress }) => {
   const navigate = useNavigate();
   const defaults = useMemo(() => getDefaultDates(), []);
   const [activeImage, setActiveImage] = useState(0);
-  const [selectedSize, setSelectedSize] = useState(dress.sizes[1] ?? dress.sizes[0] ?? "S");
+  const [selectedSize, setSelectedSize] = useState(dress.listingSize ?? "M");
   const [rentStart, setRentStart] = useState(defaults.start);
   const [rentEnd, setRentEnd] = useState(defaults.end);
   const [favorited, setFavorited] = useState(false);
@@ -70,34 +71,13 @@ const RentalDressDetails = ({ dress }) => {
 
   return (
     <div className="rental-details-page">
-      <nav className="rental-details-breadcrumb" aria-label="Breadcrumb">
-        <ol>
-          <li>
-            <Link to="/home">Home</Link>
-          </li>
-          <li className="rental-details-breadcrumb-sep" aria-hidden="true">
-            <ChevronRight size={14} />
-          </li>
-          <li>
-            <Link to={dress.categoryPath ?? "/categories"}>{dress.categoryBreadcrumb}</Link>
-          </li>
-          <li className="rental-details-breadcrumb-sep" aria-hidden="true">
-            <ChevronRight size={14} />
-          </li>
-          <li>
-            <Link to={`${dress.categoryPath}?type=rent`}>Rental Dresses</Link>
-          </li>
-          <li className="rental-details-breadcrumb-sep" aria-hidden="true">
-            <ChevronRight size={14} />
-          </li>
-          <li>Dress Details</li>
-        </ol>
-      </nav>
+      <DressDetailsBreadcrumb dress={dress} listingType="rent" />
 
       <div className="rental-details-hero">
         <div className="rental-details-gallery">
           <div className="rental-details-main-image">
             <img alt={dress.title} src={gallery[activeImage]} />
+            <span className="rental-details-condition-badge">{dress.listingCondition}</span>
             <span className="rental-details-rent-badge">Available for Rent</span>
           </div>
           <div className="rental-details-thumbs">
@@ -139,39 +119,13 @@ const RentalDressDetails = ({ dress }) => {
             </p>
           </div>
 
-          <div className="rental-details-attributes">
-            <div>
-              <p className="rental-details-attr-label">Condition</p>
-              <p className="rental-details-attr-value">{dress.condition}</p>
-            </div>
-          </div>
-
-          <div>
-            <div className="rental-details-size-header">
-              <p className="rental-details-attr-label">Select Size</p>
-              <button
-                type="button"
-                className="rental-details-size-guide-link"
-                onClick={scrollToSizeGuide}
-              >
-                Size Guide
-              </button>
-            </div>
-            <div className="rental-details-sizes">
-              {dress.sizes.map((size) => (
-                <button
-                  key={size}
-                  type="button"
-                  className={`rental-details-size-btn ${
-                    selectedSize === size ? "rental-details-size-btn--active" : ""
-                  }`}
-                  onClick={() => setSelectedSize(size)}
-                >
-                  {size}
-                </button>
-              ))}
-            </div>
-          </div>
+          <DressFitConditionSection
+            dress={dress}
+            selectedSize={selectedSize}
+            onSizeChange={setSelectedSize}
+            allowSizeSelect
+            onSizeGuideClick={scrollToSizeGuide}
+          />
 
           <div className="rental-details-booking">
             <div className="rental-details-dates">

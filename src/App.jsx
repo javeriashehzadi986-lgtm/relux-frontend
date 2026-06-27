@@ -111,7 +111,7 @@ function App() {
           />
           <Route
             path="/settings"
-            element={<Navigate to="/sellerProfile?section=settings" replace />}
+            element={<Navigate to="/sellerProfile" replace />}
           />
 
           <Route path="/profile" element={<Profile />} />

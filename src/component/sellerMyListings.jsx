@@ -24,19 +24,30 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { SELLER_LISTING_META } from "@/data/sellerListingsData";
-import { hydrateSellerListing } from "@/data/dressCatalog";
+import {
+  hydratePublishedSellerListing,
+  hydrateSellerListing,
+} from "@/data/dressCatalog";
+import { loadSellerListings } from "@/data/sellerListingStore";
+import { useListingCatalog } from "@/hooks/useListingCatalog";
 import "./sellerMyListings.css";
 
 const summaryCards = [
   { label: "Active", value: "24", variant: "primary", filter: "Active" },
-  { label: "Sale", value: "12", variant: "secondary", filter: "Sale" },
   { label: "Rent", value: "08", variant: "secondary", filter: "Rent" },
   { label: "Auctions", value: "04", variant: "tertiary", filter: "Auctions" },
 ];
 
-const filterChips = ["All", "Sale", "Rent", "Auctions"];
+const filterChips = ["All", "Rent", "Auctions"];
 
-const INITIAL_LISTINGS = SELLER_LISTING_META.map(hydrateSellerListing);
+function buildSellerListings() {
+  const staticIds = new Set(SELLER_LISTING_META.map((meta) => meta.dressId));
+  const published = Object.values(loadSellerListings())
+    .filter((listing) => !staticIds.has(listing.id))
+    .map(hydratePublishedSellerListing);
+
+  return [...published, ...SELLER_LISTING_META.map(hydrateSellerListing)];
+}
 
 function ListingActionsMenu({
   item,
@@ -165,12 +176,17 @@ function ListingActionsMenu({
 }
 
 export function SellerMyListingsContent() {
-  const [listings, setListings] = useState(INITIAL_LISTINGS);
+  const catalogRevision = useListingCatalog();
+  const [listings, setListings] = useState(() => buildSellerListings());
   const [activeFilter, setActiveFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [openMenuId, setOpenMenuId] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deactivateTarget, setDeactivateTarget] = useState(null);
+
+  useEffect(() => {
+    setListings(buildSellerListings());
+  }, [catalogRevision]);
 
   const deleteListing = listings.find((item) => item.id === deleteTarget);
   const deactivateListing = listings.find((item) => item.id === deactivateTarget);
@@ -214,7 +230,6 @@ export function SellerMyListingsContent() {
   const filteredListings = useMemo(() => {
     const filterMap = {
       All: null,
-      Sale: "Sale",
       Rent: "Rent",
       Auctions: "Auction",
     };

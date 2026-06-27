@@ -1,0 +1,84 @@
+.dress-fit-condition {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.25rem 0;
+  border-top: 1px solid #eceae8;
+  border-bottom: 1px solid #eceae8;
+}
+
+.dress-fit-condition-title {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #303333;
+}
+
+.dress-fit-condition-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.dress-fit-condition-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.dress-fit-condition-size-guide {
+  padding: 0;
+  border: none;
+  background: none;
+  color: #31685d;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.dress-fit-condition-label {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #5d605f;
+}
+
+.dress-fit-condition-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.dress-fit-condition-chip {
+  min-height: 2.25rem !important;
+  padding: 0 0.875rem !important;
+  border-radius: 9999px !important;
+  border-color: #d6d3d1 !important;
+  background: #ffffff !important;
+  color: #303333 !important;
+  font-size: 0.8125rem !important;
+  font-weight: 600 !important;
+}
+
+.dress-fit-condition-chip.is-active {
+  border-color: #31685d !important;
+  background: #eef5ef !important;
+  color: #31685d !important;
+}
+
+.dress-fit-condition-chip.is-disabled {
+  opacity: 0.35;
+  cursor: not-allowed !important;
+}
+
+.dress-fit-condition-chip.is-readonly.is-active {
+  cursor: default !important;
+}
+
+.dress-fit-condition-chip.is-readonly:not(.is-active) {
+  opacity: 0.45;
+}

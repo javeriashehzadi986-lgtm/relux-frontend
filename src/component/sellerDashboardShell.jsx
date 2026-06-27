@@ -4,7 +4,6 @@ import {
   ClipboardList,
   ShoppingBag,
   HelpCircle,
-  Settings,
   User,
   LogOut,
 } from "lucide-react";
@@ -22,11 +21,10 @@ const SIDEBAR_ITEMS = [
   { id: "listings", label: "My Listings", icon: ClipboardList, to: "/sellerProfile?section=listings" },
   { id: "orders", label: "Orders & Requests", icon: ShoppingBag, to: "/sellerProfile?section=orders" },
   { id: "support", label: "Support Center", icon: HelpCircle, to: "/sellerProfile?section=support" },
-  { id: "settings", label: "Settings", icon: Settings, to: "/sellerProfile?section=settings" },
   { id: "profile", label: "My Profile", icon: User, to: "/sellerProfile" },
 ];
 
-const WIDE_SECTIONS = new Set(["listings", "orders", "support", "settings"]);
+const WIDE_SECTIONS = new Set(["listings", "orders", "support"]);
 
 export function SellerDashboardShell({ activeSection = "listings", children }) {
   const navigate = useNavigate();

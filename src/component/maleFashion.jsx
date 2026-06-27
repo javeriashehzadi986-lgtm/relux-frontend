@@ -6,122 +6,58 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import "./maleFashion.css";
-import { STYLE_CATEGORIES } from "@/data/styleCategories";
+import { getDressesByCategory } from "@/data/dressCatalog";
+import { LISTING_SIZE_OPTIONS } from "@/data/listingSpecs";
+import { getStyleOptionsForCategory } from "@/data/styleCategories";
+import { useListingCatalog } from "@/hooks/useListingCatalog";
 
-const STYLE_FILTERS = STYLE_CATEGORIES.map((style) =>
-  style === "Bridal" ? "Groom" : style
-);
-
-const SIZES = ["S", "M", "L", "XL"];
-
-const PRODUCTS = [
-  {
-    id: "male-1",
-    brand: "Deepak Perwani",
-    title: "Midnight Velvet Sherwani",
-    style: "Groom",
-    listingType: "rent",
-    price: "Rs. 7,000",
-    badge: "Like New",
-    badgeVariant: "primary",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBm9Dz5PJZZdS9RkLNJkkpAdAC8YptD1AtAK2ClUVixihYYs_BjsHxT-VzgKKt-TzDF8jzC0X6SuUpC_bQjaJFiNdlBcv7vayPOW4snRGYg8DCY4kyFSakBn6uvd84zP2KcFNTycDIvv063KAIzLY6IZbhbiH6AAK4IquoYgvppg_k8NeNhvuoGBrIwdJfKRcdlt0zAO5W9Bse0yof9I20mQecQuJVZaPP4TMgY4-ZgmmNySNRqtI6TAauth1NdwdXUg-BdPHwQdfiP",
-  },
-  {
-    id: "male-2",
-    brand: "Republic by Omar Farooq",
-    title: "Charcoal Italian Wool Suit",
-    style: "Formal",
-    listingType: "resale",
-    price: "Rs. 42,000",
-    badge: "Excellent",
-    badgeVariant: "secondary",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuB82Zbg2Ch_SZ5m2n60FQX76_RhFiEEfyOXKH1S-1I2wCQus6u5Ix7KK_zD8XIfTpNPG0MsLWZ5KXKj9aiLdTE-qW-4owhklrrp9fgQVoC7YEHZLmn1N0d_7Ht8XTU5z7Xl9w3JpHiVgrG-2kz62QsERr8ccY54WAmqzgoJgDNFLUVgv1P30IWPT_zKulyCOTrTouU7M7Nt5usiLbFmEEkNLiw_UTsGCsAYoTp1nzQECpi4pjqTRdyH8_zA3nFXP_ON572uc_rBSd_N",
-  },
-  {
-    id: "male-3",
-    brand: "Nomi Ansari",
-    title: "Ivory Silk Waistcoat",
-    styles: ["Party", "Traditional"],
-    listingType: "rent",
-    price: "Rs. 5,000",
-    badge: "New with Tags",
-    badgeVariant: "primary",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCF5WgXJ9JhDVSA3zNBCOdn9lNZDOG9s5polxhKNCuMs0TtnjT7qIa9dUIxQSGfOMvfPWXGTU6v155SxyOBgGwDVPLlcQuXBDOxDoi0-b7efi15ogsJ4lfdts5QxJdcUkMDhA4OD7Vr03LOfrKttnBZ7bI4uoNlkemmXY5tEvs2yQ6lRkXxOq4sF8OM5t5CLmwblcC6D5HlHADplK0X5i5cyjowKaJ3ZcZv85G01J0_Ab7uXnlCGT-Kp6WjPOi5l4mg25ryB3CP1Msq",
-  },
-  {
-    id: "male-4",
-    brand: "Hassan Sheheryar Yasin (HSY)",
-    title: "Royal Jamawar Sherwani",
-    style: "Groom",
-    listingType: "resale",
-    price: "Rs. 95,000",
-    badge: "Excellent",
-    badgeVariant: "secondary",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBb3_ALdFPd5HGLtVL-cIEcGqcxxDGt0kuf-X5pfJOsd1xZRtPgWYF0yXRjqm38kGVj3MzV7l4caXI7wcEaVJrMCMEXF_v_dUFXQmJs8feQ2-_VsAr5xAw8rK3AUpa0j-Q_f7_3BjHfx2_NK77LRc50wzRDXl0mcJXfrNDAYnyciydbA9V-nF8yS_7O1qBLVl2wE7Dazwzc6bE4fDVBsT4D-eS7NfYsNkxzFV8rrWwJ7v4O6Ab3TqsGPqVEQndFBV2us5DujAXzA7f-",
-  },
-  {
-    id: "male-5",
-    brand: "Mohtaram",
-    title: "Satin Lapel Midnight Tuxedo",
-    style: "Party",
-    listingType: "rent",
-    price: "Rs. 8,000",
-    badge: "Like New",
-    badgeVariant: "primary",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBjYn_WmKVW8k7h_gK1CVNnRrkwuDb_3yJxE7Oly1EQHTrrLexAc9QYitj6GOJ4CsTVPBZr4HivaPqAIv0NefQF6UVpVoLRa9AEYp4eop-m-CMFvG4U4G0-yxXTk68j1tJHqnez-14FMUcQuO6jVMxzVq1yKW8E-K2Mhc1UElyBeKAaJCF-It5fEfpOmB3uJ6GNgZefZlOKF7ZDqnU0J-eBwURgk2yoaXh777zyJaLx2mBDe-VzRG-5_r_quOrQR_r2qlMkIc-n6mjF",
-  },
-  {
-    id: "male-6",
-    brand: "Faraz Manan",
-    title: "Black Raw Silk Prince Coat",
-    style: "Formal",
-    listingType: "resale",
-    price: "Rs. 110,000",
-    badge: "Excellent",
-    badgeVariant: "secondary",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAQaRXEDQg_VAfzy3K_0l080hT8vxQ-mKgynO3cELXGCiekZJ0ZVxIpvLmwFNwgNQs7oVyKYQ9omNljZkn1uzk7HS9ckvwafEW9ybPYyMzdWf-FI6jVDDJz1wsNwa2Y8Ar3mQw_ncDF6fMtemMk84IxDXoh_vAdp-kYBkpQhtHQ5jzjXoO0891SxUR2xDqY1RgQ1FmhCUxBwVXqgHcn2XU0pxdarKMCM4AAId2Duasu6bHSiLlAJlRVjfYgW55fcie64yT59JuKzz1x",
-  },
-];
+const STYLE_FILTERS = getStyleOptionsForCategory("Male");
+const SIZES = LISTING_SIZE_OPTIONS;
 
 const MaleFashion = () => {
   const [searchParams] = useSearchParams();
   const initialListingType = searchParams.get("type");
-  const [selectedStyle, setSelectedStyle] = useState("Formal");
+  const [selectedStyle, setSelectedStyle] = useState("");
   const [listingType, setListingType] = useState(
     initialListingType === "rent" || initialListingType === "resale"
       ? initialListingType
       : "all",
   );
-  const [selectedSize, setSelectedSize] = useState("M");
+  const [selectedSize, setSelectedSize] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("newest");
   const [currentPage, setCurrentPage] = useState(1);
   const [favorites, setFavorites] = useState(() => new Set());
+  const catalogRevision = useListingCatalog();
 
-  const filteredProducts = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
-    return PRODUCTS.filter((product) => {
-      if (listingType !== "all" && product.listingType !== listingType) return false;
-      const productStyles = product.styles ?? (product.style ? [product.style] : []);
-      if (selectedStyle && !productStyles.includes(selectedStyle)) {
-        return false;
-      }
-      if (!query) return true;
-      return (
-        product.title.toLowerCase().includes(query) ||
-        product.brand.toLowerCase().includes(query)
-      );
-    });
-  }, [searchQuery, listingType, selectedStyle]);
+  const filteredProducts = useMemo(
+    () =>
+      getDressesByCategory("/maleFashion", {
+        listingType,
+        style: selectedStyle,
+        size: selectedSize,
+        search: searchQuery,
+        sortBy,
+      }),
+    [
+      catalogRevision,
+      listingType,
+      selectedStyle,
+      selectedSize,
+      searchQuery,
+      sortBy,
+    ],
+  );
+
+  const clearFilters = () => {
+    setSelectedStyle("");
+    setSelectedSize("");
+    setListingType("all");
+    setSearchQuery("");
+  };
 
   const selectStyle = (style) => {
-    setSelectedStyle(style);
+    setSelectedStyle((current) => (current === style ? "" : style));
   };
 
   const toggleFavorite = (id) => {

@@ -503,6 +503,93 @@
   }
 
   .seller-profile-rating-summary {
-    align-items: flex-start;
+  align-items: flex-start;
+  }
+}
+
+.seller-profile-card--danger {
+  border: 1px solid rgba(186, 26, 26, 0.1);
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.seller-profile-danger-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.seller-profile-danger-icon {
+  color: #ba1a1a;
+  flex-shrink: 0;
+}
+
+.seller-profile-section-title--danger {
+  color: #ba1a1a;
+}
+
+.seller-profile-danger-desc {
+  margin: 0.75rem 0 0;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: #424841;
+}
+
+.seller-profile-danger-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.seller-profile-danger-footnote {
+  margin: 1.25rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: #5d605f;
+}
+
+.seller-profile-deactivate-btn {
+  flex: 1;
+  min-height: 3rem;
+  border: 1px solid #ba1a1a !important;
+  border-radius: 9999px !important;
+  background: transparent !important;
+  color: #ba1a1a !important;
+  font-weight: 700 !important;
+}
+
+.seller-profile-deactivate-btn:hover {
+  background: #ba1a1a !important;
+  color: #ffffff !important;
+}
+
+.seller-profile-delete-btn {
+  flex: 1;
+  min-height: 3rem;
+  border-radius: 9999px !important;
+  background: #ba1a1a !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  box-shadow: 0 10px 24px rgba(186, 26, 26, 0.1);
+}
+
+.seller-profile-delete-btn:hover {
+  background: #93000a !important;
+}
+
+.seller-profile-delete-confirm-btn {
+  min-height: 2.75rem !important;
+  border-radius: 9999px !important;
+  background: #ba1a1a !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+.seller-profile-delete-confirm-btn:hover {
+  background: #93000a !important;
+}
+
+@media (min-width: 640px) {
+  .seller-profile-danger-actions {
+    flex-direction: row;
   }
 }

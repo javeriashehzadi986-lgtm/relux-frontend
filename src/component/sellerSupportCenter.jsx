@@ -64,7 +64,7 @@ const SELLER_FAQS = [
       "Ensure your bank details are verified in the Stripe Connect dashboard. If payments are delayed, it may be due to verification requirements or hold periods for new sellers.",
     link: {
       label: "Payment settings",
-      to: "/sellerProfile?section=settings#seller-settings-payments",
+      to: "/sellerProfile#seller-profile-stripe",
     },
   },
 ];

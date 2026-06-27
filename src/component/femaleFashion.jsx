@@ -13,141 +13,73 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import "./femaleFashion.css";
-import { STYLE_CATEGORIES } from "@/data/styleCategories";
+import { getDressesByCategory } from "@/data/dressCatalog";
+import { LISTING_SIZE_OPTIONS } from "@/data/listingSpecs";
+import { getStyleOptionsForCategory } from "@/data/styleCategories";
+import { useListingCatalog } from "@/hooks/useListingCatalog";
 
-const STYLE_FILTERS = STYLE_CATEGORIES;
-
-const SIZES = ["XS", "S", "M", "L"];
-
-const PRODUCTS = [
-  {
-    id: "female-1",
-    brand: "Elan Luxury",
-    title: "Royal Emerald Bridal Lehenga",
-    style: "Bridal",
-    listingType: "rent",
-    price: "₨ 8,000",
-    badge: "Pristine",
-    badgeVariant: "primary",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCVh_ymJd-uGzRCLTDxmtnYgowXIFZWtD28_5edk15Gpg4mQoddsgPTHf1fk-2u_oFQqQ1gtj6xhbmpVSrzC15BhQvKsq2R_ChKwevbAcUNJCacjJU7E5xmD-C7v1NtcAl_lMXTCAD90dTQPcyujG6o3_m1PzYNME80G-fqj8c3D8p36AlEsVOrjOCC2h89kbWv2mRoid7mF-nJhsBYd8cfuPHT_Xkux1UE1DuFtMJDS_-OpnABEIPG9hYNpBhqfR3s4zHZlrK1cUlB",
-  },
-  {
-    id: "female-2",
-    brand: "Zaha Couture",
-    title: "Ethereal Lace Abaya",
-    style: "Bridal",
-    listingType: "resale",
-    price: "₨ 42,000",
-    badge: "Like New",
-    badgeVariant: "secondary",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuD9l5_S5Kw0tPO7ImG2ZCifAkI0JT8r4EKvjL-K7_quuPiR7HLBim3qJpa59SC8Agt_xkwZ6MgmPm2CBqqEgNY4Vij6YK01lGM8s5QuBsR607KgqyTRTeOzZkjGR8219b6etQp_PY3vwv_LPXWOM3Pi_RcUQTByHjkloMkMKxtSgoNFWAbwqPwm961bsAkT61WJ4DL8jY6hBCMo4USGAe8gXnv0Rt-oaW9NHtuH8B7BSKvYAJYilEShAp9g2hiyDNzhUfUyf9QZMmFF",
-  },
-  {
-    id: "female-3",
-    brand: "Faraz Manan",
-    title: "Blossom Organza Gown",
-    style: "Party",
-    listingType: "rent",
-    price: "₨ 7,000",
-    badge: "Pristine",
-    badgeVariant: "primary",
-    favorited: true,
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCSA-FJBW7OromnSWzZSaHuJAV_MxdaCIyzJjOHs7AgM4b_wO0uMO8sbTQPIHShD0bLtq47KqVXpUvrhEnxdaT5WAy3oql7kxmp--lvNe8-iOqVk9jiltunEjG51lwYO7nH6v-8acmcHh9udaov2s1KkOlHZdCdFf_WxvUt7cQV0HuCXd27mhz0aXeoKFeHNwUMxywEgZa1B_HdP4hFIxf5jL5hIFythWSOarf44Iwswbd66Blj5h0LDYjJ7Xr6FZ7yMucslpNcpam2",
-  },
-  {
-    id: "female-4",
-    brand: "Mohsin Naveed Ranjha",
-    title: "Velvet Heritage Kalidar",
-    style: "Traditional",
-    listingType: "resale",
-    price: "₨ 78,000",
-    badge: "Excellent",
-    badgeVariant: "excellent",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBhNdmYNvWHyRjwu1661dhd_ETKzt6rlAE2bcQ7ksK6Fw8t6lbIHIaKD2HqjeWEJ-A6TTpxGVX_nwtpT8eHDwejRE7C7PHD7O2W9UtRjCqJzqmbXxPSfZvInUQfruDnZdYzZEUiep3cg6bl7LHnc-EoGtgZD1vPCIf6SFoMJbbbym55Br4mLsUWKVtEUzpQaofausGFpvcIg5V3GCEEtDCBFAk1YgwlBHyJT832Euo-Wiy-62tYPNZfQP6tRECVSDMtsxU1QBanClpV",
-  },
-  {
-    id: "female-5",
-    brand: "Misha Lakhani",
-    title: "Champagne Silk Ensemble",
-    style: "Formal",
-    listingType: "rent",
-    price: "₨ 5,000",
-    badge: "Pristine",
-    badgeVariant: "primary",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBXt2_iQb3X05D6P02Pvy4ESkJJj9OVHETS3gSRosW5k6Nqu6s6cn3J4da9t-xu7KIIhDvoP3-S-wKVzt8Poims4tKB-Q_t7DQ4FxaNn_eCYL7tg23fRgK_znqK7OurgsU5WGEr6kMnZxxWOeniJjEvAAK_ppJvD9pdeX8Ed1pVoaOd9MxvhOtRuxAQ4tJ40Kj-7pbc1ZWZg0v8zHZBfqVt5nwNLAGrx0DJG-O6-PNXE7G4u-YwTUEv7ptGqfNSPIf2Sw55UrqFbuGr",
-  },
-  {
-    id: "female-6",
-    brand: "Sania Maskatiya",
-    title: "Midnight Sequin Sari",
-    style: "Party",
-    listingType: "resale",
-    price: "₨ 65,000",
-    badge: "Like New",
-    badgeVariant: "secondary",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAoBmnjhPkmcaBgjtBRhlPyinWu7MHuLIVAcbP-HuaNF5WYwITDkY9mkGhV46Del984wBsu1FW4OBWjXvarO5YxkX_FfgiDIolFOuW7YnWTtQChMbygTiZ84y_S8AXlWwk09OvIU3p3_nQIYLMhn5Td_ZxqAssJUJi4T_XpsTfpT_YdpKqB_2I1ibcos8s9AbdWjw4iW5kKs-pSFF-F3FoCXFERABgzrD1pqwtbLPPcHQHy3_1vfXg2Bxje4wEQnTUI7rRh-sByb8_c",
-  },
-];
+const STYLE_FILTERS = getStyleOptionsForCategory("Female");
+const SIZES = LISTING_SIZE_OPTIONS;
+const PRICE_MIN = 5000;
+const PRICE_MAX = 150000;
 
 const FemaleFashion = () => {
   const [searchParams] = useSearchParams();
   const initialListingType = searchParams.get("type");
-  const [selectedStyle, setSelectedStyle] = useState("Formal");
+  const [selectedStyle, setSelectedStyle] = useState("");
   const [listingType, setListingType] = useState(
     initialListingType === "rent" || initialListingType === "resale"
       ? initialListingType
       : "all",
   );
-  const [selectedSize, setSelectedSize] = useState("S");
+  const [selectedSize, setSelectedSize] = useState("");
+  const [priceMax, setPriceMax] = useState(PRICE_MAX);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("newest");
   const [currentPage, setCurrentPage] = useState(1);
-  const [activeTags, setActiveTags] = useState([
-    { id: "formal", label: "Formal" },
-    { id: "size-s", label: "Size: S" },
-  ]);
-  const [favorites, setFavorites] = useState(
-    () => new Set(PRODUCTS.filter((p) => p.favorited).map((p) => p.id))
+  const [activeTags, setActiveTags] = useState([]);
+  const [favorites, setFavorites] = useState(() => new Set());
+  const catalogRevision = useListingCatalog();
+
+  const filteredProducts = useMemo(
+    () =>
+      getDressesByCategory("/femaleFashion", {
+        listingType,
+        style: selectedStyle,
+        size: selectedSize,
+        priceMax,
+        search: searchQuery,
+        sortBy,
+      }),
+    [
+      catalogRevision,
+      listingType,
+      selectedStyle,
+      selectedSize,
+      priceMax,
+      searchQuery,
+      sortBy,
+    ],
   );
 
-  const filteredProducts = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
-    return PRODUCTS.filter((product) => {
-      if (listingType !== "all" && product.listingType !== listingType) return false;
-      if (selectedStyle && product.style !== selectedStyle) {
-        return false;
-      }
-      if (!query) return true;
-      return (
-        product.title.toLowerCase().includes(query) ||
-        product.brand.toLowerCase().includes(query)
-      );
-    });
-  }, [searchQuery, listingType, selectedStyle]);
-
   const selectStyle = (style) => {
-    setSelectedStyle(style);
+    setSelectedStyle((current) => (current === style ? "" : style));
   };
 
   const clearFilters = () => {
     setSelectedStyle("");
     setSelectedSize("");
     setListingType("all");
+    setPriceMax(PRICE_MAX);
+    setSearchQuery("");
     setActiveTags([]);
   };
 
   const removeTag = (id) => {
     setActiveTags((current) => current.filter((tag) => tag.id !== id));
-    if (id === "size-s") setSelectedSize("");
-    if (id === "formal") {
-      setSelectedStyle("");
-    }
+    if (id.startsWith("size-")) setSelectedSize("");
+    if (id.startsWith("style-")) setSelectedStyle("");
+    if (id.startsWith("type-")) setListingType("all");
   };
 
   const toggleFavorite = (id) => {
@@ -240,16 +172,21 @@ const FemaleFashion = () => {
               <p className="female-filter-label">Price Range</p>
               <input
                 type="range"
-                min="5000"
-                max="150000"
+                min={PRICE_MIN}
+                max={PRICE_MAX}
                 step="1000"
-                defaultValue="50000"
+                value={priceMax}
                 className="female-range-input"
                 aria-label="Price range"
+                onChange={(event) => setPriceMax(Number(event.target.value))}
               />
               <div className="female-range-labels">
-                <span>₨ 5,000</span>
-                <span>₨ 150,000+</span>
+                <span>₨ {PRICE_MIN.toLocaleString("en-PK")}</span>
+                <span>
+                  {priceMax >= PRICE_MAX
+                    ? `₨ ${PRICE_MAX.toLocaleString("en-PK")}+`
+                    : `₨ ${priceMax.toLocaleString("en-PK")}`}
+                </span>
               </div>
             </div>
 
@@ -264,7 +201,11 @@ const FemaleFashion = () => {
                     className={`female-size-btn ${
                       selectedSize === size ? "female-size-btn--active" : ""
                     }`}
-                    onClick={() => setSelectedSize(size)}
+                    onClick={() =>
+                      setSelectedSize((current) =>
+                        current === size ? "" : size,
+                      )
+                    }
                   >
                     {size}
                   </Button>

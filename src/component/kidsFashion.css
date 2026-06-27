@@ -26,12 +26,36 @@
   top: 6.5rem;
 }
 
+.kids-sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2.5rem;
+}
+
 .kids-sidebar-title {
-  margin: 0 0 1.5rem;
+  margin: 0;
   font-family: "Newsreader", serif;
   font-style: italic;
   font-size: 1.25rem;
   color: #31685d;
+}
+
+.kids-clear-btn {
+  padding: 0 !important;
+  min-height: auto !important;
+  font-size: 0.875rem !important;
+  font-weight: 400 !important;
+  color: rgba(48, 51, 51, 0.6) !important;
+  text-decoration: underline;
+  text-decoration-color: rgba(49, 104, 93, 0.3);
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.kids-clear-btn:hover {
+  color: #303333 !important;
+  background: transparent !important;
 }
 
 .kids-filter-block {
@@ -40,17 +64,17 @@
 
 .kids-filter-label {
   margin: 0 0 1rem;
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #5d605f;
+  color: rgba(48, 51, 51, 0.5);
 }
 
 .kids-filter-options {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.5rem;
 }
 
 .kids-filter-checkbox {
@@ -69,7 +93,7 @@
 .kids-filter-checkbox:hover .kids-filter-checkbox-text,
 .kids-filter-checkbox-text.is-active {
   color: #31685d;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .kids-type-tabs {
@@ -78,26 +102,26 @@
 }
 
 .kids-type-tab {
+  flex: 1;
   padding: 0.5rem 1rem !important;
   min-height: auto !important;
   border-radius: 9999px !important;
   font-size: 0.75rem !important;
   font-weight: 600 !important;
-  color: #5d605f !important;
+  color: rgba(48, 51, 51, 0.6) !important;
   background: transparent !important;
-  border: 1px solid #b0b2b1 !important;
+  border: 1px solid rgba(176, 178, 177, 0.3) !important;
   box-shadow: none !important;
 }
 
 .kids-type-tab:hover {
-  border-color: #31685d !important;
-  color: #31685d !important;
+  border-color: rgba(49, 104, 93, 0.4) !important;
 }
 
 .kids-type-tab--active {
-  border-color: #31685d !important;
+  border-color: rgba(49, 104, 93, 0.2) !important;
   color: #31685d !important;
-  background: transparent !important;
+  background: rgba(49, 104, 93, 0.05) !important;
 }
 
 .kids-range-input {
@@ -105,8 +129,8 @@
   height: 4px;
   accent-color: #31685d;
   cursor: pointer;
-  background: #e1e3e2;
-  border-radius: 0.5rem;
+  background: #e7e8e7;
+  border-radius: 9999px;
 }
 
 .kids-range-labels {
@@ -114,7 +138,7 @@
   justify-content: space-between;
   margin-top: 0.5rem;
   font-size: 0.75rem;
-  color: #5d605f;
+  color: rgba(48, 51, 51, 0.6);
 }
 
 .kids-size-grid {
@@ -124,26 +148,28 @@
 }
 
 .kids-size-btn {
-  width: 100%;
-  height: 2.5rem !important;
-  min-height: 2.5rem !important;
+  aspect-ratio: 1;
+  width: 100% !important;
+  min-height: auto !important;
   padding: 0 !important;
   border-radius: 0.5rem !important;
   font-size: 0.75rem !important;
   font-weight: 500 !important;
   color: #303333 !important;
-  background: #f3f4f3 !important;
-  border: none !important;
+  background: transparent !important;
+  border: 1px solid rgba(176, 178, 177, 0.3) !important;
   box-shadow: none !important;
 }
 
 .kids-size-btn:hover {
-  background: #b4eedf !important;
+  border-color: #31685d !important;
 }
 
 .kids-size-btn--active {
-  background: #31685d !important;
-  color: #e3fff6 !important;
+  border-color: #31685d !important;
+  color: #31685d !important;
+  background: rgba(49, 104, 93, 0.05) !important;
+  font-weight: 700 !important;
 }
 
 .kids-condition-select {
@@ -164,68 +190,106 @@
 .kids-main {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
 }
 
-.kids-header {
+.kids-toolbar {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  margin-bottom: 2.5rem;
 }
 
-.kids-title {
-  margin: 0;
-  font-family: "Newsreader", serif;
-  font-style: italic;
-  font-size: clamp(2.25rem, 5vw, 3rem);
-  font-weight: 400;
-  letter-spacing: -0.02em;
-  color: #235c51;
-}
-
-.kids-subtitle {
-  margin: 0.5rem 0 0;
-  font-size: 0.875rem;
-  color: #5d605f;
-}
-
-.kids-sort-wrap {
+.kids-search-wrap {
   position: relative;
   width: 100%;
-  max-width: 12rem;
+  max-width: 28rem;
 }
 
-.kids-sort-icon {
+.kids-search-icon {
   position: absolute;
-  left: 0.75rem;
+  left: 1rem;
   top: 50%;
   transform: translateY(-50%);
-  color: #5d605f;
+  color: rgba(48, 51, 51, 0.4);
   pointer-events: none;
 }
 
+.kids-search-wrap:focus-within .kids-search-icon {
+  color: #31685d;
+}
+
+.kids-search {
+  padding: 1rem 1rem 1rem 2.75rem !important;
+  border-radius: 9999px !important;
+  font-size: 0.875rem !important;
+  background: #f3f4f3 !important;
+  border: none !important;
+}
+
+.kids-search:focus {
+  background: #ffffff !important;
+  box-shadow: 0 0 0 2px rgba(49, 104, 93, 0.2) !important;
+}
+
+.kids-sort-wrap {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  align-self: flex-end;
+}
+
+.kids-sort-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(48, 51, 51, 0.4);
+}
+
+.kids-sort-select-wrap {
+  position: relative;
+}
+
 .kids-sort-select {
-  width: 100%;
-  padding: 0.75rem 2.5rem 0.75rem 2.5rem;
+  padding: 0.25rem 1.5rem 0.25rem 0.5rem;
   border: none;
-  border-radius: 9999px;
+  border-bottom: 1px solid #b0b2b1;
   font-size: 0.875rem;
+  font-weight: 600;
   color: #303333;
-  background: #ffffff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  background: transparent;
   cursor: pointer;
   outline: none;
   appearance: none;
 }
 
 .kids-sort-select:focus {
-  box-shadow: 0 0 0 1px rgba(49, 104, 93, 0.35);
+  border-bottom-color: #31685d;
+}
+
+.kids-sort-chevron {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(48, 51, 51, 0.4);
+  pointer-events: none;
 }
 
 .kids-products-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 2rem;
+}
+
+.kids-empty-state {
+  grid-column: 1 / -1;
+  margin: 2rem 0;
+  text-align: center;
+  color: #5d605f;
+  font-size: 0.9375rem;
 }
 
 .kids-product-card {
@@ -433,18 +497,6 @@
   color: #5d605f;
 }
 
-@media (min-width: 640px) {
-  .kids-header {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .kids-sort-wrap {
-    width: 12rem;
-  }
-}
-
 @media (min-width: 768px) {
   .kids-page {
     padding: 2rem 3rem 5rem;
@@ -457,6 +509,16 @@
 
   .kids-sidebar {
     width: 18rem;
+  }
+
+  .kids-toolbar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .kids-sort-wrap {
+    align-self: auto;
   }
 
   .kids-products-grid {

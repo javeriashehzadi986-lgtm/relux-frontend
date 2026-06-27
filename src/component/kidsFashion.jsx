@@ -1,126 +1,76 @@
 import React, { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { ArrowUpDown, ChevronLeft, ChevronRight, Heart } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Heart,
+  Search,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import "./kidsFashion.css";
-import { STYLE_CATEGORIES } from "@/data/styleCategories";
+import { getDressesByCategory } from "@/data/dressCatalog";
+import { LISTING_SIZE_OPTIONS } from "@/data/listingSpecs";
+import { getStyleOptionsForCategory } from "@/data/styleCategories";
+import { useListingCatalog } from "@/hooks/useListingCatalog";
 
-const STYLE_FILTERS = STYLE_CATEGORIES.filter((style) => style !== "Bridal");
+const CATEGORY_FILTERS = getStyleOptionsForCategory("Kids");
+const SIZES = LISTING_SIZE_OPTIONS;
 
-const SIZES = ["2-3y", "4-5y", "6-7y", "8-9y"];
-
-const CONDITION_OPTIONS = [
-  "All Conditions",
-  "Brand New",
-  "Like New",
-  "Gently Used",
-];
-
-const PRODUCTS = [
-  {
-    id: "kids-1",
-    title: "Emerald Velvet Lehenga",
-    style: "Traditional",
-    brand: "J. Kids Collection",
-    listingType: "rent",
-    price: "Rs. 5,000",
-    badge: "Like New",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBPAWrywHthD2bIuMRXjlirsHrAedKSqWI-mzFaO807fPcAcaY7KgVeI6CRbp8kjMxunVoWIu4hESh79OzHJwhvKllhtXd2ekZsfrnUKnUfwfdUYL-o8vM8VGHUm31aPIu0DF7guEAxU645MVyvbTCX1ReVpws7FRo-ztloti1iq9jmifrTUNu7RldvMf5DyBJKbT7MZ7th-Aw8ren-UiyEaf0whTZ6LqKcCKJm6W_2husgdLt9i28idwuttpPMAYjxbVm67_xgYuWI",
-  },
-  {
-    id: "kids-2",
-    title: "Mint Silk Sherwani",
-    style: "Traditional",
-    brand: "Maria B. Mini",
-    listingType: "resale",
-    price: "Rs. 18,500",
-    badge: "Brand New",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAz4exkEofpmXi50Vw6wY7bgfHZtOM5Dr4DuRutbc9SLWfqtAYaY7YCN7UtI9gbG-Ey2f7FAUSE3BMnvZK5SsDcnq_N4x1Da3oGwz8KjKED4zDr6dc7OwIK7yKpt7QFCdQvA26977PjBe_HM8-22bbqq7kNdfA8tLdV_hntoHw1B0KDvVLeupCs87zb-yDq48EqzUtrszsejNOQl0ZwwdzZxwfyqtKosFsyB20D69zbH-XSY9AhSNH3LArmDCdrmsxOA-kW_YnXBC3g",
-  },
-  {
-    id: "kids-3",
-    title: "Powder Pink Gharara",
-    style: "Party",
-    brand: "Agha Noor Kids",
-    listingType: "rent",
-    price: "Rs. 5,000",
-    badge: "Gently Used",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCTaodaeaveS1nq7pWfSfEZ9AOVpHOwFZ990Kgtsfu7Z-NqiwCJjW8z9uzoqS5EI4eFhPK9aqPMBx1QyM2Y6XwJvad7zH55RJuRD1-t7eipFiFJywpf6JJ_VVznR__rnK3YZ0kGVrOXCUpL24fNj5WUzu31DS6op79GhmR8-mfLoruak2JH8XpnesDutq8NQzzLS92By02t1Od3DRbmZqZjUYq1jT9TethW8uswCxLYdSLb_ZUtOJgSxYlEw6yVsleyn5YH5sX0OmI_",
-    favorited: true,
-  },
-  {
-    id: "kids-4",
-    title: "Mirror-Work Kurta",
-    style: "Traditional",
-    brand: "Sana Safinaz Kids",
-    listingType: "resale",
-    price: "Rs. 6,800",
-    badge: "Like New",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuByB2PgwX9GpWg2xk3YWxDpV6evW2fzOeV0cyc_-s8PxYK2VyxOYzWPNNxHVQDgPkhKRjads6J-0qk9iql0xRdereQOmlmxsI1NrZPqSp3-kP1wEXqg3S7f3K723kHk6Kt3ZjflKecKtHQ7reE8fJzzvcmne7AtI5idwkMTEKsoxy_QEBap5jhgcc41IIq3d5AS-om88voSa-dRphgnxoqGfHOGqvFciV2ySUgRG3alwCiTy5yOuj0Kb-6xIsp_4ofTlQ0dQ2-PRqJa",
-  },
-  {
-    id: "kids-5",
-    title: "Royal Prince Coat",
-    style: "Formal",
-    brand: "Hsy Kids",
-    listingType: "rent",
-    price: "Rs. 7,000",
-    badge: "Brand New",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAGHGBDkETCLdgHiyzRFRDE7FeVjj6peT5rKszrK5whuWLU4ftEgyP0NUS2bGBWPP8iH5NzfGP--3KGjTlj6vV2UkJBf4XyDTwJFHluvUzNErMtxG_WxaiuZG9UC_585aqTfAko5B7IGLfKA-p4HrLPLfPjK-dI0uSzZXQOH2vLEEZEyesA47JRkWrT6bJ2-BMxptXi2BYNExScnHsi7s4ddFlIjyg89SNSz52w3gL9IpQfLnWKgiI1-TfhSRwAff7zuiLLVk2z-Kbr",
-  },
-  {
-    id: "kids-6",
-    title: "Organza Dream Frock",
-    style: "Party",
-    brand: "Zainab Chottani Mini",
-    listingType: "resale",
-    price: "Rs. 22,000",
-    badge: "Like New",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAeDoZLfvpC2xIpJRpKksp_kudjGPhMGZu267CKS_CKPZQzOaAiLO1qygDIDINywMxm-ad95VVpzgCrDhDJRZ8XPjWcCyPK4K9vw8XesTonzn0C67TE8Ga6BwiGsn1QvzFaLfRgO2Or5wCEyzcH186tIEirb7RZ4vA1lBOogddJlhGIAAxFpaU5e1L_OG2rsYZDVPiSU62lxTHhdkA7MO16vwnTkoiQW-IVNhBqlu8MsVeUU_kw0ytnnbbnbtzSK3J4AVZGjWUdVPCL",
-  },
-];
+const PRICE_MIN = 500;
+const PRICE_MAX = 25000;
 
 const KidsFashion = () => {
   const [searchParams] = useSearchParams();
   const initialListingType = searchParams.get("type");
-  const [selectedStyle, setSelectedStyle] = useState("Party");
+  const [selectedCategory, setSelectedCategory] = useState("");
   const [listingType, setListingType] = useState(
     initialListingType === "rent" || initialListingType === "resale"
       ? initialListingType
       : "all",
   );
-  const [selectedSize, setSelectedSize] = useState("4-5y");
-  const [condition, setCondition] = useState("All Conditions");
+  const [priceMax, setPriceMax] = useState(PRICE_MAX);
+  const [selectedSize, setSelectedSize] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("newest");
   const [currentPage, setCurrentPage] = useState(1);
-  const [favorites, setFavorites] = useState(
-    () => new Set(PRODUCTS.filter((p) => p.favorited).map((p) => p.id))
-  );
+  const [favorites, setFavorites] = useState(() => new Set());
+  const catalogRevision = useListingCatalog();
 
   const filteredProducts = useMemo(
     () =>
-      PRODUCTS.filter((product) => {
-        if (listingType !== "all" && product.listingType !== listingType) {
-          return false;
-        }
-        if (selectedStyle && product.style !== selectedStyle) {
-          return false;
-        }
-        return true;
+      getDressesByCategory("/kidsFashion", {
+        listingType,
+        style: selectedCategory,
+        size: selectedSize,
+        priceMax,
+        search: searchQuery,
+        sortBy,
       }),
-    [listingType, selectedStyle]
+    [
+      catalogRevision,
+      selectedCategory,
+      selectedSize,
+      listingType,
+      priceMax,
+      sortBy,
+      searchQuery,
+    ],
   );
 
-  const selectStyle = (style) => {
-    setSelectedStyle(style);
+  const selectCategory = (category) => {
+    setSelectedCategory((current) => (current === category ? "" : category));
+  };
+
+  const clearFilters = () => {
+    setSelectedCategory("");
+    setSelectedSize("");
+    setListingType("all");
+    setPriceMax(PRICE_MAX);
+    setSearchQuery("");
   };
 
   const toggleFavorite = (id) => {
@@ -137,21 +87,31 @@ const KidsFashion = () => {
       <div className="kids-layout">
         <aside className="kids-sidebar">
           <div className="kids-sidebar-inner">
-            <h2 className="kids-sidebar-title">Refine Collection</h2>
+            <div className="kids-sidebar-header">
+              <h2 className="kids-sidebar-title">Filters</h2>
+              <Button
+                type="button"
+                variant="ghost"
+                className="kids-clear-btn"
+                onClick={clearFilters}
+              >
+                Clear All
+              </Button>
+            </div>
 
             <div className="kids-filter-block">
-              <p className="kids-filter-label">Style</p>
+              <p className="kids-filter-label">Category</p>
               <div className="kids-filter-options">
-                {STYLE_FILTERS.map((category) => (
+                {CATEGORY_FILTERS.map((category) => (
                   <label key={category} className="kids-filter-checkbox">
                     <Checkbox
-                      checked={selectedStyle === category}
-                      onCheckedChange={() => selectStyle(category)}
-                      aria-label={`Style: ${category}`}
+                      checked={selectedCategory === category}
+                      onCheckedChange={() => selectCategory(category)}
+                      aria-label={`Category: ${category}`}
                     />
                     <span
                       className={
-                        selectedStyle === category
+                        selectedCategory === category
                           ? "kids-filter-checkbox-text is-active"
                           : "kids-filter-checkbox-text"
                       }
@@ -164,7 +124,7 @@ const KidsFashion = () => {
             </div>
 
             <div className="kids-filter-block">
-              <p className="kids-filter-label">Availability</p>
+              <p className="kids-filter-label">Type</p>
               <div className="kids-type-tabs">
                 <Button
                   type="button"
@@ -203,21 +163,26 @@ const KidsFashion = () => {
               <p className="kids-filter-label">Price Range</p>
               <input
                 type="range"
-                min="500"
-                max="15000"
+                min={PRICE_MIN}
+                max={PRICE_MAX}
                 step="500"
-                defaultValue="7500"
+                value={priceMax}
                 className="kids-range-input"
                 aria-label="Price range"
+                onChange={(event) => setPriceMax(Number(event.target.value))}
               />
               <div className="kids-range-labels">
-                <span>Rs. 500</span>
-                <span>Rs. 15,000+</span>
+                <span>Rs. {PRICE_MIN.toLocaleString("en-PK")}</span>
+                <span>
+                  {priceMax >= PRICE_MAX
+                    ? `Rs. ${PRICE_MAX.toLocaleString("en-PK")}+`
+                    : `Rs. ${priceMax.toLocaleString("en-PK")}`}
+                </span>
               </div>
             </div>
 
             <div className="kids-filter-block">
-              <p className="kids-filter-label">Size (Age)</p>
+              <p className="kids-filter-label">Size</p>
               <div className="kids-size-grid">
                 {SIZES.map((size) => (
                   <Button
@@ -227,110 +192,109 @@ const KidsFashion = () => {
                     className={`kids-size-btn ${
                       selectedSize === size ? "kids-size-btn--active" : ""
                     }`}
-                    onClick={() => setSelectedSize(size)}
+                    onClick={() =>
+                      setSelectedSize((current) =>
+                        current === size ? "" : size,
+                      )
+                    }
                   >
                     {size}
                   </Button>
                 ))}
               </div>
             </div>
-
-            <div className="kids-filter-block">
-              <p className="kids-filter-label">Condition</p>
-              <select
-                className="kids-condition-select"
-                value={condition}
-                onChange={(e) => setCondition(e.target.value)}
-                aria-label="Condition"
-              >
-                {CONDITION_OPTIONS.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
-            </div>
           </div>
         </aside>
 
         <section className="kids-main">
-          <div className="kids-header">
-            <div>
-              <h1 className="kids-title">Little Curations</h1>
-              <p className="kids-subtitle">
-                Discover 142 premium traditional outfits for kids
-              </p>
+          <div className="kids-toolbar">
+            <div className="kids-search-wrap">
+              <Search className="kids-search-icon" size={18} aria-hidden="true" />
+              <Input
+                type="search"
+                className="kids-search"
+                placeholder="Search kids outfits, brands, styles..."
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+              />
             </div>
             <div className="kids-sort-wrap">
-              <ArrowUpDown
-                className="kids-sort-icon"
-                size={18}
-                aria-hidden="true"
-              />
-              <select
-                className="kids-sort-select"
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                aria-label="Sort products"
-              >
-                <option value="newest">Newest First</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
-                <option value="popularity">Popularity</option>
-              </select>
+              <span className="kids-sort-label">Sort By:</span>
+              <div className="kids-sort-select-wrap">
+                <select
+                  className="kids-sort-select"
+                  value={sortBy}
+                  onChange={(event) => setSortBy(event.target.value)}
+                  aria-label="Sort products"
+                >
+                  <option value="newest">Newest Arrivals</option>
+                  <option value="price-low">Price: Low to High</option>
+                  <option value="price-high">Price: High to Low</option>
+                  <option value="popularity">Popularity</option>
+                </select>
+                <ChevronDown
+                  className="kids-sort-chevron"
+                  size={16}
+                  aria-hidden="true"
+                />
+              </div>
             </div>
           </div>
 
           <div className="kids-products-grid">
-            {filteredProducts.map((product) => (
-              <Card key={product.id} className="kids-product-card">
-                <div className="kids-product-image-wrap">
-                  <img alt={product.title} src={product.image} />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className={`kids-favorite-btn ${
-                      favorites.has(product.id) ? "kids-favorite-btn--active" : ""
-                    }`}
-                    aria-label={`Save ${product.title}`}
-                    onClick={() => toggleFavorite(product.id)}
-                  >
-                    <Heart
-                      size={20}
-                      fill={favorites.has(product.id) ? "currentColor" : "none"}
-                    />
-                  </Button>
-                  <span className="kids-product-badge">{product.badge}</span>
-                </div>
-                <div className="kids-product-body">
-                  <div className="kids-product-top">
-                    <h3 className="kids-product-title">{product.title}</h3>
-                    <span className="kids-product-brand">{product.brand}</span>
-                  </div>
-                  <div className="kids-product-prices">
-                    <span className="kids-price-label">
-                      {product.listingType === "rent" ? "Rent" : "Resale"}
-                    </span>
-                    <span
-                      className={
-                        product.listingType === "rent"
-                          ? "kids-price-rental"
-                          : "kids-price-resale"
-                      }
+            {filteredProducts.length > 0 ? (
+              filteredProducts.map((product) => (
+                <Card key={product.id} className="kids-product-card">
+                  <div className="kids-product-image-wrap">
+                    <img alt={product.title} src={product.image} />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className={`kids-favorite-btn ${
+                        favorites.has(product.id) ? "kids-favorite-btn--active" : ""
+                      }`}
+                      aria-label={`Save ${product.title}`}
+                      onClick={() => toggleFavorite(product.id)}
                     >
-                      {product.price}
-                      {product.listingType === "rent" && (
-                        <small className="kids-price-suffix"> /day</small>
-                      )}
-                    </span>
+                      <Heart
+                        size={20}
+                        fill={favorites.has(product.id) ? "currentColor" : "none"}
+                      />
+                    </Button>
+                    <span className="kids-product-badge">{product.badge}</span>
                   </div>
-                  <Button type="button" className="kids-view-btn" asChild>
-                    <Link to={`/dress/${product.id}`}>View Details</Link>
-                  </Button>
-                </div>
-              </Card>
-            ))}
+                  <div className="kids-product-body">
+                    <div className="kids-product-top">
+                      <h3 className="kids-product-title">{product.title}</h3>
+                      <span className="kids-product-brand">{product.brand}</span>
+                    </div>
+                    <div className="kids-product-prices">
+                      <span className="kids-price-label">
+                        {product.listingType === "rent" ? "Rent" : "Resale"}
+                      </span>
+                      <span
+                        className={
+                          product.listingType === "rent"
+                            ? "kids-price-rental"
+                            : "kids-price-resale"
+                        }
+                      >
+                        {product.price}
+                        {product.listingType === "rent" && (
+                          <small className="kids-price-suffix"> /day</small>
+                        )}
+                      </span>
+                    </div>
+                    <Button type="button" className="kids-view-btn" asChild>
+                      <Link to={`/dress/${product.id}`}>View Details</Link>
+                    </Button>
+                  </div>
+                </Card>
+              ))
+            ) : (
+              <p className="kids-empty-state">No outfits match your filters.</p>
+            )}
           </div>
 
           <div className="kids-pagination">
