@@ -6,13 +6,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import "./maleFashion.css";
+import { STYLE_CATEGORIES } from "@/data/styleCategories";
 
-const CATEGORY_FILTERS = [
-  "Sherwanis",
-  "Waistcoats",
-  "Formal Suits",
-  "Casual Kurta",
-];
+const STYLE_FILTERS = STYLE_CATEGORIES.map((style) =>
+  style === "Bridal" ? "Groom" : style
+);
 
 const SIZES = ["S", "M", "L", "XL"];
 
@@ -21,6 +19,7 @@ const PRODUCTS = [
     id: "male-1",
     brand: "Deepak Perwani",
     title: "Midnight Velvet Sherwani",
+    style: "Groom",
     listingType: "rent",
     price: "Rs. 7,000",
     badge: "Like New",
@@ -32,6 +31,7 @@ const PRODUCTS = [
     id: "male-2",
     brand: "Republic by Omar Farooq",
     title: "Charcoal Italian Wool Suit",
+    style: "Formal",
     listingType: "resale",
     price: "Rs. 42,000",
     badge: "Excellent",
@@ -43,6 +43,7 @@ const PRODUCTS = [
     id: "male-3",
     brand: "Nomi Ansari",
     title: "Ivory Silk Waistcoat",
+    styles: ["Party", "Traditional"],
     listingType: "rent",
     price: "Rs. 5,000",
     badge: "New with Tags",
@@ -54,6 +55,7 @@ const PRODUCTS = [
     id: "male-4",
     brand: "Hassan Sheheryar Yasin (HSY)",
     title: "Royal Jamawar Sherwani",
+    style: "Groom",
     listingType: "resale",
     price: "Rs. 95,000",
     badge: "Excellent",
@@ -65,6 +67,7 @@ const PRODUCTS = [
     id: "male-5",
     brand: "Mohtaram",
     title: "Satin Lapel Midnight Tuxedo",
+    style: "Party",
     listingType: "rent",
     price: "Rs. 8,000",
     badge: "Like New",
@@ -76,6 +79,7 @@ const PRODUCTS = [
     id: "male-6",
     brand: "Faraz Manan",
     title: "Black Raw Silk Prince Coat",
+    style: "Formal",
     listingType: "resale",
     price: "Rs. 110,000",
     badge: "Excellent",
@@ -88,7 +92,7 @@ const PRODUCTS = [
 const MaleFashion = () => {
   const [searchParams] = useSearchParams();
   const initialListingType = searchParams.get("type");
-  const [selectedCategories, setSelectedCategories] = useState(["Formal Suits"]);
+  const [selectedStyle, setSelectedStyle] = useState("Formal");
   const [listingType, setListingType] = useState(
     initialListingType === "rent" || initialListingType === "resale"
       ? initialListingType
@@ -104,20 +108,20 @@ const MaleFashion = () => {
     const query = searchQuery.trim().toLowerCase();
     return PRODUCTS.filter((product) => {
       if (listingType !== "all" && product.listingType !== listingType) return false;
+      const productStyles = product.styles ?? (product.style ? [product.style] : []);
+      if (selectedStyle && !productStyles.includes(selectedStyle)) {
+        return false;
+      }
       if (!query) return true;
       return (
         product.title.toLowerCase().includes(query) ||
         product.brand.toLowerCase().includes(query)
       );
     });
-  }, [searchQuery, listingType]);
+  }, [searchQuery, listingType, selectedStyle]);
 
-  const toggleCategory = (category) => {
-    setSelectedCategories((current) =>
-      current.includes(category)
-        ? current.filter((item) => item !== category)
-        : [...current, category]
-    );
+  const selectStyle = (style) => {
+    setSelectedStyle(style);
   };
 
   const toggleFavorite = (id) => {
@@ -137,17 +141,18 @@ const MaleFashion = () => {
             <h2 className="male-sidebar-title">Filter By</h2>
 
             <div className="male-filter-block">
-              <p className="male-filter-label">Category</p>
+              <p className="male-filter-label">Style</p>
               <div className="male-filter-options">
-                {CATEGORY_FILTERS.map((category) => (
+                {STYLE_FILTERS.map((category) => (
                   <label key={category} className="male-filter-checkbox">
                     <Checkbox
-                      checked={selectedCategories.includes(category)}
-                      onCheckedChange={() => toggleCategory(category)}
+                      checked={selectedStyle === category}
+                      onCheckedChange={() => selectStyle(category)}
+                      aria-label={`Style: ${category}`}
                     />
                     <span
                       className={
-                        selectedCategories.includes(category)
+                        selectedStyle === category
                           ? "male-filter-checkbox-text is-active"
                           : "male-filter-checkbox-text"
                       }

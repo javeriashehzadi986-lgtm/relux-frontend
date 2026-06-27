@@ -1,12 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CloudUpload, Plus, X, Lightbulb } from "lucide-react";
+import { CloudUpload, Plus, X, Lightbulb, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import "./sellerDashboard.css";
 import "./sellerAddListing.css";
+import { getStyleOptionsForCategory } from "@/data/styleCategories";
 
 const clothingTypes = [
   "Select Type",
@@ -14,8 +15,9 @@ const clothingTypes = [
   "Shirt",
   "Knitwear",
   "Outerwear",
-  "Accessories",
 ];
+
+const categoryOptions = ["Female", "Male", "Kids"];
 
 const sizeOptions = ["XS", "S", "M", "L", "XL"];
 const conditionOptions = ["Like New", "Good", "Fair"];
@@ -51,21 +53,65 @@ function ChipGroup({ options, value, onChange }) {
   );
 }
 
+function SelectField({ id, label, value, onChange, children, optional }) {
+  return (
+    <Field className="add-listing-field add-listing-details-field">
+      <FieldLabel htmlFor={id}>
+        {label}
+        {optional ? (
+          <span className="add-listing-optional"> (Optional)</span>
+        ) : null}
+      </FieldLabel>
+      <div className="add-listing-details-select-wrap">
+        <select
+          id={id}
+          className="add-listing-details-select"
+          value={value}
+          onChange={onChange}
+        >
+          {children}
+        </select>
+        <ChevronDown size={18} className="add-listing-details-select-icon" aria-hidden="true" />
+      </div>
+    </Field>
+  );
+}
+
 const SellerAddListing = () => {
   const navigate = useNavigate();
   const [listingType, setListingType] = useState("sale");
-  const [biddingEnabled, setBiddingEnabled] = useState(false);
   const [size, setSize] = useState("S");
   const [condition, setCondition] = useState("Like New");
   const [title, setTitle] = useState("");
   const [clothingType, setClothingType] = useState("Dress");
+  const [mainCategory, setMainCategory] = useState("Female");
+  const [style, setStyle] = useState("Casual");
+  const [brand, setBrand] = useState("");
   const [description, setDescription] = useState("");
   const [salePrice, setSalePrice] = useState("");
   const [startingBid, setStartingBid] = useState("");
   const [minBid, setMinBid] = useState("");
   const [auctionEndDate, setAuctionEndDate] = useState("");
   const [rentPrice, setRentPrice] = useState("");
-  const [securityDeposit, setSecurityDeposit] = useState("");
+  const [itemPrice, setItemPrice] = useState("");
+
+  const styleOptions = useMemo(
+    () => getStyleOptionsForCategory(mainCategory),
+    [mainCategory],
+  );
+
+  useEffect(() => {
+    if (styleOptions.includes(style)) return;
+    if (style === "Bridal" && styleOptions.includes("Groom")) {
+      setStyle("Groom");
+    } else if (style === "Groom" && styleOptions.includes("Bridal")) {
+      setStyle("Bridal");
+    } else {
+      setStyle("Casual");
+    }
+  }, [mainCategory, styleOptions, style]);
+
+  const securityDeposit = itemPrice;
 
   const previewTitle = title.trim() || "Silk Midi Dress";
   const previewPrice =
@@ -135,29 +181,75 @@ const SellerAddListing = () => {
               </CardContent>
             </Card>
 
-            <Card className="add-listing-section-card">
-              <CardHeader className="add-listing-section-header">
-                <CardTitle className="add-listing-section-title">
-                  Clothing Details
-                </CardTitle>
+            <Card className="add-listing-section-card add-listing-details-card">
+              <CardHeader className="add-listing-section-header add-listing-details-header">
+                <div>
+                  <CardTitle className="add-listing-section-title">
+                    Clothing Details
+                  </CardTitle>
+                  <CardDescription className="add-listing-details-subtitle">
+                    Add accurate details so buyers can find and trust your listing.
+                  </CardDescription>
+                </div>
               </CardHeader>
-              <CardContent className="add-listing-section-content">
-                <FieldGroup className="add-listing-details-grid">
-                  <Field className="add-listing-field">
-                    <FieldLabel htmlFor="listing-title">Listing Title</FieldLabel>
-                    <Input
-                      id="listing-title"
-                      placeholder="e.g. Vintage Silk Midi Dress"
-                      className="add-listing-input"
-                      value={title}
-                      onChange={(e) => setTitle(e.target.value)}
-                    />
-                  </Field>
-                  <Field className="add-listing-field">
-                    <FieldLabel htmlFor="clothing-type">Clothing Type</FieldLabel>
-                    <select
+              <CardContent className="add-listing-section-content add-listing-details-content">
+                <section className="add-listing-details-block">
+                  <h3 className="add-listing-details-block-title">Basic Information</h3>
+                  <FieldGroup className="add-listing-details-grid add-listing-details-grid--basic">
+                    <Field className="add-listing-field add-listing-details-field add-listing-field--full">
+                      <FieldLabel htmlFor="listing-title">Listing Title</FieldLabel>
+                      <Input
+                        id="listing-title"
+                        placeholder="e.g. Vintage Silk Midi Dress"
+                        className="add-listing-details-input"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                      />
+                    </Field>
+                    <Field className="add-listing-field add-listing-details-field add-listing-field--full">
+                      <FieldLabel htmlFor="listing-description">Description</FieldLabel>
+                      <textarea
+                        id="listing-description"
+                        rows={4}
+                        placeholder="Tell buyers about the material, fit, and story of this piece..."
+                        className="add-listing-details-textarea"
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                      />
+                    </Field>
+                  </FieldGroup>
+                </section>
+
+                <section className="add-listing-details-block">
+                  <h3 className="add-listing-details-block-title">Item Specifications</h3>
+                  <FieldGroup className="add-listing-details-grid">
+                    <SelectField
+                      id="main-category"
+                      label="Main Category"
+                      value={mainCategory}
+                      onChange={(e) => setMainCategory(e.target.value)}
+                    >
+                      {categoryOptions.map((category) => (
+                        <option key={category} value={category}>
+                          {category}
+                        </option>
+                      ))}
+                    </SelectField>
+                    <SelectField
+                      id="listing-style"
+                      label="Style"
+                      value={style}
+                      onChange={(e) => setStyle(e.target.value)}
+                    >
+                      {styleOptions.map((option) => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                    </SelectField>
+                    <SelectField
                       id="clothing-type"
-                      className="add-listing-select"
+                      label="Clothing Type"
                       value={clothingType}
                       onChange={(e) => setClothingType(e.target.value)}
                     >
@@ -166,32 +258,43 @@ const SellerAddListing = () => {
                           {type}
                         </option>
                       ))}
-                    </select>
-                  </Field>
-                  <Field className="add-listing-field add-listing-field--full">
-                    <FieldLabel htmlFor="listing-description">Description</FieldLabel>
-                    <textarea
-                      id="listing-description"
-                      rows={4}
-                      placeholder="Tell buyers about the material, fit, and story of this piece..."
-                      className="add-listing-textarea"
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                    />
-                  </Field>
-                  <Field className="add-listing-field">
-                    <FieldLabel>Size</FieldLabel>
-                    <ChipGroup options={sizeOptions} value={size} onChange={setSize} />
-                  </Field>
-                  <Field className="add-listing-field">
-                    <FieldLabel>Condition</FieldLabel>
-                    <ChipGroup
-                      options={conditionOptions}
-                      value={condition}
-                      onChange={setCondition}
-                    />
-                  </Field>
-                </FieldGroup>
+                    </SelectField>
+                    <Field className="add-listing-field add-listing-details-field">
+                      <FieldLabel htmlFor="listing-brand">
+                        Brand <span className="add-listing-optional">(Optional)</span>
+                      </FieldLabel>
+                      <Input
+                        id="listing-brand"
+                        placeholder="Search brands..."
+                        className="add-listing-details-input"
+                        value={brand}
+                        onChange={(e) => setBrand(e.target.value)}
+                      />
+                    </Field>
+                  </FieldGroup>
+                </section>
+
+                <section className="add-listing-details-block add-listing-details-block--last">
+                  <h3 className="add-listing-details-block-title">Fit &amp; Condition</h3>
+                  <FieldGroup className="add-listing-details-grid add-listing-details-grid--chips">
+                    <Field className="add-listing-field add-listing-details-field">
+                      <FieldLabel>Size</FieldLabel>
+                      <div className="add-listing-details-chip-panel">
+                        <ChipGroup options={sizeOptions} value={size} onChange={setSize} />
+                      </div>
+                    </Field>
+                    <Field className="add-listing-field add-listing-details-field">
+                      <FieldLabel>Condition</FieldLabel>
+                      <div className="add-listing-details-chip-panel">
+                        <ChipGroup
+                          options={conditionOptions}
+                          value={condition}
+                          onChange={setCondition}
+                        />
+                      </div>
+                    </Field>
+                  </FieldGroup>
+                </section>
               </CardContent>
             </Card>
 
@@ -236,63 +339,53 @@ const SellerAddListing = () => {
                         className="add-listing-input"
                         value={salePrice}
                         onChange={(e) => setSalePrice(e.target.value)}
+                        required
                       />
                     </Field>
-                    <Field className="add-listing-field add-listing-field--toggle">
-                      <FieldLabel htmlFor="enable-bidding">Enable Bidding</FieldLabel>
-                      <button
-                        id="enable-bidding"
-                        type="button"
-                        role="switch"
-                        aria-checked={biddingEnabled}
-                        className={`add-listing-switch ${
-                          biddingEnabled ? "is-on" : ""
-                        }`}
-                        onClick={() => setBiddingEnabled((on) => !on)}
-                      >
-                        <span className="add-listing-switch-knob" />
-                      </button>
-                    </Field>
-                    {biddingEnabled && (
-                      <div className="add-listing-bidding-fields">
-                        <Field className="add-listing-field">
-                          <FieldLabel htmlFor="starting-bid">Starting Bid ($)</FieldLabel>
-                          <Input
-                            id="starting-bid"
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            placeholder="0.00"
-                            className="add-listing-input"
-                            value={startingBid}
-                            onChange={(e) => setStartingBid(e.target.value)}
-                          />
-                        </Field>
-                        <Field className="add-listing-field">
-                          <FieldLabel htmlFor="min-bid">Minimum Bid ($)</FieldLabel>
-                          <Input
-                            id="min-bid"
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            placeholder="0.00"
-                            className="add-listing-input"
-                            value={minBid}
-                            onChange={(e) => setMinBid(e.target.value)}
-                          />
-                        </Field>
-                        <Field className="add-listing-field">
-                          <FieldLabel htmlFor="auction-end">Auction End Date</FieldLabel>
-                          <Input
-                            id="auction-end"
-                            type="date"
-                            className="add-listing-input"
-                            value={auctionEndDate}
-                            onChange={(e) => setAuctionEndDate(e.target.value)}
-                          />
-                        </Field>
-                      </div>
-                    )}
+                    <div className="add-listing-bidding-fields">
+                      <p className="add-listing-bidding-note">
+                        Sale listings require bidding. Set your auction details below.
+                      </p>
+                      <Field className="add-listing-field">
+                        <FieldLabel htmlFor="starting-bid">Starting Bid ($)</FieldLabel>
+                        <Input
+                          id="starting-bid"
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          placeholder="0.00"
+                          className="add-listing-input"
+                          value={startingBid}
+                          onChange={(e) => setStartingBid(e.target.value)}
+                          required
+                        />
+                      </Field>
+                      <Field className="add-listing-field">
+                        <FieldLabel htmlFor="min-bid">Minimum Bid ($)</FieldLabel>
+                        <Input
+                          id="min-bid"
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          placeholder="0.00"
+                          className="add-listing-input"
+                          value={minBid}
+                          onChange={(e) => setMinBid(e.target.value)}
+                          required
+                        />
+                      </Field>
+                      <Field className="add-listing-field">
+                        <FieldLabel htmlFor="auction-end">Auction End Date</FieldLabel>
+                        <Input
+                          id="auction-end"
+                          type="date"
+                          className="add-listing-input"
+                          value={auctionEndDate}
+                          onChange={(e) => setAuctionEndDate(e.target.value)}
+                          required
+                        />
+                      </Field>
+                    </div>
                   </FieldGroup>
                 ) : (
                   <FieldGroup className="add-listing-pricing-grid">
@@ -307,23 +400,46 @@ const SellerAddListing = () => {
                         className="add-listing-input"
                         value={rentPrice}
                         onChange={(e) => setRentPrice(e.target.value)}
+                        required
                       />
                     </Field>
-                    <Field className="add-listing-field">
-                      <FieldLabel htmlFor="security-deposit">
-                        Security Deposit (Optional)
-                      </FieldLabel>
-                      <Input
-                        id="security-deposit"
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        placeholder="0.00"
-                        className="add-listing-input"
-                        value={securityDeposit}
-                        onChange={(e) => setSecurityDeposit(e.target.value)}
-                      />
-                    </Field>
+                    <div className="add-listing-bidding-fields add-listing-rent-deposit-fields">
+                      <p className="add-listing-bidding-note">
+                        Security deposit is required and must equal the full item price.
+                      </p>
+                      <Field className="add-listing-field">
+                        <FieldLabel htmlFor="item-price">Item Price ($)</FieldLabel>
+                        <Input
+                          id="item-price"
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          placeholder="0.00"
+                          className="add-listing-input"
+                          value={itemPrice}
+                          onChange={(e) => setItemPrice(e.target.value)}
+                          required
+                        />
+                        <p className="add-listing-field-hint">
+                          Enter the full value of the garment for insurance and deposit.
+                        </p>
+                      </Field>
+                      <Field className="add-listing-field">
+                        <FieldLabel htmlFor="security-deposit">Security Deposit ($)</FieldLabel>
+                        <Input
+                          id="security-deposit"
+                          type="number"
+                          className="add-listing-input add-listing-input--readonly"
+                          value={securityDeposit}
+                          readOnly
+                          tabIndex={-1}
+                          aria-readonly="true"
+                        />
+                        <p className="add-listing-field-hint">
+                          Automatically set to match the item price.
+                        </p>
+                      </Field>
+                    </div>
                   </FieldGroup>
                 )}
               </CardContent>
@@ -345,7 +461,11 @@ const SellerAddListing = () => {
               <CardContent className="add-listing-preview-body">
                 <div className="add-listing-preview-top">
                   <div>
-                    <p className="add-listing-preview-brand">{clothingType}</p>
+                    <p className="add-listing-preview-brand">
+                      {[brand.trim(), mainCategory, style, clothingType]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </p>
                     <h3 className="add-listing-preview-title">{previewTitle}</h3>
                   </div>
                   <p className="add-listing-preview-price">{previewPrice}</p>

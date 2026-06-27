@@ -13,15 +13,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import "./femaleFashion.css";
+import { STYLE_CATEGORIES } from "@/data/styleCategories";
 
-const CATEGORY_FILTERS = [
-  "Casual Wear",
-  "Formal",
-  "Luxury Designer",
-  "Party Wear",
-  "Bridal",
-  "Traditional",
-];
+const STYLE_FILTERS = STYLE_CATEGORIES;
 
 const SIZES = ["XS", "S", "M", "L"];
 
@@ -30,6 +24,7 @@ const PRODUCTS = [
     id: "female-1",
     brand: "Elan Luxury",
     title: "Royal Emerald Bridal Lehenga",
+    style: "Bridal",
     listingType: "rent",
     price: "₨ 8,000",
     badge: "Pristine",
@@ -41,6 +36,7 @@ const PRODUCTS = [
     id: "female-2",
     brand: "Zaha Couture",
     title: "Ethereal Lace Abaya",
+    style: "Bridal",
     listingType: "resale",
     price: "₨ 42,000",
     badge: "Like New",
@@ -52,6 +48,7 @@ const PRODUCTS = [
     id: "female-3",
     brand: "Faraz Manan",
     title: "Blossom Organza Gown",
+    style: "Party",
     listingType: "rent",
     price: "₨ 7,000",
     badge: "Pristine",
@@ -64,6 +61,7 @@ const PRODUCTS = [
     id: "female-4",
     brand: "Mohsin Naveed Ranjha",
     title: "Velvet Heritage Kalidar",
+    style: "Traditional",
     listingType: "resale",
     price: "₨ 78,000",
     badge: "Excellent",
@@ -75,6 +73,7 @@ const PRODUCTS = [
     id: "female-5",
     brand: "Misha Lakhani",
     title: "Champagne Silk Ensemble",
+    style: "Formal",
     listingType: "rent",
     price: "₨ 5,000",
     badge: "Pristine",
@@ -86,6 +85,7 @@ const PRODUCTS = [
     id: "female-6",
     brand: "Sania Maskatiya",
     title: "Midnight Sequin Sari",
+    style: "Party",
     listingType: "resale",
     price: "₨ 65,000",
     badge: "Like New",
@@ -98,7 +98,7 @@ const PRODUCTS = [
 const FemaleFashion = () => {
   const [searchParams] = useSearchParams();
   const initialListingType = searchParams.get("type");
-  const [selectedCategories, setSelectedCategories] = useState(["Luxury Designer"]);
+  const [selectedStyle, setSelectedStyle] = useState("Formal");
   const [listingType, setListingType] = useState(
     initialListingType === "rent" || initialListingType === "resale"
       ? initialListingType
@@ -109,7 +109,7 @@ const FemaleFashion = () => {
   const [sortBy, setSortBy] = useState("newest");
   const [currentPage, setCurrentPage] = useState(1);
   const [activeTags, setActiveTags] = useState([
-    { id: "luxury-designer", label: "Luxury Designer" },
+    { id: "formal", label: "Formal" },
     { id: "size-s", label: "Size: S" },
   ]);
   const [favorites, setFavorites] = useState(
@@ -120,24 +120,23 @@ const FemaleFashion = () => {
     const query = searchQuery.trim().toLowerCase();
     return PRODUCTS.filter((product) => {
       if (listingType !== "all" && product.listingType !== listingType) return false;
+      if (selectedStyle && product.style !== selectedStyle) {
+        return false;
+      }
       if (!query) return true;
       return (
         product.title.toLowerCase().includes(query) ||
         product.brand.toLowerCase().includes(query)
       );
     });
-  }, [searchQuery, listingType]);
+  }, [searchQuery, listingType, selectedStyle]);
 
-  const toggleCategory = (category) => {
-    setSelectedCategories((current) =>
-      current.includes(category)
-        ? current.filter((item) => item !== category)
-        : [...current, category]
-    );
+  const selectStyle = (style) => {
+    setSelectedStyle(style);
   };
 
   const clearFilters = () => {
-    setSelectedCategories([]);
+    setSelectedStyle("");
     setSelectedSize("");
     setListingType("all");
     setActiveTags([]);
@@ -146,10 +145,8 @@ const FemaleFashion = () => {
   const removeTag = (id) => {
     setActiveTags((current) => current.filter((tag) => tag.id !== id));
     if (id === "size-s") setSelectedSize("");
-    if (id === "luxury-designer") {
-      setSelectedCategories((current) =>
-        current.filter((item) => item !== "Luxury Designer")
-      );
+    if (id === "formal") {
+      setSelectedStyle("");
     }
   };
 
@@ -180,17 +177,18 @@ const FemaleFashion = () => {
             </div>
 
             <div className="female-filter-block">
-              <p className="female-filter-label">Category</p>
+              <p className="female-filter-label">Style</p>
               <div className="female-filter-options">
-                {CATEGORY_FILTERS.map((category) => (
+                {STYLE_FILTERS.map((category) => (
                   <label key={category} className="female-filter-checkbox">
                     <Checkbox
-                      checked={selectedCategories.includes(category)}
-                      onCheckedChange={() => toggleCategory(category)}
+                      checked={selectedStyle === category}
+                      onCheckedChange={() => selectStyle(category)}
+                      aria-label={`Style: ${category}`}
                     />
                     <span
                       className={
-                        selectedCategories.includes(category)
+                        selectedStyle === category
                           ? "female-filter-checkbox-text is-active"
                           : "female-filter-checkbox-text"
                       }

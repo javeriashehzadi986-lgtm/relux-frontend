@@ -5,14 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card } from "@/components/ui/card";
 import "./kidsFashion.css";
+import { STYLE_CATEGORIES } from "@/data/styleCategories";
 
-const CATEGORY_FILTERS = [
-  "Casual Wear",
-  "Party Wear",
-  "Traditional",
-  "Wedding",
-  "School Events",
-];
+const STYLE_FILTERS = STYLE_CATEGORIES.filter((style) => style !== "Bridal");
 
 const SIZES = ["2-3y", "4-5y", "6-7y", "8-9y"];
 
@@ -27,6 +22,7 @@ const PRODUCTS = [
   {
     id: "kids-1",
     title: "Emerald Velvet Lehenga",
+    style: "Traditional",
     brand: "J. Kids Collection",
     listingType: "rent",
     price: "Rs. 5,000",
@@ -37,6 +33,7 @@ const PRODUCTS = [
   {
     id: "kids-2",
     title: "Mint Silk Sherwani",
+    style: "Traditional",
     brand: "Maria B. Mini",
     listingType: "resale",
     price: "Rs. 18,500",
@@ -47,6 +44,7 @@ const PRODUCTS = [
   {
     id: "kids-3",
     title: "Powder Pink Gharara",
+    style: "Party",
     brand: "Agha Noor Kids",
     listingType: "rent",
     price: "Rs. 5,000",
@@ -58,6 +56,7 @@ const PRODUCTS = [
   {
     id: "kids-4",
     title: "Mirror-Work Kurta",
+    style: "Traditional",
     brand: "Sana Safinaz Kids",
     listingType: "resale",
     price: "Rs. 6,800",
@@ -68,6 +67,7 @@ const PRODUCTS = [
   {
     id: "kids-5",
     title: "Royal Prince Coat",
+    style: "Formal",
     brand: "Hsy Kids",
     listingType: "rent",
     price: "Rs. 7,000",
@@ -78,6 +78,7 @@ const PRODUCTS = [
   {
     id: "kids-6",
     title: "Organza Dream Frock",
+    style: "Party",
     brand: "Zainab Chottani Mini",
     listingType: "resale",
     price: "Rs. 22,000",
@@ -90,10 +91,7 @@ const PRODUCTS = [
 const KidsFashion = () => {
   const [searchParams] = useSearchParams();
   const initialListingType = searchParams.get("type");
-  const [selectedCategories, setSelectedCategories] = useState([
-    "Party Wear",
-    "Traditional",
-  ]);
+  const [selectedStyle, setSelectedStyle] = useState("Party");
   const [listingType, setListingType] = useState(
     initialListingType === "rent" || initialListingType === "resale"
       ? initialListingType
@@ -109,19 +107,20 @@ const KidsFashion = () => {
 
   const filteredProducts = useMemo(
     () =>
-      PRODUCTS.filter(
-        (product) =>
-          listingType === "all" || product.listingType === listingType
-      ),
-    [listingType]
+      PRODUCTS.filter((product) => {
+        if (listingType !== "all" && product.listingType !== listingType) {
+          return false;
+        }
+        if (selectedStyle && product.style !== selectedStyle) {
+          return false;
+        }
+        return true;
+      }),
+    [listingType, selectedStyle]
   );
 
-  const toggleCategory = (category) => {
-    setSelectedCategories((current) =>
-      current.includes(category)
-        ? current.filter((item) => item !== category)
-        : [...current, category]
-    );
+  const selectStyle = (style) => {
+    setSelectedStyle(style);
   };
 
   const toggleFavorite = (id) => {
@@ -141,17 +140,18 @@ const KidsFashion = () => {
             <h2 className="kids-sidebar-title">Refine Collection</h2>
 
             <div className="kids-filter-block">
-              <p className="kids-filter-label">Category</p>
+              <p className="kids-filter-label">Style</p>
               <div className="kids-filter-options">
-                {CATEGORY_FILTERS.map((category) => (
+                {STYLE_FILTERS.map((category) => (
                   <label key={category} className="kids-filter-checkbox">
                     <Checkbox
-                      checked={selectedCategories.includes(category)}
-                      onCheckedChange={() => toggleCategory(category)}
+                      checked={selectedStyle === category}
+                      onCheckedChange={() => selectStyle(category)}
+                      aria-label={`Style: ${category}`}
                     />
                     <span
                       className={
-                        selectedCategories.includes(category)
+                        selectedStyle === category
                           ? "kids-filter-checkbox-text is-active"
                           : "kids-filter-checkbox-text"
                       }

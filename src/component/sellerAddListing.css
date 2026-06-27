@@ -159,7 +159,7 @@
 .add-listing-pricing-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1.5rem;
+  gap: 1.25rem;
 }
 
 @media (min-width: 768px) {
@@ -172,8 +172,183 @@
   }
 }
 
+/* Clothing Details — polished section */
+.add-listing-details-card {
+  overflow: hidden;
+  border: 1px solid rgba(48, 104, 85, 0.08) !important;
+  box-shadow: 0 8px 32px rgba(48, 104, 85, 0.06) !important;
+}
+
+.add-listing-details-header {
+  padding-bottom: 0 !important;
+  border-bottom: 1px solid rgba(191, 201, 195, 0.35);
+}
+
+.add-listing-details-subtitle {
+  margin-top: 0.35rem !important;
+  font-size: 0.9rem !important;
+  line-height: 1.5;
+  color: #5d605f !important;
+}
+
+.add-listing-details-content {
+  padding: 0 !important;
+}
+
+.add-listing-details-block {
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(191, 201, 195, 0.3);
+}
+
+.add-listing-details-block--last {
+  border-bottom: none;
+}
+
+.add-listing-details-block-title {
+  margin: 0 0 1.25rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #306855;
+}
+
+.add-listing-details-grid--basic,
+.add-listing-details-grid--chips {
+  gap: 1rem;
+}
+
+.add-listing-details-field {
+  gap: 0.5rem !important;
+}
+
+.add-listing-details-field label,
+.add-listing-details-field [data-slot="field-label"] {
+  font-size: 0.8rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.04em;
+  color: #727970 !important;
+  padding-left: 0.15rem;
+}
+
+.add-listing-details-input {
+  width: 100%;
+  border: none !important;
+  border-radius: 0.75rem !important;
+  background: #eef5ef !important;
+  padding: 0.85rem 1rem !important;
+  font-size: 0.95rem !important;
+  color: #191c1b !important;
+  box-shadow: none !important;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.add-listing-details-input::placeholder {
+  color: #8a9290;
+}
+
+.add-listing-details-input:focus-visible {
+  background: #fff !important;
+  box-shadow: 0 0 0 2px rgba(48, 104, 85, 0.2) !important;
+}
+
+.add-listing-details-textarea {
+  width: 100%;
+  min-height: 7rem;
+  border: none;
+  border-radius: 0.75rem;
+  background: #eef5ef;
+  padding: 0.85rem 1rem;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: #191c1b;
+  font-family: inherit;
+  resize: vertical;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.add-listing-details-textarea::placeholder {
+  color: #8a9290;
+}
+
+.add-listing-details-textarea:focus {
+  outline: none;
+  background: #fff;
+  box-shadow: 0 0 0 2px rgba(48, 104, 85, 0.2);
+}
+
+.add-listing-details-select-wrap {
+  position: relative;
+}
+
+.add-listing-details-select {
+  width: 100%;
+  appearance: none;
+  border: none;
+  border-radius: 0.75rem;
+  background: #eef5ef;
+  padding: 0.85rem 2.5rem 0.85rem 1rem;
+  font-size: 0.95rem;
+  color: #191c1b;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.add-listing-details-select:focus {
+  outline: none;
+  background: #fff;
+  box-shadow: 0 0 0 2px rgba(48, 104, 85, 0.2);
+}
+
+.add-listing-details-select-icon {
+  position: absolute;
+  top: 50%;
+  right: 0.85rem;
+  transform: translateY(-50%);
+  color: #727970;
+  pointer-events: none;
+}
+
+.add-listing-details-chip-panel {
+  padding: 0.85rem 1rem;
+  border-radius: 0.75rem;
+  background: #eef5ef;
+  min-height: 3.25rem;
+  display: flex;
+  align-items: center;
+}
+
+.add-listing-details-chip-panel .add-listing-chips {
+  padding-top: 0;
+}
+
+.add-listing-details-chip-panel .add-listing-chip {
+  background: #fff !important;
+  border-color: rgba(191, 201, 195, 0.8) !important;
+}
+
+.add-listing-details-chip-panel .add-listing-chip.is-active {
+  background: #306855 !important;
+  border-color: #306855 !important;
+  color: #fff !important;
+}
+
+@media (min-width: 768px) {
+  .add-listing-details-block {
+    padding: 1.75rem 1.5rem;
+  }
+}
+
 .add-listing-field--full {
   grid-column: 1 / -1;
+}
+
+.add-listing-optional {
+  font-weight: 500;
+  color: #727970;
+  letter-spacing: normal;
+  text-transform: none;
 }
 
 .add-listing-field label,
@@ -312,10 +487,38 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: 1.5rem;
-  padding: 1rem;
+  padding: 1.25rem;
   background: #f8faf6;
   border: 1px solid rgba(48, 104, 85, 0.2);
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
+}
+
+.add-listing-bidding-note {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: #306855;
+  font-weight: 600;
+}
+
+.add-listing-rent-deposit-fields {
+  margin-top: 0.25rem;
+}
+
+.add-listing-field-hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: #727970;
+}
+
+.add-listing-input--readonly {
+  background: #eef5ef !important;
+  color: #306855 !important;
+  font-weight: 600 !important;
+  cursor: not-allowed;
+  border-bottom-color: rgba(48, 104, 85, 0.25) !important;
 }
 
 @media (min-width: 768px) {
