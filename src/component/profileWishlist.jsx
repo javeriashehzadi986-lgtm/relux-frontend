@@ -144,7 +144,9 @@ const ProfileWishlist = () => {
           filteredItems.map((product) => (
             <Card key={product.id} className="profile-wishlist-product-card">
               <div className="profile-wishlist-product-image-wrap">
-                <img alt={product.title} src={product.image} />
+                <Link to={`/dress/${product.id}`} aria-label={`View ${product.title}`}>
+                  <img alt={product.title} src={product.image} />
+                </Link>
                 <span
                   className={`profile-wishlist-product-badge profile-wishlist-product-badge--${product.badgeVariant}`}
                 >
@@ -164,7 +166,9 @@ const ProfileWishlist = () => {
               <div className="profile-wishlist-product-body">
                 <div>
                   <p className="profile-wishlist-product-brand">{product.brand}</p>
-                  <h3 className="profile-wishlist-product-title">{product.title}</h3>
+                  <h3 className="profile-wishlist-product-title">
+                    <Link to={`/dress/${product.id}`}>{product.title}</Link>
+                  </h3>
                 </div>
                 <div className="profile-wishlist-product-prices">
                   <div>
@@ -198,6 +202,9 @@ const ProfileWishlist = () => {
                 aria-hidden="true"
               />
               <p>No wishlist items match your search or filter.</p>
+              <Button type="button" className="profile-wishlist-view-btn" asChild>
+                <Link to="/categories">Browse Collection</Link>
+              </Button>
             </CardContent>
           </Card>
         )}

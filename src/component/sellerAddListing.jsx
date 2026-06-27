@@ -1,10 +1,12 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { CloudUpload, Plus, X, Lightbulb, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { SellerDashboardShell } from "./sellerDashboardShell";
+import { getDressById } from "@/data/dressCatalog";
 import "./sellerDashboard.css";
 import "./sellerAddListing.css";
 import { getStyleOptionsForCategory } from "@/data/styleCategories";
@@ -79,6 +81,8 @@ function SelectField({ id, label, value, onChange, children, optional }) {
 
 const SellerAddListing = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const editListingId = location.state?.editListingId;
   const [listingType, setListingType] = useState("sale");
   const [size, setSize] = useState("S");
   const [condition, setCondition] = useState("Like New");
@@ -94,11 +98,49 @@ const SellerAddListing = () => {
   const [auctionEndDate, setAuctionEndDate] = useState("");
   const [rentPrice, setRentPrice] = useState("");
   const [itemPrice, setItemPrice] = useState("");
+  const [previewImages, setPreviewImages] = useState(previewThumbs);
+  const [previewHeroImage, setPreviewHeroImage] = useState(previewHero);
+  const listingImagesRef = useRef(null);
+  const addThumbRef = useRef(null);
 
   const styleOptions = useMemo(
     () => getStyleOptionsForCategory(mainCategory),
     [mainCategory],
   );
+
+  useEffect(() => {
+    if (!editListingId) return;
+    const dress = getDressById(editListingId);
+    setTitle(dress.title);
+    setBrand(dress.brand ?? "");
+    setDescription(dress.fabric ?? dress.occasion ?? "");
+    setListingType(dress.listingType === "rent" ? "rent" : "sale");
+    if (dress.listingType === "rent") {
+      setRentPrice(String(dress.dailyRate ?? ""));
+      setItemPrice(String(dress.securityDeposit ?? dress.fullDressPrice ?? ""));
+    } else {
+      setSalePrice(String(dress.price ?? ""));
+      setStartingBid(String(dress.currentBid ?? dress.price ?? ""));
+      setMinBid(String(dress.minimumNextBid ?? ""));
+    }
+    if (dress.sizes?.[0]) {
+      const sizeMatch = dress.sizes[0].replace(/^Size\s*/i, "").trim();
+      if (sizeOptions.includes(sizeMatch)) {
+        setSize(sizeMatch);
+      }
+    }
+    if (dress.mainImage ?? dress.image) {
+      const hero = dress.mainImage ?? dress.image;
+      setPreviewHeroImage(hero);
+      setPreviewImages((current) => [hero, ...current.slice(1)]);
+    }
+    if (dress.conditionStatus || dress.condition) {
+      const conditionText = dress.conditionStatus ?? dress.condition;
+      if (conditionText.toLowerCase().includes("like new")) setCondition("Like New");
+      else if (conditionText.toLowerCase().includes("good")) setCondition("Good");
+      else setCondition("Fair");
+    }
+  }, [editListingId]);
 
   useEffect(() => {
     if (styleOptions.includes(style)) return;
@@ -123,6 +165,24 @@ const SellerAddListing = () => {
         ? `$${rentPrice} / day`
         : "$45 / day";
 
+  const handleListingImagesChange = (event) => {
+    const files = Array.from(event.target.files ?? []);
+    if (files.length === 0) return;
+
+    const urls = files.map((file) => URL.createObjectURL(file));
+    setPreviewImages((current) => [...current, ...urls]);
+    setPreviewHeroImage(urls[0]);
+    event.target.value = "";
+  };
+
+  const handleRemoveThumb = (index) => {
+    setPreviewImages((current) => {
+      const next = current.filter((_, thumbIndex) => thumbIndex !== index);
+      setPreviewHeroImage(next[0] ?? previewHero);
+      return next;
+    });
+  };
+
   const goToListings = () =>
     navigate("/sellerProfile?section=listings");
 
@@ -132,9 +192,20 @@ const SellerAddListing = () => {
   };
 
   return (
-    <div className="add-listing-page">
+    <SellerDashboardShell activeSection="listings">
+      <div className="add-listing-page">
         <header className="add-listing-header">
-          <h1 className="seller-dashboard-page-title">Add New Listing</h1>
+          <Button
+            type="button"
+            variant="ghost"
+            className="add-listing-back-btn"
+            asChild
+          >
+            <Link to="/sellerProfile?section=listings">Back to My Listings</Link>
+          </Button>
+          <h1 className="seller-dashboard-page-title">
+            {editListingId ? "Edit Listing" : "Add New Listing"}
+          </h1>
           <p className="add-listing-subtitle">
             List your pre-loved clothing for sale or rent
           </p>
@@ -155,28 +226,44 @@ const SellerAddListing = () => {
                   <span>SVG, PNG, JPG or WEBP (MAX. 800x400px)</span>
                   <input
                     id="listing-images"
+                    ref={listingImagesRef}
                     type="file"
                     accept="image/svg+xml,image/png,image/jpeg,image/webp"
                     multiple
                     className="add-listing-upload-input"
+                    onChange={handleListingImagesChange}
                   />
                 </label>
                 <div className="add-listing-thumb-grid">
-                  {previewThumbs.map((src, index) => (
-                    <div key={src} className="add-listing-thumb">
+                  {previewImages.map((src, index) => (
+                    <div key={`${src}-${index}`} className="add-listing-thumb">
                       <img src={src} alt={`Listing preview ${index + 1}`} />
                       <button
                         type="button"
                         className="add-listing-thumb-remove"
                         aria-label="Remove image"
+                        onClick={() => handleRemoveThumb(index)}
                       >
                         <X size={14} />
                       </button>
                     </div>
                   ))}
-                  <button type="button" className="add-listing-thumb add-listing-thumb--add">
+                  <button
+                    type="button"
+                    className="add-listing-thumb add-listing-thumb--add"
+                    onClick={() => addThumbRef.current?.click()}
+                  >
                     <Plus size={22} />
                   </button>
+                  <input
+                    ref={addThumbRef}
+                    type="file"
+                    accept="image/svg+xml,image/png,image/jpeg,image/webp"
+                    multiple
+                    className="add-listing-upload-input"
+                    hidden
+                    onChange={handleListingImagesChange}
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -450,7 +537,7 @@ const SellerAddListing = () => {
             <p className="add-listing-preview-label">Live Preview</p>
             <Card className="add-listing-preview-card">
               <div className="add-listing-preview-image-wrap">
-                <img src={previewHero} alt={previewTitle} />
+                <img src={previewHeroImage} alt={previewTitle} />
                 <span className="add-listing-preview-badge add-listing-preview-badge--condition">
                   {condition}
                 </span>
@@ -505,7 +592,8 @@ const SellerAddListing = () => {
             </Card>
           </aside>
         </form>
-    </div>
+      </div>
+    </SellerDashboardShell>
   );
 };
 

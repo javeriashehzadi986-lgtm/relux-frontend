@@ -23,19 +23,20 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { SELLER_LISTINGS } from "@/data/sellerListingsData";
+import { SELLER_LISTING_META } from "@/data/sellerListingsData";
+import { hydrateSellerListing } from "@/data/dressCatalog";
 import "./sellerMyListings.css";
 
 const summaryCards = [
-  { label: "Active", value: "24", variant: "primary" },
-  { label: "Sale", value: "12", variant: "secondary" },
-  { label: "Rent", value: "08", variant: "secondary" },
-  { label: "Auctions", value: "04", variant: "tertiary" },
+  { label: "Active", value: "24", variant: "primary", filter: "Active" },
+  { label: "Sale", value: "12", variant: "secondary", filter: "Sale" },
+  { label: "Rent", value: "08", variant: "secondary", filter: "Rent" },
+  { label: "Auctions", value: "04", variant: "tertiary", filter: "Auctions" },
 ];
 
 const filterChips = ["All", "Sale", "Rent", "Auctions"];
 
-const INITIAL_LISTINGS = SELLER_LISTINGS;
+const INITIAL_LISTINGS = SELLER_LISTING_META.map(hydrateSellerListing);
 
 function ListingActionsMenu({
   item,
@@ -182,6 +183,7 @@ export function SellerMyListingsContent() {
       const duplicate = {
         ...source,
         id: `${source.id}-copy-${Date.now()}`,
+        dressId: source.id,
         title: `${source.title} (Copy)`,
         status: "Active",
         statusVariant: "active",
@@ -218,13 +220,17 @@ export function SellerMyListingsContent() {
     };
 
     return listings.filter((item) => {
-      const filterType = filterMap[activeFilter];
-      const matchesFilter = !filterType || item.type === filterType;
+      if (activeFilter === "Active") {
+        if (item.status !== "Active" && item.status !== "Live") return false;
+      } else {
+        const filterType = filterMap[activeFilter];
+        if (filterType && item.type !== filterType) return false;
+      }
       const matchesSearch = item.title
         .toLowerCase()
         .includes(searchQuery.trim().toLowerCase());
 
-      return matchesFilter && matchesSearch;
+      return matchesSearch;
     });
   }, [activeFilter, listings, searchQuery]);
 
@@ -248,19 +254,27 @@ export function SellerMyListingsContent() {
       <section className="my-listing-summary">
         <div className="my-listing-summary-track">
           {summaryCards.map((card) => (
-            <Card
+            <button
               key={card.label}
-              className={`my-listing-summary-card my-listing-summary-card--${card.variant} py-0 gap-0 ring-0 shadow-none`}
+              type="button"
+              className={`my-listing-summary-card-btn ${
+                activeFilter === card.filter ? "is-active" : ""
+              }`}
+              onClick={() => setActiveFilter(card.filter)}
             >
-              <CardContent className="my-listing-summary-content">
-                <CardDescription className="my-listing-summary-label">
-                  {card.label}
-                </CardDescription>
-                <CardTitle className="my-listing-summary-value">
-                  {card.value}
-                </CardTitle>
-              </CardContent>
-            </Card>
+              <Card
+                className={`my-listing-summary-card my-listing-summary-card--${card.variant} py-0 gap-0 ring-0 shadow-none`}
+              >
+                <CardContent className="my-listing-summary-content">
+                  <CardDescription className="my-listing-summary-label">
+                    {card.label}
+                  </CardDescription>
+                  <CardTitle className="my-listing-summary-value">
+                    {card.value}
+                  </CardTitle>
+                </CardContent>
+              </Card>
+            </button>
           ))}
         </div>
       </section>
@@ -302,20 +316,24 @@ export function SellerMyListingsContent() {
       <Separator className="my-listing-divider" />
 
       <section className="my-listing-cards">
-        {filteredListings.map((item) => (
+        {filteredListings.length > 0 ? (
+          filteredListings.map((item) => (
           <Card
             key={item.id}
             className="my-listing-card py-0 gap-0 ring-0 shadow-none"
           >
             <CardContent className="my-listing-card-content">
               <div className="my-listing-card-image">
-                <img src={item.image} alt={item.title} />
+                <Link to={`/dress/${item.id}`} aria-label={`View ${item.title}`}>
+                  <img src={item.image} alt={item.title} />
+                </Link>
               </div>
               <div className="my-listing-card-body">
                 <div className="my-listing-card-top">
                   <CardTitle className="my-listing-card-title">
-                    {item.title}
+                    <Link to={`/dress/${item.id}`}>{item.title}</Link>
                   </CardTitle>
+                  <p className="my-listing-card-brand">{item.brand}</p>
                   <CardAction className="my-listing-card-action">
                     <ListingActionsMenu
                       item={item}
@@ -372,7 +390,20 @@ export function SellerMyListingsContent() {
               </div>
             </CardContent>
           </Card>
-        ))}
+        ))
+        ) : (
+          <Card className="my-listing-empty">
+            <CardContent className="my-listing-empty-content">
+              <p>No listings match your search or filter.</p>
+              <Button asChild className="my-listing-add-btn">
+                <Link to="/addListing">
+                  <Plus size={18} />
+                  Add Listing
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+        )}
       </section>
 
       {deactivateTarget && (

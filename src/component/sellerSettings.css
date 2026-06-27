@@ -83,6 +83,22 @@
   margin-bottom: 1rem;
 }
 
+.seller-settings-aside-user-link {
+  text-decoration: none;
+  color: inherit;
+  border-radius: 0.5rem;
+  transition: background 0.15s ease;
+}
+
+.seller-settings-aside-user-link:hover {
+  background: rgba(68, 102, 72, 0.08);
+}
+
+.seller-settings-aside-user-link:focus-visible {
+  outline: 2px solid #306855;
+  outline-offset: 2px;
+}
+
 .seller-settings-aside-avatar {
   width: 3rem;
   height: 3rem;

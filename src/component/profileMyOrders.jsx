@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   CalendarCheck,
   CheckCircle2,
@@ -12,6 +13,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import { BUYER_ORDERS } from "@/data/buyerOrdersData";
+import { hydrateBuyerOrder } from "@/data/dressCatalog";
 import "./profileMyOrders.css";
 
 const FILTER_TABS = [
@@ -22,46 +25,15 @@ const FILTER_TABS = [
   { id: "in-progress", label: "In Progress" },
 ];
 
-const ORDERS = [
-  {
-    id: "RLX-10294",
-    type: "rental",
-    typeLabel: "Rental",
-    title: "Zari Embroidered Silk Ensemble",
-    variant: "Size: M • Emerald Green",
-    meta: [
-      { icon: "calendar-check", text: "4 Days Rental" },
-      { icon: "check-circle", text: "Payment Paid", highlight: true },
-    ],
-    amount: "$240.00",
-    status: "rental-active",
-    statusLabel: "Rental Active",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBWl1Ln5sy_lzXjuKL5bO9sdZnA8wZhzpAqph4Te-beOkNHee3vSnNyYoEJQlR-ma8QV2WJlvuYKDycZT6AREto9x9TRJMXEuM34XJzHc1dVRd-p_Yc5XL3idw3hUvuDoLSfbsHOqQDZVir-PBLXEiJYo3kRDEgdVSZcbQyyDeENhNKhcIcXabmuSrh2YNj7KbAQZmORgGtjbjE8zsx_WgMJnZ8O8o39MBOnoDGOuKP-7_iRrwXzc7iE8wyqwmnMUktWuFzPappm8ao",
-    actions: [
-      { id: "track", label: "Track Order", variant: "primary", icon: "truck" },
-      { id: "details", label: "View Details", variant: "outline" },
-      { id: "rent-again", label: "Rent Again", variant: "ghost", icon: "history", alignEnd: true },
-    ],
-  },
-  {
-    id: "RLX-10452",
-    type: "rental",
-    typeLabel: "Rental",
-    title: "Sculptural Wool Blazer",
-    variant: "Size: 40 • Charcoal Gray",
-    meta: [{ icon: "clock", text: "Rental Period: July 01 - July 08" }],
-    amount: "$185.00",
-    status: "processing",
-    statusLabel: "Processing",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDY9_eQ9oa-A4ljLCKAcN2dn-NqQHEFETGF1_1uA0dLmxSlssqy5eN0zl6jVfV65Nu23G92HJul2xJen5xr7dc0HQnTl03dpknqqkJng4HVgg1arIggdQTi3p6CM0VAmZk8ax8TGYkrYCiMoc-TzDNh60uIYdPcOHYAZUyF4cLba91RjGZUDu_HnSLHQW-8KVwgr76eBd0q4d8KSKwnkUeebqV90zKkWm-XHFOGOy__l7y8c9KUc5MNKP3LFoK_nkMZl5wWwNf4q5r_",
-    actions: [
-      { id: "details", label: "View Details", variant: "outline" },
-      { id: "cancel", label: "Cancel Request", variant: "danger" },
-    ],
-  },
-];
+const ORDERS = BUYER_ORDERS;
+
+const getOrderActionRoute = (actionId, order) => {
+  if (actionId === "track") return "/notification";
+  if (actionId === "details" || actionId === "rent-again") {
+    return `/dress/${order.dressId}`;
+  }
+  return null;
+};
 
 const META_ICONS = {
   "calendar-check": CalendarCheck,
@@ -86,19 +58,57 @@ const matchesFilter = (order, filter) => {
 };
 
 const ProfileMyOrders = () => {
+  const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [orders, setOrders] = useState(ORDERS);
+  const [cancelTarget, setCancelTarget] = useState(null);
 
   const filteredOrders = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
-    return ORDERS.filter((order) => {
+    return orders.map(hydrateBuyerOrder).filter((order) => {
       const matchesSearch =
         !query ||
         order.title.toLowerCase().includes(query) ||
+        order.brand.toLowerCase().includes(query) ||
         order.id.toLowerCase().includes(query);
       return matchesFilter(order, activeFilter) && matchesSearch;
     });
-  }, [activeFilter, searchQuery]);
+  }, [activeFilter, orders, searchQuery]);
+
+  const handleOrderAction = (action, order) => {
+    if (action.id === "cancel") {
+      setCancelTarget(order.id);
+      return;
+    }
+
+    const route = action.link ? getOrderActionRoute(action.id, order) : null;
+    if (route) navigate(route);
+  };
+
+  const confirmCancel = () => {
+    if (!cancelTarget) return;
+    setOrders((current) =>
+      current.map((order) =>
+        order.id === cancelTarget
+          ? {
+              ...order,
+              status: "cancelled",
+              statusLabel: "Cancelled",
+              actions: [
+                {
+                  id: "details",
+                  label: "View Details",
+                  variant: "outline",
+                  link: true,
+                },
+              ],
+            }
+          : order,
+      ),
+    );
+    setCancelTarget(null);
+  };
 
   return (
     <section className="profile-orders">
@@ -122,7 +132,7 @@ const ProfileMyOrders = () => {
       <div className="profile-orders-hero">
         <div>
           <nav className="profile-orders-breadcrumb" aria-label="Breadcrumb">
-            <span>Dashboard</span>
+            <Link to="/profile">Dashboard</Link>
             <ChevronRight size={12} aria-hidden="true" />
             <span className="profile-orders-breadcrumb-current">My Orders</span>
           </nav>
@@ -152,7 +162,9 @@ const ProfileMyOrders = () => {
             <Card key={order.id} className="profile-order-card">
               <CardContent className="profile-order-card-inner">
                 <div className="profile-order-image-wrap">
-                  <img alt={order.title} src={order.image} />
+                  <Link to={`/dress/${order.dressId}`} aria-label={`View ${order.title}`}>
+                    <img alt={order.title} src={order.image} />
+                  </Link>
                 </div>
 
                 <div className="profile-order-body">
@@ -166,8 +178,11 @@ const ProfileMyOrders = () => {
                           {order.typeLabel}
                         </span>
                       </div>
-                      <h3 className="profile-order-title">{order.title}</h3>
+                      <h3 className="profile-order-title">
+                        <Link to={`/dress/${order.dressId}`}>{order.title}</Link>
+                      </h3>
                       <p className="profile-order-variant">{order.variant}</p>
+                      <p className="profile-order-brand">{order.brand}</p>
                       <div className="profile-order-details">
                         {order.meta.map((item) => {
                           const Icon = META_ICONS[item.icon];
@@ -211,14 +226,35 @@ const ProfileMyOrders = () => {
                       const ActionIcon = action.icon
                         ? ACTION_ICONS[action.icon]
                         : null;
+                      const actionClass = `profile-order-action profile-order-action--${action.variant} ${
+                        action.alignEnd ? "profile-order-action--end" : ""
+                      }`;
+
+                      if (action.link) {
+                        const route = getOrderActionRoute(action.id, order);
+                        return (
+                          <Button
+                            key={action.id}
+                            type="button"
+                            variant="ghost"
+                            className={actionClass}
+                            asChild
+                          >
+                            <Link to={route ?? `/dress/${order.dressId}`}>
+                              {ActionIcon && <ActionIcon size={16} aria-hidden="true" />}
+                              {action.label}
+                            </Link>
+                          </Button>
+                        );
+                      }
+
                       return (
                         <Button
                           key={action.id}
                           type="button"
                           variant="ghost"
-                          className={`profile-order-action profile-order-action--${action.variant} ${
-                            action.alignEnd ? "profile-order-action--end" : ""
-                          }`}
+                          className={actionClass}
+                          onClick={() => handleOrderAction(action, order)}
                         >
                           {ActionIcon && <ActionIcon size={16} aria-hidden="true" />}
                           {action.label}
@@ -243,12 +279,54 @@ const ProfileMyOrders = () => {
               It seems you haven&apos;t placed any orders yet. Explore our latest
               premium collection.
             </p>
-            <Button type="button" className="profile-orders-empty-btn">
-              Start Shopping
+            <Button type="button" className="profile-orders-empty-btn" asChild>
+              <Link to="/categories">Start Shopping</Link>
             </Button>
           </div>
         )}
       </div>
+
+      {cancelTarget && (
+        <div
+          className="profile-logout-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="cancel-order-title"
+          onClick={() => setCancelTarget(null)}
+        >
+          <Card
+            className="profile-logout-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <CardContent className="profile-logout-modal-header">
+              <h2 id="cancel-order-title" className="profile-logout-modal-title">
+                Cancel rental request?
+              </h2>
+              <p className="profile-logout-modal-description">
+                This will withdraw your pending rental request. You can request again
+                from the dress page anytime.
+              </p>
+            </CardContent>
+            <CardContent className="profile-logout-modal-actions">
+              <Button
+                type="button"
+                variant="ghost"
+                className="profile-logout-cancel-btn"
+                onClick={() => setCancelTarget(null)}
+              >
+                Keep Request
+              </Button>
+              <Button
+                type="button"
+                className="profile-logout-confirm-btn"
+                onClick={confirmCancel}
+              >
+                Cancel Request
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </section>
   );
 };

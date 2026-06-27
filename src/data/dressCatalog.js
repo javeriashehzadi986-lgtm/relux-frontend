@@ -561,6 +561,53 @@ const REFERENCE_DRESS = {
   categoryLabel: "Female Fashion",
 };
 
+const PRODUCT_STYLES = {
+  "female-1": "Bridal",
+  "female-2": "Bridal",
+  "female-3": "Party",
+  "female-4": "Traditional",
+  "female-5": "Formal",
+  "female-6": "Party",
+  "male-1": "Groom",
+  "male-2": "Formal",
+  "male-3": "Party",
+  "male-4": "Traditional",
+  "male-5": "Formal",
+  "male-6": "Party",
+  "kids-1": "Traditional",
+  "kids-2": "Traditional",
+  "kids-3": "Party",
+  "kids-4": "Traditional",
+  "kids-5": "Formal",
+  "kids-6": "Party",
+  "silk-slip": "Party",
+  "wool-blazer": "Formal",
+  "walima-gown": "Bridal",
+  "cashmere-knit": "Formal",
+};
+
+const deriveBadge = (dress) => {
+  if (dress.listingType === "rent") {
+    return { badge: "Pristine", badgeVariant: "primary" };
+  }
+
+  const condition = dress.conditionStatus ?? dress.condition ?? "";
+  if (/brand new|never worn/i.test(condition)) {
+    return { badge: "Brand New", badgeVariant: "primary" };
+  }
+  if (/like new/i.test(condition)) {
+    return { badge: "Like New", badgeVariant: "secondary" };
+  }
+  if (/excellent/i.test(condition)) {
+    return { badge: "Excellent", badgeVariant: "excellent" };
+  }
+  if (/good/i.test(condition)) {
+    return { badge: "Good", badgeVariant: "secondary" };
+  }
+
+  return { badge: "Pre-owned", badgeVariant: "secondary" };
+};
+
 export const getDressById = (id) => {
   const dress = ALL_PRODUCTS[id] ?? REFERENCE_DRESS;
 
@@ -569,6 +616,129 @@ export const getDressById = (id) => {
   }
 
   return enrichResaleDress(dress);
+};
+
+export const toProductCardView = (dress) => {
+  const enriched = dress.mainImage ? dress : getDressById(dress.id);
+  const { badge, badgeVariant } = deriveBadge(enriched);
+
+  return {
+    id: enriched.id,
+    brand: enriched.brand,
+    title: enriched.title,
+    style: PRODUCT_STYLES[enriched.id],
+    listingType: enriched.listingType,
+    price:
+      enriched.listingType === "rent"
+        ? enriched.dailyRateFormatted
+        : enriched.priceFormatted,
+    badge,
+    badgeVariant,
+    image: enriched.mainImage ?? enriched.image,
+    categoryPath: enriched.categoryPath,
+    seller: enriched.seller ?? enriched.sellerName,
+  };
+};
+
+export const getDressesByCategory = (categoryPath, filters = {}) => {
+  const { listingType, style, search } = filters;
+  const query = search?.trim().toLowerCase() ?? "";
+
+  return Object.values(ALL_PRODUCTS)
+    .filter((product) => product.categoryPath === categoryPath)
+    .map((product) => getDressById(product.id))
+    .map(toProductCardView)
+    .filter((product) => {
+      if (listingType && listingType !== "all" && product.listingType !== listingType) {
+        return false;
+      }
+      if (style && product.style !== style) {
+        return false;
+      }
+      if (
+        query &&
+        !product.title.toLowerCase().includes(query) &&
+        !product.brand.toLowerCase().includes(query)
+      ) {
+        return false;
+      }
+      return true;
+    });
+};
+
+export const hydrateBuyerOrder = (order) => {
+  const dress = getDressById(order.dressId);
+  const rentalTotal =
+    order.rentalDays && dress.dailyRate
+      ? dress.dailyRate * order.rentalDays
+      : null;
+
+  return {
+    ...order,
+    title: dress.title,
+    brand: dress.brand,
+    image: dress.mainImage ?? dress.image,
+    listingType: dress.listingType,
+    amount:
+      order.type === "rental"
+        ? formatRs(rentalTotal ?? dress.securityDeposit ?? dress.dailyRate * 3)
+        : dress.priceFormatted,
+    variant: order.variant ?? `Size: ${order.size ?? "M"} • ${dress.brand}`,
+  };
+};
+
+export const hydrateBuyerBid = (bid) => {
+  const dress = getDressById(bid.dressId);
+
+  return {
+    ...bid,
+    title: dress.title,
+    seller: dress.seller ?? dress.sellerName ?? dress.brand,
+    image: dress.mainImage ?? dress.image,
+    originalPrice: dress.estimatedValueFormatted ?? dress.priceFormatted,
+    currentHighest: dress.currentBidFormatted ?? dress.priceFormatted,
+    myBid: formatRs(bid.myBidAmount),
+    bidDelta:
+      bid.myBidAmount < (dress.currentBid ?? 0)
+        ? `-${Math.round(((dress.currentBid ?? 0) - bid.myBidAmount) / 1000)}k`
+        : null,
+  };
+};
+
+export const hydrateSellerOrder = (order) => {
+  const dress = getDressById(order.dressId);
+
+  return {
+    ...order,
+    itemTitle: dress.title,
+    itemImage: dress.mainImage ?? dress.image,
+    brand: dress.brand,
+  };
+};
+
+export const hydrateSellerListing = (meta) => {
+  const dress = getDressById(meta.dressId);
+  const isAuction = meta.type === "Auction";
+
+  return {
+    id: meta.dressId,
+    title: dress.title,
+    brand: dress.brand,
+    type: meta.type,
+    typeVariant: meta.typeVariant,
+    size: meta.size,
+    price:
+      dress.listingType === "rent"
+        ? `${dress.dailyRateFormatted} / day`
+        : isAuction
+          ? `Current: ${dress.currentBidFormatted}`
+          : dress.priceFormatted,
+    detail: dress.conditionStatus ?? dress.condition ?? meta.detail,
+    status: meta.status,
+    statusVariant: meta.statusVariant,
+    image: dress.mainImage ?? dress.image,
+    listingType: dress.listingType,
+  };
 };
 
 export { formatRs as formatPkr };

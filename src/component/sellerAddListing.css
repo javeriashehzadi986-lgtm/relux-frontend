@@ -1,9 +1,25 @@
 .add-listing-page {
   width: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 .add-listing-header {
-  margin-bottom: 2rem;
+  margin: 0 0 2rem;
+}
+
+.add-listing-back-btn {
+  margin: 0 0 1rem !important;
+  padding: 0 !important;
+  min-height: auto !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  color: #31685d !important;
+}
+
+.add-listing-back-btn:hover {
+  color: #225b4f !important;
+  background: transparent !important;
 }
 
 .add-listing-subtitle {
@@ -531,12 +547,14 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  margin: 0;
+  padding: 0;
 }
 
 @media (min-width: 1024px) {
   .add-listing-sidebar {
     position: sticky;
-    top: 6rem;
+    top: 6.5rem;
   }
 }
 

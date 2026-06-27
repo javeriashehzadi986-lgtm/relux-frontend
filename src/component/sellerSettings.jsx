@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   AlertTriangle,
   Bell,
@@ -16,6 +16,13 @@ import {
   Wallet,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import "./sellerSettings.css";
 
 const SELLER_AVATAR =
@@ -61,13 +68,13 @@ const SECURITY_ACTIONS = [
     id: "email",
     label: "Update Email",
     meta: "s***@relux.com",
-    to: null,
+    to: "/sellerProfile?section=profile",
   },
   {
     id: "phone",
     label: "Phone Number",
     meta: "+1 ••• ••• 44",
-    to: null,
+    to: "/sellerProfile?section=profile",
   },
 ];
 
@@ -130,6 +137,7 @@ function ToggleRow({ id, label, description, checked, onChange, isLast }) {
 }
 
 export function SellerSettingsContent() {
+  const navigate = useNavigate();
   const [activeNav, setActiveNav] = useState("account");
   const [privacy, setPrivacy] = useState(() =>
     Object.fromEntries(PRIVACY_TOGGLES.map((item) => [item.id, item.defaultChecked])),
@@ -139,6 +147,22 @@ export function SellerSettingsContent() {
       NOTIFICATION_TOGGLES.map((item) => [item.id, item.defaultChecked]),
     ),
   );
+  const [showDeactivateConfirm, setShowDeactivateConfirm] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  useEffect(() => {
+    if (window.location.hash !== "#seller-settings-payments") return;
+    const target = document.getElementById("seller-settings-payments");
+    target?.scrollIntoView({ behavior: "smooth", block: "start" });
+    setActiveNav("payments");
+  }, []);
+
+  const scrollToPayments = () => {
+    setActiveNav("payments");
+    document
+      .getElementById("seller-settings-payments")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   const scrollToSection = (sectionId) => {
     setActiveNav(sectionId);
@@ -180,7 +204,10 @@ export function SellerSettingsContent() {
           </nav>
 
           <div className="seller-settings-aside-card">
-            <div className="seller-settings-aside-user">
+            <Link
+              to="/sellerProfile?section=profile"
+              className="seller-settings-aside-user seller-settings-aside-user-link"
+            >
               <div className="seller-settings-aside-avatar">
                 <img src={SELLER_AVATAR} alt="Store owner" />
               </div>
@@ -188,7 +215,7 @@ export function SellerSettingsContent() {
                 <p className="seller-settings-aside-name">Store Owner</p>
                 <p className="seller-settings-aside-badge">Verified Seller</p>
               </div>
-            </div>
+            </Link>
             <p className="seller-settings-aside-member">Member since Jan 2023</p>
           </div>
         </aside>
@@ -307,7 +334,11 @@ export function SellerSettingsContent() {
                 </div>
                 <p className="seller-settings-payment-desc">Automatic payouts enabled.</p>
               </div>
-              <Button type="button" className="seller-settings-primary-btn">
+              <Button
+                type="button"
+                className="seller-settings-primary-btn"
+                onClick={scrollToPayments}
+              >
                 Manage Stripe Account
               </Button>
             </section>
@@ -362,10 +393,15 @@ export function SellerSettingsContent() {
                 type="button"
                 variant="outline"
                 className="seller-settings-danger-outline-btn"
+                onClick={() => setShowDeactivateConfirm(true)}
               >
                 Deactivate Account
               </Button>
-              <Button type="button" className="seller-settings-danger-btn">
+              <Button
+                type="button"
+                className="seller-settings-danger-btn"
+                onClick={() => setShowDeleteConfirm(true)}
+              >
                 Delete Account
               </Button>
             </div>
@@ -377,6 +413,94 @@ export function SellerSettingsContent() {
           </section>
         </div>
       </div>
+
+      {showDeactivateConfirm && (
+        <div
+          className="profile-logout-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="deactivate-account-title"
+          onClick={() => setShowDeactivateConfirm(false)}
+        >
+          <Card
+            className="profile-logout-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <CardHeader className="profile-logout-modal-header">
+              <CardTitle id="deactivate-account-title" className="profile-logout-modal-title">
+                Deactivate account?
+              </CardTitle>
+              <CardDescription className="profile-logout-modal-description">
+                Your listings will be hidden until you sign in and reactivate your account.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="profile-logout-modal-actions">
+              <Button
+                type="button"
+                variant="ghost"
+                className="profile-logout-cancel-btn"
+                onClick={() => setShowDeactivateConfirm(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                className="profile-logout-confirm-btn"
+                onClick={() => {
+                  setShowDeactivateConfirm(false);
+                  navigate("/login");
+                }}
+              >
+                Deactivate
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {showDeleteConfirm && (
+        <div
+          className="profile-logout-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-account-title"
+          onClick={() => setShowDeleteConfirm(false)}
+        >
+          <Card
+            className="profile-logout-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <CardHeader className="profile-logout-modal-header">
+              <CardTitle id="delete-account-title" className="profile-logout-modal-title">
+                Delete account permanently?
+              </CardTitle>
+              <CardDescription className="profile-logout-modal-description">
+                This action cannot be undone. Your listings and seller data will be removed.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="profile-logout-modal-actions">
+              <Button
+                type="button"
+                variant="ghost"
+                className="profile-logout-cancel-btn"
+                onClick={() => setShowDeleteConfirm(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                className="seller-settings-danger-btn"
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                  navigate("/login");
+                }}
+              >
+                Delete Account
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }

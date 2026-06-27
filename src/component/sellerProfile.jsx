@@ -88,6 +88,16 @@ const reviews = [
     stars: 4.5,
     text: '"Beautifully packaged and shipped very fast. Will definitely buy again!"',
   },
+  {
+    id: "review-3",
+    stars: 5,
+    text: '"Accurate sizing and the dress looked exactly like the photos. Highly recommend!"',
+  },
+  {
+    id: "review-4",
+    stars: 4,
+    text: '"Great communication throughout the rental period. Would rent again."',
+  },
 ];
 
 function getInitials(name) {
@@ -113,11 +123,13 @@ function StarRating({ rating }) {
 
 function SellerProfileSection() {
   const [isEditing, setIsEditing] = useState(false);
+  const [showAllReviews, setShowAllReviews] = useState(false);
   const [profile, setProfile] = useState(defaultProfile);
   const [draft, setDraft] = useState(defaultProfile);
 
   const initials = useMemo(() => getInitials(profile.fullName), [profile.fullName]);
   const draftInitials = useMemo(() => getInitials(draft.fullName), [draft.fullName]);
+  const visibleReviews = showAllReviews ? reviews : reviews.slice(0, 2);
 
   const viewFields = [
     { id: "fullName", label: "Full Name", value: profile.fullName },
@@ -219,6 +231,17 @@ function SellerProfileSection() {
 
               <Button type="submit" className="seller-dashboard-save-btn">
                 Save Changes
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                className="profile-cancel-btn"
+                onClick={() => {
+                  setDraft(profile);
+                  setIsEditing(false);
+                }}
+              >
+                Cancel
               </Button>
             </form>
           </section>
@@ -362,13 +385,16 @@ function SellerProfileSection() {
                 <Button
                   type="button"
                   className="seller-profile-primary-btn seller-profile-primary-btn--full"
+                  asChild
                 >
-                  Manage Stripe Account
+                  <Link to="/sellerProfile?section=settings#seller-settings-payments">
+                    Manage Stripe Account
+                  </Link>
                 </Button>
               </CardContent>
             </Card>
 
-            <Card className="seller-profile-card">
+            <Card id="seller-profile-reviews" className="seller-profile-card">
               <CardHeader className="seller-profile-section-header seller-profile-section-header--inline">
                 <CardTitle className="seller-profile-section-title">
                   Seller Reviews
@@ -383,7 +409,7 @@ function SellerProfileSection() {
               </CardHeader>
               <CardContent className="seller-profile-section-content">
                 <div className="seller-profile-reviews">
-                  {reviews.map((review) => (
+                  {visibleReviews.map((review) => (
                     <div key={review.id} className="seller-profile-review">
                       <StarRating rating={review.stars} />
                       <p className="seller-profile-review-text">{review.text}</p>
@@ -394,8 +420,9 @@ function SellerProfileSection() {
                   type="button"
                   variant="link"
                   className="seller-profile-reviews-link"
+                  onClick={() => setShowAllReviews((current) => !current)}
                 >
-                  View all reviews
+                  {showAllReviews ? "Show fewer reviews" : "View all reviews"}
                 </Button>
               </CardContent>
             </Card>

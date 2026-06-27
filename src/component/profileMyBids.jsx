@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   AlertTriangle,
   ChevronLeft,
@@ -14,6 +15,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import { BUYER_BIDS } from "@/data/buyerBidsData";
+import { hydrateBuyerBid } from "@/data/dressCatalog";
 import "./profileMyBids.css";
 
 const FILTER_TABS = [
@@ -26,48 +29,8 @@ const FILTER_TABS = [
   { id: "expired", label: "Expired" },
 ];
 
-const BIDS = [
-  {
-    id: "bid-1",
-    title: "Zari Embroidered Ivory Nikkah Ensemble",
-    seller: "Sana Safinaz Couture",
-    status: "winning",
-    statusLabel: "Winning",
-    timeRemaining: "4h 12m",
-    timeUrgent: false,
-    bannerType: "winning",
-    bannerText: "You are currently the highest bidder.",
-    originalPrice: "Rs. 120,000",
-    currentHighest: "Rs. 85,000",
-    myBid: "Rs. 85,000",
-    bidDelta: null,
-    primaryAction: "Increase Bid",
-    secondaryAction: "View Details",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuB3Uo8SvBmBlPi1CK0pD8FzJwaUl-XzyYSD0cicdieAa2kuAzB1hezTlJAB5FgTX9UigTIEvKHgM5eKvee0eTfiIAjOpd4QsEqdCmlNV44EJdt0UcG22KxmaYlkNkWPONiIFl1n-jsYFFRXbhgYp8GlvRdxHAZ6POggtyL7GRtJ9ejDS4bWtmpGynvX5HGagbuNi7k4GFHZ22Pvs_ONwujGzi8nR909gFGwL596DGXwGumE7Olr3lHOC44_DtYCXD8apeYdyaMMCm-3",
-    dimmed: false,
-  },
-  {
-    id: "bid-2",
-    title: "Emerald Velvet Tilla Work Pishwas",
-    seller: "Elan Official",
-    status: "outbid",
-    statusLabel: "Outbid",
-    timeRemaining: "1h 05m",
-    timeUrgent: true,
-    bannerType: "outbid",
-    bannerText: "You have been outbid. Increase your bid to win!",
-    originalPrice: "Rs. 95,000",
-    currentHighest: "Rs. 45,000",
-    myBid: "Rs. 40,000",
-    bidDelta: "-5k",
-    primaryAction: "Place Higher Bid",
-    secondaryAction: "View Product",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDjGPz_EnIiL9nMHb7C5FTbcu7qoqv9KdAkoNClUgoIirKV-vGvm9iHkPqBuM8ELI2MhWyNUSe0xqxWIy3s7Ghde_2kWgEJWHuzlU0zzChwjSvAyrbwVJsd4__Gs-aooGVVoedYrcvrUt-heoukEvi4sX8911aHl9NhZvu5Rw2hm85oR6ntAcAoVDzWFTFgKkC2Yhs50v0xEztOzjbk0C3AqZvWoee9M-ie08X6yYkdSXW2RETlNvKA5sOAqZPiSv9BotCYpxWcHzri",
-    dimmed: true,
-  },
-];
+const BIDS = BUYER_BIDS;
+const BIDS_PER_PAGE = 2;
 
 const ProfileMyBids = () => {
   const [activeFilter, setActiveFilter] = useState("all");
@@ -75,7 +38,7 @@ const ProfileMyBids = () => {
   const [currentPage, setCurrentPage] = useState(1);
 
   const filteredBids = useMemo(() => {
-    return BIDS.filter((bid) => {
+    return BIDS.map(hydrateBuyerBid).filter((bid) => {
       const matchesFilter =
         activeFilter === "all" ||
         bid.status === activeFilter ||
@@ -87,6 +50,23 @@ const ProfileMyBids = () => {
       return matchesFilter && matchesSearch;
     });
   }, [activeFilter, searchQuery]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredBids.length / BIDS_PER_PAGE));
+
+  const paginatedBids = useMemo(() => {
+    const start = (currentPage - 1) * BIDS_PER_PAGE;
+    return filteredBids.slice(start, start + BIDS_PER_PAGE);
+  }, [currentPage, filteredBids]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeFilter, searchQuery]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
 
   return (
     <section className="profile-bids">
@@ -119,13 +99,16 @@ const ProfileMyBids = () => {
               variant="icon"
               size="icon"
               className="profile-bids-filter-btn"
-              aria-label="Filter bids"
+              aria-label="Show active bids only"
+              onClick={() => setActiveFilter("active")}
             >
               <SlidersHorizontal size={20} />
             </Button>
-            <Button type="button" className="profile-bids-explore-btn">
-              <Compass size={16} aria-hidden="true" />
-              Explore Auctions
+            <Button type="button" className="profile-bids-explore-btn" asChild>
+              <Link to="/femaleFashion?type=resale">
+                <Compass size={16} aria-hidden="true" />
+                Explore Auctions
+              </Link>
             </Button>
           </div>
         </div>
@@ -148,8 +131,8 @@ const ProfileMyBids = () => {
       </header>
 
       <div className="profile-bids-list">
-        {filteredBids.length > 0 ? (
-          filteredBids.map((bid) => (
+        {paginatedBids.length > 0 ? (
+          paginatedBids.map((bid) => (
             <Card
               key={bid.id}
               className={`profile-bid-card ${
@@ -161,7 +144,9 @@ const ProfileMyBids = () => {
                   bid.dimmed ? "profile-bid-image-wrap--dimmed" : ""
                 }`}
               >
-                <img alt={bid.title} src={bid.image} />
+                <Link to={`/dress/${bid.dressId}`} aria-label={`View ${bid.title}`}>
+                  <img alt={bid.title} src={bid.image} />
+                </Link>
                 <span
                   className={`profile-bid-badge profile-bid-badge--${bid.status}`}
                 >
@@ -172,7 +157,9 @@ const ProfileMyBids = () => {
               <CardContent className="profile-bid-content">
                 <div className="profile-bid-content-header">
                   <div>
-                    <h3 className="profile-bid-title">{bid.title}</h3>
+                    <h3 className="profile-bid-title">
+                      <Link to={`/dress/${bid.dressId}`}>{bid.title}</Link>
+                    </h3>
                     <p className="profile-bid-seller">
                       <Store size={16} aria-hidden="true" />
                       By {bid.seller}
@@ -237,15 +224,16 @@ const ProfileMyBids = () => {
                 </div>
 
                 <div className="profile-bid-actions">
-                  <Button type="button" className="profile-bid-primary-btn">
-                    {bid.primaryAction}
+                  <Button type="button" className="profile-bid-primary-btn" asChild>
+                    <Link to={`/dress/${bid.dressId}`}>{bid.primaryAction}</Link>
                   </Button>
                   <Button
                     type="button"
                     variant="ghost"
                     className="profile-bid-secondary-btn"
+                    asChild
                   >
-                    {bid.secondaryAction}
+                    <Link to={`/dress/${bid.dressId}`}>{bid.secondaryAction}</Link>
                   </Button>
                   <Button
                     type="button"
@@ -253,8 +241,11 @@ const ProfileMyBids = () => {
                     size="icon"
                     className="profile-bid-mail-btn"
                     aria-label="Contact seller"
+                    asChild
                   >
-                    <Mail size={20} />
+                    <Link to={`/dress/${bid.dressId}/chat`}>
+                      <Mail size={20} />
+                    </Link>
                   </Button>
                 </div>
               </CardContent>
@@ -264,6 +255,9 @@ const ProfileMyBids = () => {
           <Card className="profile-bids-empty">
             <CardContent className="profile-bids-empty-content">
               <p>No bids match your search or filter.</p>
+              <Button type="button" className="profile-bids-explore-btn" asChild>
+                <Link to="/femaleFashion?type=resale">Explore Auctions</Link>
+              </Button>
             </CardContent>
           </Card>
         )}
@@ -271,7 +265,7 @@ const ProfileMyBids = () => {
 
       <footer className="profile-bids-footer">
         <p className="profile-bids-footer-count">
-          Showing {filteredBids.length} of 12 active bids
+          Showing {filteredBids.length} of {BIDS.length} active bids
         </p>
         <div className="profile-bids-pagination">
           <Button
@@ -286,7 +280,7 @@ const ProfileMyBids = () => {
             <ChevronLeft size={20} />
           </Button>
           <div className="profile-bids-page-numbers">
-            {[1, 2, 3].map((page) => (
+            {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
               <Button
                 key={page}
                 type="button"
@@ -306,8 +300,8 @@ const ProfileMyBids = () => {
             size="icon"
             className="profile-bids-page-btn profile-bids-page-btn--nav"
             aria-label="Next page"
-            disabled={currentPage === 3}
-            onClick={() => setCurrentPage((page) => Math.min(3, page + 1))}
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
           >
             <ChevronRight size={20} />
           </Button>

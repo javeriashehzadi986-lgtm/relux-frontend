@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { ChevronRight, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,7 +18,8 @@ import {
 } from "@/components/ui/accordion";
 import "./sellerSupportCenter.css";
 
-const issueTypes = ["Listing", "Order", "Payment", "Other"];
+const SELLER_ISSUE_TYPES = ["Listing", "Order", "Payment", "Other"];
+const BUYER_ISSUE_TYPES = ["Order", "Rental", "Payment", "Return", "Other"];
 
 const requests = [
   {
@@ -26,6 +28,8 @@ const requests = [
     date: "Oct 24, 2023",
     status: "Open",
     statusVariant: "open",
+    detail:
+      "Deposit refund for order RLX-10294 is pending review. Our team will update you within 24 hours.",
   },
   {
     id: "RH-8810",
@@ -33,6 +37,8 @@ const requests = [
     date: "Oct 20, 2023",
     status: "Resolved",
     statusVariant: "resolved",
+    detail:
+      "Your rental return was confirmed and the remaining deposit has been refunded to your wallet.",
   },
 ];
 
@@ -41,19 +47,25 @@ const SELLER_FAQS = [
     id: "add-listing",
     question: "How to add listing?",
     answer:
-      'To add a listing, navigate to the "Sell" tab and click the plus icon. You will be prompted to upload clear photos, select a brand, describe the condition, and set your price.',
+      'To add a listing, go to My Listings and click Add Listing. Upload clear photos, select a brand, describe the condition, and set your price.',
+    link: { label: "Add a listing", to: "/addListing" },
   },
   {
     id: "bidding",
     question: "How bidding works?",
     answer:
       "Auctions start at a base price. Sellers can set a duration. The highest bidder at the end of the countdown wins the item, provided it meets any reserve price set.",
+    link: { label: "View my listings", to: "/sellerProfile?section=listings" },
   },
   {
     id: "stripe",
     question: "Stripe payment issues?",
     answer:
       "Ensure your bank details are verified in the Stripe Connect dashboard. If payments are delayed, it may be due to verification requirements or hold periods for new sellers.",
+    link: {
+      label: "Payment settings",
+      to: "/sellerProfile?section=settings#seller-settings-payments",
+    },
   },
 ];
 
@@ -63,32 +75,42 @@ const BUYER_FAQS = [
     question: "How do I place a rental or resale order?",
     answer:
       "Browse products, select your preferred item, and proceed to checkout. Complete the payment process to confirm your order.",
+    link: { label: "Browse categories", to: "/categories" },
   },
   {
     id: "damaged-item",
     question: "What should I do if I receive a damaged or incorrect item?",
     answer:
       "Report the issue through Support Center within 24 hours of delivery. Our team will review your request and assist with a replacement or refund.",
+    link: { label: "Contact us", to: "/contactUs" },
   },
   {
     id: "track-order",
     question: "How can I track my order or rental delivery?",
     answer:
       'You can view the current status of your order in the "My Orders" section. Delivery updates are also sent through notifications.',
+    link: { label: "Go to My Orders", to: "/profile?section=orders" },
   },
 ];
 
 const SellerSupportCenter = ({ variant = "buyer" }) => {
   const faqs = variant === "seller" ? SELLER_FAQS : BUYER_FAQS;
-  const [issueType, setIssueType] = useState("Listing");
+  const issueTypes = variant === "seller" ? SELLER_ISSUE_TYPES : BUYER_ISSUE_TYPES;
+  const [issueType, setIssueType] = useState(issueTypes[0]);
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const [expandedRequestId, setExpandedRequestId] = useState(null);
+  const fileInputRef = useRef(null);
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    if (!subject.trim() || !message.trim()) return;
     setSubject("");
     setMessage("");
-    setIssueType("Listing");
+    setIssueType(issueTypes[0]);
+    setSubmitted(true);
+    window.setTimeout(() => setSubmitted(false), 3000);
   };
 
   return (
@@ -100,6 +122,11 @@ const SellerSupportCenter = ({ variant = "buyer" }) => {
           </CardTitle>
         </CardHeader>
         <CardContent className="support-center-form-content">
+          {submitted && (
+            <p className="support-center-success" role="status">
+              Your request has been submitted. We will respond within 24 hours.
+            </p>
+          )}
           <form className="support-center-form" onSubmit={handleSubmit}>
             <FieldGroup className="support-center-fields">
               <Field className="support-center-field">
@@ -126,6 +153,7 @@ const SellerSupportCenter = ({ variant = "buyer" }) => {
                   className="support-center-input"
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
+                  required
                 />
               </Field>
               <Field className="support-center-field">
@@ -137,14 +165,26 @@ const SellerSupportCenter = ({ variant = "buyer" }) => {
                   className="support-center-textarea"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
+                  required
                 />
               </Field>
             </FieldGroup>
             <div className="support-center-form-actions">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="support-center-file-input"
+                hidden
+                onChange={() => {
+                  setSubmitted(false);
+                }}
+              />
               <Button
                 type="button"
                 variant="outline"
                 className="support-center-upload-btn"
+                onClick={() => fileInputRef.current?.click()}
               >
                 <Upload size={18} />
                 Upload Image
@@ -176,14 +216,22 @@ const SellerSupportCenter = ({ variant = "buyer" }) => {
                     {request.status}
                   </span>
                 </div>
+                {expandedRequestId === request.id && (
+                  <p className="support-center-request-detail">{request.detail}</p>
+                )}
                 <div className="support-center-request-bottom">
                   <p className="support-center-request-date">{request.date}</p>
                   <Button
                     type="button"
                     variant="ghost"
                     className="support-center-view-btn"
+                    onClick={() =>
+                      setExpandedRequestId((current) =>
+                        current === request.id ? null : request.id,
+                      )
+                    }
                   >
-                    View
+                    {expandedRequestId === request.id ? "Hide" : "View"}
                     <ChevronRight size={18} />
                   </Button>
                 </div>
@@ -206,7 +254,12 @@ const SellerSupportCenter = ({ variant = "buyer" }) => {
                 {faq.question}
               </AccordionTrigger>
               <AccordionContent className="support-center-faq-content">
-                {faq.answer}
+                <p>{faq.answer}</p>
+                {faq.link && (
+                  <Link to={faq.link.to} className="support-center-faq-link">
+                    {faq.link.label}
+                  </Link>
+                )}
               </AccordionContent>
             </AccordionItem>
           ))}
