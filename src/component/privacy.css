@@ -1,5 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap");
 
 .privacy-page {
   --privacy-primary: #3a6758;
@@ -17,7 +15,7 @@
   min-height: 100vh;
   background-color: var(--privacy-surface);
   color: var(--privacy-on-surface);
-  font-family: "DM Sans", sans-serif;
+  font-family: "Newsreader", serif;
 }
 
 .privacy-page ::selection {
@@ -75,7 +73,7 @@
 }
 
 .privacy-hero-title {
-  font-family: "Cormorant Garamond", Georgia, serif;
+  font-family: "Newsreader", serif;
   font-size: clamp(2.75rem, 6vw, 4.25rem);
   font-weight: 700;
   line-height: 1.05;

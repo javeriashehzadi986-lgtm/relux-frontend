@@ -24,8 +24,6 @@ const FILTER_TABS = [
   { id: "active", label: "Active" },
   { id: "winning", label: "Winning" },
   { id: "outbid", label: "Outbid" },
-  { id: "accepted", label: "Accepted" },
-  { id: "rejected", label: "Rejected" },
   { id: "expired", label: "Expired" },
 ];
 

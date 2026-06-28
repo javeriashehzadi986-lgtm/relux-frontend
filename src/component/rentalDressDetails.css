@@ -1,7 +1,6 @@
-@import url("https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Plus+Jakarta+Sans:wght@200..800&display=swap");
 
 .rental-details-page {
-  font-family: "Plus Jakarta Sans", sans-serif;
+  font-family: "Newsreader", serif;
   background: #faf9f8;
   color: #303333;
   max-width: 80rem;
@@ -165,7 +164,7 @@
 }
 
 .rental-details-daily-rate span {
-  font-family: "Plus Jakarta Sans", sans-serif;
+  font-family: "Newsreader", serif;
   font-size: 1.125rem;
   font-weight: 400;
   color: #5d605f;
@@ -422,6 +421,82 @@
   border-color: #31685d !important;
 }
 
+.rental-details-pending-note {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #31685d;
+  background: #e3fff6;
+  border: 1px solid #b4eedf;
+}
+
+.rental-details-cancel-btn {
+  width: 100%;
+  padding: 1rem 1.5rem !important;
+  min-height: auto !important;
+  border-radius: 9999px !important;
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+  border: 2px solid #a83836 !important;
+  color: #a83836 !important;
+  background: transparent !important;
+}
+
+.rental-details-cancel-btn:hover {
+  background: rgba(168, 56, 54, 0.08) !important;
+}
+
+.rental-details-cancel-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgba(27, 28, 25, 0.45);
+}
+
+.rental-details-cancel-modal {
+  width: 100%;
+  max-width: 28rem;
+  border-radius: 1rem !important;
+  border: 1px solid #e1e3e2 !important;
+  box-shadow: 0 20px 48px rgba(27, 28, 25, 0.18) !important;
+}
+
+.rental-details-cancel-modal-body {
+  padding: 1.5rem 1.5rem 0.5rem !important;
+}
+
+.rental-details-cancel-modal-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #303333;
+}
+
+.rental-details-cancel-modal-description {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: #5d605f;
+}
+
+.rental-details-cancel-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem 1.5rem !important;
+}
+
+.rental-details-cancel-confirm-btn {
+  background: #a83836 !important;
+  color: #fff !important;
+}
+
 .rental-details-trust {
   display: flex;
   justify-content: space-between;
@@ -567,26 +642,8 @@
 }
 
 .rental-details-seller-profile {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.5rem;
-  text-align: center;
-}
-
-.rental-details-seller-avatar {
-  width: 6rem;
-  height: 6rem;
-  border-radius: 9999px;
-  overflow: hidden;
-  border: 4px solid #faf9f8;
-  box-shadow: 0 0 0 2px #31685d;
-}
-
-.rental-details-seller-avatar img {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  text-align: center;
 }
 
 .rental-details-seller-name-row {
@@ -657,13 +714,89 @@
 }
 
 .rental-details-write-review {
+  padding: 0 !important;
+  min-height: auto !important;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font-size: 0.875rem !important;
+  font-weight: 700 !important;
+  color: #31685d !important;
+  text-decoration: underline;
+  text-underline-offset: 0.25rem;
+}
+
+.rental-details-write-review:hover {
+  color: #235c51 !important;
+  background: transparent !important;
+}
+
+.rental-details-review-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  background: #ffffff;
+  border: 1px solid #e1e3e2;
+}
+
+.rental-details-review-form-label {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #5d605f;
+}
+
+.rental-details-review-input {
+  background: #f3f4f3 !important;
+  border: none !important;
+}
+
+.rental-details-review-textarea {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: none;
+  border-radius: 0.75rem;
+  font-family: inherit;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: #303333;
+  background: #f3f4f3;
+  resize: vertical;
+}
+
+.rental-details-review-textarea:focus {
+  outline: 2px solid rgba(49, 104, 93, 0.25);
+  background: #ffffff;
+}
+
+.rental-details-review-submit {
+  align-self: flex-start;
+  margin-top: 0.5rem;
+  border-radius: 9999px !important;
+  background: #31685d !important;
+  color: #e3fff6 !important;
+}
+
+.rental-details-review-stars--interactive {
+  gap: 0.25rem;
+}
+
+.rental-details-star-btn {
+  display: inline-flex;
   padding: 0;
   border: none;
-  background: none;
-  font-weight: 700;
+  background: transparent;
   color: #31685d;
-  text-decoration: underline;
   cursor: pointer;
+}
+
+.rental-details-star-btn:hover {
+  transform: scale(1.05);
 }
 
 .rental-details-reviews-grid {
@@ -711,7 +844,6 @@
   }
 
   .rental-details-seller-profile {
-    flex-direction: row;
     text-align: left;
   }
 

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
@@ -11,27 +11,60 @@ import {
   Verified,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
 import { formatPkr } from "@/data/dressCatalog";
+import {
+  addSellerReview,
+  getSellerKey,
+  getSellerRatingStats,
+  getSellerReviews,
+} from "@/data/sellerReviewsStore";
 import { useBuyerOrders } from "@/hooks/useBuyerOrders";
 import { useWishlist } from "@/hooks/useWishlist";
 import { DressDetailsBreadcrumb } from "./dressDetailsBreadcrumb";
 import { DressFitConditionSection } from "./dressFitCondition";
 import "./rentalDressDetails.css";
 
-const REVIEWS = [
-  {
-    id: "review-1",
-    quote:
-      "The dress arrived in pristine condition and fit beautifully for my sister's nikkah. The rental process was seamless from booking to return.",
-    author: "Sara M., Lahore",
-  },
-  {
-    id: "review-2",
-    quote:
-      "Absolutely stunning craftsmanship. The security deposit was refunded promptly after inspection. Will definitely rent again for the next event.",
-    author: "Hina A., Karachi",
-  },
-];
+function StarRating({ rating, size = 18, interactive = false, onChange }) {
+  return (
+    <div
+      className={`rental-details-review-stars ${
+        interactive ? "rental-details-review-stars--interactive" : ""
+      }`}
+      role={interactive ? "radiogroup" : undefined}
+      aria-label={interactive ? "Select rating" : `${rating} out of 5 stars`}
+    >
+      {Array.from({ length: 5 }).map((_, index) => {
+        const starValue = index + 1;
+        const filled = starValue <= rating;
+
+        if (interactive) {
+          return (
+            <button
+              key={starValue}
+              type="button"
+              className="rental-details-star-btn"
+              aria-label={`${starValue} star${starValue === 1 ? "" : "s"}`}
+              onClick={() => onChange(starValue)}
+            >
+              <Star size={size} fill={filled ? "currentColor" : "none"} />
+            </button>
+          );
+        }
+
+        return (
+          <Star
+            key={starValue}
+            size={size}
+            fill={filled ? "currentColor" : "none"}
+            aria-hidden="true"
+          />
+        );
+      })}
+    </div>
+  );
+}
 
 const toInputDate = (date) => date.toISOString().split("T")[0];
 
@@ -53,14 +86,40 @@ const getRentalDays = (start, end) => {
 
 const RentalDressDetails = ({ dress }) => {
   const navigate = useNavigate();
+  const sellerKey = getSellerKey(dress);
   const defaults = useMemo(() => getDefaultDates(), []);
   const [activeImage, setActiveImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState(dress.listingSize ?? "M");
   const [rentStart, setRentStart] = useState(defaults.start);
   const [rentEnd, setRentEnd] = useState(defaults.end);
+  const [reviews, setReviews] = useState(() => getSellerReviews(sellerKey));
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewText, setReviewText] = useState("");
+  const [reviewAuthor, setReviewAuthor] = useState("");
   const { isSaved, toggle: toggleWishlist } = useWishlist();
-  const { requestRental } = useBuyerOrders();
+  const { orders, requestRental, cancelOrder } = useBuyerOrders();
   const favorited = isSaved(dress.id);
+
+  const pendingRequest = useMemo(
+    () =>
+      orders.find(
+        (order) =>
+          order.type === "rental" &&
+          order.dressId === dress.id &&
+          order.status === "processing",
+      ) ?? null,
+    [orders, dress.id],
+  );
+
+  useEffect(() => {
+    if (!pendingRequest) return;
+    if (pendingRequest.size) setSelectedSize(pendingRequest.size);
+    if (pendingRequest.rentStart) setRentStart(pendingRequest.rentStart);
+    if (pendingRequest.rentEnd) setRentEnd(pendingRequest.rentEnd);
+  }, [pendingRequest]);
+
+  const sellerStats = useMemo(() => getSellerRatingStats(reviews), [reviews]);
 
   const gallery = dress.gallery ?? [dress.mainImage];
   const rentalDays = getRentalDays(rentStart, rentEnd);
@@ -68,6 +127,8 @@ const RentalDressDetails = ({ dress }) => {
   const securityDeposit = dress.securityDeposit ?? dress.fullDressPrice;
   const totalPaidToday = securityDeposit;
   const estimatedRefund = Math.max(0, securityDeposit - rentalCharges);
+
+  const [showCancelModal, setShowCancelModal] = useState(false);
 
   const scrollToSizeGuide = () => {
     document.getElementById("rental-size-guide")?.scrollIntoView({ behavior: "smooth" });
@@ -82,6 +143,28 @@ const RentalDressDetails = ({ dress }) => {
       rentalDays,
     });
     navigate("/profile?section=orders");
+  };
+
+  const handleCancelRequest = () => {
+    if (!pendingRequest) return;
+    cancelOrder(pendingRequest.id);
+    setShowCancelModal(false);
+  };
+
+  const handleSubmitReview = (event) => {
+    event.preventDefault();
+    if (!reviewRating || !reviewText.trim()) return;
+
+    addSellerReview(sellerKey, {
+      rating: reviewRating,
+      quote: reviewText.trim(),
+      author: reviewAuthor.trim() || "Verified Renter",
+    });
+    setReviews(getSellerReviews(sellerKey));
+    setReviewRating(0);
+    setReviewText("");
+    setReviewAuthor("");
+    setShowReviewForm(false);
   };
 
   return (
@@ -196,14 +279,31 @@ const RentalDressDetails = ({ dress }) => {
           </div>
 
           <div className="rental-details-actions">
-            <Button
-              type="button"
-              className="rental-details-rent-btn"
-              onClick={handleRentRequest}
-            >
-              Request for Rent
-              <ArrowRight size={20} aria-hidden="true" />
-            </Button>
+            {pendingRequest ? (
+              <>
+                <p className="rental-details-pending-note">
+                  You have a pending rental request for this dress (Order{" "}
+                  <strong>{pendingRequest.id}</strong>).
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="rental-details-cancel-btn"
+                  onClick={() => setShowCancelModal(true)}
+                >
+                  Cancel Request
+                </Button>
+              </>
+            ) : (
+              <Button
+                type="button"
+                className="rental-details-rent-btn"
+                onClick={handleRentRequest}
+              >
+                Request for Rent
+                <ArrowRight size={20} aria-hidden="true" />
+              </Button>
+            )}
             <Button
               type="button"
               variant="outline"
@@ -283,9 +383,6 @@ const RentalDressDetails = ({ dress }) => {
 
       <section className="rental-details-seller">
         <div className="rental-details-seller-profile">
-          <div className="rental-details-seller-avatar">
-            <img alt={dress.sellerName} src={dress.sellerAvatar} />
-          </div>
           <div>
             <div className="rental-details-seller-name-row">
               <h4 className="rental-details-seller-name">{dress.sellerName}</h4>
@@ -294,9 +391,9 @@ const RentalDressDetails = ({ dress }) => {
             <div className="rental-details-seller-meta">
               <span className="rental-details-seller-rating">
                 <Star size={14} fill="currentColor" aria-hidden="true" />
-                {dress.sellerRating.toFixed(1)}{" "}
+                {sellerStats.average.toFixed(1)}{" "}
                 <span className="rental-details-deposit">
-                  ({dress.sellerReviews} Reviews)
+                  ({sellerStats.count} Review{sellerStats.count === 1 ? "" : "s"})
                 </span>
               </span>
               <span aria-hidden="true">•</span>
@@ -309,24 +406,102 @@ const RentalDressDetails = ({ dress }) => {
       <section className="rental-details-reviews">
         <div className="rental-details-reviews-header">
           <h2>Client Experiences</h2>
-          <button type="button" className="rental-details-write-review">
-            Write a Review
-          </button>
+          <Button
+            type="button"
+            variant="ghost"
+            className="rental-details-write-review"
+            onClick={() => setShowReviewForm((open) => !open)}
+          >
+            {showReviewForm ? "Cancel" : "Write a Review"}
+          </Button>
         </div>
+
+        {showReviewForm && (
+          <form className="rental-details-review-form" onSubmit={handleSubmitReview}>
+            <p className="rental-details-review-form-label">Rate this seller</p>
+            <StarRating
+              rating={reviewRating}
+              size={24}
+              interactive
+              onChange={setReviewRating}
+            />
+            <label className="rental-details-review-form-label" htmlFor="review-author">
+              Your name
+            </label>
+            <Input
+              id="review-author"
+              className="rental-details-review-input"
+              placeholder="e.g. Ayesha K., Lahore"
+              value={reviewAuthor}
+              onChange={(event) => setReviewAuthor(event.target.value)}
+            />
+            <label className="rental-details-review-form-label" htmlFor="review-text">
+              Your review
+            </label>
+            <textarea
+              id="review-text"
+              className="rental-details-review-textarea"
+              placeholder="Share your experience renting from this seller..."
+              value={reviewText}
+              onChange={(event) => setReviewText(event.target.value)}
+              rows={4}
+              required
+            />
+            <Button
+              type="submit"
+              className="rental-details-review-submit"
+              disabled={!reviewRating || !reviewText.trim()}
+            >
+              Submit Review
+            </Button>
+          </form>
+        )}
+
         <div className="rental-details-reviews-grid">
-          {REVIEWS.map((review) => (
+          {reviews.map((review) => (
             <article key={review.id} className="rental-details-review-card">
-              <div className="rental-details-review-stars" aria-label="5 out of 5 stars">
-                {Array.from({ length: 5 }).map((_, index) => (
-                  <Star key={index} size={18} fill="currentColor" />
-                ))}
-              </div>
+              <StarRating rating={review.rating} />
               <p className="rental-details-review-quote">&ldquo;{review.quote}&rdquo;</p>
               <p className="rental-details-review-author">{review.author}</p>
             </article>
           ))}
         </div>
       </section>
+
+      {showCancelModal && pendingRequest && (
+        <div
+          className="rental-details-cancel-overlay"
+          role="presentation"
+          onClick={() => setShowCancelModal(false)}
+        >
+          <Card
+            className="rental-details-cancel-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <CardContent className="rental-details-cancel-modal-body">
+              <h2 id="rental-cancel-title" className="rental-details-cancel-modal-title">
+                Cancel rental request?
+              </h2>
+              <p className="rental-details-cancel-modal-description">
+                This will withdraw your pending rental request. You can request again from this
+                page anytime and your existing order will be updated.
+              </p>
+            </CardContent>
+            <CardContent className="rental-details-cancel-modal-actions">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setShowCancelModal(false)}
+              >
+                Keep Request
+              </Button>
+              <Button type="button" className="rental-details-cancel-confirm-btn" onClick={handleCancelRequest}>
+                Cancel Request
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 };

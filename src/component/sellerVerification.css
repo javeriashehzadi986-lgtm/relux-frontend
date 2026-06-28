@@ -1,4 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap");
 
 .seller-verification-page {
   --seller-primary: #356668;
@@ -17,7 +16,7 @@
   min-height: 100vh;
   background-color: var(--seller-surface);
   color: var(--seller-on-surface);
-  font-family: "Plus Jakarta Sans", "DM Sans", sans-serif;
+  font-family: "Newsreader", serif;
 }
 
 /* Main */

@@ -23,7 +23,6 @@ const SORT_OPTIONS = [
   { id: "recently-added", label: "Recently Added" },
   { id: "price-low", label: "Price: Low to High" },
   { id: "price-high", label: "Price: High to Low" },
-  { id: "popular", label: "Most Popular" },
 ];
 
 const RECOMMENDED = FEATURED_RENTAL_PRODUCTS.slice(0, 4);
@@ -35,9 +34,6 @@ const sortItems = (items, sortBy) => {
   }
   if (sortBy === "price-high") {
     return sorted.sort((a, b) => b.sortPrice - a.sortPrice);
-  }
-  if (sortBy === "popular") {
-    return sorted.sort((a, b) => b.popularity - a.popularity);
   }
   return sorted.sort((a, b) => b.addedAt - a.addedAt);
 };

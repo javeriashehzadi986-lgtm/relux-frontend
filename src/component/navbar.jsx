@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import "./navbar.css";
 import {
   Heart,
@@ -11,15 +11,26 @@ import { Button } from "@/components/ui/button";
 
 const Navbar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const userType = sessionStorage.getItem("userType");
   const isSeller = userType === "seller";
 
-  const showBuyerMenu =
-    location.pathname === "/profile" ||
-    (location.pathname === "/home" && !isSeller);
-  const showSellerMenu =
+  const isBuyerDashboard =
+    location.pathname === "/profile" || location.pathname === "/wishlist";
+  const isSellerDashboard =
     location.pathname === "/sellerProfile" ||
-    (location.pathname === "/home" && isSeller);
+    location.pathname === "/addListing";
+
+  const showBuyerMenu = !isSeller;
+  const showSellerMenu = isSeller;
+
+  const handleBuyerMenuClick = () => {
+    navigate(isBuyerDashboard ? "/home" : "/profile");
+  };
+
+  const handleSellerMenuClick = () => {
+    navigate(isSellerDashboard ? "/home" : "/sellerProfile");
+  };
 
   return (
     <nav className="navbar">
@@ -30,12 +41,18 @@ const Navbar = () => {
               type="button"
               variant="icon"
               size="icon"
-              className="navbar-menu-btn"
-              asChild
+              className={`navbar-menu-btn ${
+                isBuyerDashboard ? "navbar-menu-btn--active" : ""
+              }`}
+              aria-label={
+                isBuyerDashboard
+                  ? "Close buyer dashboard"
+                  : "Open buyer dashboard"
+              }
+              aria-expanded={isBuyerDashboard}
+              onClick={handleBuyerMenuClick}
             >
-              <Link to="/profile" aria-label="Open buyer dashboard">
-                <Menu size={22} />
-              </Link>
+              <Menu size={22} />
             </Button>
           )}
           {showSellerMenu && (
@@ -43,12 +60,18 @@ const Navbar = () => {
               type="button"
               variant="icon"
               size="icon"
-              className="navbar-menu-btn"
-              asChild
+              className={`navbar-menu-btn ${
+                isSellerDashboard ? "navbar-menu-btn--active" : ""
+              }`}
+              aria-label={
+                isSellerDashboard
+                  ? "Close seller dashboard"
+                  : "Open seller dashboard"
+              }
+              aria-expanded={isSellerDashboard}
+              onClick={handleSellerMenuClick}
             >
-              <Link to="/sellerProfile" aria-label="Open seller dashboard">
-                <Menu size={22} />
-              </Link>
+              <Menu size={22} />
             </Button>
           )}
           <Link to="/home" className="logo">

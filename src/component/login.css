@@ -1,11 +1,10 @@
-@import url("https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap");
 
 .login-page {
   display: flex;
   flex: 1;
   width: 100%;
   min-height: calc(100vh - 72px);
-  font-family: "Plus Jakarta Sans", sans-serif;
+  font-family: "Newsreader", serif;
   background: #faf9f8;
   color: #303333;
   overflow: hidden;

@@ -35,6 +35,57 @@ const CANCELLED_ORDER_ACTIONS = [
   { id: "remove", label: "Remove from Order List", variant: "danger" },
 ];
 
+const PROCESSING_RENTAL_ACTIONS = [
+  { id: "details", label: "View Details", variant: "outline", link: true },
+  { id: "cancel", label: "Cancel Request", variant: "danger" },
+];
+
+function buildRentalOrderFields({ size, rentStart, rentEnd, rentalDays }) {
+  return {
+    size,
+    rentalDays,
+    rentStart,
+    rentEnd,
+    meta: [
+      { icon: "calendar-check", text: `${rentalDays} Days Rental` },
+      { icon: "clock", text: formatRentalPeriod(rentStart, rentEnd) },
+    ],
+    status: "processing",
+    statusLabel: "Processing",
+    actions: PROCESSING_RENTAL_ACTIONS,
+    updatedAt: Date.now(),
+  };
+}
+
+export function findReusableRentalOrderForDress(orders, dressId) {
+  const rentalOrders = orders.filter(
+    (order) =>
+      order.type === "rental" &&
+      order.dressId === dressId &&
+      (order.status === "processing" || order.status === "cancelled"),
+  );
+
+  const processing = rentalOrders.find((order) => order.status === "processing");
+  if (processing) return processing;
+
+  const cancelled = rentalOrders
+    .filter((order) => order.status === "cancelled")
+    .sort((a, b) => (b.updatedAt ?? b.createdAt ?? 0) - (a.updatedAt ?? a.createdAt ?? 0));
+
+  return cancelled[0] ?? null;
+}
+
+export function getPendingRentalOrderForDress(dressId) {
+  return (
+    loadBuyerOrders().find(
+      (order) =>
+        order.type === "rental" &&
+        order.dressId === dressId &&
+        order.status === "processing",
+    ) ?? null
+  );
+}
+
 function normalizeBuyerOrder(order) {
   if (order.status !== "cancelled") return order;
 
@@ -89,26 +140,29 @@ export function subscribeBuyerOrdersRevision(onStoreChange) {
 
 export function addRentalRequest({ dressId, size, rentStart, rentEnd, rentalDays }) {
   const orders = loadBuyerOrders();
+  const existing = findReusableRentalOrderForDress(orders, dressId);
+  const rentalFields = buildRentalOrderFields({ size, rentStart, rentEnd, rentalDays });
+
+  if (existing) {
+    const updated = {
+      ...existing,
+      ...rentalFields,
+      dressId,
+      type: "rental",
+      typeLabel: "Rental",
+    };
+    const nextOrders = [updated, ...orders.filter((order) => order.id !== existing.id)];
+    persist(nextOrders);
+    return updated;
+  }
+
   const existingIds = new Set(orders.map((order) => order.id));
   const order = {
     id: generateOrderId(existingIds),
     dressId,
     type: "rental",
     typeLabel: "Rental",
-    size,
-    rentalDays,
-    rentStart,
-    rentEnd,
-    meta: [
-      { icon: "calendar-check", text: `${rentalDays} Days Rental` },
-      { icon: "clock", text: formatRentalPeriod(rentStart, rentEnd) },
-    ],
-    status: "processing",
-    statusLabel: "Processing",
-    actions: [
-      { id: "details", label: "View Details", variant: "outline", link: true },
-      { id: "cancel", label: "Cancel Request", variant: "danger" },
-    ],
+    ...rentalFields,
     createdAt: Date.now(),
   };
 
@@ -122,6 +176,7 @@ export function cancelBuyerOrder(orderId) {
       ? normalizeBuyerOrder({
           ...order,
           status: "cancelled",
+          updatedAt: Date.now(),
         })
       : order,
   );

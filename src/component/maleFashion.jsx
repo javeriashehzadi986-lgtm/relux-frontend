@@ -193,7 +193,6 @@ const MaleFashion = () => {
                 <option value="newest">Newest Arrivals</option>
                 <option value="price-low">Price: Low to High</option>
                 <option value="price-high">Price: High to Low</option>
-                <option value="condition">Condition: Best</option>
               </select>
             </div>
           </div>

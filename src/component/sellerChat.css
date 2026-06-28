@@ -1,8 +1,6 @@
-@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Plus+Jakarta+Sans:wght@200..800&display=swap");
 
 .seller-chat-page {
-  font-family: "Plus Jakarta Sans", sans-serif;
+  font-family: "Newsreader", serif;
   background: #faf9f8;
   color: #303333;
   width: 100%;
