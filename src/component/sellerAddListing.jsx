@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { SellerDashboardShell } from "./sellerDashboardShell";
 import { getDressById } from "@/data/dressCatalog";
 import {
   LISTING_CONDITION_OPTIONS,
@@ -14,7 +13,6 @@ import {
   normalizeListingSize,
 } from "@/data/listingSpecs";
 import { saveSellerListing } from "@/data/sellerListingStore";
-import "./sellerDashboard.css";
 import "./sellerAddListing.css";
 import { getStyleOptionsForCategory } from "@/data/styleCategories";
 
@@ -224,8 +222,7 @@ const SellerAddListing = () => {
   };
 
   return (
-    <SellerDashboardShell activeSection="listings">
-      <div className="add-listing-page">
+    <div className="add-listing-page">
         <header className="add-listing-header">
           <Button
             type="button"
@@ -235,7 +232,7 @@ const SellerAddListing = () => {
           >
             <Link to="/sellerProfile?section=listings">Back to My Listings</Link>
           </Button>
-          <h1 className="seller-dashboard-page-title">
+          <h1 className="add-listing-title">
             {editListingId ? "Edit Listing" : "Add New Listing"}
           </h1>
           <p className="add-listing-subtitle">
@@ -624,8 +621,7 @@ const SellerAddListing = () => {
             </Card>
           </aside>
         </form>
-      </div>
-    </SellerDashboardShell>
+    </div>
   );
 };
 

@@ -124,10 +124,6 @@ function App() {
             path="/supportCenter"
             element={<Navigate to="/sellerProfile?section=support" replace />}
           />
-          <Route
-            path="/settings"
-            element={<Navigate to="/sellerProfile" replace />}
-          />
 
           <Route path="/profile" element={<Profile />} />
           <Route path="/wishlist" element={<Profile section="wishlist" />} />
