@@ -10,6 +10,7 @@ import { getDressesByCategory } from "@/data/dressCatalog";
 import { LISTING_SIZE_OPTIONS } from "@/data/listingSpecs";
 import { getStyleOptionsForCategory } from "@/data/styleCategories";
 import { useListingCatalog } from "@/hooks/useListingCatalog";
+import { useWishlist } from "@/hooks/useWishlist";
 
 const STYLE_FILTERS = getStyleOptionsForCategory("Male");
 const SIZES = LISTING_SIZE_OPTIONS;
@@ -27,7 +28,7 @@ const MaleFashion = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("newest");
   const [currentPage, setCurrentPage] = useState(1);
-  const [favorites, setFavorites] = useState(() => new Set());
+  const { isSaved, toggle: toggleWishlist } = useWishlist();
   const catalogRevision = useListingCatalog();
 
   const filteredProducts = useMemo(
@@ -60,13 +61,8 @@ const MaleFashion = () => {
     setSelectedStyle((current) => (current === style ? "" : style));
   };
 
-  const toggleFavorite = (id) => {
-    setFavorites((current) => {
-      const next = new Set(current);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+  const toggleFavorite = (product) => {
+    toggleWishlist(product);
   };
 
   return (
@@ -212,14 +208,14 @@ const MaleFashion = () => {
                     variant="ghost"
                     size="icon"
                     className={`male-favorite-btn ${
-                      favorites.has(product.id) ? "male-favorite-btn--active" : ""
+                      isSaved(product.id) ? "male-favorite-btn--active" : ""
                     }`}
                     aria-label={`Save ${product.title}`}
-                    onClick={() => toggleFavorite(product.id)}
+                    onClick={() => toggleFavorite(product)}
                   >
                     <Heart
                       size={18}
-                      fill={favorites.has(product.id) ? "currentColor" : "none"}
+                      fill={isSaved(product.id) ? "currentColor" : "none"}
                     />
                   </Button>
                   <div className="male-product-badges">

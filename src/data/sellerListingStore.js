@@ -1,4 +1,5 @@
 const STORAGE_KEY = "relux-seller-listings";
+const DELETED_LISTINGS_KEY = "relux-seller-deleted-listings";
 
 const categoryPathByMain = {
   Female: "/femaleFashion",
@@ -37,13 +38,47 @@ export function subscribeListingRevision(onStoreChange) {
   return () => window.removeEventListener("relux-listings-updated", handler);
 }
 
+export function loadDeletedListingIds() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(DELETED_LISTINGS_KEY) ?? "[]");
+    return new Set(Array.isArray(parsed) ? parsed : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function markListingDeleted(id) {
+  const deleted = loadDeletedListingIds();
+  deleted.add(id);
+  localStorage.setItem(DELETED_LISTINGS_KEY, JSON.stringify([...deleted]));
+}
+
+export function deleteSellerListing(id) {
+  const listings = loadSellerListings();
+  if (listings[id]) {
+    delete listings[id];
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(listings));
+  }
+
+  markListingDeleted(id);
+  listingRevision += 1;
+  window.dispatchEvent(new Event("relux-listings-updated"));
+}
+
+export function isListingDeleted(id) {
+  return loadDeletedListingIds().has(id);
+}
+
 export function getSellerListingIdsForCategory(categoryPath) {
+  const deletedIds = loadDeletedListingIds();
+
   return Object.values(loadSellerListings())
     .filter(
       (listing) =>
         (categoryPathByMain[listing.mainCategory] ?? "") === categoryPath,
     )
-    .map((listing) => listing.id);
+    .map((listing) => listing.id)
+    .filter((id) => !deletedIds.has(id));
 }
 
 export function getSellerListingOverride(id) {

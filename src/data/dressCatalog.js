@@ -10,6 +10,7 @@ import {
 import {
   getSellerListingOverride,
   getSellerListingIdsForCategory,
+  isListingDeleted,
   mapSellerListingToProduct,
 } from "./sellerListingStore";
 
@@ -736,7 +737,9 @@ const getDressIdsForCategory = (categoryPath) => {
     .filter((product) => product.categoryPath === categoryPath)
     .map((product) => product.id);
   const sellerIds = getSellerListingIdsForCategory(categoryPath);
-  return [...new Set([...catalogIds, ...sellerIds])];
+  return [...new Set([...catalogIds, ...sellerIds])].filter(
+    (id) => !isListingDeleted(id),
+  );
 };
 
 export const getDressesByCategory = (categoryPath, filters = {}) => {

@@ -165,9 +165,13 @@
   color: #31685d !important;
 }
 
-.dress-details-favorite:hover,
+.dress-details-favorite:hover {
+  background: #b4eedf !important;
+}
+
 .dress-details-favorite--active {
-  background: #e7e8e7 !important;
+  background: #31685d !important;
+  color: #e3fff6 !important;
 }
 
 .dress-details-meta {

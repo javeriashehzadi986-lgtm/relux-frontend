@@ -28,7 +28,11 @@ import {
   hydratePublishedSellerListing,
   hydrateSellerListing,
 } from "@/data/dressCatalog";
-import { loadSellerListings } from "@/data/sellerListingStore";
+import {
+  deleteSellerListing,
+  isListingDeleted,
+  loadSellerListings,
+} from "@/data/sellerListingStore";
 import { useListingCatalog } from "@/hooks/useListingCatalog";
 import "./sellerMyListings.css";
 
@@ -46,7 +50,13 @@ function buildSellerListings() {
     .filter((listing) => !staticIds.has(listing.id))
     .map(hydratePublishedSellerListing);
 
-  return [...published, ...SELLER_LISTING_META.map(hydrateSellerListing)];
+  const staticListings = SELLER_LISTING_META.map(hydrateSellerListing).filter(
+    (listing) => !isListingDeleted(listing.id),
+  );
+
+  return [...published, ...staticListings].filter(
+    (listing) => !isListingDeleted(listing.id),
+  );
 }
 
 function ListingActionsMenu({
@@ -223,7 +233,7 @@ export function SellerMyListingsContent() {
 
   const handleDeleteConfirm = () => {
     if (!deleteTarget) return;
-    setListings((current) => current.filter((item) => item.id !== deleteTarget));
+    deleteSellerListing(deleteTarget);
     setDeleteTarget(null);
   };
 

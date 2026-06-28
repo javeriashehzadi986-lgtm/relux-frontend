@@ -3,7 +3,6 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   ShoppingBag,
   HandCoins,
-  Heart,
   HelpCircle,
   User,
   LogOut,
@@ -34,7 +33,6 @@ import ProfileSupportCenter from "./profileSupportCenter";
 const SIDEBAR_ITEMS = [
   { id: "orders", label: "My Orders", icon: ShoppingBag },
   { id: "bids", label: "My Bids", icon: HandCoins },
-  { id: "wishlist", label: "Wishlist", icon: Heart },
   { id: "support", label: "Support Center", icon: HelpCircle },
   { id: "profile", label: "My Profile", icon: User },
 ];
@@ -90,10 +88,6 @@ const Profile = ({ section: sectionProp }) => {
 
   const handleSectionChange = (sectionId) => {
     setActiveSection(sectionId);
-    if (sectionId === "wishlist") {
-      navigate("/wishlist", { replace: true });
-      return;
-    }
     if (sectionId === "profile") {
       navigate("/profile", { replace: true });
       return;

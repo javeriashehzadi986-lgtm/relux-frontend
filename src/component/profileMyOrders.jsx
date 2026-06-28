@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   CalendarCheck,
@@ -13,8 +13,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { BUYER_ORDERS } from "@/data/buyerOrdersData";
 import { hydrateBuyerOrder } from "@/data/dressCatalog";
+import { useBuyerOrders } from "@/hooks/useBuyerOrders";
 import "./profileMyOrders.css";
 
 const FILTER_TABS = [
@@ -24,8 +24,6 @@ const FILTER_TABS = [
   { id: "delivered", label: "Delivered" },
   { id: "in-progress", label: "In Progress" },
 ];
-
-const ORDERS = BUYER_ORDERS;
 
 const getOrderActionRoute = (actionId, order) => {
   if (actionId === "track") return "/notification";
@@ -46,6 +44,24 @@ const ACTION_ICONS = {
   history: History,
 };
 
+const CANCELLED_ORDER_ACTIONS = [
+  { id: "details", label: "View Details", variant: "outline", link: true },
+  { id: "remove", label: "Remove from Order List", variant: "danger" },
+];
+
+const getOrderActions = (order) => {
+  if (order.status === "cancelled") {
+    return CANCELLED_ORDER_ACTIONS;
+  }
+
+  return order.actions ?? [];
+};
+
+const getOrderStatusLabel = (order) => {
+  if (order.status === "cancelled") return "Cancelled";
+  return order.statusLabel;
+};
+
 const matchesFilter = (order, filter) => {
   if (filter === "all") return true;
   if (filter === "purchases") return order.type === "purchase";
@@ -61,7 +77,7 @@ const ProfileMyOrders = () => {
   const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [orders, setOrders] = useState(ORDERS);
+  const { orders, cancelOrder, removeOrder } = useBuyerOrders();
   const [cancelTarget, setCancelTarget] = useState(null);
 
   const filteredOrders = useMemo(() => {
@@ -82,31 +98,18 @@ const ProfileMyOrders = () => {
       return;
     }
 
+    if (action.id === "remove") {
+      removeOrder(order.id);
+      return;
+    }
+
     const route = action.link ? getOrderActionRoute(action.id, order) : null;
     if (route) navigate(route);
   };
 
   const confirmCancel = () => {
     if (!cancelTarget) return;
-    setOrders((current) =>
-      current.map((order) =>
-        order.id === cancelTarget
-          ? {
-              ...order,
-              status: "cancelled",
-              statusLabel: "Cancelled",
-              actions: [
-                {
-                  id: "details",
-                  label: "View Details",
-                  variant: "outline",
-                  link: true,
-                },
-              ],
-            }
-          : order,
-      ),
-    );
+    cancelOrder(cancelTarget);
     setCancelTarget(null);
   };
 
@@ -216,13 +219,13 @@ const ProfileMyOrders = () => {
                         {order.status === "delivered" && (
                           <CheckCircle2 size={14} aria-hidden="true" />
                         )}
-                        {order.statusLabel}
+                        {getOrderStatusLabel(order)}
                       </span>
                     </div>
                   </div>
 
                   <div className="profile-order-actions">
-                    {order.actions.map((action) => {
+                    {getOrderActions(order).map((action) => {
                       const ActionIcon = action.icon
                         ? ACTION_ICONS[action.icon]
                         : null;

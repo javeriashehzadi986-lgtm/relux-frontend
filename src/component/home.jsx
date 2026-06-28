@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import { ClipboardList, CalendarDays, RotateCcw, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import {
   FEATURED_RENTAL_PRODUCTS,
   FEATURED_RENTALS_EXPLORE_PATH,
 } from "@/data/featuredRentals";
+import { useWishlist } from "@/hooks/useWishlist";
 import "./home.css";
 
 const categories = [
@@ -63,15 +64,10 @@ const steps = [
 ];
 
 const Home = () => {
-  const [favorites, setFavorites] = useState(() => new Set());
+  const { isSaved, toggle: toggleWishlist } = useWishlist();
 
-  const toggleFavorite = (id) => {
-    setFavorites((current) => {
-      const next = new Set(current);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+  const toggleFavorite = (product) => {
+    toggleWishlist(product);
   };
 
   return (
@@ -147,14 +143,14 @@ const Home = () => {
                     variant="ghost"
                     size="icon"
                     className={`home-product-favorite ${
-                      favorites.has(product.id) ? "home-product-favorite--active" : ""
+                      isSaved(product.id) ? "home-product-favorite--active" : ""
                     }`}
                     aria-label={`Save ${product.title}`}
-                    onClick={() => toggleFavorite(product.id)}
+                    onClick={() => toggleFavorite(product)}
                   >
                     <Heart
                       size={18}
-                      fill={favorites.has(product.id) ? "currentColor" : "none"}
+                      fill={isSaved(product.id) ? "currentColor" : "none"}
                     />
                   </Button>
                 </div>

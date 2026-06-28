@@ -341,7 +341,8 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
 }
 
-.kids-favorite-btn--active {
+.kids-favorite-btn--active,
+.kids-favorite-btn:hover {
   background: #31685d !important;
   color: #e3fff6 !important;
 }

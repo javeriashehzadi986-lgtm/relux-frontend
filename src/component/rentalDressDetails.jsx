@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatPkr } from "@/data/dressCatalog";
+import { useBuyerOrders } from "@/hooks/useBuyerOrders";
+import { useWishlist } from "@/hooks/useWishlist";
 import { DressDetailsBreadcrumb } from "./dressDetailsBreadcrumb";
 import { DressFitConditionSection } from "./dressFitCondition";
 import "./rentalDressDetails.css";
@@ -56,7 +58,9 @@ const RentalDressDetails = ({ dress }) => {
   const [selectedSize, setSelectedSize] = useState(dress.listingSize ?? "M");
   const [rentStart, setRentStart] = useState(defaults.start);
   const [rentEnd, setRentEnd] = useState(defaults.end);
-  const [favorited, setFavorited] = useState(false);
+  const { isSaved, toggle: toggleWishlist } = useWishlist();
+  const { requestRental } = useBuyerOrders();
+  const favorited = isSaved(dress.id);
 
   const gallery = dress.gallery ?? [dress.mainImage];
   const rentalDays = getRentalDays(rentStart, rentEnd);
@@ -67,6 +71,17 @@ const RentalDressDetails = ({ dress }) => {
 
   const scrollToSizeGuide = () => {
     document.getElementById("rental-size-guide")?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const handleRentRequest = () => {
+    requestRental({
+      dressId: dress.id,
+      size: selectedSize,
+      rentStart,
+      rentEnd,
+      rentalDays,
+    });
+    navigate("/profile?section=orders");
   };
 
   return (
@@ -184,7 +199,7 @@ const RentalDressDetails = ({ dress }) => {
             <Button
               type="button"
               className="rental-details-rent-btn"
-              onClick={() => navigate("/profile?section=orders")}
+              onClick={handleRentRequest}
             >
               Request for Rent
               <ArrowRight size={20} aria-hidden="true" />
@@ -192,11 +207,10 @@ const RentalDressDetails = ({ dress }) => {
             <Button
               type="button"
               variant="outline"
-              className="rental-details-wishlist-btn"
-              onClick={() => {
-                setFavorited(true);
-                navigate("/wishlist");
-              }}
+              className={`rental-details-wishlist-btn ${
+                favorited ? "rental-details-wishlist-btn--active" : ""
+              }`.trim()}
+              onClick={() => toggleWishlist(dress.id)}
             >
               <Heart size={18} fill={favorited ? "currentColor" : "none"} aria-hidden="true" />
               {favorited ? "Saved to Wishlist" : "Add to Wishlist"}

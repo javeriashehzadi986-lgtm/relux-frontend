@@ -16,6 +16,7 @@ import { getDressesByCategory } from "@/data/dressCatalog";
 import { LISTING_SIZE_OPTIONS } from "@/data/listingSpecs";
 import { getStyleOptionsForCategory } from "@/data/styleCategories";
 import { useListingCatalog } from "@/hooks/useListingCatalog";
+import { useWishlist } from "@/hooks/useWishlist";
 
 const CATEGORY_FILTERS = getStyleOptionsForCategory("Kids");
 const SIZES = LISTING_SIZE_OPTIONS;
@@ -37,7 +38,7 @@ const KidsFashion = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("newest");
   const [currentPage, setCurrentPage] = useState(1);
-  const [favorites, setFavorites] = useState(() => new Set());
+  const { isSaved, toggle: toggleWishlist } = useWishlist();
   const catalogRevision = useListingCatalog();
 
   const filteredProducts = useMemo(
@@ -73,13 +74,8 @@ const KidsFashion = () => {
     setSearchQuery("");
   };
 
-  const toggleFavorite = (id) => {
-    setFavorites((current) => {
-      const next = new Set(current);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+  const toggleFavorite = (product) => {
+    toggleWishlist(product);
   };
 
   return (
@@ -252,14 +248,14 @@ const KidsFashion = () => {
                       variant="ghost"
                       size="icon"
                       className={`kids-favorite-btn ${
-                        favorites.has(product.id) ? "kids-favorite-btn--active" : ""
+                        isSaved(product.id) ? "kids-favorite-btn--active" : ""
                       }`}
                       aria-label={`Save ${product.title}`}
-                      onClick={() => toggleFavorite(product.id)}
+                      onClick={() => toggleFavorite(product)}
                     >
                       <Heart
                         size={20}
-                        fill={favorites.has(product.id) ? "currentColor" : "none"}
+                        fill={isSaved(product.id) ? "currentColor" : "none"}
                       />
                     </Button>
                     <span className="kids-product-badge">{product.badge}</span>

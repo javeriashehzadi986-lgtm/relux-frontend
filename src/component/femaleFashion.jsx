@@ -17,6 +17,7 @@ import { getDressesByCategory } from "@/data/dressCatalog";
 import { LISTING_SIZE_OPTIONS } from "@/data/listingSpecs";
 import { getStyleOptionsForCategory } from "@/data/styleCategories";
 import { useListingCatalog } from "@/hooks/useListingCatalog";
+import { useWishlist } from "@/hooks/useWishlist";
 
 const STYLE_FILTERS = getStyleOptionsForCategory("Female");
 const SIZES = LISTING_SIZE_OPTIONS;
@@ -38,7 +39,7 @@ const FemaleFashion = () => {
   const [sortBy, setSortBy] = useState("newest");
   const [currentPage, setCurrentPage] = useState(1);
   const [activeTags, setActiveTags] = useState([]);
-  const [favorites, setFavorites] = useState(() => new Set());
+  const { isSaved, toggle: toggleWishlist } = useWishlist();
   const catalogRevision = useListingCatalog();
 
   const filteredProducts = useMemo(
@@ -82,13 +83,8 @@ const FemaleFashion = () => {
     if (id.startsWith("type-")) setListingType("all");
   };
 
-  const toggleFavorite = (id) => {
-    setFavorites((current) => {
-      const next = new Set(current);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+  const toggleFavorite = (product) => {
+    toggleWishlist(product);
   };
 
   return (
@@ -283,14 +279,14 @@ const FemaleFashion = () => {
                     variant="ghost"
                     size="icon"
                     className={`female-favorite-btn ${
-                      favorites.has(product.id) ? "female-favorite-btn--active" : ""
+                      isSaved(product.id) ? "female-favorite-btn--active" : ""
                     }`}
                     aria-label={`Save ${product.title}`}
-                    onClick={() => toggleFavorite(product.id)}
+                    onClick={() => toggleFavorite(product)}
                   >
                     <Heart
                       size={18}
-                      fill={favorites.has(product.id) ? "currentColor" : "none"}
+                      fill={isSaved(product.id) ? "currentColor" : "none"}
                     />
                   </Button>
                 </div>

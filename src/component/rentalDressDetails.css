@@ -416,6 +416,12 @@
   background: #b4eedf !important;
 }
 
+.rental-details-wishlist-btn--active {
+  background: #31685d !important;
+  color: #e3fff6 !important;
+  border-color: #31685d !important;
+}
+
 .rental-details-trust {
   display: flex;
   justify-content: space-between;

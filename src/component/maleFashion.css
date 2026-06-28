@@ -247,12 +247,14 @@
   border-radius: 9999px !important;
   background: rgba(255, 255, 255, 0.8) !important;
   backdrop-filter: blur(4px);
-  color: #5d605f !important;
+  color: #31685d !important;
   box-shadow: none !important;
 }
 
-.male-favorite-btn--active {
-  color: #a83836 !important;
+.male-favorite-btn--active,
+.male-favorite-btn:hover {
+  background: #31685d !important;
+  color: #e3fff6 !important;
 }
 
 .male-product-badges {

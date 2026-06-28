@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { getDressById } from "@/data/dressCatalog";
+import { useWishlist } from "@/hooks/useWishlist";
 import RentalDressDetails from "./rentalDressDetails";
 import { DressDetailsBreadcrumb } from "./dressDetailsBreadcrumb";
 import { DressFitConditionSection } from "./dressFitCondition";
@@ -20,7 +21,8 @@ const DressDetails = () => {
   const [activeImage, setActiveImage] = useState(0);
   const [bidAmount, setBidAmount] = useState("");
   const [termsAccepted, setTermsAccepted] = useState(false);
-  const [favorited, setFavorited] = useState(false);
+  const { isSaved, toggle: toggleWishlist } = useWishlist();
+  const favorited = isSaved(dress.id);
   const [hasWonAuction, setHasWonAuction] = useState(Boolean(dress.auctionWon));
   const [countdown, setCountdown] = useState(dress.countdown ?? { hours: 14, minutes: 22, seconds: 8 });
 
@@ -115,7 +117,7 @@ const DressDetails = () => {
                 size="icon"
                 className={`dress-details-favorite ${favorited ? "dress-details-favorite--active" : ""}`}
                 aria-label={favorited ? "Remove from favorites" : "Save to favorites"}
-                onClick={() => setFavorited((value) => !value)}
+                onClick={() => toggleWishlist(dress.id)}
               >
                 <Heart size={20} fill={favorited ? "currentColor" : "none"} />
               </Button>

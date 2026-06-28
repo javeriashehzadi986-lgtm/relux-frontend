@@ -9,7 +9,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { WISHLIST_ITEMS } from "@/data/wishlistItems";
+import { FEATURED_RENTAL_PRODUCTS } from "@/data/featuredRentals";
+import { useWishlist } from "@/hooks/useWishlist";
 import "./profileWishlist.css";
 
 const FILTER_TABS = [
@@ -25,7 +26,7 @@ const SORT_OPTIONS = [
   { id: "popular", label: "Most Popular" },
 ];
 
-const RECOMMENDED = WISHLIST_ITEMS.slice(0, 4);
+const RECOMMENDED = FEATURED_RENTAL_PRODUCTS.slice(0, 4);
 
 const sortItems = (items, sortBy) => {
   const sorted = [...items];
@@ -38,7 +39,7 @@ const sortItems = (items, sortBy) => {
   if (sortBy === "popular") {
     return sorted.sort((a, b) => b.popularity - a.popularity);
   }
-  return sorted.sort((a, b) => a.addedAt - b.addedAt);
+  return sorted.sort((a, b) => b.addedAt - a.addedAt);
 };
 
 const ProfileWishlist = () => {
@@ -46,14 +47,11 @@ const ProfileWishlist = () => {
   const [activeFilter, setActiveFilter] = useState("all");
   const [sortBy, setSortBy] = useState("recently-added");
   const [searchQuery, setSearchQuery] = useState("");
-  const [savedIds, setSavedIds] = useState(
-    () => new Set(WISHLIST_ITEMS.map((item) => item.id)),
-  );
+  const { items: wishlistItems, remove } = useWishlist();
 
   const filteredItems = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
-    const items = WISHLIST_ITEMS.filter((item) => {
-      if (!savedIds.has(item.id)) return false;
+    const items = wishlistItems.filter((item) => {
       const matchesFilter =
         activeFilter === "all" || item.listingType === activeFilter;
       const matchesSearch =
@@ -63,14 +61,10 @@ const ProfileWishlist = () => {
       return matchesFilter && matchesSearch;
     });
     return sortItems(items, sortBy);
-  }, [activeFilter, searchQuery, sortBy, savedIds]);
+  }, [activeFilter, searchQuery, sortBy, wishlistItems]);
 
   const removeFromWishlist = (id) => {
-    setSavedIds((prev) => {
-      const next = new Set(prev);
-      next.delete(id);
-      return next;
-    });
+    remove(id);
   };
 
   const scrollCarousel = (direction) => {
@@ -201,7 +195,11 @@ const ProfileWishlist = () => {
                 strokeWidth={1}
                 aria-hidden="true"
               />
-              <p>No wishlist items match your search or filter.</p>
+              <p>
+                {wishlistItems.length === 0
+                  ? "Your wishlist is empty. Save items you love while browsing."
+                  : "No wishlist items match your search or filter."}
+              </p>
               <Button type="button" className="profile-wishlist-view-btn" asChild>
                 <Link to="/categories">Browse Collection</Link>
               </Button>
