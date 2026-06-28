@@ -62,3 +62,9 @@ body,
 .app-container--full-page {
   min-height: 100vh;
 }
+
+.main-content--admin {
+  padding-top: 0;
+  padding-bottom: 0;
+  flex: 1;
+}
