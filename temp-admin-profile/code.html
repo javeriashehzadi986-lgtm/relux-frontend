@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Relux Hub | Admin Profile &amp; Settings</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts: Manrope & JetBrains Mono -->
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-low": "#f5f4ec",
+                    "on-surface": "#1b1c17",
+                    "tertiary-container": "#babfbb",
+                    "surface-dim": "#dcdad2",
+                    "secondary-fixed": "#cbebcf",
+                    "background": "#fbf9f1",
+                    "on-tertiary-fixed": "#181d1a",
+                    "surface-container-lowest": "#ffffff",
+                    "on-background": "#1b1c17",
+                    "tertiary-fixed-dim": "#c3c7c4",
+                    "surface-container": "#f0eee6",
+                    "tertiary": "#5b5f5d",
+                    "on-secondary-container": "#4f6b55",
+                    "error": "#ba1a1a",
+                    "inverse-primary": "#a1d2ac",
+                    "secondary-fixed-dim": "#afceb3",
+                    "on-secondary-fixed": "#05200f",
+                    "on-surface-variant": "#414942",
+                    "surface-bright": "#fbf9f1",
+                    "on-secondary": "#ffffff",
+                    "surface-variant": "#e4e3db",
+                    "on-primary-fixed": "#00210e",
+                    "surface": "#fbf9f1",
+                    "on-tertiary": "#ffffff",
+                    "primary-container": "#98c9a3",
+                    "error-container": "#ffdad6",
+                    "surface-container-high": "#eae8e0",
+                    "on-error": "#ffffff",
+                    "tertiary-fixed": "#dfe3e0",
+                    "secondary-container": "#cbebcf",
+                    "primary": "#3b6848",
+                    "on-primary": "#ffffff",
+                    "surface-container-highest": "#e4e3db",
+                    "secondary": "#49654f",
+                    "outline-variant": "#c1c9bf",
+                    "on-tertiary-fixed-variant": "#434845",
+                    "on-primary-container": "#285537",
+                    "inverse-surface": "#30312c",
+                    "on-primary-fixed-variant": "#224f32",
+                    "inverse-on-surface": "#f3f1e9",
+                    "surface-tint": "#3b6848",
+                    "primary-fixed-dim": "#a1d2ac",
+                    "primary-fixed": "#bcefc7",
+                    "on-tertiary-container": "#494e4b",
+                    "on-error-container": "#93000a",
+                    "on-secondary-fixed-variant": "#324d38",
+                    "outline": "#717971"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "8px",
+                    "xl": "12px",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "unit": "8px",
+                    "sidebar-width": "260px",
+                    "gutter": "24px",
+                    "card-gap": "20px",
+                    "container-padding": "32px"
+            },
+            "fontFamily": {
+                    "display": ["Manrope"],
+                    "headline-md": ["Manrope"],
+                    "headline-lg": ["Manrope"],
+                    "button": ["Manrope"],
+                    "body-lg": ["Manrope"],
+                    "label-caps": ["JetBrains Mono"],
+                    "body-md": ["Manrope"]
+            },
+            "fontSize": {
+                    "display": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "button": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .custom-shadow {
+            box-shadow: 0 4px 20px -2px rgba(59, 104, 72, 0.08);
+        }
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #3b6848;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #98c9a3;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen">
+<!-- Side Navigation Shell -->
+<aside class="fixed left-0 top-0 h-screen w-[260px] bg-surface shadow-sm flex flex-col h-full py-8 px-4 z-50">
+<div class="mb-10 px-4">
+<h1 class="font-display text-display text-primary">Relux Hub</h1>
+<p class="font-body-md text-on-surface-variant text-xs mt-1">Marketplace Admin</p>
+</div>
+<nav class="flex-grow space-y-2">
+<a class="flex items-center space-x-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-secondary-container transition-colors duration-200 cursor-pointer active:scale-95 group" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-body-md">Dashboard</span>
+</a>
+<a class="flex items-center space-x-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-secondary-container transition-colors duration-200 cursor-pointer active:scale-95" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-body-md">Users</span>
+</a>
+<a class="flex items-center space-x-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-secondary-container transition-colors duration-200 cursor-pointer active:scale-95" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-body-md">Inventory</span>
+</a>
+<a class="flex items-center space-x-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-secondary-container transition-colors duration-200 cursor-pointer active:scale-95" href="#">
+<span class="material-symbols-outlined">shopping_bag</span>
+<span class="font-body-md">Orders</span>
+</a>
+<a class="flex items-center space-x-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-secondary-container transition-colors duration-200 cursor-pointer active:scale-95" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-body-md">Analytics</span>
+</a>
+<a class="flex items-center space-x-3 px-4 py-3 rounded-lg text-primary font-bold border-r-4 border-primary bg-secondary-container/30 transition-colors duration-200 cursor-pointer active:scale-95" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">settings</span>
+<span class="font-body-md">Settings</span>
+</a>
+</nav>
+<div class="mt-auto px-4">
+<button class="w-full py-3 bg-primary text-on-primary font-button rounded-lg hover:bg-primary-container hover:text-on-primary-container transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">add_chart</span>
+                Quick Report
+            </button>
+</div>
+</aside>
+<!-- Top App Bar -->
+<header class="fixed top-0 right-0 w-[calc(100%-260px)] h-16 bg-surface-bright/80 backdrop-blur-md flex justify-between items-center px-8 z-40">
+<div class="flex items-center bg-surface-container-low border border-outline-variant px-4 py-2 rounded-full w-96">
+<span class="material-symbols-outlined text-on-surface-variant text-xl mr-2">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-body-md w-full placeholder-on-surface-variant" placeholder="Search admin tools..." type="text"/>
+</div>
+<div class="flex items-center space-x-6">
+<button class="relative p-2 hover:bg-surface-container rounded-full transition-all text-on-surface-variant">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-1 right-1 w-2 h-2 bg-error rounded-full"></span>
+</button>
+<button class="p-2 hover:bg-surface-container rounded-full transition-all text-on-surface-variant">
+<span class="material-symbols-outlined">help_outline</span>
+</button>
+<div class="flex items-center space-x-3 pl-4 border-l border-outline-variant">
+<div class="text-right hidden sm:block">
+<p class="font-button text-on-surface">Elena Vance</p>
+<p class="text-[10px] uppercase font-label-caps text-on-surface-variant">Super Admin</p>
+</div>
+<img class="w-10 h-10 rounded-full border-2 border-primary-container object-cover" data-alt="A professional headshot of a female administrator with a friendly expression, captured in high-resolution with soft studio lighting. She has dark hair and wears a professional neutral-toned blazer. The background is a clean, minimalist office setting with soft green accents, echoing a luxury sustainable fashion brand's aesthetic. The overall mood is reliable, expert, and serene." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCp6p6vQ3oX-n-48ci-rcve1ascuZd367mzcRr4YUCNVc9N_ZGD3CydMaUntXtaHjnTpa3sBYrQAs6AHXTC6cXOR4nwvQCCQqF78j6X2cj12kZkHRhIQTDBRPFS_EhzYXiAhTnmAvL-EOTqKBMFoPEM3dWzB4p9ny2TYdM-lXmJB2satUvb4hL1v_z4kp_JB5CNuxvl8fiQvqOaieN2TzZOwScHZ3XjU86trDx7YD6xef-kbNxkGC-b3wnd9cf2U-q0hVTtq1SbqLU"/>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-[260px] pt-24 pb-16 px-[32px] max-w-[1440px]">
+<!-- Header Section -->
+<div class="mb-10">
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Admin Profile &amp; Settings</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Manage your profile, account security, and preferences.</p>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-[24px]">
+<!-- Column 1: Profile & Account Status -->
+<div class="space-y-[24px] lg:col-span-1">
+<!-- Profile Information Card -->
+<div class="bg-surface-container-lowest p-8 rounded-lg custom-shadow border border-[#E8EEE8] flex flex-col items-center text-center">
+<div class="relative mb-6">
+<img class="w-24 h-24 rounded-full border-4 border-surface-container-high object-cover" data-alt="A close-up portrait of Elena Vance, the Super Admin, presented as a high-quality profile picture for a web application. The lighting is bright and airy, matching a light-mode UI theme. She looks confident and professional. The circular frame has a subtle Soft Mint Green glow, signifying an active and verified status within the Relux Hub platform." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDGwkedp3jbJaCNOxJHzXx3Pw6FC-QoWyG5hGRCoiUooqfYIhIZKnM5SDbYVb2LYAwv23KngCHu4sFFCW6nuYEBCchhu7VmlxK-7RAqsiOTRm3LqU-urvWlV7YFrlyMpfZ9cv52dftcSjMT2Dd2aFvZ2wDlDh54lRcC6pW4LHjOseDw6VzBXZKySayazQSGamntSmIbujTYpqpy3N5MBZTBPskPSLrnwFQfh0x3piKkvD4Uq8GqP1XnJug0pECiNNTrq54GoHWjuQY"/>
+<button class="absolute bottom-0 right-0 p-2 bg-primary text-on-primary rounded-full shadow-lg hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-sm">edit</span>
+</button>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface">Elena Vance</h3>
+<p class="font-label-caps text-on-surface-variant mb-6">admin@reluxhub.com</p>
+<div class="w-full space-y-4 text-left border-t border-surface-container-high pt-6">
+<div class="flex justify-between items-center">
+<span class="text-on-surface-variant font-body-md">Phone Number</span>
+<span class="text-on-surface font-body-md font-medium">+1 (555) 012-3456</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-on-surface-variant font-body-md">Time Zone</span>
+<span class="text-on-surface font-body-md font-medium">EST (UTC-5)</span>
+</div>
+</div>
+<button class="mt-8 w-full py-2.5 bg-primary-container text-on-primary-container font-button rounded-lg hover:brightness-95 transition-all">
+                        Edit Profile
+                    </button>
+</div>
+<!-- Account Information Section -->
+<div class="bg-surface-container-lowest p-6 rounded-lg custom-shadow border border-[#E8EEE8]">
+<div class="flex items-center gap-3 mb-4">
+<span class="material-symbols-outlined text-primary">verified_user</span>
+<h4 class="font-headline-md text-headline-md">Account Info</h4>
+</div>
+<div class="space-y-4">
+<div class="p-3 bg-surface rounded-lg flex justify-between items-center">
+<span class="text-on-surface-variant text-sm">Role</span>
+<span class="px-2 py-1 bg-secondary-container text-on-secondary-container rounded text-xs font-bold uppercase tracking-wider">Super Admin</span>
+</div>
+<div class="p-3 bg-surface rounded-lg flex justify-between items-center">
+<span class="text-on-surface-variant text-sm">Last Login</span>
+<span class="text-on-surface text-sm">2 hours ago</span>
+</div>
+<div class="p-3 bg-surface rounded-lg flex justify-between items-center">
+<span class="text-on-surface-variant text-sm">Status</span>
+<div class="flex items-center gap-1.5 text-primary">
+<span class="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
+<span class="text-sm font-semibold">Active</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Column 2 & 3: Security & Notifications -->
+<div class="lg:col-span-2 space-y-[24px]">
+<!-- Security Settings Card -->
+<div class="bg-surface-container-lowest p-8 rounded-lg custom-shadow border border-[#E8EEE8]">
+<div class="flex items-center justify-between mb-8">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">security</span>
+</div>
+<h4 class="font-headline-md text-headline-md">Security Settings</h4>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="p-6 bg-surface rounded-xl border border-outline-variant/30 hover:border-primary/30 transition-colors">
+<p class="font-headline-md text-sm mb-1">Password Management</p>
+<p class="text-on-surface-variant text-xs mb-4">Keep your account safe with a strong password.</p>
+<button class="px-4 py-2 bg-surface-container-highest text-on-surface font-button rounded-lg hover:bg-surface-container-high transition-all flex items-center gap-2">
+                                Change Password
+                                <span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+<div class="p-6 bg-surface rounded-xl border border-outline-variant/30 hover:border-primary/30 transition-colors">
+<p class="font-headline-md text-sm mb-1">Email Address</p>
+<p class="text-on-surface-variant text-xs mb-4">Currently linked: admin@reluxhub.com</p>
+<button class="px-4 py-2 bg-surface-container-highest text-on-surface font-button rounded-lg hover:bg-surface-container-high transition-all flex items-center gap-2">
+                                Update Email
+                                <span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+</div>
+<div class="mt-6 p-6 bg-primary-container/20 rounded-xl flex items-center justify-between">
+<div class="flex gap-4">
+<span class="material-symbols-outlined text-primary p-2 bg-white rounded-full h-fit">phonelink_lock</span>
+<div>
+<p class="font-headline-md text-sm">Two-Factor Authentication (2FA)</p>
+<p class="text-on-surface-variant text-xs">Add an extra layer of security to your account.</p>
+</div>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer outline-none focus:ring-0 transition-all right-0 border-primary" id="toggle2fa" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-primary-container cursor-pointer" for="toggle2fa"></label>
+</div>
+</div>
+</div>
+<!-- Notification Preferences Card -->
+<div class="bg-surface-container-lowest p-8 rounded-lg custom-shadow border border-[#E8EEE8]">
+<div class="flex items-center gap-3 mb-8">
+<div class="w-10 h-10 bg-secondary-container/30 rounded-lg flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined">notifications_active</span>
+</div>
+<h4 class="font-headline-md text-headline-md">Notification Preferences</h4>
+</div>
+<div class="space-y-2">
+<!-- Notification Row -->
+<div class="flex items-center justify-between p-4 hover:bg-surface rounded-lg transition-all group">
+<div class="flex gap-4 items-center">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary">mail</span>
+<div>
+<p class="font-button text-on-surface">Email Notifications</p>
+<p class="text-on-surface-variant text-xs">Receive global system updates and weekly summaries.</p>
+</div>
+</div>
+<div class="relative inline-block w-10 align-middle select-none">
+<input checked="" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-2 appearance-none cursor-pointer transition-all right-0 border-primary" id="notif-1" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-5 rounded-full bg-primary-container cursor-pointer" for="notif-1"></label>
+</div>
+</div>
+<!-- Notification Row -->
+<div class="flex items-center justify-between p-4 hover:bg-surface rounded-lg transition-all group">
+<div class="flex gap-4 items-center">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary">person_check</span>
+<div>
+<p class="font-button text-on-surface">Seller Verification Alerts</p>
+<p class="text-on-surface-variant text-xs">Get notified when a new seller submits documentation.</p>
+</div>
+</div>
+<div class="relative inline-block w-10 align-middle select-none">
+<input checked="" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-2 appearance-none cursor-pointer transition-all right-0 border-primary" id="notif-2" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-5 rounded-full bg-primary-container cursor-pointer" for="notif-2"></label>
+</div>
+</div>
+<!-- Notification Row -->
+<div class="flex items-center justify-between p-4 hover:bg-surface rounded-lg transition-all group">
+<div class="flex gap-4 items-center">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary">report_problem</span>
+<div>
+<p class="font-button text-on-surface">Reports &amp; Complaints Alerts</p>
+<p class="text-on-surface-variant text-xs">Immediate alerts for high-priority user complaints.</p>
+</div>
+</div>
+<div class="relative inline-block w-10 align-middle select-none">
+<input class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-2 appearance-none cursor-pointer transition-all left-0 border-outline" id="notif-3" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-5 rounded-full bg-surface-container-high cursor-pointer" for="notif-3"></label>
+</div>
+</div>
+<!-- Notification Row -->
+<div class="flex items-center justify-between p-4 hover:bg-surface rounded-lg transition-all group">
+<div class="flex gap-4 items-center">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary">confirmation_number</span>
+<div>
+<p class="font-button text-on-surface">Support Ticket Alerts</p>
+<p class="text-on-surface-variant text-xs">Notifications for new and escalated support tickets.</p>
+</div>
+</div>
+<div class="relative inline-block w-10 align-middle select-none">
+<input checked="" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-2 appearance-none cursor-pointer transition-all right-0 border-primary" id="notif-4" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-5 rounded-full bg-primary-container cursor-pointer" for="notif-4"></label>
+</div>
+</div>
+</div>
+</div>
+<!-- Account Actions (Danger Zone) -->
+<div class="bg-surface-container-lowest p-8 rounded-lg custom-shadow border border-error/10 flex flex-col md:flex-row items-center justify-between gap-6">
+<div>
+<h4 class="font-headline-md text-headline-md text-on-surface">Account Management</h4>
+<p class="text-on-surface-variant text-sm">Log out of your session or permanently deactivate your account.</p>
+</div>
+<div class="flex items-center gap-4 w-full md:w-auto">
+<button class="flex-1 md:flex-none px-6 py-2.5 bg-surface-container text-on-surface font-button rounded-lg hover:bg-surface-variant transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-lg">logout</span>
+                            Logout
+                        </button>
+<button class="flex-1 md:flex-none px-6 py-2.5 bg-error text-on-error font-button rounded-lg hover:brightness-90 transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-lg">no_accounts</span>
+                            Deactivate
+                        </button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<script>
+        // Micro-interaction for Toggles
+        document.querySelectorAll('.toggle-checkbox').forEach(toggle => {
+            toggle.addEventListener('change', function() {
+                const label = this.nextElementSibling;
+                if(this.checked) {
+                    this.classList.replace('left-0', 'right-0');
+                    this.classList.replace('border-outline', 'border-primary');
+                    label.classList.replace('bg-surface-container-high', 'bg-primary-container');
+                } else {
+                    this.classList.replace('right-0', 'left-0');
+                    this.classList.replace('border-primary', 'border-outline');
+                    label.classList.replace('bg-primary-container', 'bg-surface-container-high');
+                }
+            });
+        });
+
+        // Hover animation for cards
+        const cards = document.querySelectorAll('.custom-shadow');
+        cards.forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-2px)';
+                card.style.transition = 'all 0.3s ease-out';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+</body></html>

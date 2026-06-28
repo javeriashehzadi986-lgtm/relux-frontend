@@ -26,6 +26,12 @@ import ForgotPassword from "./component/forgotPassword";
 import Profile from "./component/profile";
 import SellerProfile from "./component/sellerProfile";
 import SellerAddListing from "./component/sellerAddListing";
+import AdminProfile from "./component/admin/adminProfile";
+import AdminReviews from "./component/admin/adminReviews";
+import AdminSupportCenter from "./component/admin/adminSupportCenter";
+import AdminNotifications from "./component/admin/adminNotifications";
+import AdminPayments from "./component/admin/adminPayments";
+import AdminReportsComplaints from "./component/admin/adminReportsComplaints";
 
 const DressChatRedirect = () => {
   const { id } = useParams();
@@ -129,6 +135,12 @@ function App() {
 
           <Route path="/cart" element={<Navigate to="/wishlist" replace />} />
           <Route path="/notification" element={<Notification />} />
+          <Route path="/adminProfile" element={<AdminProfile />} />
+          <Route path="/adminReviews" element={<AdminReviews />} />
+          <Route path="/adminSupportCenter" element={<AdminSupportCenter />} />
+          <Route path="/adminNotifications" element={<AdminNotifications />} />
+          <Route path="/adminPayments" element={<AdminPayments />} />
+          <Route path="/adminReportsComplaints" element={<AdminReportsComplaints />} />
         </Routes>
       </main>
 

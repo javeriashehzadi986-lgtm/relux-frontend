@@ -129,6 +129,15 @@
   padding-top: 0;
 }
 
+body.dashboard-sidebar-closed .profile-sidebar,
+body.dashboard-sidebar-closed .profile-mobile-nav {
+  display: none !important;
+}
+
+body.dashboard-sidebar-closed .profile-main {
+  margin-left: 0 !important;
+}
+
 .profile-card {
   max-width: 48rem;
   margin: 0 auto;

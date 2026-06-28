@@ -782,6 +782,49 @@
   color: #e3fff6 !important;
 }
 
+.rental-details-report-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #e1e3e2;
+}
+
+.rental-details-report-hint {
+  margin: -0.25rem 0 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #5d605f;
+}
+
+.rental-details-report-select {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: none;
+  border-radius: 0.75rem;
+  font-family: inherit;
+  font-size: 0.9375rem;
+  color: #303333;
+  background: #f3f4f3;
+  cursor: pointer;
+}
+
+.rental-details-report-select:focus {
+  outline: 2px solid rgba(49, 104, 93, 0.25);
+  background: #ffffff;
+}
+
+.rental-details-review-notice {
+  margin: 0 0 1.5rem;
+  padding: 0.875rem 1rem;
+  border-radius: 0.75rem;
+  font-size: 0.9375rem;
+  color: #225b4f;
+  background: #e3fff6;
+  border: 1px solid #b4eedf;
+}
+
 .rental-details-review-stars--interactive {
   gap: 0.25rem;
 }

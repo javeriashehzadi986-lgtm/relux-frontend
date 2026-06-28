@@ -1,4 +1,5 @@
 const STORAGE_KEY = "relux-seller-reviews";
+const REPORTS_STORAGE_KEY = "relux-seller-reports";
 
 const SEED_REVIEWS = [
   {
@@ -50,6 +51,38 @@ export function addSellerReview(sellerKey, { rating, quote, author }) {
   all[sellerKey] = [review, ...(all[sellerKey] ?? [])];
   saveAll(all);
   return review;
+}
+
+function loadReports() {
+  try {
+    return JSON.parse(localStorage.getItem(REPORTS_STORAGE_KEY) ?? "[]");
+  } catch {
+    return [];
+  }
+}
+
+function saveReports(reports) {
+  localStorage.setItem(REPORTS_STORAGE_KEY, JSON.stringify(reports));
+}
+
+export function addSellerReport({
+  sellerKey,
+  dressId,
+  reason,
+  details,
+  author,
+}) {
+  const report = {
+    id: `report-${Date.now()}`,
+    sellerKey,
+    dressId,
+    reason,
+    details,
+    author,
+    createdAt: new Date().toISOString(),
+  };
+  saveReports([report, ...loadReports()]);
+  return report;
 }
 
 export function getSellerRatingStats(reviews) {

@@ -486,6 +486,10 @@
   margin-top: 6rem;
 }
 
+.dress-details-page .rental-details-seller {
+  margin-top: 4rem;
+}
+
 .dress-details-history-header {
   display: flex;
   flex-wrap: wrap;

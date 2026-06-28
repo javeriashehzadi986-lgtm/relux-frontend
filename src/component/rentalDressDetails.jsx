@@ -7,64 +7,17 @@ import {
   Heart,
   Lock,
   Sparkles,
-  Star,
   Verified,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatPkr } from "@/data/dressCatalog";
-import {
-  addSellerReview,
-  getSellerKey,
-  getSellerRatingStats,
-  getSellerReviews,
-} from "@/data/sellerReviewsStore";
 import { useBuyerOrders } from "@/hooks/useBuyerOrders";
 import { useWishlist } from "@/hooks/useWishlist";
 import { DressDetailsBreadcrumb } from "./dressDetailsBreadcrumb";
 import { DressFitConditionSection } from "./dressFitCondition";
+import { SellerReviewsSection } from "./sellerReviewsSection";
 import "./rentalDressDetails.css";
-
-function StarRating({ rating, size = 18, interactive = false, onChange }) {
-  return (
-    <div
-      className={`rental-details-review-stars ${
-        interactive ? "rental-details-review-stars--interactive" : ""
-      }`}
-      role={interactive ? "radiogroup" : undefined}
-      aria-label={interactive ? "Select rating" : `${rating} out of 5 stars`}
-    >
-      {Array.from({ length: 5 }).map((_, index) => {
-        const starValue = index + 1;
-        const filled = starValue <= rating;
-
-        if (interactive) {
-          return (
-            <button
-              key={starValue}
-              type="button"
-              className="rental-details-star-btn"
-              aria-label={`${starValue} star${starValue === 1 ? "" : "s"}`}
-              onClick={() => onChange(starValue)}
-            >
-              <Star size={size} fill={filled ? "currentColor" : "none"} />
-            </button>
-          );
-        }
-
-        return (
-          <Star
-            key={starValue}
-            size={size}
-            fill={filled ? "currentColor" : "none"}
-            aria-hidden="true"
-          />
-        );
-      })}
-    </div>
-  );
-}
 
 const toInputDate = (date) => date.toISOString().split("T")[0];
 
@@ -86,17 +39,11 @@ const getRentalDays = (start, end) => {
 
 const RentalDressDetails = ({ dress }) => {
   const navigate = useNavigate();
-  const sellerKey = getSellerKey(dress);
   const defaults = useMemo(() => getDefaultDates(), []);
   const [activeImage, setActiveImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState(dress.listingSize ?? "M");
   const [rentStart, setRentStart] = useState(defaults.start);
   const [rentEnd, setRentEnd] = useState(defaults.end);
-  const [reviews, setReviews] = useState(() => getSellerReviews(sellerKey));
-  const [showReviewForm, setShowReviewForm] = useState(false);
-  const [reviewRating, setReviewRating] = useState(0);
-  const [reviewText, setReviewText] = useState("");
-  const [reviewAuthor, setReviewAuthor] = useState("");
   const { isSaved, toggle: toggleWishlist } = useWishlist();
   const { orders, requestRental, cancelOrder } = useBuyerOrders();
   const favorited = isSaved(dress.id);
@@ -118,8 +65,6 @@ const RentalDressDetails = ({ dress }) => {
     if (pendingRequest.rentStart) setRentStart(pendingRequest.rentStart);
     if (pendingRequest.rentEnd) setRentEnd(pendingRequest.rentEnd);
   }, [pendingRequest]);
-
-  const sellerStats = useMemo(() => getSellerRatingStats(reviews), [reviews]);
 
   const gallery = dress.gallery ?? [dress.mainImage];
   const rentalDays = getRentalDays(rentStart, rentEnd);
@@ -149,22 +94,6 @@ const RentalDressDetails = ({ dress }) => {
     if (!pendingRequest) return;
     cancelOrder(pendingRequest.id);
     setShowCancelModal(false);
-  };
-
-  const handleSubmitReview = (event) => {
-    event.preventDefault();
-    if (!reviewRating || !reviewText.trim()) return;
-
-    addSellerReview(sellerKey, {
-      rating: reviewRating,
-      quote: reviewText.trim(),
-      author: reviewAuthor.trim() || "Verified Renter",
-    });
-    setReviews(getSellerReviews(sellerKey));
-    setReviewRating(0);
-    setReviewText("");
-    setReviewAuthor("");
-    setShowReviewForm(false);
   };
 
   return (
@@ -381,92 +310,11 @@ const RentalDressDetails = ({ dress }) => {
         </div>
       </div>
 
-      <section className="rental-details-seller">
-        <div className="rental-details-seller-profile">
-          <div>
-            <div className="rental-details-seller-name-row">
-              <h4 className="rental-details-seller-name">{dress.sellerName}</h4>
-              <span className="rental-details-elite-badge">Elite Member</span>
-            </div>
-            <div className="rental-details-seller-meta">
-              <span className="rental-details-seller-rating">
-                <Star size={14} fill="currentColor" aria-hidden="true" />
-                {sellerStats.average.toFixed(1)}{" "}
-                <span className="rental-details-deposit">
-                  ({sellerStats.count} Review{sellerStats.count === 1 ? "" : "s"})
-                </span>
-              </span>
-              <span aria-hidden="true">•</span>
-              <span>Member since {dress.sellerMemberSince}</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="rental-details-reviews">
-        <div className="rental-details-reviews-header">
-          <h2>Client Experiences</h2>
-          <Button
-            type="button"
-            variant="ghost"
-            className="rental-details-write-review"
-            onClick={() => setShowReviewForm((open) => !open)}
-          >
-            {showReviewForm ? "Cancel" : "Write a Review"}
-          </Button>
-        </div>
-
-        {showReviewForm && (
-          <form className="rental-details-review-form" onSubmit={handleSubmitReview}>
-            <p className="rental-details-review-form-label">Rate this seller</p>
-            <StarRating
-              rating={reviewRating}
-              size={24}
-              interactive
-              onChange={setReviewRating}
-            />
-            <label className="rental-details-review-form-label" htmlFor="review-author">
-              Your name
-            </label>
-            <Input
-              id="review-author"
-              className="rental-details-review-input"
-              placeholder="e.g. Ayesha K., Lahore"
-              value={reviewAuthor}
-              onChange={(event) => setReviewAuthor(event.target.value)}
-            />
-            <label className="rental-details-review-form-label" htmlFor="review-text">
-              Your review
-            </label>
-            <textarea
-              id="review-text"
-              className="rental-details-review-textarea"
-              placeholder="Share your experience renting from this seller..."
-              value={reviewText}
-              onChange={(event) => setReviewText(event.target.value)}
-              rows={4}
-              required
-            />
-            <Button
-              type="submit"
-              className="rental-details-review-submit"
-              disabled={!reviewRating || !reviewText.trim()}
-            >
-              Submit Review
-            </Button>
-          </form>
-        )}
-
-        <div className="rental-details-reviews-grid">
-          {reviews.map((review) => (
-            <article key={review.id} className="rental-details-review-card">
-              <StarRating rating={review.rating} />
-              <p className="rental-details-review-quote">&ldquo;{review.quote}&rdquo;</p>
-              <p className="rental-details-review-author">{review.author}</p>
-            </article>
-          ))}
-        </div>
-      </section>
+      <SellerReviewsSection
+        dress={dress}
+        defaultAuthor="Verified Renter"
+        reviewPlaceholder="Share your experience renting from this seller..."
+      />
 
       {showCancelModal && pendingRequest && (
         <div

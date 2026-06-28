@@ -9,6 +9,7 @@ import { useWishlist } from "@/hooks/useWishlist";
 import RentalDressDetails from "./rentalDressDetails";
 import { DressDetailsBreadcrumb } from "./dressDetailsBreadcrumb";
 import { DressFitConditionSection } from "./dressFitCondition";
+import { SellerReviewsSection } from "./sellerReviewsSection";
 import "./dressDetails.css";
 
 const formatCountdown = ({ hours, minutes, seconds }) =>
@@ -348,6 +349,12 @@ const DressDetails = () => {
           </div>
         )}
       </section>
+
+      <SellerReviewsSection
+        dress={dress}
+        defaultAuthor="Verified Buyer"
+        reviewPlaceholder="Share your experience buying from this seller..."
+      />
     </div>
   );
 };

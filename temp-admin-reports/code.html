@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Reports &amp; Complaints | Relux Hub Admin</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary": "#49654f",
+                    "on-tertiary-fixed-variant": "#434845",
+                    "outline-variant": "#c1c9bf",
+                    "error-container": "#ffdad6",
+                    "surface-container-low": "#f5f4ec",
+                    "secondary-fixed": "#cbebcf",
+                    "primary-fixed-dim": "#a1d2ac",
+                    "surface-container": "#f0eee6",
+                    "secondary-container": "#cbebcf",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-highest": "#e4e3db",
+                    "on-secondary-fixed": "#05200f",
+                    "primary-container": "#98c9a3",
+                    "on-tertiary-container": "#494e4b",
+                    "on-primary-fixed-variant": "#224f32",
+                    "inverse-on-surface": "#f3f1e9",
+                    "on-secondary-container": "#4f6b55",
+                    "on-primary": "#ffffff",
+                    "inverse-primary": "#a1d2ac",
+                    "on-tertiary-fixed": "#181d1a",
+                    "on-surface-variant": "#414942",
+                    "on-secondary-fixed-variant": "#324d38",
+                    "error": "#ba1a1a",
+                    "surface-variant": "#e4e3db",
+                    "surface-dim": "#dcdad2",
+                    "on-surface": "#1b1c17",
+                    "tertiary-fixed-dim": "#c3c7c4",
+                    "tertiary": "#5b5f5d",
+                    "primary-fixed": "#bcefc7",
+                    "secondary-fixed-dim": "#afceb3",
+                    "primary": "#3b6848",
+                    "surface-container-high": "#eae8e0",
+                    "surface-tint": "#3b6848",
+                    "surface": "#fbf9f1",
+                    "tertiary-container": "#babfbb",
+                    "background": "#fbf9f1",
+                    "surface-bright": "#fbf9f1",
+                    "on-primary-container": "#285537",
+                    "on-background": "#1b1c17",
+                    "on-secondary": "#ffffff",
+                    "tertiary-fixed": "#dfe3e0",
+                    "on-tertiary": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "on-error": "#ffffff",
+                    "inverse-surface": "#30312c",
+                    "outline": "#717971",
+                    "on-primary-fixed": "#00210e"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "unit": "8px",
+                    "container-padding": "32px",
+                    "card-gap": "20px",
+                    "gutter": "24px",
+                    "sidebar-width": "260px"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Manrope"],
+                    "body-md": ["Manrope"],
+                    "headline-md": ["Manrope"],
+                    "body-lg": ["Manrope"],
+                    "label-caps": ["JetBrains Mono"],
+                    "button": ["Manrope"],
+                    "display": ["Manrope"]
+            },
+            "fontSize": {
+                    "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "button": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                    "display": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { background-color: #fbf9f1; color: #1b1c17; font-family: 'Manrope', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .sidebar-item-active { background-color: #cbebcf; color: #3b6848; font-weight: 700; border-radius: 0.5rem; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #c1c9bf; border-radius: 10px; }
+        .glass-panel { backdrop-filter: blur(8px); background-color: rgba(255, 255, 255, 0.8); }
+        .pillowy-shadow { box-shadow: 0 4px 20px -2px rgba(73, 101, 79, 0.08); }
+    </style>
+</head>
+<body class="bg-surface overflow-hidden">
+<!-- Fixed Side Navigation Bar -->
+<aside class="w-sidebar-width h-screen fixed left-0 top-0 flex flex-col bg-surface-container-low border-r border-outline-variant z-50">
+<div class="p-container-padding">
+<h1 class="font-headline-md text-headline-md font-bold text-primary">Relux Hub</h1>
+<p class="text-body-md text-on-surface-variant opacity-70">Admin Terminal</p>
+</div>
+<nav class="flex-1 px-4 space-y-2 mt-4 overflow-y-auto custom-scrollbar">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-body-md text-body-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-body-md text-body-md">User Management</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">apparel</span>
+<span class="font-body-md text-body-md">Listings</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">calendar_today</span>
+<span class="font-body-md text-body-md">Rentals</span>
+</a>
+<!-- Active State: Reports & Complaints -->
+<a class="flex items-center gap-3 px-4 py-3 text-primary font-bold bg-secondary-container rounded-lg transition-transform scale-95" href="#">
+<span class="material-symbols-outlined">report_problem</span>
+<span class="font-body-md text-body-md">Reports &amp; Complaints</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-highest transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-body-md text-body-md">Settings</span>
+</a>
+</nav>
+<div class="p-6 border-t border-outline-variant flex items-center gap-3">
+<div class="w-10 h-10 rounded-full overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of a middle-aged female administrator with a kind smile, wearing a sustainable linen blazer. The lighting is soft and natural, reflecting the eco-conscious and luxury-oriented brand values of Relux Hub. The background is a clean, minimalist studio setting with a warm, cream-toned aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB6qEQ131ov99ati6XeYdB3LAsIT_Dde2AvgD-S9nFtyfkpqH8gDs6S6U-5iIphYu6MWnC908g7tTTbafAPcCDmcZyZqrLcQ-dDHd91CX4RHYz0xD-Oi_CgITPQRWsoAI7OJyl5QPumC6iyajmoBy5U1uyv5NW7xKTOta99QMSc9hniD84nq1PPyrbdnSGAaxlPP-lLz1mumYguu_UwqFR3soxVmu8VKAQeZQVggmsLCIbihkzWyIO8AWoltoigoeo1ZagcEIaNOAg"/>
+</div>
+<div>
+<p class="font-body-md text-body-md font-bold text-on-surface">Alex Rivera</p>
+<p class="text-xs text-on-surface-variant">Senior Moderator</p>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-sidebar-width h-screen flex flex-col relative overflow-hidden">
+<!-- Top Navigation Bar -->
+<header class="h-16 sticky top-0 z-30 flex items-center justify-between px-container-padding bg-surface border-b border-outline-variant">
+<div class="flex items-center gap-4 flex-1">
+<div class="relative w-full max-w-md">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-surface-container-low border border-outline-variant rounded-lg font-body-md text-body-md focus:ring-2 focus:ring-primary/20 outline-none transition-all" placeholder="Search by Report ID or User Name" type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<button class="p-2 hover:bg-surface-container-highest rounded-full transition-colors relative">
+<span class="material-symbols-outlined text-on-surface-variant">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
+</button>
+<button class="p-2 hover:bg-surface-container-highest rounded-full transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">help_outline</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Page Canvas -->
+<div class="flex-1 flex overflow-hidden p-container-padding gap-gutter">
+<!-- Left Side: Table & Filters -->
+<div class="flex-1 flex flex-col gap-gutter overflow-hidden">
+<div class="flex items-end justify-between">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-primary">Reports &amp; Complaints</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Review and manage user reports and complaints.</p>
+</div>
+<div class="flex gap-3">
+<select class="bg-white border border-outline-variant rounded-lg px-4 py-2 font-body-md text-body-md focus:ring-primary/20">
+<option>Report Type: All</option>
+<option>Listing Report</option>
+<option>Rental Issue</option>
+<option>Resale Order Issue</option>
+<option>User Complaint</option>
+</select>
+<select class="bg-white border border-outline-variant rounded-lg px-4 py-2 font-body-md text-body-md focus:ring-primary/20">
+<option>Status: All</option>
+<option>Pending</option>
+<option>In Progress</option>
+<option>Resolved</option>
+</select>
+</div>
+</div>
+<!-- Table Card -->
+<div class="flex-1 bg-white rounded-xl border border-outline-variant pillowy-shadow overflow-hidden flex flex-col">
+<div class="overflow-x-auto custom-scrollbar flex-1">
+<table class="w-full text-left border-collapse">
+<thead class="sticky top-0 bg-white z-10">
+<tr class="border-b border-surface-container">
+<th class="px-6 py-4 font-label-caps text-label-caps text-on-surface-variant">Report ID</th>
+<th class="px-6 py-4 font-label-caps text-label-caps text-on-surface-variant">Reported By</th>
+<th class="px-6 py-4 font-label-caps text-label-caps text-on-surface-variant">Report Against</th>
+<th class="px-6 py-4 font-label-caps text-label-caps text-on-surface-variant">Report Type</th>
+<th class="px-6 py-4 font-label-caps text-label-caps text-on-surface-variant">Date</th>
+<th class="px-6 py-4 font-label-caps text-label-caps text-on-surface-variant">Status</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container">
+<!-- Row 1 (Selected) -->
+<tr class="bg-secondary-container/20 cursor-pointer hover:bg-secondary-container/30 transition-colors" onclick="selectReport('REP-1234')">
+<td class="px-6 py-4 font-body-md text-body-md font-bold text-primary">#REP-1234</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-high overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="Close-up portrait of a stylish young man in his late 20s, wearing sustainable fashion items like a recycled polyester beanie. Professional, bright photography style with soft shadows and a warm cream background that matches the Relux brand aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPnOfNLlX5qo4jA4Ft9Z8RVn45Jk7vDMgCldS1jxIZ5BQTSyb-0PdkiJqI2QNIppny-HuO5-Rf3fESjN-DTzYA7yOaun1t7GI9Soxm_BfWsehz5RtZrO_rxFUugn4i_h8gB_zRNAPeYCQwzs9WLaZHZKtx4fA6Sj_p08ogMMrY6IMmXp1YQh_6G4WQXJ3dxNfYYWca8X8Ta7RwAMRZoL_aKsteZvgO7aTpfDTBKOhtoJAYVSn-b4FpqopZb7IXSH6TFjRbHezUhBY"/>
+</div>
+<span class="font-body-md text-body-md">Lucas Thorne</span>
+</div>
+</td>
+<td class="px-6 py-4 font-body-md text-body-md">Velvet Gala Dress</td>
+<td class="px-6 py-4">
+<span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-tertiary-container text-on-tertiary-container">Listing Report</span>
+</td>
+<td class="px-6 py-4 font-body-md text-body-md text-on-surface-variant">Oct 24, 2023</td>
+<td class="px-6 py-4">
+<span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary-fixed text-on-secondary-fixed-variant">Pending</span>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="cursor-pointer hover:bg-surface-container transition-colors" onclick="selectReport('REP-1235')">
+<td class="px-6 py-4 font-body-md text-body-md font-bold text-primary">#REP-1235</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-high overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="A portrait of a cheerful woman with silver hair, wearing an elegant cream silk scarf. The photograph is taken in a minimalist, high-end showroom with soft, diffused sunlight coming from the side. The overall mood is sophisticated, reliable, and modern." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBDYfq9MCcxoUye0gfNiiOmA6QyCZctEa-2JO2TmQwwMii56g14hsomWr0d4I4aUinKo7LDZCg4X1D2UmwE7RMWIM8WDYbhNqCbfqD-5S7RtprbuPiIWOEXXS-1BwG4q_orih1ZhiNyP8Yw_tzFDTZoR2ok4cN-4PMhatPzp5AmoARGziNQ-2PXg78bUzQU8TmK1t-1a4F5vJ5PCFG2ptfum4izqo1mMDKAZ36s5EfZOugpfLJvrCyA7iuuC3oICzyndqGjnYebCfc"/>
+</div>
+<span class="font-body-md text-body-md">Sarah Jenkins</span>
+</div>
+</td>
+<td class="px-6 py-4 font-body-md text-body-md">UrbanKicks Shop</td>
+<td class="px-6 py-4">
+<span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-tertiary-container text-on-tertiary-container">User Complaint</span>
+</td>
+<td class="px-6 py-4 font-body-md text-body-md text-on-surface-variant">Oct 23, 2023</td>
+<td class="px-6 py-4">
+<span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-fixed text-on-primary-fixed-variant">In Progress</span>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="cursor-pointer hover:bg-surface-container transition-colors">
+<td class="px-6 py-4 font-body-md text-body-md font-bold text-primary">#REP-1236</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-high overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="A young creative professional with glasses and a minimal black t-shirt, looking directly at the camera with a calm expression. The studio background is a soft beige with a subtle texture. The lighting is clean and balanced, perfect for a high-quality admin dashboard profile." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAeZo0X0qsi8nnYoLH0b78-SujeLYDZ24I2Y_BMQPVlXxm4FJOBErFHUj0n5YoRsET1WC47RTTeAS7aO4FmEvqWdCoDnViA0T_tQjZGmX77nmzlfpCijmIQ-9j6b06dzc2B9rdSdasiB69iW6rXncMewsT1ivDpgfxbFK18TL7TbyyaXh6fYQSE9nCt-MCWjL2JSByZj_7rzBB0Oew0eyqyFenE-MqIWSoL57JXV5yIE4zEXPW04X6pcwYPGW7EB6QDqnnrHmXypgU"/>
+</div>
+<span class="font-body-md text-body-md">Marcus Zhao</span>
+</div>
+</td>
+<td class="px-6 py-4 font-body-md text-body-md">Order #ORD-982</td>
+<td class="px-6 py-4">
+<span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-tertiary-container text-on-tertiary-container">Rental Issue</span>
+</td>
+<td class="px-6 py-4 font-body-md text-body-md text-on-surface-variant">Oct 22, 2023</td>
+<td class="px-6 py-4">
+<span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-surface-container-highest text-on-surface-variant">Resolved</span>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="cursor-pointer hover:bg-surface-container transition-colors">
+<td class="px-6 py-4 font-body-md text-body-md font-bold text-primary">#REP-1237</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-high overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="A headshot of a person with a professional yet approachable look, wearing an organic cotton sweater in a soft green hue. The photography is clean, minimal, and well-lit, emphasizing natural textures and a luxury marketplace aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPweGTPed76eknkc0AeN9UMZo2IVPfAnGkboYZ2YUOXI_-5H5P_F0drWFzKq0y-vP6i8vylcDPM10JSUYB2-GJcIGx0dDWq4Dlv2PsNmacUJkI-0C1vlJ_wTq9Y19AxctHcetTIU5zdIEBTs5MjpUq9YCxvD3FoZINuLIDTXIgncbFBxhYzdI5ACWVsnrVCyX0CAuTUD0xPX5dU8eOoZIk7crgzlqm8bok_emeCHWBxyTt9BYq4w9DH3rBVDsajlCTZkBwsK-tiHY"/>
+</div>
+<span class="font-body-md text-body-md">Elena Gilbert</span>
+</div>
+</td>
+<td class="px-6 py-4 font-body-md text-body-md">EcoBag L</td>
+<td class="px-6 py-4">
+<span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-tertiary-container text-on-tertiary-container">Resale Issue</span>
+</td>
+<td class="px-6 py-4 font-body-md text-body-md text-on-surface-variant">Oct 21, 2023</td>
+<td class="px-6 py-4">
+<span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary-fixed text-on-secondary-fixed-variant">Pending</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-4 border-t border-outline-variant flex items-center justify-between">
+<p class="text-body-md text-on-surface-variant">Showing 4 of 128 reports</p>
+<div class="flex gap-2">
+<button class="p-2 border border-outline-variant rounded hover:bg-surface-container transition-colors"><span class="material-symbols-outlined">chevron_left</span></button>
+<button class="p-2 border border-outline-variant rounded hover:bg-surface-container transition-colors"><span class="material-symbols-outlined">chevron_right</span></button>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Side: Detail Panel (Active) -->
+<aside class="w-[400px] bg-white rounded-xl border border-outline-variant pillowy-shadow flex flex-col overflow-hidden animate-in slide-in-from-right duration-300" id="detailPanel">
+<!-- Panel Header -->
+<div class="p-6 border-b border-outline-variant flex items-center justify-between bg-surface-container-low">
+<div>
+<span class="font-label-caps text-label-caps text-on-surface-variant block mb-1">Active Review</span>
+<h3 class="font-headline-md text-headline-md text-primary">#REP-1234</h3>
+</div>
+<button class="p-2 hover:bg-surface-container-highest rounded-full transition-colors">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<div class="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6">
+<!-- Reporter Info -->
+<section>
+<h4 class="font-label-caps text-label-caps text-on-surface-variant mb-3">Reporter Information</h4>
+<div class="flex items-center gap-4 p-3 rounded-lg border border-surface-container">
+<div class="w-12 h-12 rounded-full overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="Professional studio portrait of Lucas Thorne, looking modern and stylish. He has a clean-cut look and wears high-quality, sustainable fabrics. The lighting is soft and flattering, with a clean cream background that aligns with the Relux Hub brand colors." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQy9a1CYlgDKqA0rgJ296A2G7oWGyGIVYkYZwojTMuRj_O7gKD0HYdytcs-yc1_OJKvx8Rj_SwZBvDzYQNGZEBNrcu0dQ56MZwKzjzdma-rhkVgNEkikjqYSmlIdIpv8CwS4_deDWZ6H5yFZUkQBpTxxCwG6OT3CRfhNo7cfum-NBP38Z0_AuYzUrwcgU2BeY61zPeJ1V0FvfQKEg-99OZvoe8mtNTWcHxbzyEWdeAAbfmV1pUMAS9Tf5LSa0Hc3BspfEVilLzJpk"/>
+</div>
+<div>
+<p class="font-body-md text-body-md font-bold">Lucas Thorne</p>
+<p class="text-xs text-on-surface-variant">Member since Jan 2022 • 42 Rentals</p>
+</div>
+</div>
+</section>
+<!-- Reported Item -->
+<section>
+<h4 class="font-label-caps text-label-caps text-on-surface-variant mb-3">Reported Item</h4>
+<div class="flex items-center gap-4 p-3 rounded-lg bg-surface-container-low border border-outline-variant/30">
+<div class="w-16 h-16 rounded-lg overflow-hidden border border-outline-variant bg-white">
+<img class="w-full h-full object-cover" data-alt="A luxury velvet gala dress in a deep forest green color, displayed elegantly on a minimalist mannequin. The photography style is high-end fashion catalog, with soft studio lighting and a clean, neutral background. The fabric texture is clearly visible, showcasing the item's quality." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDd3x4_VQVnPcF19_XKK0FqKvpqJ8DcxxECcK190uXrrzbK7sSF_YWQPh0MHMOItnGfUhYQeqxfpuCzLGAbJXq4aX8phkGu6ddB0EbiAeobN7fOT8g_2u3Zbs4INfM3FnpAxGL754aHY7vFjnSIioYyZs0y-oMox4vjisorVuiy49o4ofnjJav0sewi19N6YdJQGTB_XmRTWf0lrsoi-xllGAaAVQJzSbeFITXynq0EL8zB6X76PiRAW6OsLGhi8dxSOE872PYwvqU"/>
+</div>
+<div class="flex-1">
+<p class="font-body-md text-body-md font-bold">Velvet Gala Dress</p>
+<p class="text-xs text-on-surface-variant">Seller: Boutique De Luxe</p>
+<a class="text-xs text-primary font-bold hover:underline" href="#">View Listing</a>
+</div>
+</div>
+</section>
+<!-- Complaint Details -->
+<section>
+<h4 class="font-label-caps text-label-caps text-on-surface-variant mb-3">Complaint Description</h4>
+<div class="p-4 rounded-lg bg-surface-container border border-surface-container-highest">
+<p class="font-body-md text-body-md leading-relaxed text-on-surface">
+                                "The item received is significantly different from the description. There is a noticeable tear in the inner lining of the dress that was not mentioned or shown in the listing photos. The seller is unresponsive to my messages about a refund."
+                            </p>
+</div>
+</section>
+<!-- Evidence Grid -->
+<section>
+<div class="flex items-center justify-between mb-3">
+<h4 class="font-label-caps text-label-caps text-on-surface-variant">Uploaded Evidence</h4>
+<span class="text-xs font-bold text-primary">3 Photos</span>
+</div>
+<div class="grid grid-cols-3 gap-2">
+<div class="aspect-square rounded-lg overflow-hidden border border-outline-variant cursor-zoom-in hover:opacity-80 transition-opacity">
+<img class="w-full h-full object-cover" data-alt="Close-up detail shot of a torn inner lining on a luxury green velvet dress. The photo is well-lit to clearly show the damage. The aesthetic is clean and forensic, used for verifying marketplace complaints. Part of a minimalist, high-quality user management dashboard." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD0sP_yIrlzPNVA1CcLBt3G60wSQtLx4YUBkLKsze6C3nVCFQjhdhAqcU2X90R__wnsbaJLMhfYYiKU_AnY6pEU9Eif6Z_Jv_NtFt1N7Qmg9fAAAa1oMOVQOyJQldYDuMcYeMFIGIxXVK-F2Z-a6XWhavSeaZxwt3UjJVenN9QTabowB_2Vpq_7mGhsdFk17a48lrFhHASa4vDFVrKIx-86BqNcwMq1gnxBB-I4QZNXIqJvYqlQ9t_X9bsVIzT1yHymCZ5BQjkP704"/>
+</div>
+<div class="aspect-square rounded-lg overflow-hidden border border-outline-variant cursor-zoom-in hover:opacity-80 transition-opacity">
+<img class="w-full h-full object-cover" data-alt="Photograph of a shipping label and packaging from a high-end fashion boutique, showing the order details. The image is taken in a home setting with natural light on a clean wooden table, looking like evidence provided by a customer for a dispute." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCfMPDLjsP3ueuiZ1anZs6EijEpBqiSOaB2QpkvTiSFImxbOrbq0xj22V_BHYMgwlyEw-d8yJbJVrvoy4eMg5Gk7pSloqMiqcMwWN7iOkjUJbTuh65DwiE_vQhcwkmKJtBNn9Gz3eyLjrKFXKS4fEJHdJgXzqxNBEqDp4Y9ZS8WxDph3ClV__2b6EuhoD0wnE_XciycYRnCY7IwT8FG9Cy1mhLW1y8aP89zLDGCTgfgtCvdq4zRO1lG749MyTCsp7vEODQ-AGF9KWk"/>
+</div>
+<div class="aspect-square rounded-lg overflow-hidden border border-outline-variant cursor-zoom-in hover:opacity-80 transition-opacity">
+<img class="w-full h-full object-cover" data-alt="A screenshot of a mobile chat interface showing a customer's unanswered messages to a seller. The interface looks clean and modern. This image serves as evidence for an unresponsive seller in a circular economy fashion marketplace dashboard." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDzCPf7TUXupl4RnxMhZCu_1LzA-aZQscAZwpwJ4uG9xiFtFiBm7lry9zPEk0ffO6M9jF7BOmr1npoSCLS_3vVWeTJsLlZ81bi5Vbq3BjLDEooofbtsZmWX-nnt5vSNqNnBOw6TDfbfUlFg5geoWog_T-U_2exeYY2KiiEoRfv_2LQl4ZO3xw8TUEwuK0vDCbF7AIZUZMO8FeDkRdbdZIS-9-6lItgYLnSnEjLX8svYxhQTZJH9WVtkrlal1jEdic0-Qy00b1I00KQ"/>
+</div>
+</div>
+</section>
+</div>
+<!-- Panel Actions -->
+<div class="p-6 border-t border-outline-variant bg-surface space-y-3">
+<button class="w-full py-3 bg-primary text-on-primary rounded-lg font-button text-button shadow-sm hover:opacity-90 active:scale-[0.98] transition-all" onclick="openModal('resolve')">
+                        Mark as Resolved
+                    </button>
+<div class="grid grid-cols-2 gap-3">
+<button class="py-2.5 border border-outline text-on-surface rounded-lg font-button text-button hover:bg-surface-container-highest transition-colors" onclick="openModal('reject')">
+                            Reject Report
+                        </button>
+<button class="py-2.5 border border-error text-error rounded-lg font-button text-button hover:bg-error-container/20 transition-colors" onclick="openModal('suspend')">
+                            Suspend User
+                        </button>
+</div>
+</div>
+</aside>
+</div>
+</main>
+<!-- Modals (Confirmation Dialog State) -->
+<div class="fixed inset-0 z-[100] hidden items-center justify-center p-6 glass-panel" id="confirmationModal">
+<div class="w-full max-w-md bg-white rounded-2xl border border-outline-variant pillowy-shadow p-8 flex flex-col items-center text-center">
+<div class="w-16 h-16 rounded-full bg-primary-container/20 text-primary flex items-center justify-center mb-6" id="modalIcon">
+<span class="material-symbols-outlined text-3xl">check_circle</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2" id="modalTitle">Resolve Report?</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-8" id="modalDescription">
+                By marking this as resolved, an automated notification will be sent to both parties.
+            </p>
+<div class="w-full flex gap-3">
+<button class="flex-1 py-3 border border-outline-variant rounded-xl font-button text-button hover:bg-surface-container transition-colors" onclick="closeModal()">
+                    Cancel
+                </button>
+<button class="flex-1 py-3 bg-primary text-on-primary rounded-xl font-button text-button shadow-sm hover:opacity-90 active:scale-[0.98] transition-all" id="modalConfirmBtn" onclick="closeModal()">
+                    Confirm Action
+                </button>
+</div>
+</div>
+</div>
+<script>
+        function selectReport(id) {
+            // Logic to update the side panel could be added here
+            console.log("Selected Report:", id);
+        }
+
+        function openModal(action) {
+            const modal = document.getElementById('confirmationModal');
+            const icon = document.getElementById('modalIcon');
+            const title = document.getElementById('modalTitle');
+            const desc = document.getElementById('modalDescription');
+            const confirmBtn = document.getElementById('modalConfirmBtn');
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            if (action === 'resolve') {
+                icon.className = "w-16 h-16 rounded-full bg-primary-container/20 text-primary flex items-center justify-center mb-6";
+                icon.innerHTML = '<span class="material-symbols-outlined text-3xl">check_circle</span>';
+                title.innerText = "Resolve Report?";
+                desc.innerText = "By marking this as resolved, an automated notification will be sent to both parties and the case will be closed.";
+                confirmBtn.className = "flex-1 py-3 bg-primary text-on-primary rounded-xl font-button text-button shadow-sm hover:opacity-90 active:scale-[0.98] transition-all";
+            } else if (action === 'reject') {
+                icon.className = "w-16 h-16 rounded-full bg-surface-container-highest text-on-surface-variant flex items-center justify-center mb-6";
+                icon.innerHTML = '<span class="material-symbols-outlined text-3xl">cancel</span>';
+                title.innerText = "Reject Report?";
+                desc.innerText = "The report will be dismissed as insufficient evidence. The reporter will be notified of the decision.";
+                confirmBtn.className = "flex-1 py-3 bg-outline text-white rounded-xl font-button text-button shadow-sm hover:opacity-90 active:scale-[0.98] transition-all";
+            } else if (action === 'suspend') {
+                icon.className = "w-16 h-16 rounded-full bg-error-container/20 text-error flex items-center justify-center mb-6";
+                icon.innerHTML = '<span class="material-symbols-outlined text-3xl">warning</span>';
+                title.innerText = "Suspend User?";
+                desc.innerText = "This action will temporarily disable the reported user's account until further investigation is complete.";
+                confirmBtn.className = "flex-1 py-3 bg-error text-on-error rounded-xl font-button text-button shadow-sm hover:opacity-90 active:scale-[0.98] transition-all";
+            }
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('confirmationModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        // Close modal on click outside
+        document.getElementById('confirmationModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+    </script>
+</body></html>

@@ -1,5 +1,5 @@
-import React from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import "./navbar.css";
 import {
   Heart,
@@ -8,68 +8,56 @@ import {
   MessageCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  isDashboardRoute,
+  isDashboardSidebarOpen,
+  resetDashboardSidebar,
+  setDashboardSidebarOpen,
+  subscribeDashboardSidebar,
+  syncDashboardSidebarToBody,
+  toggleDashboardSidebar,
+} from "@/utils/dashboardSidebar";
 
 const Navbar = () => {
   const location = useLocation();
-  const navigate = useNavigate();
-  const userType = sessionStorage.getItem("userType");
-  const isSeller = userType === "seller";
+  const onDashboard = isDashboardRoute(location.pathname);
+  const [sidebarOpen, setSidebarOpen] = useState(() => isDashboardSidebarOpen());
 
-  const isBuyerDashboard =
-    location.pathname === "/profile" || location.pathname === "/wishlist";
-  const isSellerDashboard =
-    location.pathname === "/sellerProfile" ||
-    location.pathname === "/addListing";
+  useEffect(() => {
+    if (onDashboard) {
+      setDashboardSidebarOpen(true);
+      syncDashboardSidebarToBody();
+    } else {
+      resetDashboardSidebar();
+      setDashboardSidebarOpen(false);
+    }
 
-  const showBuyerMenu = !isSeller;
-  const showSellerMenu = isSeller;
+    setSidebarOpen(isDashboardSidebarOpen());
+    return subscribeDashboardSidebar(setSidebarOpen);
+  }, [onDashboard, location.pathname]);
 
-  const handleBuyerMenuClick = () => {
-    navigate(isBuyerDashboard ? "/home" : "/profile");
-  };
-
-  const handleSellerMenuClick = () => {
-    navigate(isSellerDashboard ? "/home" : "/sellerProfile");
+  const handleMenuClick = () => {
+    if (!onDashboard) return;
+    toggleDashboardSidebar();
   };
 
   return (
     <nav className="navbar">
       <div className="navbar-inner">
         <div className="navbar-start">
-          {showBuyerMenu && (
+          {onDashboard && (
             <Button
               type="button"
               variant="icon"
               size="icon"
               className={`navbar-menu-btn ${
-                isBuyerDashboard ? "navbar-menu-btn--active" : ""
+                sidebarOpen ? "navbar-menu-btn--active" : ""
               }`}
               aria-label={
-                isBuyerDashboard
-                  ? "Close buyer dashboard"
-                  : "Open buyer dashboard"
+                sidebarOpen ? "Hide dashboard menu" : "Show dashboard menu"
               }
-              aria-expanded={isBuyerDashboard}
-              onClick={handleBuyerMenuClick}
-            >
-              <Menu size={22} />
-            </Button>
-          )}
-          {showSellerMenu && (
-            <Button
-              type="button"
-              variant="icon"
-              size="icon"
-              className={`navbar-menu-btn ${
-                isSellerDashboard ? "navbar-menu-btn--active" : ""
-              }`}
-              aria-label={
-                isSellerDashboard
-                  ? "Close seller dashboard"
-                  : "Open seller dashboard"
-              }
-              aria-expanded={isSellerDashboard}
-              onClick={handleSellerMenuClick}
+              aria-expanded={sidebarOpen}
+              onClick={handleMenuClick}
             >
               <Menu size={22} />
             </Button>
@@ -117,5 +105,4 @@ const Navbar = () => {
     </nav>
   );
 };
-
 export default Navbar;
