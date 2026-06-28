@@ -26,6 +26,12 @@ import ForgotPassword from "./component/forgotPassword";
 import Profile from "./component/profile";
 import SellerProfile from "./component/sellerProfile";
 import SellerAddListing from "./component/sellerAddListing";
+import AdminUserManagement from "./component/admin/AdminUserManagement";
+import AdminSellerVerification from "./component/admin/AdminSellerVerification";
+import AdminProductManagement from "./component/admin/AdminProductManagement";
+import AdminResaleOrders from "./component/admin/AdminResaleOrders";
+import AdminRentalOrders from "./component/admin/AdminRentalOrders";
+import AdminCategoriesManagement from "./component/admin/AdminCategoriesManagement";
 
 const DressChatRedirect = () => {
   const { id } = useParams();
@@ -55,11 +61,14 @@ function App() {
 
   const isMessagesPage = location.pathname.startsWith("/messages");
 
+  const isAdminPage = location.pathname.startsWith("/admin");
+
   const mainClass = [
     "main-content",
     hideNavbar && !isAuthPage && "main-content--full-page",
     isAuthPage && "main-content--auth",
     isMessagesPage && "main-content--messages",
+    isAdminPage && "main-content--admin",
   ]
     .filter(Boolean)
     .join(" ");
@@ -70,7 +79,7 @@ function App() {
         isMessagesPage ? " app-container--messages" : ""
       }`}
     >
-      {!hideNavbar && <Navbar />}
+      {!hideNavbar && !isAdminPage && <Navbar />}
 
       <main className={mainClass}>
         <Routes>
@@ -129,10 +138,17 @@ function App() {
 
           <Route path="/cart" element={<Navigate to="/wishlist" replace />} />
           <Route path="/notification" element={<Notification />} />
+
+          <Route path="/admin/users" element={<AdminUserManagement />} />
+          <Route path="/admin/seller-verification" element={<AdminSellerVerification />} />
+          <Route path="/admin/products" element={<AdminProductManagement />} />
+          <Route path="/admin/resale-orders" element={<AdminResaleOrders />} />
+          <Route path="/admin/rental-orders" element={<AdminRentalOrders />} />
+          <Route path="/admin/categories" element={<AdminCategoriesManagement />} />
         </Routes>
       </main>
 
-      {!isMessagesPage && <Footer />}
+      {!isMessagesPage && !isAdminPage && <Footer />}
     </div>
   );
 }
