@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import "./signup.css";
 import { Button } from "@/components/ui/button";
@@ -19,22 +19,28 @@ import {
   FieldLabel,
   FieldSeparator,
 } from "@/components/ui/field";
+import { useAuth } from "@/context/AuthContext";
 
 const Signup = () => {
+  const navigate = useNavigate();
+  const { register } = useAuth();
   const [submitted, setsubmitted] = useState(false);
   const [name, setname] = useState("");
   const [email, setemail] = useState("");
   const [password, setpassword] = useState("");
   const [confirmPassword, setconfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const [nameerror, setnameerror] = useState("");
   const [emailerror, setemailerror] = useState("");
   const [passworderror, setpassworderror] = useState("");
   const [confirmError, setconfirmError] = useState("");
+  const [submitError, setSubmitError] = useState("");
 
-  const onsubmitted = (e) => {
+  const onsubmitted = async (e) => {
     e.preventDefault();
+    setSubmitError("");
     let valid = true;
 
     if (name.trim() === "") {
@@ -57,8 +63,17 @@ const Signup = () => {
       valid = false;
     } else setconfirmError("");
 
-    if (valid) {
+    if (!valid) return;
+
+    setLoading(true);
+    try {
+      await register({ name: name.trim(), email, password });
       setsubmitted(true);
+      setTimeout(() => navigate("/home"), 1500);
+    } catch (error) {
+      setSubmitError(error.message || "Signup failed");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -190,9 +205,10 @@ const Signup = () => {
                     </Field>
                   </div>
 
-                  <Button type="submit" size="auth" className="signup-submit-btn">
-                    Sign Up
+                  <Button type="submit" size="auth" className="signup-submit-btn" disabled={loading}>
+                    {loading ? "Creating account..." : "Sign Up"}
                   </Button>
+                  {submitError && <FieldError>{submitError}</FieldError>}
                 </FieldGroup>
               </form>
 

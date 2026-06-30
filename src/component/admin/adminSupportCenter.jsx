@@ -72,17 +72,17 @@ const SUPPORT_TICKETS = [
     userType: "seller",
     timestamp: "Oct 23, 03:20 PM",
     originalMessage:
-      "The buyer is asking for an update on shipping. The blazer was dropped off with the courier two days ago but tracking hasn't updated yet.",
+      "The buyer is asking for an update on shipping. The blazer was dropped off with the courier two days ago but has not arrived yet.",
     conversation: [
       {
         type: "admin",
-        text: "Thanks Michael. I've contacted the courier partner and will update you once we have a tracking refresh.",
+        text: "Thanks Michael. I've contacted the courier partner and will update you once we have a delivery update.",
         time: "03:35 PM",
         author: "Admin (Me)",
       },
       {
         type: "user",
-        text: "The buyer is asking for an update on shipping. The blazer was dropped off with the courier two days ago but tracking hasn't updated yet.",
+        text: "The buyer is asking for an update on shipping. The blazer was dropped off with the courier two days ago but has not arrived yet.",
         time: "03:20 PM",
         author: "Michael Chen",
       },

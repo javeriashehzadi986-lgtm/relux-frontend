@@ -26,6 +26,8 @@ import ForgotPassword from "./component/forgotPassword";
 import Profile from "./component/profile";
 import SellerProfile from "./component/sellerProfile";
 import SellerAddListing from "./component/sellerAddListing";
+import AdminLayout from "./component/admin/AdminLayout";
+import AdminDashboard from "./component/admin/AdminDashboard";
 import AdminProfile from "./component/admin/adminProfile";
 import AdminReviews from "./component/admin/adminReviews";
 import AdminSupportCenter from "./component/admin/adminSupportCenter";
@@ -140,18 +142,31 @@ function App() {
 
           <Route path="/cart" element={<Navigate to="/wishlist" replace />} />
           <Route path="/notification" element={<Notification />} />
-          <Route path="/adminProfile" element={<AdminProfile />} />
-          <Route path="/adminReviews" element={<AdminReviews />} />
-          <Route path="/adminSupportCenter" element={<AdminSupportCenter />} />
-          <Route path="/adminNotifications" element={<AdminNotifications />} />
-          <Route path="/adminPayments" element={<AdminPayments />} />
-          <Route path="/adminReportsComplaints" element={<AdminReportsComplaints />} />
-          <Route path="/admin/users" element={<AdminUserManagement />} />
-          <Route path="/admin/seller-verification" element={<AdminSellerVerification />} />
-          <Route path="/admin/products" element={<AdminProductManagement />} />
-          <Route path="/admin/resale-orders" element={<AdminResaleOrders />} />
-          <Route path="/admin/rental-orders" element={<AdminRentalOrders />} />
-          <Route path="/admin/categories" element={<AdminCategoriesManagement />} />
+          <Route path="/adminProfile" element={<Navigate to="/admin/profile" replace />} />
+          <Route path="/adminReviews" element={<Navigate to="/admin/reviews" replace />} />
+          <Route path="/adminSupportCenter" element={<Navigate to="/admin/support" replace />} />
+          <Route path="/adminNotifications" element={<Navigate to="/admin/notifications" replace />} />
+          <Route path="/adminPayments" element={<Navigate to="/admin/payments" replace />} />
+          <Route
+            path="/adminReportsComplaints"
+            element={<Navigate to="/admin/reports" replace />}
+          />
+
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<AdminDashboard />} />
+            <Route path="users" element={<AdminUserManagement />} />
+            <Route path="seller-verification" element={<AdminSellerVerification />} />
+            <Route path="products" element={<AdminProductManagement />} />
+            <Route path="categories" element={<AdminCategoriesManagement />} />
+            <Route path="resale-orders" element={<AdminResaleOrders />} />
+            <Route path="rental-orders" element={<AdminRentalOrders />} />
+            <Route path="reviews" element={<AdminReviews />} />
+            <Route path="payments" element={<AdminPayments />} />
+            <Route path="notifications" element={<AdminNotifications />} />
+            <Route path="support" element={<AdminSupportCenter />} />
+            <Route path="reports" element={<AdminReportsComplaints />} />
+            <Route path="profile" element={<AdminProfile />} />
+          </Route>
         </Routes>
       </main>
 

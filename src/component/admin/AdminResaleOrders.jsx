@@ -4,6 +4,7 @@ import {
   ADMIN_RESALE_ORDERS_TOTAL,
   ADMIN_RESALE_ORDER_STATS,
 } from "@/data/adminResaleOrdersData";
+import { toggleAdminSidebar } from "@/utils/adminSidebar";
 import "./adminResaleOrders.css";
 
 const ADMIN_AVATAR =
@@ -67,7 +68,12 @@ const AdminResaleOrders = () => {
     <div className="admin-resale-page">
       <header className="admin-resale-header">
         <div className="admin-resale-header-left">
-          <button type="button" className="admin-resale-menu-btn" aria-label="Open menu">
+          <button
+            type="button"
+            className="admin-resale-menu-btn"
+            aria-label="Open menu"
+            onClick={toggleAdminSidebar}
+          >
             <span className="material-symbols-outlined">menu</span>
           </button>
           <div className="admin-resale-header-titles">

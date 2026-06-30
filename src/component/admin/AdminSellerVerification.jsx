@@ -3,6 +3,7 @@ import {
   ADMIN_SELLER_APPLICATIONS,
   ADMIN_SELLER_VERIFICATION_STATS,
 } from "@/data/adminSellerVerificationData";
+import { toggleAdminSidebar } from "@/utils/adminSidebar";
 import "./adminSellerVerification.css";
 
 const ADMIN_AVATAR =
@@ -89,7 +90,12 @@ const AdminSellerVerification = () => {
     <div className="admin-verify-page">
       <header className="admin-verify-header">
         <div className="admin-verify-header-left">
-          <button type="button" className="admin-verify-menu-btn" aria-label="Open menu">
+          <button
+            type="button"
+            className="admin-verify-menu-btn"
+            aria-label="Open menu"
+            onClick={toggleAdminSidebar}
+          >
             <span className="material-symbols-outlined">menu</span>
           </button>
           <div className="admin-verify-header-titles">

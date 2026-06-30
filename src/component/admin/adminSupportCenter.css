@@ -1,5 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap");
-
 .admin-support-page {
   --admin-bg: #fbf9f1;
   --admin-white: #ffffff;
@@ -28,7 +26,7 @@
   padding: 2rem 1.5rem 5rem;
   background: var(--admin-bg);
   color: var(--admin-on-surface);
-  font-family: "Manrope", sans-serif;
+  font-family: "Newsreader", Georgia, serif;
 }
 
 .admin-support-header {
@@ -210,7 +208,7 @@
 }
 
 .admin-support-ticket-item-top span:first-child {
-  font-family: "JetBrains Mono", monospace;
+  font-family: inherit;
   font-size: 0.625rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -389,7 +387,7 @@
 
 .admin-support-detail-label {
   margin: 0 0 0.25rem;
-  font-family: "JetBrains Mono", monospace;
+  font-family: inherit;
   font-size: 0.75rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -422,7 +420,7 @@
   align-items: center;
   gap: 0.5rem;
   margin: 0 0 1rem;
-  font-family: "JetBrains Mono", monospace;
+  font-family: inherit;
   font-size: 0.75rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -536,7 +534,7 @@
 .admin-support-reply-toolbar span {
   margin-left: auto;
   padding-right: 0.5rem;
-  font-family: "JetBrains Mono", monospace;
+  font-family: inherit;
   font-size: 0.625rem;
   font-weight: 700;
   letter-spacing: 0.05em;

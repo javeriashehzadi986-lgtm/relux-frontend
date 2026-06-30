@@ -84,13 +84,6 @@ const BUYER_FAQS = [
       "Report the issue through Support Center within 24 hours of delivery. Our team will review your request and assist with a replacement or refund.",
     link: { label: "Contact us", to: "/contactUs" },
   },
-  {
-    id: "track-order",
-    question: "How can I track my order or rental delivery?",
-    answer:
-      'You can view the current status of your order in the "My Orders" section. Delivery updates are also sent through notifications.',
-    link: { label: "Go to My Orders", to: "/profile?section=orders" },
-  },
 ];
 
 const SellerSupportCenter = ({ variant = "buyer" }) => {

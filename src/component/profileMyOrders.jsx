@@ -8,7 +8,6 @@ import {
   History,
   Search,
   ShoppingBag,
-  Truck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,7 +25,6 @@ const FILTER_TABS = [
 ];
 
 const getOrderActionRoute = (actionId, order) => {
-  if (actionId === "track") return "/notification";
   if (actionId === "details" || actionId === "rent-again") {
     return `/dress/${order.dressId}`;
   }
@@ -40,7 +38,6 @@ const META_ICONS = {
 };
 
 const ACTION_ICONS = {
-  truck: Truck,
   history: History,
 };
 

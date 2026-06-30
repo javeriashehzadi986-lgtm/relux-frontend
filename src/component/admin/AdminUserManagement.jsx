@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { ADMIN_USERS, ADMIN_USER_STATS } from "@/data/adminUsersData";
+import { toggleAdminSidebar } from "@/utils/adminSidebar";
 import "./adminUserManagement.css";
 
 const ADMIN_AVATAR =
@@ -65,7 +66,12 @@ const AdminUserManagement = () => {
     <div className="admin-users-page">
       <header className="admin-users-header">
         <div className="admin-users-header-left">
-          <button type="button" className="admin-users-menu-btn" aria-label="Open menu">
+          <button
+            type="button"
+            className="admin-users-menu-btn"
+            aria-label="Open menu"
+            onClick={toggleAdminSidebar}
+          >
             <span className="material-symbols-outlined">menu</span>
           </button>
           <div className="admin-users-header-titles">

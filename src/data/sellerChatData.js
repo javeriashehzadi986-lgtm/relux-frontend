@@ -137,7 +137,7 @@ const STATIC_THREADS = {
       {
         id: "z3",
         type: "received",
-        text: "We'll dispatch within 24 hours via our insured courier. You'll receive tracking shortly.",
+        text: "We'll dispatch within 24 hours via our insured courier.",
         time: "9:40 AM",
         avatar: OTHER_AVATARS.zahra,
       },

@@ -86,11 +86,21 @@ export function getPendingRentalOrderForDress(dressId) {
   );
 }
 
+function stripTrackActions(actions) {
+  if (!Array.isArray(actions)) return actions;
+  return actions.filter((action) => action.id !== "track");
+}
+
 function normalizeBuyerOrder(order) {
-  if (order.status !== "cancelled") return order;
+  const withoutTrack = {
+    ...order,
+    actions: stripTrackActions(order.actions),
+  };
+
+  if (withoutTrack.status !== "cancelled") return withoutTrack;
 
   return {
-    ...order,
+    ...withoutTrack,
     statusLabel: "Cancelled",
     actions: CANCELLED_ORDER_ACTIONS,
   };

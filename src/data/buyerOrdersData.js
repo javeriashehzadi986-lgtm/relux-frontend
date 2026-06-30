@@ -13,7 +13,6 @@ export const BUYER_ORDERS = [
     status: "rental-active",
     statusLabel: "Rental Active",
     actions: [
-      { id: "track", label: "Track Order", variant: "primary", icon: "truck" },
       { id: "details", label: "View Details", variant: "outline", link: true },
       {
         id: "rent-again",

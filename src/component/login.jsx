@@ -17,19 +17,24 @@ import {
   FieldLabel,
   FieldSeparator,
 } from "@/components/ui/field";
+import { useAuth } from "@/context/AuthContext";
 
 const LOGIN_IMAGE =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuBSnYGdanF0GYhv0vCxLzPcHcKTIzsyWHGMBv9agRIlHAXHLiLRIKpquL8JMbhuAoqsTDkdGDTELSWmxXQi4_Z96O5DbrRXRxkNqqEENu95HT90prKHhQ7l7pPvfa7VaHSJqm0L9KwHEwYoXXTx1dAlvGt1y2YFnpL7A59XleADEloG4hmHU5edTw9cFXygFzUj3uLLnksJ1SUiXDcbqG-jNDJeNpmPu6AnMJg3gH197CC5qNo_bu41kyK9cULkpYyk1BpAXK2g0zoT";
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [email, setemail] = useState("");
   const [password, setpassword] = useState("");
   const [emailerror, setemailerror] = useState("");
   const [passworderror, setpassworderror] = useState("");
+  const [submitError, setSubmitError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const onsubmitted = (e) => {
+  const onsubmitted = async (e) => {
     e.preventDefault();
+    setSubmitError("");
 
     const isEmailValid = email.includes("@") && email.includes(".");
     const isPasswordValid = password.length >= 6;
@@ -46,8 +51,16 @@ const Login = () => {
       setpassworderror("");
     }
 
-    if (isEmailValid && isPasswordValid) {
-      navigate("/home");
+    if (!isEmailValid || !isPasswordValid) return;
+
+    setLoading(true);
+    try {
+      const user = await login(email, password);
+      navigate(user.role === "admin" ? "/admin" : "/home");
+    } catch (error) {
+      setSubmitError(error.message || "Login failed");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -128,9 +141,10 @@ const Login = () => {
                   <FieldError>{passworderror}</FieldError>
                 </Field>
 
-                <Button type="submit" size="auth">
-                  Login
+                <Button type="submit" size="auth" disabled={loading}>
+                  {loading ? "Logging in..." : "Login"}
                 </Button>
+                {submitError && <FieldError>{submitError}</FieldError>}
               </FieldGroup>
             </form>
 

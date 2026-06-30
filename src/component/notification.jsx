@@ -5,7 +5,6 @@ import {
   CalendarClock,
   ClipboardCheck,
   CreditCard,
-  Truck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
@@ -93,21 +92,6 @@ const INITIAL_NOTIFICATIONS = [
       <>
         Payment for your recent rental has been completed successfully. Thank you
         for choosing Relux Hub.
-      </>
-    ),
-  },
-  {
-    id: "delivery",
-    title: "Out for Delivery",
-    time: "4 days ago",
-    unread: false,
-    category: "orders",
-    icon: Truck,
-    iconVariant: "muted",
-    body: (
-      <>
-        Your order is out for delivery with our courier partner. It should reach
-        you by the end of the day.
       </>
     ),
   },

@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { ADMIN_PRODUCTS, ADMIN_PRODUCTS_TOTAL } from "@/data/adminProductsData";
+import { toggleAdminSidebar } from "@/utils/adminSidebar";
 import "./adminProductManagement.css";
 
 const ADMIN_AVATAR =
@@ -89,7 +90,12 @@ const AdminProductManagement = () => {
     <div className="admin-products-page">
       <header className="admin-products-header">
         <div className="admin-products-header-left">
-          <button type="button" className="admin-products-menu-btn" aria-label="Open menu">
+          <button
+            type="button"
+            className="admin-products-menu-btn"
+            aria-label="Open menu"
+            onClick={toggleAdminSidebar}
+          >
             <span className="material-symbols-outlined">menu</span>
           </button>
           <div className="admin-products-header-titles">

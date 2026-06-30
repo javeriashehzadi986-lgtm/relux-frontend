@@ -44,20 +44,6 @@ export const SELLER_LISTING_IMAGES = {
     "https://lh3.googleusercontent.com/aida-public/AB6AXuAQemD3e6BOZATewDckoKN6LGnMsltEY2gw2q8lUInmROjSEuYbIBlXLU9LUnCGJIGwNMXoNKyqeBcXytDaU5EI9HU4SsDZZzh8zPiKHd9ZgptgIA9vSmf2EVijv5Q65Z4SF_wE4V54whxi3f5U9mej7h0idCDMflF_MmbmFSiI6jigtowaWzcJQd8eQ8qHoXkLskRTeqv-DsFY0OYczzrRtmuKiRt8dqoNh-zIy4f85wyWtLtisvVC3LIzzo-_yP2PF2M4C_dnSjkz",
 };
 
-/** @deprecated Use hydrateSellerListing from dressCatalog with SELLER_LISTING_META */
-export const SELLER_LISTINGS = SELLER_LISTING_META.map((meta) => ({
-  id: meta.dressId,
-  title: "",
-  type: meta.type,
-  typeVariant: meta.typeVariant,
-  size: meta.size,
-  price: "",
-  detail: "",
-  status: meta.status,
-  statusVariant: meta.statusVariant,
-  image: SELLER_LISTING_IMAGES[meta.dressId] ?? "",
-}));
-
 export const SELLER_LISTING_PRODUCTS = {
   "silk-slip": {
     id: "silk-slip",
@@ -160,5 +146,3 @@ export const SELLER_AUCTION_BY_ID = {
   },
 };
 
-export const getSellerListingById = (id) =>
-  SELLER_LISTINGS.find((listing) => listing.id === id) ?? null;
