@@ -26,6 +26,7 @@ import ForgotPassword from "./component/forgotPassword";
 import Profile from "./component/profile";
 import SellerProfile from "./component/sellerProfile";
 import SellerAddListing from "./component/sellerAddListing";
+import SellerPending from "./component/sellerPending";
 import AdminLayout from "./component/admin/AdminLayout";
 import AdminDashboard from "./component/admin/AdminDashboard";
 import AdminProfile from "./component/admin/adminProfile";
@@ -40,7 +41,8 @@ import AdminProductManagement from "./component/admin/AdminProductManagement";
 import AdminResaleOrders from "./component/admin/AdminResaleOrders";
 import AdminRentalOrders from "./component/admin/AdminRentalOrders";
 import AdminCategoriesManagement from "./component/admin/AdminCategoriesManagement";
-import ProtectedRoute from "./components/ProtectedRoute";
+import ProtectedRoute from "./routes/ProtectedRoute";
+import SellerRoute from "./routes/SellerRoute";
 
 const DressChatRedirect = () => {
   const { id } = useParams();
@@ -110,11 +112,19 @@ function App() {
 
           <Route path="/sellerVerification" element={<SellerVerification />} />
           <Route
-            path="/sellerProfile"
+            path="/seller-pending"
             element={
               <ProtectedRoute roles={["seller"]}>
-                <SellerProfile />
+                <SellerPending />
               </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/sellerProfile"
+            element={
+              <SellerRoute>
+                <SellerProfile />
+              </SellerRoute>
             }
           />
           <Route
@@ -128,9 +138,9 @@ function App() {
           <Route
             path="/addListing"
             element={
-              <ProtectedRoute roles={["seller"]}>
+              <SellerRoute>
                 <SellerAddListing />
-              </ProtectedRoute>
+              </SellerRoute>
             }
           />
           <Route

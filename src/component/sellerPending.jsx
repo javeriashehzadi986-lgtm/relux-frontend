@@ -1,0 +1,84 @@
+import { useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Clock, ShieldCheck, Mail } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/context/AuthContext";
+import "./sellerPending.css";
+
+export default function SellerPending() {
+  const navigate = useNavigate();
+  const { user, loading, logout } = useAuth();
+
+  useEffect(() => {
+    if (loading) return;
+    if (!user) {
+      navigate("/login", { replace: true });
+      return;
+    }
+    if (user.role !== "seller") {
+      navigate("/home", { replace: true });
+      return;
+    }
+    if (user.status === "active") {
+      navigate("/sellerProfile", { replace: true });
+    }
+  }, [user, loading, navigate]);
+
+  if (loading || !user || user.role !== "seller" || user.status === "active") {
+    return (
+      <div className="seller-pending-page">
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="seller-pending-page">
+      <Card className="seller-pending-card">
+        <CardHeader className="seller-pending-header">
+          <span className="seller-pending-icon" aria-hidden="true">
+            <Clock size={28} strokeWidth={1.75} />
+          </span>
+          <CardTitle className="seller-pending-title">Application Under Review</CardTitle>
+        </CardHeader>
+        <CardContent className="seller-pending-content">
+          <p className="seller-pending-lead">
+            Thank you, <strong>{user.name}</strong>. Your seller verification has been submitted
+            successfully.
+          </p>
+
+          <div className="seller-pending-status-box">
+            <p className="seller-pending-status-label">Current status</p>
+            <span className="seller-pending-status-badge">Pending approval</span>
+          </div>
+
+          <ul className="seller-pending-list">
+            <li>
+              <ShieldCheck size={18} strokeWidth={1.75} />
+              Our team usually reviews applications within 24 to 48 business hours.
+            </li>
+            <li>
+              <Mail size={18} strokeWidth={1.75} />
+              You will get an update at <strong>{user.email}</strong> once approved.
+            </li>
+          </ul>
+
+          <p className="seller-pending-note">
+            Your seller dashboard will unlock after admin approval. Until then you cannot add
+            listings or access seller tools.
+          </p>
+
+          <div className="seller-pending-actions">
+            <Button type="button" variant="default" asChild>
+              <Link to="/home">Back to Home</Link>
+            </Button>
+            <Button type="button" variant="outline" onClick={logout}>
+              Log out
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

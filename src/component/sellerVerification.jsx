@@ -175,7 +175,7 @@ function SellerVerification() {
         cnicBack: cnicBackData,
       });
 
-      navigate("/sellerProfile?section=profile", { replace: true });
+      navigate("/seller-pending", { replace: true });
     } catch (error) {
       setSubmitError(error.message || "Failed to update documents");
     } finally {
@@ -237,7 +237,7 @@ function SellerVerification() {
         return;
       }
 
-      navigate("/sellerProfile?section=listings", { replace: true });
+      navigate("/seller-pending", { replace: true });
     } catch (error) {
       setSubmitError(error.message || "Verification submission failed");
     } finally {
@@ -321,7 +321,7 @@ function SellerVerification() {
                 className="seller-back-link"
                 asChild
               >
-                <Link to="/sellerProfile">Back to Profile</Link>
+                <Link to="/seller-pending">Back to Application Status</Link>
               </Button>
             </div>
           </form>
