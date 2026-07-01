@@ -85,6 +85,14 @@ export const api = {
   updateSellerDocuments: (body) =>
     request("/seller/verification/documents", { method: "PUT", body: JSON.stringify(body) }),
   getSellerVerification: () => request("/seller/verification/me"),
+  getAdminSellerApplications: () => request("/admin/seller-verifications"),
+  approveSellerApplication: (id) =>
+    request(`/admin/seller-verifications/${id}/approve`, { method: "PATCH" }),
+  rejectSellerApplication: (id, body = {}) =>
+    request(`/admin/seller-verifications/${id}/reject`, {
+      method: "PATCH",
+      body: JSON.stringify(body),
+    }),
 };
 
 export default api;

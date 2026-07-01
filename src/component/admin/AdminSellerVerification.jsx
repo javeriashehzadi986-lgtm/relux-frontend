@@ -1,8 +1,5 @@
-import React, { useEffect, useMemo, useState } from "react";
-import {
-  ADMIN_SELLER_APPLICATIONS,
-  ADMIN_SELLER_VERIFICATION_STATS,
-} from "@/data/adminSellerVerificationData";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import api from "@/services/api";
 import { toggleAdminSidebar } from "@/utils/adminSidebar";
 import "./adminSellerVerification.css";
 
@@ -28,8 +25,36 @@ function formatAppliedDate(iso) {
 
 const AdminSellerVerification = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedId, setSelectedId] = useState(ADMIN_SELLER_APPLICATIONS[0]?.id ?? null);
-  const [applications, setApplications] = useState(ADMIN_SELLER_APPLICATIONS);
+  const [selectedId, setSelectedId] = useState(null);
+  const [applications, setApplications] = useState([]);
+  const [stats, setStats] = useState({
+    pendingReview: 0,
+    approvedThisWeek: 0,
+    rejectedThisWeek: 0,
+    avgReviewHours: 28,
+  });
+  const [loading, setLoading] = useState(true);
+  const [actionError, setActionError] = useState("");
+  const [actionLoading, setActionLoading] = useState(false);
+
+  const loadApplications = useCallback(async () => {
+    setLoading(true);
+    setActionError("");
+    try {
+      const data = await api.getAdminSellerApplications();
+      setApplications(data.applications ?? []);
+      setStats(data.stats ?? { pendingReview: 0, approvedThisWeek: 0, rejectedThisWeek: 0, avgReviewHours: 28 });
+    } catch (error) {
+      setActionError(error.message || "Failed to load seller applications");
+      setApplications([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadApplications();
+  }, [loadApplications]);
 
   const filteredApplications = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -56,34 +81,34 @@ const AdminSellerVerification = () => {
     }
   }, [filteredApplications, selectedId]);
 
-  const handleApprove = () => {
+  const handleApprove = async () => {
     if (!selectedApplication) return;
-    setApplications((current) =>
-      current.map((application) =>
-        application.id === selectedApplication.id
-          ? { ...application, status: "approved" }
-          : application,
-      ),
-    );
-    const nextPending = filteredApplications.find(
-      (application) => application.id !== selectedApplication.id,
-    );
-    setSelectedId(nextPending?.id ?? null);
+    setActionLoading(true);
+    setActionError("");
+    try {
+      await api.approveSellerApplication(selectedApplication.id);
+      await loadApplications();
+      setSelectedId(null);
+    } catch (error) {
+      setActionError(error.message || "Failed to approve seller");
+    } finally {
+      setActionLoading(false);
+    }
   };
 
-  const handleReject = () => {
+  const handleReject = async () => {
     if (!selectedApplication) return;
-    setApplications((current) =>
-      current.map((application) =>
-        application.id === selectedApplication.id
-          ? { ...application, status: "rejected" }
-          : application,
-      ),
-    );
-    const nextPending = filteredApplications.find(
-      (application) => application.id !== selectedApplication.id,
-    );
-    setSelectedId(nextPending?.id ?? null);
+    setActionLoading(true);
+    setActionError("");
+    try {
+      await api.rejectSellerApplication(selectedApplication.id);
+      await loadApplications();
+      setSelectedId(null);
+    } catch (error) {
+      setActionError(error.message || "Failed to reject seller");
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   return (
@@ -139,34 +164,38 @@ const AdminSellerVerification = () => {
           <article className="admin-verify-stat-card">
             <p className="admin-verify-stat-label">Pending Review</p>
             <p className="admin-verify-stat-value">
-              {filteredApplications.length || ADMIN_SELLER_VERIFICATION_STATS.pendingReview}
+              {loading ? "..." : stats.pendingReview}
             </p>
           </article>
           <article className="admin-verify-stat-card">
             <p className="admin-verify-stat-label">Approved This Week</p>
             <p className="admin-verify-stat-value">
-              {ADMIN_SELLER_VERIFICATION_STATS.approvedThisWeek}
+              {loading ? "..." : stats.approvedThisWeek}
             </p>
           </article>
           <article className="admin-verify-stat-card">
             <p className="admin-verify-stat-label">Rejected This Week</p>
             <p className="admin-verify-stat-value">
-              {ADMIN_SELLER_VERIFICATION_STATS.rejectedThisWeek}
+              {loading ? "..." : stats.rejectedThisWeek}
             </p>
           </article>
           <article className="admin-verify-stat-card">
             <p className="admin-verify-stat-label">Avg. Review Time</p>
             <p className="admin-verify-stat-value">
-              {ADMIN_SELLER_VERIFICATION_STATS.avgReviewHours}h
+              {stats.avgReviewHours}h
             </p>
           </article>
         </div>
+
+        {actionError ? <p className="admin-verify-applied-date">{actionError}</p> : null}
 
         <div className="admin-verify-layout">
           <section aria-label="Pending seller applications">
             <p className="admin-verify-queue-title">Pending Applications</p>
             <div className="admin-verify-queue">
-              {filteredApplications.length === 0 ? (
+              {loading ? (
+                <p className="admin-verify-applied-date">Loading applications...</p>
+              ) : filteredApplications.length === 0 ? (
                 <p className="admin-verify-applied-date">No pending applications match your search.</p>
               ) : (
                 filteredApplications.map((application) => (
@@ -277,10 +306,20 @@ const AdminSellerVerification = () => {
                 </p>
 
                 <div className="admin-verify-actions">
-                  <button type="button" className="admin-verify-btn-approve" onClick={handleApprove}>
-                    Approve Seller
+                  <button
+                    type="button"
+                    className="admin-verify-btn-approve"
+                    onClick={handleApprove}
+                    disabled={actionLoading}
+                  >
+                    {actionLoading ? "Processing..." : "Approve Seller"}
                   </button>
-                  <button type="button" className="admin-verify-btn-reject" onClick={handleReject}>
+                  <button
+                    type="button"
+                    className="admin-verify-btn-reject"
+                    onClick={handleReject}
+                    disabled={actionLoading}
+                  >
                     Reject Application
                   </button>
                   <button type="button" className="admin-verify-btn-secondary">
