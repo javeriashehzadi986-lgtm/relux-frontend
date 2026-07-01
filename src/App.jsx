@@ -40,6 +40,7 @@ import AdminProductManagement from "./component/admin/AdminProductManagement";
 import AdminResaleOrders from "./component/admin/AdminResaleOrders";
 import AdminRentalOrders from "./component/admin/AdminRentalOrders";
 import AdminCategoriesManagement from "./component/admin/AdminCategoriesManagement";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const DressChatRedirect = () => {
   const { id } = useParams();
@@ -108,7 +109,14 @@ function App() {
           <Route path="/becomeASeller" element={<BecomeASeller />} />
 
           <Route path="/sellerVerification" element={<SellerVerification />} />
-          <Route path="/sellerProfile" element={<SellerProfile />} />
+          <Route
+            path="/sellerProfile"
+            element={
+              <ProtectedRoute roles={["seller"]}>
+                <SellerProfile />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/sellerDashboard"
             element={<Navigate to="/sellerProfile" replace />}
@@ -117,7 +125,14 @@ function App() {
             path="/myListing"
             element={<Navigate to="/sellerProfile?section=listings" replace />}
           />
-          <Route path="/addListing" element={<SellerAddListing />} />
+          <Route
+            path="/addListing"
+            element={
+              <ProtectedRoute roles={["seller"]}>
+                <SellerAddListing />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/ordersRequests"
             element={<Navigate to="/sellerProfile?section=orders" replace />}

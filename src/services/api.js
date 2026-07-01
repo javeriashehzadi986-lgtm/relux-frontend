@@ -40,15 +40,29 @@ async function request(path, options = {}) {
     headers.Authorization = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_BASE}${path}`, {
-    ...options,
-    headers,
-  });
+  let response;
+  try {
+    response = await fetch(`${API_BASE}${path}`, {
+      ...options,
+      headers,
+    });
+  } catch {
+    throw new Error(
+      "Cannot reach the backend server. Open relux-backend folder and run: npm start",
+    );
+  }
 
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
-    throw new Error(data.message || "Request failed");
+    const message =
+      data.message ||
+      (response.status === 413
+        ? "Images are too large. Please use smaller photos."
+        : response.status === 404
+          ? "API not found. Make sure the backend server is running (npm start)."
+          : "Request failed");
+    throw new Error(message);
   }
 
   return data;
@@ -64,6 +78,13 @@ export const api = {
   login: (body) =>
     request("/auth/login", { method: "POST", body: JSON.stringify(body) }),
   getMe: () => request("/auth/me"),
+  applyAsSeller: (body) =>
+    request("/seller/verification/apply", { method: "POST", body: JSON.stringify(body) }),
+  submitSellerVerification: (body) =>
+    request("/seller/verification", { method: "POST", body: JSON.stringify(body) }),
+  updateSellerDocuments: (body) =>
+    request("/seller/verification/documents", { method: "PUT", body: JSON.stringify(body) }),
+  getSellerVerification: () => request("/seller/verification/me"),
 };
 
 export default api;

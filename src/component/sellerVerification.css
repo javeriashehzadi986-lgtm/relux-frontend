@@ -214,6 +214,45 @@
   color: #c62828;
 }
 
+.seller-field-error {
+  margin: 8px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #c62828;
+}
+
+.seller-auth-notice {
+  margin: 0 0 20px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.seller-auth-notice--buyer {
+  background: #fff8e6;
+  border: 1px solid #f0d78c;
+  color: #5c4a1a;
+}
+
+.seller-auth-notice p + p {
+  margin-top: 8px;
+}
+
+.seller-auth-notice-link {
+  padding: 0;
+  border: none;
+  background: none;
+  color: #8b6914;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.seller-desc--highlight {
+  font-weight: 600;
+}
+
 .seller-upload-icon {
   color: var(--seller-outline-variant);
   margin-bottom: 12px;

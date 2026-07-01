@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import "./login.css";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +24,7 @@ const LOGIN_IMAGE =
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
   const [email, setemail] = useState("");
   const [password, setpassword] = useState("");
@@ -56,7 +57,16 @@ const Login = () => {
     setLoading(true);
     try {
       const user = await login(email, password);
-      navigate(user.role === "admin" ? "/admin" : "/home");
+      const redirectTo = location.state?.from;
+      if (redirectTo) {
+        navigate(redirectTo, { replace: true });
+      } else if (user.role === "admin") {
+        navigate("/admin");
+      } else if (user.role === "seller") {
+        navigate("/sellerProfile");
+      } else {
+        navigate("/home");
+      }
     } catch (error) {
       setSubmitError(error.message || "Login failed");
     } finally {
