@@ -93,6 +93,21 @@ export const api = {
       method: "PATCH",
       body: JSON.stringify(body),
     }),
+  createListing: (body) =>
+    request("/seller/listings", { method: "POST", body: JSON.stringify(body) }),
+  updateListing: (id, body) =>
+    request(`/seller/listings/${id}`, { method: "PUT", body: JSON.stringify(body) }),
+  getMyListings: () => request("/seller/listings/me"),
+  getMyListing: (id) => request(`/seller/listings/${id}`),
+  getAdminListings: (status) =>
+    request(status ? `/admin/listings?status=${status}` : "/admin/listings"),
+  approveListing: (id) =>
+    request(`/admin/listings/${id}/approve`, { method: "PATCH" }),
+  rejectListing: (id, body = {}) =>
+    request(`/admin/listings/${id}/reject`, {
+      method: "PATCH",
+      body: JSON.stringify(body),
+    }),
 };
 
 export default api;

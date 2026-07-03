@@ -80,6 +80,7 @@ export function AuthProvider({ children }) {
       isAuthenticated: Boolean(user),
       isAdmin: user?.role === "admin",
       isSeller: user?.role === "seller",
+      isSellerActive: user?.role === "seller" && user?.status === "active",
       login,
       register,
       refreshUser,

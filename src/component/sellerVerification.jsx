@@ -136,10 +136,19 @@ function SellerVerification() {
       return;
     }
 
+    if (!loading && isAuthenticated && user?.role === "seller") {
+      if (user.status === "active") {
+        navigate("/sellerProfile", { replace: true });
+      } else if (user.status === "pending") {
+        navigate("/seller-pending", { replace: true });
+      }
+      return;
+    }
+
     if (isAdmin) {
       navigate("/admin", { replace: true });
     }
-  }, [loading, isUpdateMode, isAuthenticated, isSeller, isAdmin, navigate]);
+  }, [loading, isUpdateMode, isAuthenticated, isSeller, isAdmin, user, navigate]);
 
   const validateFiles = () => {
     let valid = true;
@@ -205,6 +214,13 @@ function SellerVerification() {
       ]);
 
       if (isAuthenticated && user?.role === "buyer") {
+        await submitSellerVerification({
+          phone,
+          city,
+          cnicFront: cnicFrontData,
+          cnicBack: cnicBackData,
+        });
+      } else if (isAuthenticated && user?.role === "seller" && user?.status === "rejected") {
         await submitSellerVerification({
           phone,
           city,
@@ -321,7 +337,9 @@ function SellerVerification() {
                 className="seller-back-link"
                 asChild
               >
-                <Link to="/seller-pending">Back to Application Status</Link>
+                <Link to={user?.status === "rejected" ? "/seller-rejected" : "/seller-pending"}>
+                  Back to Application Status
+                </Link>
               </Button>
             </div>
           </form>
@@ -331,17 +349,32 @@ function SellerVerification() {
   }
 
   const isLoggedInBuyer = isAuthenticated && user?.role === "buyer";
+  const isLoggedInRejectedSeller =
+    isAuthenticated && user?.role === "seller" && user?.status === "rejected";
 
   return (
     <div className="seller-verification-page">
       <main className="seller-main">
         <div className="seller-intro">
-          <h1 className="seller-title">Become a Verified Seller</h1>
+          <h1 className="seller-title">
+            {isLoggedInRejectedSeller ? "Re-apply as Seller" : "Become a Verified Seller"}
+          </h1>
           <p className="seller-desc">
-            Complete your information below to start selling and renting clothes
-            on Relux Hub. Join our community of conscious fashion enthusiasts.
+            {isLoggedInRejectedSeller
+              ? "Update your details and CNIC documents below to submit a new seller application."
+              : "Complete your information below to start selling and renting clothes on Relux Hub. Join our community of conscious fashion enthusiasts."}
           </p>
-          {isLoggedInBuyer ? (
+          {isLoggedInRejectedSeller ? (
+            <div className="seller-auth-notice seller-auth-notice--rejected">
+              <p>
+                Your previous application was not approved. Please review your information and
+                upload clear CNIC images before submitting again.
+              </p>
+              <p>
+                <Link to="/seller-rejected">View rejection details</Link>
+              </p>
+            </div>
+          ) : isLoggedInBuyer ? (
             <div className="seller-auth-notice seller-auth-notice--buyer">
               <p>
                 You are logged in as buyer <strong>{user.email}</strong>. Only phone, city,
@@ -379,7 +412,7 @@ function SellerVerification() {
               <h2 className="seller-card-title">Personal Information</h2>
             </div>
             <div className="seller-form-grid">
-              {!isLoggedInBuyer ? (
+              {!isLoggedInBuyer && !isLoggedInRejectedSeller ? (
                 <>
                   <div className="seller-field">
                     <Label htmlFor="fullName" className="seller-field-label">
@@ -504,7 +537,7 @@ function SellerVerification() {
               className="seller-submit-btn"
               disabled={submitting}
             >
-              {submitting ? "Submitting..." : "Submit Verification Request"}
+              {submitting ? "Submitting..." : isLoggedInRejectedSeller ? "Submit New Application" : "Submit Verification Request"}
               <Send size={18} strokeWidth={1.75} />
             </Button>
             <p className="seller-terms-note">

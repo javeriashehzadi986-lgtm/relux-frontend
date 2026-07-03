@@ -452,3 +452,84 @@
   color: #ba1a1a !important;
   border-color: #ba1a1a !important;
 }
+
+.my-listing-status--pending {
+  color: #8b6914 !important;
+  border-color: #d4a72c !important;
+}
+
+.my-listing-status--rejected {
+  color: #b42318 !important;
+  border-color: #f5c2c0 !important;
+}
+
+.my-listing-load-error {
+  margin: 0 0 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background: #fff5f5;
+  border: 1px solid #f5c2c0;
+  color: #7a2e2a;
+  font-size: 0.9rem;
+}
+
+.my-listing-card--rejected {
+  border-color: #f5c2c0;
+}
+
+.my-listing-review-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin: 0.5rem 0 0.25rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.my-listing-review-banner--pending {
+  background: #fff8e6;
+  border: 1px solid #f0d78c;
+  color: #5c4a1a;
+}
+
+.my-listing-review-banner--rejected {
+  background: #fff5f5;
+  border: 1px solid #f5c2c0;
+  color: #7a2e2a;
+}
+
+.my-listing-rejection-title {
+  margin: 0 0 0.25rem;
+  font-weight: 600;
+}
+
+.my-listing-rejection-note {
+  margin: 0 0 0.5rem;
+}
+
+.my-listing-resubmit-btn {
+  margin-top: 0.25rem;
+}
+
+.my-listing-card-bottom-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.my-listing-view-btn {
+  gap: 0.35rem;
+}
+
+.my-listing-card-title a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.my-listing-card-title a:hover {
+  text-decoration: underline;
+}

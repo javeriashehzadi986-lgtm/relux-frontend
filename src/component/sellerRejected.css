@@ -1,0 +1,122 @@
+.seller-rejected-page {
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.seller-rejected-card {
+  width: 100%;
+  max-width: 560px;
+  border: 1px solid #e8dfd2;
+  box-shadow: 0 12px 40px rgba(44, 36, 27, 0.08);
+}
+
+.seller-rejected-header {
+  text-align: center;
+  padding-bottom: 0.5rem;
+}
+
+.seller-rejected-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 12px;
+  border-radius: 50%;
+  background: #fdecea;
+  color: #b42318;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.seller-rejected-title {
+  font-size: 1.5rem;
+}
+
+.seller-rejected-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.seller-rejected-lead {
+  text-align: center;
+  color: #4a4036;
+  line-height: 1.6;
+}
+
+.seller-rejected-status-box {
+  text-align: center;
+  padding: 14px;
+  border-radius: 10px;
+  background: #faf6f0;
+  border: 1px solid #eadfce;
+}
+
+.seller-rejected-status-label {
+  margin: 0 0 8px;
+  font-size: 0.85rem;
+  color: #7a6f62;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.seller-rejected-status-badge {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: #fdecea;
+  color: #b42318;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.seller-rejected-reason {
+  padding: 14px;
+  border-radius: 10px;
+  background: #fff5f5;
+  border: 1px solid #f5c2c0;
+}
+
+.seller-rejected-reason-label {
+  margin: 0 0 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #7a2e2a;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.seller-rejected-reason-text {
+  margin: 0;
+  color: #4a4036;
+  line-height: 1.55;
+}
+
+.seller-rejected-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.seller-rejected-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: #4a4036;
+  line-height: 1.5;
+}
+
+.seller-rejected-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 4px;
+}

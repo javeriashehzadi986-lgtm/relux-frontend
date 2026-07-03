@@ -27,6 +27,7 @@ import Profile from "./component/profile";
 import SellerProfile from "./component/sellerProfile";
 import SellerAddListing from "./component/sellerAddListing";
 import SellerPending from "./component/sellerPending";
+import SellerRejected from "./component/sellerRejected";
 import AdminLayout from "./component/admin/AdminLayout";
 import AdminDashboard from "./component/admin/AdminDashboard";
 import AdminProfile from "./component/admin/adminProfile";
@@ -116,6 +117,14 @@ function App() {
             element={
               <ProtectedRoute roles={["seller"]}>
                 <SellerPending />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/seller-rejected"
+            element={
+              <ProtectedRoute roles={["seller"]}>
+                <SellerRejected />
               </ProtectedRoute>
             }
           />

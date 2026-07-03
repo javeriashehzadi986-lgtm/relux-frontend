@@ -683,6 +683,13 @@
   gap: 1rem;
 }
 
+.add-listing-submit-error {
+  margin: 0;
+  color: #ba1a1a;
+  font-size: 0.875rem;
+  text-align: center;
+}
+
 .add-listing-publish-btn {
   width: 100%;
   min-height: 3.5rem !important;

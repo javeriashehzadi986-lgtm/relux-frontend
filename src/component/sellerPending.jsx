@@ -8,7 +8,7 @@ import "./sellerPending.css";
 
 export default function SellerPending() {
   const navigate = useNavigate();
-  const { user, loading, logout } = useAuth();
+  const { user, loading, logout, refreshUser } = useAuth();
 
   useEffect(() => {
     if (loading) return;
@@ -22,10 +22,42 @@ export default function SellerPending() {
     }
     if (user.status === "active") {
       navigate("/sellerProfile", { replace: true });
+      return;
+    }
+    if (user.status === "rejected") {
+      navigate("/seller-rejected", { replace: true });
     }
   }, [user, loading, navigate]);
 
-  if (loading || !user || user.role !== "seller" || user.status === "active") {
+  useEffect(() => {
+    if (loading || !user || user.role !== "seller" || user.status !== "pending") {
+      return undefined;
+    }
+
+    const checkApproval = async () => {
+      try {
+        const freshUser = await refreshUser();
+        if (freshUser.status === "active") {
+          navigate("/sellerProfile", { replace: true });
+        } else if (freshUser.status === "rejected") {
+          navigate("/seller-rejected", { replace: true });
+        }
+      } catch {
+        // ignore polling errors
+      }
+    };
+
+    checkApproval();
+    const interval = window.setInterval(checkApproval, 10000);
+    window.addEventListener("focus", checkApproval);
+
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener("focus", checkApproval);
+    };
+  }, [loading, user, refreshUser, navigate]);
+
+  if (loading || !user || user.role !== "seller" || user.status !== "pending") {
     return (
       <div className="seller-pending-page">
         <p>Loading...</p>
@@ -65,8 +97,8 @@ export default function SellerPending() {
           </ul>
 
           <p className="seller-pending-note">
-            Your seller dashboard will unlock after admin approval. Until then you cannot add
-            listings or access seller tools.
+            Once admin approves your account, you will be redirected to the seller dashboard
+            automatically. Then you can add listings and manage your shop.
           </p>
 
           <div className="seller-pending-actions">

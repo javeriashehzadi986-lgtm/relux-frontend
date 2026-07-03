@@ -685,6 +685,44 @@ const deriveBadge = (dress) => {
   return { badge: "Pre-owned", badgeVariant: "secondary" };
 };
 
+export const isMongoListingId = (id) => /^[a-f0-9]{24}$/i.test(String(id ?? ""));
+
+export const mapApiListingToDress = (listing) => {
+  const id = String(listing.id);
+  const isRent = listing.listingType === "rent";
+  const dress = {
+    id,
+    title: listing.title,
+    brand: listing.brand || "Relux Seller",
+    description: listing.description,
+    fabric: listing.description,
+    mainImage: listing.mainImage,
+    image: listing.mainImage,
+    gallery: listing.gallery?.length ? listing.gallery : [listing.mainImage],
+    listingSize: listing.listingSize || "M",
+    listingCondition: listing.listingCondition || "Like New",
+    style: listing.style,
+    categoryLabel: listing.clothingType || listing.mainCategory,
+    ...(isRent
+      ? {
+          listingType: "rent",
+          dailyRate: parsePrice(listing.rentPrice),
+          securityDeposit: parsePrice(listing.itemPrice),
+          fullDressPrice: parsePrice(listing.itemPrice),
+        }
+      : {
+          listingType: "resale",
+          price: parsePrice(listing.salePrice),
+          currentBid: parsePrice(listing.startingBid || listing.salePrice),
+          minimumNextBid: parsePrice(
+            listing.minBid || listing.startingBid || listing.salePrice,
+          ),
+        }),
+  };
+
+  return isRent ? enrichRentalDress(dress) : enrichResaleDress(dress);
+};
+
 export const getDressById = (id) => {
   const stored = getSellerListingOverride(id);
   const catalogDress = ALL_PRODUCTS[id];

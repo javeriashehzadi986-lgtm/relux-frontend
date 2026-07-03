@@ -4,7 +4,8 @@ import { Gavel, Heart, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { getDressById } from "@/data/dressCatalog";
+import { getDressById, isMongoListingId, mapApiListingToDress } from "@/data/dressCatalog";
+import api from "@/services/api";
 import { useWishlist } from "@/hooks/useWishlist";
 import RentalDressDetails from "./rentalDressDetails";
 import { DressDetailsBreadcrumb } from "./dressDetailsBreadcrumb";
@@ -18,14 +19,57 @@ const formatCountdown = ({ hours, minutes, seconds }) =>
 const DressDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const dress = useMemo(() => getDressById(id), [id]);
+  const [dress, setDress] = useState(() =>
+    isMongoListingId(id) ? null : getDressById(id),
+  );
+  const [loading, setLoading] = useState(isMongoListingId(id));
   const [activeImage, setActiveImage] = useState(0);
   const [bidAmount, setBidAmount] = useState("");
   const [termsAccepted, setTermsAccepted] = useState(false);
   const { isSaved, toggle: toggleWishlist } = useWishlist();
-  const favorited = isSaved(dress.id);
-  const [hasWonAuction, setHasWonAuction] = useState(Boolean(dress.auctionWon));
-  const [countdown, setCountdown] = useState(dress.countdown ?? { hours: 14, minutes: 22, seconds: 8 });
+
+  useEffect(() => {
+    if (!isMongoListingId(id)) {
+      setDress(getDressById(id));
+      setLoading(false);
+      return undefined;
+    }
+
+    let cancelled = false;
+    setLoading(true);
+
+    api
+      .getMyListing(id)
+      .then(({ listing }) => {
+        if (!cancelled) {
+          setDress(mapApiListingToDress(listing));
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setDress(getDressById(id));
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
+
+  const favorited = dress ? isSaved(dress.id) : false;
+  const [hasWonAuction, setHasWonAuction] = useState(false);
+  const [countdown, setCountdown] = useState({ hours: 14, minutes: 22, seconds: 8 });
+
+  useEffect(() => {
+    if (!dress) return;
+    setHasWonAuction(Boolean(dress.auctionWon));
+    setCountdown(dress.countdown ?? { hours: 14, minutes: 22, seconds: 8 });
+  }, [dress]);
 
   const proceedToCheckout = () => navigate(`/dress/${id}/checkout`);
 
@@ -35,16 +79,12 @@ const DressDetails = () => {
   };
 
   useEffect(() => {
-    setHasWonAuction(Boolean(dress.auctionWon));
-  }, [dress.id, dress.auctionWon]);
-
-  useEffect(() => {
-    if (dress.listingType !== "resale") return undefined;
+    if (!dress || dress.listingType !== "resale") return undefined;
     setCountdown(dress.countdown ?? { hours: 14, minutes: 22, seconds: 8 });
   }, [dress]);
 
   useEffect(() => {
-    if (dress.listingType !== "resale") return undefined;
+    if (!dress || dress.listingType !== "resale") return undefined;
 
     const timer = window.setInterval(() => {
       setCountdown((current) => {
@@ -63,7 +103,15 @@ const DressDetails = () => {
     }, 1000);
 
     return () => window.clearInterval(timer);
-  }, [dress.listingType]);
+  }, [dress?.listingType, dress]);
+
+  if (loading || !dress) {
+    return (
+      <div className="dress-details-page">
+        <p style={{ padding: "2rem", textAlign: "center" }}>Loading dress details...</p>
+      </div>
+    );
+  }
 
   if (dress.listingType !== "resale") {
     return <RentalDressDetails dress={dress} />;

@@ -12,7 +12,8 @@ import {
   normalizeListingCondition,
   normalizeListingSize,
 } from "@/data/listingSpecs";
-import { saveSellerListing } from "@/data/sellerListingStore";
+import api from "@/services/api";
+import { prepareImageList, prepareImageSource } from "@/utils/imageUpload";
 import "./sellerAddListing.css";
 import { getStyleOptionsForCategory } from "@/data/styleCategories";
 
@@ -105,6 +106,8 @@ const SellerAddListing = () => {
   const [itemPrice, setItemPrice] = useState("");
   const [previewImages, setPreviewImages] = useState(previewThumbs);
   const [previewHeroImage, setPreviewHeroImage] = useState(previewHero);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const listingImagesRef = useRef(null);
   const addThumbRef = useRef(null);
 
@@ -115,6 +118,61 @@ const SellerAddListing = () => {
 
   useEffect(() => {
     if (!editListingId) return;
+
+    const isApiListing = /^[a-f0-9]{24}$/i.test(editListingId);
+
+    if (isApiListing) {
+      let cancelled = false;
+
+      api
+        .getMyListing(editListingId)
+        .then(({ listing }) => {
+          if (cancelled || !listing) return;
+
+          setTitle(listing.title || "");
+          setBrand(listing.brand || "");
+          setDescription(listing.description || "");
+          setListingType(listing.listingType === "rent" ? "rent" : "sale");
+          setMainCategory(listing.mainCategory || "Female");
+          setStyle(listing.style || "Casual");
+          setClothingType(listing.clothingType || "Dress");
+
+          if (listing.listingType === "rent") {
+            setRentPrice(listing.rentPrice || "");
+            setItemPrice(listing.itemPrice || "");
+          } else {
+            setSalePrice(listing.salePrice || "");
+            setStartingBid(listing.startingBid || "");
+            setMinBid(listing.minBid || "");
+            setAuctionEndDate(listing.auctionEndDate || "");
+          }
+
+          if (listing.listingSize) {
+            setSize(normalizeListingSize(listing.listingSize));
+          }
+          if (listing.listingCondition) {
+            setCondition(normalizeListingCondition(listing.listingCondition));
+          }
+
+          const gallery = listing.gallery?.length
+            ? listing.gallery
+            : listing.mainImage
+              ? [listing.mainImage]
+              : [];
+          if (gallery.length) {
+            setPreviewHeroImage(gallery[0]);
+            setPreviewImages(gallery);
+          }
+        })
+        .catch(() => {
+          // keep empty form if listing cannot be loaded
+        });
+
+      return () => {
+        cancelled = true;
+      };
+    }
+
     const dress = getDressById(editListingId);
     setTitle(dress.title);
     setBrand(dress.brand ?? "");
@@ -191,34 +249,50 @@ const SellerAddListing = () => {
   const goToListings = () =>
     navigate("/sellerProfile?section=listings");
 
-  const handlePublish = (event) => {
+  const handlePublish = async (event) => {
     event.preventDefault();
-    const listingId = editListingId ?? `seller-${Date.now()}`;
+    setSubmitError("");
+    setSubmitting(true);
 
-    saveSellerListing({
-      id: listingId,
-      title: title.trim() || previewTitle,
-      brand: brand.trim(),
-      description: description.trim(),
-      listingType,
-      listingSize: size,
-      listingCondition: condition,
-      mainCategory,
-      style,
-      clothingType,
-      salePrice,
-      startingBid,
-      minBid,
-      auctionEndDate,
-      rentPrice,
-      itemPrice,
-      mainImage: previewHeroImage,
-      gallery: previewImages,
-      seller: "Zarish",
-      sellerName: "Zarish",
-    });
+    try {
+      const preparedGallery = await prepareImageList(previewImages);
+      const mainImage =
+        preparedGallery[0] || (await prepareImageSource(previewHeroImage));
 
-    goToListings();
+      const payload = {
+        title: title.trim() || previewTitle,
+        brand: brand.trim(),
+        description: description.trim(),
+        listingType,
+        listingSize: size,
+        listingCondition: condition,
+        mainCategory,
+        style,
+        clothingType,
+        salePrice,
+        startingBid,
+        minBid,
+        auctionEndDate,
+        rentPrice,
+        itemPrice,
+        mainImage,
+        gallery: preparedGallery.length ? preparedGallery : [mainImage],
+      };
+
+      const isApiListing = editListingId && /^[a-f0-9]{24}$/i.test(editListingId);
+
+      if (isApiListing) {
+        await api.updateListing(editListingId, payload);
+      } else {
+        await api.createListing(payload);
+      }
+
+      goToListings();
+    } catch (error) {
+      setSubmitError(error.message || "Failed to submit listing");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -236,7 +310,7 @@ const SellerAddListing = () => {
             {editListingId ? "Edit Listing" : "Add New Listing"}
           </h1>
           <p className="add-listing-subtitle">
-            List your pre-loved clothing for sale or rent
+            List your pre-loved clothing — submissions are reviewed by admin before going live
           </p>
         </header>
 
@@ -594,9 +668,16 @@ const SellerAddListing = () => {
             </Card>
 
             <div className="add-listing-actions">
-              <Button type="submit" className="add-listing-publish-btn">
-                Publish Listing
+              <Button
+                type="submit"
+                className="add-listing-publish-btn"
+                disabled={submitting}
+              >
+                {submitting ? "Submitting..." : "Submit for Review"}
               </Button>
+              {submitError ? (
+                <p className="add-listing-submit-error">{submitError}</p>
+              ) : null}
               <Button
                 type="button"
                 variant="outline"

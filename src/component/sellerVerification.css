@@ -235,6 +235,17 @@
   color: #5c4a1a;
 }
 
+.seller-auth-notice--rejected {
+  background: #fff5f5;
+  border: 1px solid #f5c2c0;
+  color: #7a2e2a;
+}
+
+.seller-auth-notice--rejected a {
+  color: #b42318;
+  font-weight: 600;
+}
+
 .seller-auth-notice p + p {
   margin-top: 8px;
 }

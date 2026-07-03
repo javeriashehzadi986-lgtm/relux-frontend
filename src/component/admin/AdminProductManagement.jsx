@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from "react";
-import { ADMIN_PRODUCTS, ADMIN_PRODUCTS_TOTAL } from "@/data/adminProductsData";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import api from "@/services/api";
 import { toggleAdminSidebar } from "@/utils/adminSidebar";
 import "./adminProductManagement.css";
 
@@ -18,6 +18,7 @@ const TYPE_LABELS = {
 };
 
 const STATUS_LABELS = {
+  pending: "Pending Review",
   active: "Active",
   sold: "Sold",
   rented: "Rented",
@@ -30,33 +31,63 @@ function ProductStatusBadge({ status, pulse = false }) {
       <span
         className={`admin-products-status-dot ${
           status === "active" && pulse ? "admin-products-status-dot--pulse" : ""
-        }`.trim()}
+        } ${status === "pending" ? "admin-products-status-dot--pulse" : ""}`.trim()}
         aria-hidden="true"
       />
-      {STATUS_LABELS[status]}
+      {STATUS_LABELS[status] ?? status}
     </span>
   );
 }
 
 const AdminProductManagement = () => {
-  const [selectedId, setSelectedId] = useState(ADMIN_PRODUCTS[0]?.id ?? null);
+  const [products, setProducts] = useState([]);
+  const [stats, setStats] = useState({
+    pendingReview: 0,
+    approvedThisWeek: 0,
+    rejectedThisWeek: 0,
+  });
+  const [selectedId, setSelectedId] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [actionError, setActionError] = useState("");
+  const [actionLoading, setActionLoading] = useState(false);
 
   const [draftName, setDraftName] = useState("");
   const [draftType, setDraftType] = useState("all");
   const [draftCategory, setDraftCategory] = useState("all");
-  const [draftStatus, setDraftStatus] = useState("all");
+  const [draftStatus, setDraftStatus] = useState("pending");
 
   const [appliedFilters, setAppliedFilters] = useState({
     name: "",
     type: "all",
     category: "all",
-    status: "all",
+    status: "pending",
   });
+
+  const loadListings = useCallback(async () => {
+    setLoading(true);
+    setActionError("");
+    try {
+      const data = await api.getAdminListings();
+      setProducts(data.listings ?? []);
+      setStats(
+        data.stats ?? { pendingReview: 0, approvedThisWeek: 0, rejectedThisWeek: 0 },
+      );
+    } catch (error) {
+      setActionError(error.message || "Failed to load listings");
+      setProducts([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadListings();
+  }, [loadListings]);
 
   const filteredProducts = useMemo(() => {
     const query = appliedFilters.name.trim().toLowerCase();
 
-    return ADMIN_PRODUCTS.filter((product) => {
+    return products.filter((product) => {
       const matchesName =
         !query ||
         product.title.toLowerCase().includes(query) ||
@@ -70,12 +101,22 @@ const AdminProductManagement = () => {
 
       return matchesName && matchesType && matchesCategory && matchesStatus;
     });
-  }, [appliedFilters]);
+  }, [products, appliedFilters]);
 
   const selectedProduct =
     filteredProducts.find((product) => product.id === selectedId) ??
-    ADMIN_PRODUCTS.find((product) => product.id === selectedId) ??
+    products.find((product) => product.id === selectedId) ??
     null;
+
+  useEffect(() => {
+    if (filteredProducts.length === 0) {
+      setSelectedId(null);
+      return;
+    }
+    if (!filteredProducts.some((product) => product.id === selectedId)) {
+      setSelectedId(filteredProducts[0].id);
+    }
+  }, [filteredProducts, selectedId]);
 
   const applyFilters = () => {
     setAppliedFilters({
@@ -84,6 +125,34 @@ const AdminProductManagement = () => {
       category: draftCategory,
       status: draftStatus,
     });
+  };
+
+  const handleApprove = async () => {
+    if (!selectedProduct) return;
+    setActionLoading(true);
+    setActionError("");
+    try {
+      await api.approveListing(selectedProduct.id);
+      await loadListings();
+    } catch (error) {
+      setActionError(error.message || "Failed to approve listing");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleReject = async () => {
+    if (!selectedProduct) return;
+    setActionLoading(true);
+    setActionError("");
+    try {
+      await api.rejectListing(selectedProduct.id);
+      await loadListings();
+    } catch (error) {
+      setActionError(error.message || "Failed to reject listing");
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   return (
@@ -100,7 +169,7 @@ const AdminProductManagement = () => {
           </button>
           <div className="admin-products-header-titles">
             <h1>Products Management</h1>
-            <p>View and manage all clothing listings on Relux Hub.</p>
+            <p>Review new listings and manage approved products on Relux Hub.</p>
           </div>
         </div>
         <div className="admin-products-header-right">
@@ -111,6 +180,23 @@ const AdminProductManagement = () => {
       </header>
 
       <div className="admin-products-body">
+        <div className="admin-products-stats-row">
+          <article className="admin-products-stat-card">
+            <p>Pending Review</p>
+            <strong>{loading ? "..." : stats.pendingReview}</strong>
+          </article>
+          <article className="admin-products-stat-card">
+            <p>Approved This Week</p>
+            <strong>{loading ? "..." : stats.approvedThisWeek}</strong>
+          </article>
+          <article className="admin-products-stat-card">
+            <p>Rejected This Week</p>
+            <strong>{loading ? "..." : stats.rejectedThisWeek}</strong>
+          </article>
+        </div>
+
+        {actionError ? <p className="admin-products-action-error">{actionError}</p> : null}
+
         <div className="admin-products-filters">
           <div className="admin-products-filter-field">
             <label htmlFor="admin-product-name">Clothing Name</label>
@@ -155,9 +241,8 @@ const AdminProductManagement = () => {
               onChange={(event) => setDraftStatus(event.target.value)}
             >
               <option value="all">Any Status</option>
+              <option value="pending">Pending Review</option>
               <option value="active">Active</option>
-              <option value="sold">Sold</option>
-              <option value="rented">Rented</option>
               <option value="removed">Removed</option>
             </select>
           </div>
@@ -181,71 +266,67 @@ const AdminProductManagement = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredProducts.map((product) => (
-                    <tr
-                      key={product.id}
-                      className={
-                        selectedId === product.id ? "admin-products-row--selected" : undefined
-                      }
-                      onClick={() => setSelectedId(product.id)}
-                    >
-                      <td>
-                        <div className="admin-products-product-cell">
-                          <div className="admin-products-thumb">
-                            <img src={product.image} alt="" />
-                          </div>
-                          <div>
-                            <p className="admin-products-product-title">{product.title}</p>
-                            <p className="admin-products-product-id">ID: #{product.id}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <div className="admin-products-seller-cell">
-                          <span
-                            className={`admin-products-seller-avatar ${
-                              product.listingType === "rent"
-                                ? "admin-products-seller-avatar--tertiary"
-                                : ""
-                            }`.trim()}
-                          >
-                            {product.sellerInitials}
-                          </span>
-                          <span>{product.sellerName}</span>
-                        </div>
-                      </td>
-                      <td>{CATEGORY_LABELS[product.category]}</td>
-                      <td>
-                        <span
-                          className={`admin-products-type-badge admin-products-type-badge--${product.listingType}`}
-                        >
-                          {TYPE_LABELS[product.listingType]}
-                        </span>
-                      </td>
-                      <td className="admin-products-price">{product.price}</td>
-                      <td>
-                        <ProductStatusBadge
-                          status={product.status}
-                          pulse={product.status === "active" && selectedId === product.id}
-                        />
-                      </td>
+                  {loading ? (
+                    <tr>
+                      <td colSpan={6}>Loading listings...</td>
                     </tr>
-                  ))}
+                  ) : filteredProducts.length === 0 ? (
+                    <tr>
+                      <td colSpan={6}>No listings match your filters.</td>
+                    </tr>
+                  ) : (
+                    filteredProducts.map((product) => (
+                      <tr
+                        key={product.id}
+                        className={
+                          selectedId === product.id ? "admin-products-row--selected" : undefined
+                        }
+                        onClick={() => setSelectedId(product.id)}
+                      >
+                        <td>
+                          <div className="admin-products-product-cell">
+                            <div className="admin-products-thumb">
+                              <img src={product.image} alt="" />
+                            </div>
+                            <div>
+                              <p className="admin-products-product-title">{product.title}</p>
+                              <p className="admin-products-product-id">ID: #{product.id}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="admin-products-seller-cell">
+                            <span className="admin-products-seller-avatar">
+                              {product.sellerInitials}
+                            </span>
+                            <span>{product.sellerName}</span>
+                          </div>
+                        </td>
+                        <td>{CATEGORY_LABELS[product.category]}</td>
+                        <td>
+                          <span
+                            className={`admin-products-type-badge admin-products-type-badge--${product.listingType}`}
+                          >
+                            {TYPE_LABELS[product.listingType]}
+                          </span>
+                        </td>
+                        <td className="admin-products-price">{product.price}</td>
+                        <td>
+                          <ProductStatusBadge
+                            status={product.status}
+                            pulse={product.status === "pending" && selectedId === product.id}
+                          />
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
             <div className="admin-products-table-footer">
               <p>
-                Showing {filteredProducts.length} of {ADMIN_PRODUCTS_TOTAL} products
+                Showing {filteredProducts.length} of {products.length} listings
               </p>
-              <div className="admin-products-pagination">
-                <button type="button" className="admin-products-page-btn" aria-label="Previous page">
-                  <span className="material-symbols-outlined">chevron_left</span>
-                </button>
-                <button type="button" className="admin-products-page-btn" aria-label="Next page">
-                  <span className="material-symbols-outlined">chevron_right</span>
-                </button>
-              </div>
             </div>
           </section>
 
@@ -253,33 +334,17 @@ const AdminProductManagement = () => {
             <aside className="admin-products-detail" aria-label="Product details">
               <div className="admin-products-detail-header">
                 <h3>Product Details</h3>
-                <button type="button" className="admin-products-detail-menu" aria-label="More options">
-                  <span className="material-symbols-outlined">more_vert</span>
-                </button>
               </div>
 
               <div className="admin-products-gallery">
                 <div className="admin-products-gallery-main">
                   <img src={selectedProduct.gallery[0]} alt={selectedProduct.title} />
                 </div>
-                {selectedProduct.gallery[1] && (
-                  <div className="admin-products-gallery-thumb">
-                    <img src={selectedProduct.gallery[1]} alt="" />
+                {selectedProduct.gallery.slice(1, 4).map((image, index) => (
+                  <div key={`${image}-${index}`} className="admin-products-gallery-thumb">
+                    <img src={image} alt="" />
                   </div>
-                )}
-                {selectedProduct.gallery[2] && (
-                  <div className="admin-products-gallery-thumb">
-                    <img src={selectedProduct.gallery[2]} alt="" />
-                  </div>
-                )}
-                {selectedProduct.gallery[3] && (
-                  <div className="admin-products-gallery-thumb admin-products-gallery-more">
-                    <img src={selectedProduct.gallery[3]} alt="" />
-                    {selectedProduct.extraGalleryCount > 0 && (
-                      <span>+{selectedProduct.extraGalleryCount}</span>
-                    )}
-                  </div>
-                )}
+                ))}
               </div>
 
               <h4 className="admin-products-detail-title">{selectedProduct.title}</h4>
@@ -318,54 +383,38 @@ const AdminProductManagement = () => {
                 <p>Seller Information</p>
                 <div className="admin-products-seller-row">
                   <div className="admin-products-seller-photo">
-                    {selectedProduct.sellerAvatar ? (
-                      <img src={selectedProduct.sellerAvatar} alt="" />
-                    ) : (
-                      <span
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          height: "100%",
-                          fontWeight: 700,
-                        }}
-                      >
-                        {selectedProduct.sellerInitials}
-                      </span>
-                    )}
+                    <span>{selectedProduct.sellerInitials}</span>
                   </div>
                   <div>
                     <p className="admin-products-seller-name">{selectedProduct.sellerFullName}</p>
-                    <div className="admin-products-seller-rating">
-                      <span className="material-symbols-outlined" aria-hidden="true">
-                        star
-                      </span>
-                      <strong>{selectedProduct.sellerRating}</strong>
-                      <span>({selectedProduct.sellerReviews} Reviews)</span>
-                    </div>
+                    <p>{selectedProduct.sellerEmail}</p>
+                    <p>{selectedProduct.sellerPhone}</p>
                   </div>
-                  <button type="button" className="admin-products-seller-mail" aria-label="Email seller">
-                    <span className="material-symbols-outlined">mail</span>
-                  </button>
                 </div>
               </div>
 
-              <div className="admin-products-detail-actions">
-                <button type="button" className="admin-products-btn-view">
-                  <span className="material-symbols-outlined">visibility</span>
-                  View Listing
-                </button>
-                <div className="admin-products-btn-row">
-                  <button type="button" className="admin-products-btn-outline">
-                    <span className="material-symbols-outlined">archive</span>
-                    Remove
+              {selectedProduct.verificationStatus === "pending" ? (
+                <div className="admin-products-review-actions">
+                  <button
+                    type="button"
+                    className="admin-products-btn-approve"
+                    onClick={handleApprove}
+                    disabled={actionLoading}
+                  >
+                    Approve Listing
                   </button>
-                  <button type="button" className="admin-products-btn-danger">
-                    <span className="material-symbols-outlined">delete</span>
-                    Delete
+                  <button
+                    type="button"
+                    className="admin-products-btn-danger"
+                    onClick={handleReject}
+                    disabled={actionLoading}
+                  >
+                    Reject Listing
                   </button>
                 </div>
-              </div>
+              ) : selectedProduct.adminNote ? (
+                <p className="admin-products-admin-note">Admin note: {selectedProduct.adminNote}</p>
+              ) : null}
             </aside>
           )}
         </div>

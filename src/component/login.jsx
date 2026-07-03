@@ -63,7 +63,13 @@ const Login = () => {
       } else if (user.role === "admin") {
         navigate("/admin");
       } else if (user.role === "seller") {
-        navigate(user.status === "pending" ? "/seller-pending" : "/sellerProfile");
+        if (user.status === "pending") {
+          navigate("/seller-pending");
+        } else if (user.status === "rejected") {
+          navigate("/seller-rejected");
+        } else {
+          navigate("/sellerProfile");
+        }
       } else {
         navigate("/home");
       }
