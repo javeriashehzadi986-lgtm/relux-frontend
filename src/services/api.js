@@ -78,6 +78,8 @@ export const api = {
   login: (body) =>
     request("/auth/login", { method: "POST", body: JSON.stringify(body) }),
   getMe: () => request("/auth/me"),
+  updateProfile: (body) =>
+    request("/auth/me", { method: "PATCH", body: JSON.stringify(body) }),
   applyAsSeller: (body) =>
     request("/seller/verification/apply", { method: "POST", body: JSON.stringify(body) }),
   submitSellerVerification: (body) =>

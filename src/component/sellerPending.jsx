@@ -12,22 +12,28 @@ export default function SellerPending() {
 
   useEffect(() => {
     if (loading) return;
-    if (!user) {
-      navigate("/login", { replace: true });
-      return;
-    }
-    if (user.role !== "seller") {
-      navigate("/home", { replace: true });
-      return;
-    }
-    if (user.status === "active") {
-      navigate("/sellerProfile", { replace: true });
-      return;
-    }
-    if (user.status === "rejected") {
-      navigate("/seller-rejected", { replace: true });
-    }
-  }, [user, loading, navigate]);
+
+    const checkStatus = async () => {
+      const freshUser = await refreshUser();
+      if (!freshUser) {
+        navigate("/login", { replace: true });
+        return;
+      }
+      if (freshUser.role !== "seller") {
+        navigate("/home", { replace: true });
+        return;
+      }
+      if (freshUser.status === "active") {
+        navigate("/sellerProfile", { replace: true });
+        return;
+      }
+      if (freshUser.status === "rejected") {
+        navigate("/seller-rejected", { replace: true });
+      }
+    };
+
+    checkStatus();
+  }, [loading, navigate, refreshUser]);
 
   useEffect(() => {
     if (loading || !user || user.role !== "seller" || user.status !== "pending") {
@@ -102,6 +108,20 @@ export default function SellerPending() {
           </p>
 
           <div className="seller-pending-actions">
+            <Button
+              type="button"
+              variant="default"
+              onClick={async () => {
+                const freshUser = await refreshUser();
+                if (freshUser?.status === "active") {
+                  navigate("/sellerProfile", { replace: true });
+                } else if (freshUser?.status === "rejected") {
+                  navigate("/seller-rejected", { replace: true });
+                }
+              }}
+            >
+              Check Approval Status
+            </Button>
             <Button type="button" variant="default" asChild>
               <Link to="/home">Back to Home</Link>
             </Button>

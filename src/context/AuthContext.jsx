@@ -51,6 +51,13 @@ export function AuthProvider({ children }) {
     return data.user;
   }, []);
 
+  const updateProfile = useCallback(async (payload) => {
+    const data = await api.updateProfile(payload);
+    setUser(data.user);
+    api.setStoredUser(data.user);
+    return data.user;
+  }, []);
+
   const applyAsSeller = useCallback(async (payload) => {
     const data = await api.applyAsSeller(payload);
     api.setToken(data.token);
@@ -84,11 +91,12 @@ export function AuthProvider({ children }) {
       login,
       register,
       refreshUser,
+      updateProfile,
       applyAsSeller,
       submitSellerVerification,
       logout,
     }),
-    [user, loading, login, register, refreshUser, applyAsSeller, submitSellerVerification, logout],
+    [user, loading, login, register, refreshUser, updateProfile, applyAsSeller, submitSellerVerification, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

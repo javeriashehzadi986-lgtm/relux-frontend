@@ -26,6 +26,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/context/AuthContext";
+import api from "@/services/api";
 import { SellerMyListingsContent } from "./sellerMyListings";
 import { SellerOrdersRequestsContent } from "./sellerOrdersRequests";
 import SellerSupportCenter from "./sellerSupportCenter";
@@ -62,12 +64,22 @@ const resolveSection = (sectionFromQuery, stateSection) => {
 };
 
 const defaultProfile = {
-  fullName: "Zarish",
-  email: "zarish@example.com",
-  phone: "+92 300 1234567",
-  city: "Lahore",
-  address: "Gulberg III, Lahore",
+  fullName: "",
+  email: "",
+  phone: "",
+  city: "",
+  address: "",
 };
+
+function userToProfile(user) {
+  return {
+    fullName: user?.name ?? "",
+    email: user?.email ?? "",
+    phone: user?.phone ?? "",
+    city: user?.city ?? "",
+    address: "",
+  };
+}
 
 const accountSettings = [
   { id: "password", label: "Change Password", icon: Lock, to: "/forgot-password" },
@@ -123,14 +135,52 @@ function StarRating({ rating }) {
   );
 }
 
+function formatFieldValue(value) {
+  const text = value?.trim();
+  return text || "—";
+}
+
 function SellerProfileSection() {
   const navigate = useNavigate();
+  const { user, updateProfile } = useAuth();
+  const profile = useMemo(() => userToProfile(user), [user]);
   const [isEditing, setIsEditing] = useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [showDeactivateConfirm, setShowDeactivateConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [profile, setProfile] = useState(defaultProfile);
-  const [draft, setDraft] = useState(defaultProfile);
+  const [draft, setDraft] = useState(profile);
+  const [verificationStatus, setVerificationStatus] = useState(() =>
+    user?.status === "active" ? "approved" : "pending",
+  );
+  const [saveError, setSaveError] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!isEditing) {
+      setDraft(profile);
+    }
+  }, [profile, isEditing]);
+
+  useEffect(() => {
+    let active = true;
+
+    api
+      .getSellerVerification()
+      .then((data) => {
+        if (active) {
+          setVerificationStatus(data.verification?.verificationStatus ?? "pending");
+        }
+      })
+      .catch(() => {
+        if (active && user?.status === "active") {
+          setVerificationStatus("approved");
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [user?.status]);
 
   useEffect(() => {
     if (window.location.hash !== "#seller-profile-stripe") return;
@@ -139,19 +189,21 @@ function SellerProfileSection() {
       ?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
 
+  const isVerified = user?.status === "active" && verificationStatus === "approved";
+
   const initials = useMemo(() => getInitials(profile.fullName), [profile.fullName]);
   const draftInitials = useMemo(() => getInitials(draft.fullName), [draft.fullName]);
   const visibleReviews = showAllReviews ? reviews : reviews.slice(0, 2);
 
   const viewFields = [
-    { id: "fullName", label: "Full Name", value: profile.fullName },
-    { id: "email", label: "Email Address", value: profile.email },
-    { id: "phone", label: "Phone Number", value: profile.phone },
-    { id: "city", label: "City", value: profile.city },
+    { id: "fullName", label: "Full Name", value: formatFieldValue(profile.fullName) },
+    { id: "email", label: "Email Address", value: formatFieldValue(profile.email) },
+    { id: "phone", label: "Phone Number", value: formatFieldValue(profile.phone) },
+    { id: "city", label: "City", value: formatFieldValue(profile.city) },
     {
       id: "address",
       label: "Delivery Address",
-      value: profile.address,
+      value: formatFieldValue(profile.address),
       fullWidth: true,
     },
   ];
@@ -165,10 +217,23 @@ function SellerProfileSection() {
     setDraft((current) => ({ ...current, [field]: event.target.value }));
   };
 
-  const handleSave = (event) => {
+  const handleSave = async (event) => {
     event.preventDefault();
-    setProfile(draft);
-    setIsEditing(false);
+    setSaveError("");
+    setSaving(true);
+    try {
+      const updatedUser = await updateProfile({
+        name: draft.fullName.trim(),
+        phone: draft.phone.trim(),
+        city: draft.city.trim(),
+      });
+      setDraft(userToProfile(updatedUser));
+      setIsEditing(false);
+    } catch (error) {
+      setSaveError(error.message || "Could not save profile");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -207,7 +272,8 @@ function SellerProfileSection() {
                     id="edit-email"
                     type="email"
                     value={draft.email}
-                    onChange={handleDraftChange("email")}
+                    readOnly
+                    disabled
                     className="seller-dashboard-input"
                   />
                 </Field>
@@ -241,8 +307,14 @@ function SellerProfileSection() {
                 </Field>
               </FieldGroup>
 
-              <Button type="submit" className="seller-dashboard-save-btn">
-                Save Changes
+              {saveError ? (
+                <p className="seller-profile-subtitle" style={{ color: "#b42318" }}>
+                  {saveError}
+                </p>
+              ) : null}
+
+              <Button type="submit" className="seller-dashboard-save-btn" disabled={saving}>
+                {saving ? "Saving..." : "Save Changes"}
               </Button>
               <Button
                 type="button"
@@ -333,8 +405,14 @@ function SellerProfileSection() {
                     Required to earn your trust badge.
                   </CardDescription>
                 </div>
-                <span className="seller-profile-status-badge seller-profile-status-badge--verified">
-                  Verified
+                <span
+                  className={`seller-profile-status-badge ${
+                    isVerified
+                      ? "seller-profile-status-badge--verified"
+                      : "seller-profile-status-badge--pending"
+                  }`}
+                >
+                  {isVerified ? "Verified" : "Pending"}
                 </span>
               </CardHeader>
               <CardContent className="seller-profile-section-content">
@@ -585,6 +663,7 @@ function SellerProfileSection() {
 const SellerProfile = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, logout } = useAuth();
   const [searchParams] = useSearchParams();
   const sectionFromQuery = searchParams.get("section");
   const [activeSection, setActiveSection] = useState(() =>
@@ -595,6 +674,8 @@ const SellerProfile = () => {
   useEffect(() => {
     setActiveSection(resolveSection(sectionFromQuery, location.state?.section));
   }, [sectionFromQuery, location.state]);
+
+  const sidebarInitials = useMemo(() => getInitials(user?.name ?? ""), [user?.name]);
 
   const handleSectionChange = (sectionId) => {
     setActiveSection(sectionId);
@@ -607,6 +688,7 @@ const SellerProfile = () => {
 
   const handleLogoutConfirm = () => {
     setShowLogoutConfirm(false);
+    logout();
     navigate("/login");
   };
 
@@ -674,6 +756,15 @@ const SellerProfile = () => {
     <div className="profile-page">
       <aside className="profile-sidebar" aria-label="Seller navigation">
         <h2 className="profile-sidebar-heading">Dashboard</h2>
+        {user ? (
+          <div className="seller-dashboard-user seller-profile-sidebar-user">
+            <div className="seller-dashboard-avatar">{sidebarInitials}</div>
+            <div>
+              <p className="seller-profile-user-name">{user.name}</p>
+              <p className="seller-dashboard-account-type">{user.email}</p>
+            </div>
+          </div>
+        ) : null}
         {renderSidebarNav()}
         <div className="profile-sidebar-footer">
           <Button
