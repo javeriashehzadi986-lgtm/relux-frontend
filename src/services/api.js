@@ -61,7 +61,11 @@ async function request(path, options = {}) {
         ? "Images are too large. Please use smaller photos."
         : response.status === 404
           ? "API not found. Make sure the backend server is running (npm start)."
-          : "Request failed");
+          : response.status === 401
+            ? "Session expired. Please log out and sign in again."
+            : response.status === 403
+              ? "You do not have access. Use the correct account (seller for seller dashboard, admin for admin panel)."
+              : "Request failed");
     throw new Error(message);
   }
 
@@ -101,6 +105,9 @@ export const api = {
     request(`/seller/listings/${id}`, { method: "PUT", body: JSON.stringify(body) }),
   getMyListings: () => request("/seller/listings/me"),
   getMyListing: (id) => request(`/seller/listings/${id}`),
+  getPublicListings: (category) =>
+    request(category ? `/catalog/listings?category=${category}` : "/catalog/listings"),
+  getPublicListing: (id) => request(`/catalog/listings/${id}`),
   getAdminListings: (status) =>
     request(status ? `/admin/listings?status=${status}` : "/admin/listings"),
   approveListing: (id) =>

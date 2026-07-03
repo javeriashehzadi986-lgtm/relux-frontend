@@ -39,7 +39,7 @@ const DressDetails = () => {
     setLoading(true);
 
     api
-      .getMyListing(id)
+      .getPublicListing(id)
       .then(({ listing }) => {
         if (!cancelled) {
           setDress(mapApiListingToDress(listing));

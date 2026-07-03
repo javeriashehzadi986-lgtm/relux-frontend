@@ -173,7 +173,16 @@ export function SellerMyListingsContent() {
       const data = await api.getMyListings();
       setListings((data.listings ?? []).map(mapApiListing));
     } catch (error) {
-      setLoadError(error.message || "Failed to load listings");
+      const message = error.message || "Failed to load listings";
+      if (message.includes("do not have access")) {
+        setLoadError(
+          "Access denied. Log in with an approved seller account to view your listings.",
+        );
+      } else if (message.includes("Session expired") || message.includes("Not authorized")) {
+        setLoadError("Please log out and sign in again as a seller.");
+      } else {
+        setLoadError(message);
+      }
       setListings([]);
     } finally {
       setLoading(false);

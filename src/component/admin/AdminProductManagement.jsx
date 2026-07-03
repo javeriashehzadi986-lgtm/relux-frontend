@@ -54,13 +54,13 @@ const AdminProductManagement = () => {
   const [draftName, setDraftName] = useState("");
   const [draftType, setDraftType] = useState("all");
   const [draftCategory, setDraftCategory] = useState("all");
-  const [draftStatus, setDraftStatus] = useState("pending");
+  const [draftStatus, setDraftStatus] = useState("all");
 
   const [appliedFilters, setAppliedFilters] = useState({
     name: "",
     type: "all",
     category: "all",
-    status: "pending",
+    status: "all",
   });
 
   const loadListings = useCallback(async () => {
@@ -73,7 +73,16 @@ const AdminProductManagement = () => {
         data.stats ?? { pendingReview: 0, approvedThisWeek: 0, rejectedThisWeek: 0 },
       );
     } catch (error) {
-      setActionError(error.message || "Failed to load listings");
+      const message = error.message || "Failed to load listings";
+      if (message.includes("do not have access")) {
+        setActionError(
+          "Access denied. Log out and sign in with the admin account (admin@reluxhub.com).",
+        );
+      } else if (message.includes("Session expired") || message.includes("Not authorized")) {
+        setActionError("Session expired. Please log in again as admin.");
+      } else {
+        setActionError(message);
+      }
       setProducts([]);
     } finally {
       setLoading(false);

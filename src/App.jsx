@@ -186,7 +186,14 @@ function App() {
             element={<Navigate to="/admin/reports" replace />}
           />
 
-          <Route path="/admin" element={<AdminLayout />}>
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute roles={["admin"]}>
+                <AdminLayout />
+              </ProtectedRoute>
+            }
+          >
             <Route index element={<AdminDashboard />} />
             <Route path="users" element={<AdminUserManagement />} />
             <Route path="seller-verification" element={<AdminSellerVerification />} />

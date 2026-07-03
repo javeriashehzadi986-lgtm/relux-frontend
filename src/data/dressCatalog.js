@@ -13,6 +13,10 @@ import {
   isListingDeleted,
   mapSellerListingToProduct,
 } from "./sellerListingStore";
+import {
+  getPublicListingById,
+  getPublicListingIdsForCategory,
+} from "./catalogStore";
 
 const parsePrice = (value) => {
   if (typeof value === "number") return value;
@@ -694,6 +698,8 @@ export const mapApiListingToDress = (listing) => {
     id,
     title: listing.title,
     brand: listing.brand || "Relux Seller",
+    seller: listing.seller ?? listing.sellerName ?? "Relux Seller",
+    sellerName: listing.sellerName ?? listing.seller ?? "Relux Seller",
     description: listing.description,
     fabric: listing.description,
     mainImage: listing.mainImage,
@@ -702,7 +708,10 @@ export const mapApiListingToDress = (listing) => {
     listingSize: listing.listingSize || "M",
     listingCondition: listing.listingCondition || "Like New",
     style: listing.style,
+    clothingType: listing.clothingType,
+    categoryPath: listing.categoryPath,
     categoryLabel: listing.clothingType || listing.mainCategory,
+    updatedAt: listing.updatedAt,
     ...(isRent
       ? {
           listingType: "rent",
@@ -724,6 +733,11 @@ export const mapApiListingToDress = (listing) => {
 };
 
 export const getDressById = (id) => {
+  const apiListing = getPublicListingById(id);
+  if (apiListing) {
+    return mapApiListingToDress(apiListing);
+  }
+
   const stored = getSellerListingOverride(id);
   const catalogDress = ALL_PRODUCTS[id];
   const dress = stored
@@ -775,7 +789,8 @@ const getDressIdsForCategory = (categoryPath) => {
     .filter((product) => product.categoryPath === categoryPath)
     .map((product) => product.id);
   const sellerIds = getSellerListingIdsForCategory(categoryPath);
-  return [...new Set([...catalogIds, ...sellerIds])].filter(
+  const apiIds = getPublicListingIdsForCategory(categoryPath);
+  return [...new Set([...catalogIds, ...sellerIds, ...apiIds])].filter(
     (id) => !isListingDeleted(id),
   );
 };
