@@ -26,7 +26,6 @@ export const ADMIN_NAV_SECTIONS = [
       { path: "/admin/payments", label: "Payments", icon: "payments" },
       { path: "/admin/notifications", label: "Notifications", icon: "notifications" },
       { path: "/admin/support", label: "Support Center", icon: "support_agent" },
-      { path: "/admin/reports", label: "Reports & Complaints", icon: "flag" },
     ],
   },
   {

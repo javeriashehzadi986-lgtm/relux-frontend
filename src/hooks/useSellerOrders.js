@@ -1,0 +1,68 @@
+import { useCallback, useEffect, useState } from "react";
+import { useAuth } from "@/context/AuthContext";
+import api from "@/services/api";
+
+export function useSellerOrders() {
+  const { user, isAuthenticated } = useAuth();
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const refreshOrders = useCallback(async () => {
+    if (!isAuthenticated || user?.role !== "seller") {
+      setOrders([]);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+    try {
+      const data = await api.getMySellerOrders();
+      setOrders(data.orders ?? []);
+    } catch (err) {
+      setError(err.message || "Failed to load orders");
+      setOrders([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [isAuthenticated, user?.role]);
+
+  useEffect(() => {
+    refreshOrders();
+  }, [refreshOrders]);
+
+  const approveOrder = useCallback(
+    async (orderId) => {
+      await api.approveSellerOrder(orderId);
+      await refreshOrders();
+    },
+    [refreshOrders],
+  );
+
+  const rejectOrder = useCallback(
+    async (orderId) => {
+      await api.rejectSellerOrder(orderId);
+      await refreshOrders();
+    },
+    [refreshOrders],
+  );
+
+  const completeOrder = useCallback(
+    async (orderId) => {
+      await api.completeSellerOrder(orderId);
+      await refreshOrders();
+    },
+    [refreshOrders],
+  );
+
+  return {
+    orders,
+    loading,
+    error,
+    refreshOrders,
+    approveOrder,
+    rejectOrder,
+    completeOrder,
+  };
+}

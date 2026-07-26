@@ -1,8 +1,28 @@
-import { BUYER_ORDERS } from "./buyerOrdersData";
+import {
+  findSellerIdForOrder,
+  removeSellerOrder,
+  updateSellerOrderStatus,
+  upsertSellerRentalRequest,
+} from "./sellerOrdersStore";
 
-const STORAGE_KEY = "relux-buyer-orders";
+const STORAGE_PREFIX = "relux-buyer-orders:";
+const LEGACY_STORAGE_KEY = "relux-buyer-orders";
+
+/** Old demo order IDs — never show these on a real buyer account. */
+const DEMO_ORDER_IDS = new Set(["RLX-10294", "RLX-10452", "RLX-10501"]);
 
 let ordersRevision = 0;
+let legacyCleared = false;
+
+function clearLegacySharedOrders() {
+  if (legacyCleared || typeof localStorage === "undefined") return;
+  legacyCleared = true;
+  try {
+    localStorage.removeItem(LEGACY_STORAGE_KEY);
+  } catch {
+    // ignore
+  }
+}
 
 function formatRentalPeriod(start, end) {
   const format = (iso) =>
@@ -19,15 +39,27 @@ function generateOrderId(existingIds) {
   let id = "";
   do {
     id = `RLX-${Math.floor(10000 + Math.random() * 90000)}`;
-  } while (existingIds.has(id));
+  } while (existingIds.has(id) || DEMO_ORDER_IDS.has(id));
   return id;
 }
 
-function seedOrders() {
-  return BUYER_ORDERS.map((order, index) => ({
-    ...order,
-    createdAt: Date.now() - (BUYER_ORDERS.length - index) * 86_400_000,
-  }));
+function getUserId(userId) {
+  if (userId == null || userId === "") return null;
+  if (typeof userId === "object") {
+    if (userId.$oid) return String(userId.$oid);
+    if (userId._id) return getUserId(userId._id);
+    if (typeof userId.toString === "function") {
+      const asString = userId.toString();
+      if (asString && asString !== "[object Object]") return asString;
+    }
+    return null;
+  }
+  return String(userId);
+}
+
+function getStorageKey(userId) {
+  const id = getUserId(userId);
+  return id ? `${STORAGE_PREFIX}${id}` : null;
 }
 
 const CANCELLED_ORDER_ACTIONS = [
@@ -75,9 +107,9 @@ export function findReusableRentalOrderForDress(orders, dressId) {
   return cancelled[0] ?? null;
 }
 
-export function getPendingRentalOrderForDress(dressId) {
+export function getPendingRentalOrderForDress(userId, dressId) {
   return (
-    loadBuyerOrders().find(
+    loadBuyerOrders(userId).find(
       (order) =>
         order.type === "rental" &&
         order.dressId === dressId &&
@@ -110,30 +142,38 @@ function normalizeBuyerOrders(orders) {
   return orders.map(normalizeBuyerOrder);
 }
 
-export function loadBuyerOrders() {
+/** Each buyer has their own order list. New buyers start empty (no demo orders). */
+export function loadBuyerOrders(userId) {
+  clearLegacySharedOrders();
+
+  const key = getStorageKey(userId);
+  if (!key) return [];
+
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      const seeded = seedOrders();
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(seeded));
-      return seeded;
-    }
+    const raw = localStorage.getItem(key);
+    if (!raw) return [];
+
     const parsed = JSON.parse(raw);
-    const orders = Array.isArray(parsed) ? parsed : seedOrders();
-    const normalized = normalizeBuyerOrders(orders);
+    const orders = Array.isArray(parsed) ? parsed : [];
+    // Strip old demo/sample orders if they were ever copied into a user key
+    const withoutDemo = orders.filter((order) => !DEMO_ORDER_IDS.has(order.id));
+    const normalized = normalizeBuyerOrders(withoutDemo);
 
     if (JSON.stringify(normalized) !== JSON.stringify(orders)) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
+      localStorage.setItem(key, JSON.stringify(normalized));
     }
 
     return normalized;
   } catch {
-    return seedOrders();
+    return [];
   }
 }
 
-function persist(orders) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(orders));
+function persist(userId, orders) {
+  const key = getStorageKey(userId);
+  if (!key) return;
+
+  localStorage.setItem(key, JSON.stringify(orders));
   ordersRevision += 1;
   window.dispatchEvent(new Event("relux-buyer-orders-updated"));
 }
@@ -148,40 +188,69 @@ export function subscribeBuyerOrdersRevision(onStoreChange) {
   return () => window.removeEventListener("relux-buyer-orders-updated", handler);
 }
 
-export function addRentalRequest({ dressId, size, rentStart, rentEnd, rentalDays }) {
-  const orders = loadBuyerOrders();
+export function addRentalRequest(
+  userId,
+  { dressId, size, rentStart, rentEnd, rentalDays, sellerId, customerName },
+) {
+  if (!getUserId(userId)) {
+    throw new Error("Please log in to place a rental request");
+  }
+
+  const orders = loadBuyerOrders(userId);
   const existing = findReusableRentalOrderForDress(orders, dressId);
   const rentalFields = buildRentalOrderFields({ size, rentStart, rentEnd, rentalDays });
 
+  let order;
+
   if (existing) {
-    const updated = {
+    order = {
       ...existing,
       ...rentalFields,
       dressId,
       type: "rental",
       typeLabel: "Rental",
+      buyerId: getUserId(userId),
+      sellerId: sellerId ? String(sellerId) : existing.sellerId ?? null,
+      customerName: customerName || existing.customerName || "Buyer",
     };
-    const nextOrders = [updated, ...orders.filter((order) => order.id !== existing.id)];
-    persist(nextOrders);
-    return updated;
+    const nextOrders = [order, ...orders.filter((item) => item.id !== existing.id)];
+    persist(userId, nextOrders);
+  } else {
+    const existingIds = new Set(orders.map((item) => item.id));
+    order = {
+      id: generateOrderId(existingIds),
+      buyerId: getUserId(userId),
+      sellerId: sellerId ? String(sellerId) : null,
+      customerName: customerName || "Buyer",
+      dressId,
+      type: "rental",
+      typeLabel: "Rental",
+      ...rentalFields,
+      createdAt: Date.now(),
+    };
+    persist(userId, [order, ...orders]);
   }
 
-  const existingIds = new Set(orders.map((order) => order.id));
-  const order = {
-    id: generateOrderId(existingIds),
-    dressId,
-    type: "rental",
-    typeLabel: "Rental",
-    ...rentalFields,
-    createdAt: Date.now(),
-  };
+  if (order.sellerId) {
+    upsertSellerRentalRequest({
+      sellerId: order.sellerId,
+      orderId: order.id,
+      dressId: order.dressId,
+      buyerId: order.buyerId,
+      customerName: order.customerName,
+      size: order.size,
+      rentStart: order.rentStart,
+      rentEnd: order.rentEnd,
+      rentalDays: order.rentalDays,
+    });
+  }
 
-  persist([order, ...orders]);
   return order;
 }
 
-export function cancelBuyerOrder(orderId) {
-  const orders = loadBuyerOrders().map((order) =>
+export function cancelBuyerOrder(userId, orderId) {
+  const previous = loadBuyerOrders(userId).find((order) => order.id === orderId);
+  const orders = loadBuyerOrders(userId).map((order) =>
     order.id === orderId
       ? normalizeBuyerOrder({
           ...order,
@@ -191,15 +260,94 @@ export function cancelBuyerOrder(orderId) {
       : order,
   );
 
-  persist(orders);
+  persist(userId, orders);
+
+  const sellerId = previous?.sellerId || findSellerIdForOrder(orderId);
+  if (sellerId) {
+    updateSellerOrderStatus(sellerId, orderId, "Cancelled");
+  }
 }
 
-export function removeBuyerOrder(orderId) {
-  const orders = loadBuyerOrders().filter((order) => order.id !== orderId);
-  persist(orders);
+export function removeBuyerOrder(userId, orderId) {
+  const previous = loadBuyerOrders(userId).find((order) => order.id === orderId);
+  const orders = loadBuyerOrders(userId).filter((order) => order.id !== orderId);
+  persist(userId, orders);
+
+  const sellerId = previous?.sellerId || findSellerIdForOrder(orderId);
+  if (sellerId) {
+    removeSellerOrder(sellerId, orderId);
+  }
 }
 
-export function updateBuyerOrders(updater) {
-  const orders = updater(loadBuyerOrders());
-  persist(orders);
+export function updateBuyerOrders(userId, updater) {
+  const orders = updater(loadBuyerOrders(userId));
+  persist(userId, orders);
+}
+
+/** Seller actions update the matching buyer order (same order id). */
+export function applySellerDecisionToBuyerOrder(buyerId, orderId, decision) {
+  if (!buyerId || !orderId) return;
+
+  const orders = loadBuyerOrders(buyerId).map((order) => {
+    if (order.id !== orderId) return order;
+
+    if (decision === "approve") {
+      return normalizeBuyerOrder({
+        ...order,
+        status: "rental-active",
+        statusLabel: "Rental Active",
+        meta: [
+          { icon: "calendar-check", text: `${order.rentalDays || 1} Days Rental` },
+          { icon: "check-circle", text: "Seller Approved", highlight: true },
+        ],
+        actions: [
+          { id: "details", label: "View Details", variant: "outline", link: true },
+          {
+            id: "rent-again",
+            label: "Rent Again",
+            variant: "ghost",
+            icon: "history",
+            alignEnd: true,
+            link: true,
+          },
+        ],
+        updatedAt: Date.now(),
+      });
+    }
+
+    if (decision === "reject") {
+      return normalizeBuyerOrder({
+        ...order,
+        status: "cancelled",
+        updatedAt: Date.now(),
+      });
+    }
+
+    if (decision === "complete") {
+      return normalizeBuyerOrder({
+        ...order,
+        status: "delivered",
+        statusLabel: "Delivered",
+        meta: [
+          { icon: "check-circle", text: "Rental Completed", highlight: true },
+        ],
+        actions: [
+          { id: "details", label: "View Details", variant: "outline", link: true },
+          {
+            id: "rent-again",
+            label: "Rent Again",
+            variant: "ghost",
+            icon: "history",
+            alignEnd: true,
+            link: true,
+          },
+        ],
+        updatedAt: Date.now(),
+      });
+    }
+
+    return order;
+  });
+
+  persist(buyerId, orders);
 }

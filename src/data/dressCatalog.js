@@ -735,6 +735,7 @@ export const mapApiListingToDress = (listing) => {
     brand: listing.brand || "Relux Seller",
     seller: listing.seller ?? listing.sellerName ?? "Relux Seller",
     sellerName: listing.sellerName ?? listing.seller ?? "Relux Seller",
+    sellerId: listing.sellerId ? String(listing.sellerId) : null,
     description: listing.description,
     fabric: listing.description,
     mainImage: listing.mainImage,

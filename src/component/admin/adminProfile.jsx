@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { useAuth } from "@/context/AuthContext";
 import "./adminProfile.css";
 import "../profile.css";
 
@@ -55,7 +56,7 @@ const NOTIFICATION_PREFS = [
   },
   {
     id: "reports",
-    label: "Reports & Complaints Alerts",
+    label: "Support Center Alerts",
     description: "Immediate alerts for high-priority user complaints.",
     icon: AlertTriangle,
     defaultChecked: false,
@@ -71,6 +72,7 @@ const NOTIFICATION_PREFS = [
 
 const AdminProfile = () => {
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(true);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [showDeactivateConfirm, setShowDeactivateConfirm] = useState(false);
@@ -87,12 +89,14 @@ const AdminProfile = () => {
 
   const handleLogoutConfirm = () => {
     setShowLogoutConfirm(false);
-    navigate("/login");
+    logout();
+    navigate("/login", { replace: true });
   };
 
   const handleDeactivateConfirm = () => {
     setShowDeactivateConfirm(false);
-    navigate("/login");
+    logout();
+    navigate("/login", { replace: true });
   };
 
   return (

@@ -1,45 +1,86 @@
-import { useCallback, useSyncExternalStore } from "react";
-import {
-  addRentalRequest,
-  cancelBuyerOrder,
-  getBuyerOrdersRevision,
-  loadBuyerOrders,
-  removeBuyerOrder,
-  subscribeBuyerOrdersRevision,
-  updateBuyerOrders,
-} from "@/data/buyerOrdersStore";
+import { useCallback, useEffect, useState } from "react";
+import { useAuth } from "@/context/AuthContext";
+import api from "@/services/api";
 
 export function useBuyerOrders() {
-  useSyncExternalStore(
-    subscribeBuyerOrdersRevision,
-    getBuyerOrdersRevision,
-    getBuyerOrdersRevision,
-  );
+  const { user, isAuthenticated } = useAuth();
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const orders = loadBuyerOrders();
+  const refreshOrders = useCallback(async () => {
+    if (!isAuthenticated || user?.role !== "buyer") {
+      setOrders([]);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+    try {
+      const data = await api.getMyBuyerOrders();
+      setOrders(data.orders ?? []);
+    } catch (err) {
+      setError(err.message || "Failed to load orders");
+      setOrders([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [isAuthenticated, user?.role]);
+
+  useEffect(() => {
+    refreshOrders();
+  }, [refreshOrders]);
 
   const requestRental = useCallback(
-    (payload) => addRentalRequest(payload),
-    [],
+    async ({ dressId, size, rentStart, rentEnd, rentalDays, sellerId, customerName }) => {
+      if (!dressId) {
+        throw new Error("Product is required");
+      }
+      if (!sellerId) {
+        throw new Error(
+          "This listing has no linked seller. Rent from a seller-submitted product.",
+        );
+      }
+
+      const data = await api.createRentalRequest({
+        productId: dressId,
+        size,
+        rentStart,
+        rentEnd,
+        rentalDays,
+        customerName,
+      });
+
+      await refreshOrders();
+      return data.order;
+    },
+    [refreshOrders],
   );
 
-  const cancelOrder = useCallback((orderId) => {
-    cancelBuyerOrder(orderId);
-  }, []);
+  const cancelOrder = useCallback(
+    async (orderId) => {
+      await api.cancelBuyerOrder(orderId);
+      await refreshOrders();
+    },
+    [refreshOrders],
+  );
 
-  const removeOrder = useCallback((orderId) => {
-    removeBuyerOrder(orderId);
-  }, []);
-
-  const setOrders = useCallback((updater) => {
-    updateBuyerOrders(updater);
-  }, []);
+  const removeOrder = useCallback(
+    async (orderId) => {
+      await api.removeBuyerOrder(orderId);
+      await refreshOrders();
+    },
+    [refreshOrders],
+  );
 
   return {
     orders,
+    loading,
+    error,
+    refreshOrders,
     requestRental,
     cancelOrder,
     removeOrder,
-    setOrders,
   };
 }

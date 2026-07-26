@@ -1,19 +1,34 @@
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  Bold,
+  CheckCircle2,
+  ChevronLeft,
   ChevronRight,
-  Filter,
-  History,
-  Italic,
-  Paperclip,
   Search,
   Send,
+  X,
+  XCircle,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Card } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   Select,
   SelectContent,
@@ -21,446 +36,694 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import "./adminSupportCenter.css";
+import api from "@/services/api";
+import "./adminReportsComplaints.css";
 
-const ADMIN_AVATARS = [
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuCvDi-gEeNpn10OS21zufJFuKcH60wcnF-5cuuOvQROCS3xWLuCQMksv_TlaLsqs48J-rRz68yzYFGHuQ2Et-KJA84w6FQ_pvj__OuK8UgP8XrJYvqYWRpzH5yJh8MHNghSKGUpi0Kvrvy-dTznTyXigp7Obj88nKoPAcy6hZpwCUN3Rx9_Rt4MXpYZjN0LP_0THYWug-LB2Ct2Ei114pRi3JmnRf-ITDImIU9nuWJEtTNoahzCVu3Cc514dT6NgvrbHVBw00WAZdk",
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuBrFc9m4FK5UGQJ36plHiw2NUjOBhSII3o-FsU9JyUbcfKNABSenfCZ88fX5x2epbToxKO1ct5DjOoEHKbNu2zNI0lp1Yc9-6sUATo5vdkq_8MfuN_LGi7Pl_NN_l1a01JN5S9ZudWpeSBJU3JUlMj4bhQ31WtjUJ0HQaTKL0fxPLlc1a7GL9EmveGgF9x1Q_BWj7iPp0NvimflUlzZoCWFhUrrIcEyTLfY9jt2vQoGe2cRGqPfPIec44ILwPghnakqmA5UKhqDKWc",
+const ISSUE_TYPE_OPTIONS = [
+  { value: "all", label: "Issue Type: All" },
+  { value: "order", label: "Order" },
+  { value: "rental", label: "Rental" },
+  { value: "payment", label: "Payment" },
+  { value: "return", label: "Return" },
+  { value: "listing", label: "Listing" },
+  { value: "other", label: "Other" },
 ];
 
-const SUPPORT_TICKETS = [
-  {
-    id: "TKT-8291",
-    status: "open",
-    subject: "Issue with payment processing",
-    userName: "Sarah Jenkins",
-    userInitials: "SJ",
-    userEmail: "sarah.j@example.com",
-    userId: "USR-9201",
-    userType: "buyer",
-    timestamp: "Oct 24, 10:45 AM",
-    originalMessage:
-      "Hello support team, I tried to purchase a dress today but the transaction failed three times even though my bank says the payment went through. Could you please check if the order #ORD-4452 is confirmed?",
-    conversation: [
-      {
-        type: "admin",
-        text: "Hi Sarah, we've received your inquiry. I'm currently looking into the transaction logs for ORD-4452. Please allow me 15-20 minutes to verify this with our payment gateway.",
-        time: "10:52 AM",
-        author: "Admin (Me)",
-      },
-      {
-        type: "system",
-        text: "Admin took ownership of the ticket",
-        time: "10:48 AM",
-      },
-      {
-        type: "user",
-        text: "Hello support team, I tried to purchase a dress today but the transaction failed three times even though my bank says the payment went through. Could you please check if the order #ORD-4452 is confirmed?",
-        time: "10:45 AM",
-        author: "Sarah Jenkins",
-      },
-    ],
-  },
-  {
-    id: "TKT-8288",
-    status: "in_progress",
-    subject: "Shipping delay for vintage blazer",
-    userName: "Michael Chen",
-    userInitials: "MC",
-    userEmail: "michael.chen@example.com",
-    userId: "USR-8842",
-    userType: "seller",
-    timestamp: "Oct 23, 03:20 PM",
-    originalMessage:
-      "The buyer is asking for an update on shipping. The blazer was dropped off with the courier two days ago but has not arrived yet.",
-    conversation: [
-      {
-        type: "admin",
-        text: "Thanks Michael. I've contacted the courier partner and will update you once we have a delivery update.",
-        time: "03:35 PM",
-        author: "Admin (Me)",
-      },
-      {
-        type: "user",
-        text: "The buyer is asking for an update on shipping. The blazer was dropped off with the courier two days ago but has not arrived yet.",
-        time: "03:20 PM",
-        author: "Michael Chen",
-      },
-    ],
-  },
-  {
-    id: "TKT-8285",
-    status: "closed",
-    subject: "How to update bank details?",
-    userName: "Jessica Park",
-    userInitials: "JP",
-    userEmail: "jessica.park@example.com",
-    userId: "USR-7710",
-    userType: "seller",
-    timestamp: "Oct 23, 09:12 AM",
-    originalMessage:
-      "I need to change my payout bank account before my next sale settles. Where can I update this in my seller settings?",
-    conversation: [
-      {
-        type: "admin",
-        text: "You can update payout details under Seller Profile → Payments. I've sent a step-by-step guide to your email as well.",
-        time: "09:30 AM",
-        author: "Admin (Me)",
-      },
-      {
-        type: "user",
-        text: "I need to change my payout bank account before my next sale settles. Where can I update this in my seller settings?",
-        time: "09:12 AM",
-        author: "Jessica Park",
-      },
-    ],
-  },
-  {
-    id: "TKT-8282",
-    status: "open",
-    subject: "Return request: Item not as described",
-    userName: "David Miller",
-    userInitials: "DM",
-    userEmail: "david.miller@example.com",
-    userId: "USR-6533",
-    userType: "buyer",
-    timestamp: "Oct 22, 11:00 AM",
-    originalMessage:
-      "The listing said the lehenga was in like-new condition, but there are visible stains on the inner lining. I'd like to initiate a return.",
-    conversation: [
-      {
-        type: "user",
-        text: "The listing said the lehenga was in like-new condition, but there are visible stains on the inner lining. I'd like to initiate a return.",
-        time: "11:00 AM",
-        author: "David Miller",
-      },
-    ],
-  },
+const STATUS_OPTIONS = [
+  { value: "all", label: "Status: All" },
+  { value: "pending", label: "Open / Pending" },
+  { value: "in_progress", label: "In Progress" },
+  { value: "resolved", label: "Resolved" },
 ];
 
-const STATUS_LABELS = {
-  open: "Open",
-  in_progress: "In Progress",
-  closed: "Closed",
+const ROLE_OPTIONS = [
+  { value: "all", label: "User: All" },
+  { value: "buyer", label: "Buyer" },
+  { value: "seller", label: "Seller" },
+];
+
+const TYPE_LABELS = {
+  order: "Order",
+  rental: "Rental",
+  payment: "Payment",
+  return: "Return",
+  listing: "Listing",
+  other: "Other",
 };
 
-function TicketStatusBadge({ status }) {
+const STATUS_LABELS = {
+  pending: "Open",
+  in_progress: "In Progress",
+  resolved: "Resolved",
+};
+
+const PAGE_SIZE = 10;
+
+const MODAL_CONFIG = {
+  resolve: {
+    icon: CheckCircle2,
+    iconClass: "admin-reports-modal-icon--resolve",
+    title: "Resolve Dispute / Request?",
+    description:
+      "Your decision will be shown to the buyer and (if linked) the seller in Support Center.",
+    confirmLabel: "Resolve",
+    confirmClass: "admin-reports-modal-confirm--resolve",
+  },
+  reject: {
+    icon: XCircle,
+    iconClass: "admin-reports-modal-icon--reject",
+    title: "Dismiss Request?",
+    description:
+      "The request will be closed. The user will see your reply (or a default dismiss message).",
+    confirmLabel: "Dismiss",
+    confirmClass: "admin-reports-modal-confirm--reject",
+  },
+  askSeller: {
+    icon: Send,
+    iconClass: "admin-reports-modal-icon--resolve",
+    title: "Ask Seller for Response?",
+    description:
+      "The seller will see this dispute in their Support Center and can submit their side of the story.",
+    confirmLabel: "Contact Seller",
+    confirmClass: "admin-reports-modal-confirm--resolve",
+  },
+};
+
+function getInitials(name = "") {
   return (
-    <Badge variant="outline" className={`admin-support-status admin-support-status--${status}`}>
-      {STATUS_LABELS[status]}
+    name
+      .split(" ")
+      .filter(Boolean)
+      .map((part) => part[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase() || "?"
+  );
+}
+
+function ReportTypeBadge({ type }) {
+  return (
+    <Badge variant="outline" className="admin-reports-type-badge">
+      {TYPE_LABELS[type] ?? type}
     </Badge>
   );
 }
 
-function UserTypeBadge({ userType }) {
+function StatusBadge({ status }) {
   return (
-    <Badge variant="outline" className={`admin-support-user-type admin-support-user-type--${userType}`}>
-      {userType === "buyer" ? "Buyer" : "Seller"}
+    <Badge
+      variant="outline"
+      className={`admin-reports-status-badge admin-reports-status-badge--${status}`}
+    >
+      {STATUS_LABELS[status] ?? status}
     </Badge>
+  );
+}
+
+function ReporterAvatar({ name, src }) {
+  if (src) {
+    return <img src={src} alt="" />;
+  }
+  return (
+    <span className="admin-reports-avatar-fallback" aria-hidden="true">
+      {getInitials(name)}
+    </span>
   );
 }
 
 const AdminSupportCenter = () => {
-  const [selectedTicketId, setSelectedTicketId] = useState(SUPPORT_TICKETS[0].id);
+  const [reports, setReports] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [actionError, setActionError] = useState("");
+  const [actionLoading, setActionLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [userTypeFilter, setUserTypeFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [roleFilter, setRoleFilter] = useState("all");
+  const [selectedReportId, setSelectedReportId] = useState("");
   const [replyText, setReplyText] = useState("");
-  const [notifyViaEmail, setNotifyViaEmail] = useState(true);
-  const [ticketStatuses, setTicketStatuses] = useState(() =>
-    SUPPORT_TICKETS.reduce((acc, ticket) => {
-      acc[ticket.id] = ticket.status;
-      return acc;
-    }, {}),
-  );
-  const [extraMessages, setExtraMessages] = useState({});
+  const [activeModal, setActiveModal] = useState(null);
+  const [page, setPage] = useState(1);
 
-  const filteredTickets = useMemo(() => {
+  const loadReports = useCallback(async () => {
+    setLoading(true);
+    setLoadError("");
+    try {
+      const data = await api.getAdminReports();
+      setReports(data.reports ?? []);
+    } catch (error) {
+      setLoadError(error.message || "Failed to load support requests");
+      setReports([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadReports();
+  }, [loadReports]);
+
+  const filteredReports = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
 
-    return SUPPORT_TICKETS.filter((ticket) => {
-      const status = ticketStatuses[ticket.id];
-      if (userTypeFilter !== "all" && ticket.userType !== userTypeFilter) return false;
-      if (statusFilter !== "all" && status !== statusFilter) return false;
-      if (
-        query &&
-        !ticket.id.toLowerCase().includes(query) &&
-        !ticket.userName.toLowerCase().includes(query) &&
-        !ticket.subject.toLowerCase().includes(query)
-      ) {
-        return false;
-      }
-      return true;
+    return reports.filter((report) => {
+      const matchesQuery =
+        !query ||
+        report.id.toLowerCase().includes(query) ||
+        report.reportedBy.toLowerCase().includes(query) ||
+        report.reportAgainst.toLowerCase().includes(query);
+
+      const matchesType = typeFilter === "all" || report.reportType === typeFilter;
+      const matchesStatus = statusFilter === "all" || report.status === statusFilter;
+      const matchesRole = roleFilter === "all" || report.reporterRole === roleFilter;
+
+      return matchesQuery && matchesType && matchesStatus && matchesRole;
     });
-  }, [searchQuery, userTypeFilter, statusFilter, ticketStatuses]);
+  }, [reports, searchQuery, statusFilter, typeFilter, roleFilter]);
 
-  const selectedTicket =
-    filteredTickets.find((ticket) => ticket.id === selectedTicketId) ??
-    filteredTickets[0] ??
-    SUPPORT_TICKETS.find((ticket) => ticket.id === selectedTicketId) ??
-    SUPPORT_TICKETS[0];
+  const totalPages = Math.max(1, Math.ceil(filteredReports.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const pagedReports = filteredReports.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE,
+  );
 
-  const selectedStatus = ticketStatuses[selectedTicket.id] ?? selectedTicket.status;
-  const conversation = [
-    ...(extraMessages[selectedTicket.id] ?? []),
-    ...selectedTicket.conversation,
-  ];
+  useEffect(() => {
+    setPage(1);
+  }, [searchQuery, typeFilter, statusFilter, roleFilter]);
 
-  const updateTicketStatus = (status) => {
-    setTicketStatuses((current) => ({ ...current, [selectedTicket.id]: status }));
+  useEffect(() => {
+    if (pagedReports.length === 0) {
+      setSelectedReportId("");
+      return;
+    }
+    if (!pagedReports.some((report) => report.id === selectedReportId)) {
+      setSelectedReportId(pagedReports[0].id);
+    }
+  }, [pagedReports, selectedReportId]);
+
+  const selectedReport =
+    filteredReports.find((report) => report.id === selectedReportId) ?? null;
+
+  useEffect(() => {
+    setReplyText(selectedReport?.adminReply || "");
+  }, [selectedReport?.mongoId]);
+
+  const modalConfig = activeModal ? MODAL_CONFIG[activeModal] : null;
+  const ModalIcon = modalConfig?.icon;
+  const isClosed = selectedReport?.status === "resolved";
+
+  const patchReport = async (body) => {
+    if (!selectedReport) return;
+    setActionLoading(true);
+    setActionError("");
+    try {
+      await api.updateAdminReport(selectedReport.mongoId, body);
+      await loadReports();
+    } catch (error) {
+      setActionError(error.message || "Failed to update request");
+      throw error;
+    } finally {
+      setActionLoading(false);
+    }
   };
 
-  const handleSendReply = () => {
-    if (!replyText.trim()) return;
+  const handleMarkInProgress = async () => {
+    if (!selectedReport || isClosed) return;
+    try {
+      await patchReport({
+        status: "in_progress",
+        adminReply: replyText.trim() || selectedReport.adminReply || "",
+      });
+    } catch {
+      /* error already set */
+    }
+  };
 
-    setExtraMessages((current) => ({
-      ...current,
-      [selectedTicket.id]: [
-        {
-          type: "admin",
-          text: replyText.trim(),
-          time: "Just now",
-          author: "Admin (Me)",
-        },
-        ...(current[selectedTicket.id] ?? []),
-      ],
-    }));
-    setReplyText("");
+  const handleConfirmModal = async () => {
+    if (!selectedReport || !activeModal) return;
+
+    const trimmedReply = replyText.trim();
+
+    let body;
+    if (activeModal === "askSeller") {
+      body = {
+        askSeller: true,
+        messageToSeller:
+          trimmedReply ||
+          "Please respond to this buyer complaint with your side of the story.",
+        adminReply:
+          "We have contacted the seller and are waiting for their response.",
+      };
+    } else if (activeModal === "resolve") {
+      body = {
+        status: "resolved",
+        decision:
+          trimmedReply ||
+          "Your request has been reviewed and marked as resolved.",
+        adminReply:
+          trimmedReply ||
+          "Your request has been reviewed and marked as resolved.",
+      };
+    } else {
+      body = {
+        status: "resolved",
+        decision:
+          trimmedReply || "Your request was reviewed and dismissed.",
+        adminReply:
+          trimmedReply || "Your request was reviewed and dismissed.",
+        adminNote: "Dismissed by admin",
+      };
+    }
+
+    try {
+      await patchReport(body);
+      setActiveModal(null);
+    } catch {
+      setActiveModal(null);
+    }
   };
 
   return (
-    <div className="admin-support-page">
-      <div className="admin-support-header">
-        <div>
+    <div className="admin-reports-page">
+      <header className="admin-reports-toolbar">
+        <div className="admin-reports-header">
           <h1>Support Center</h1>
-          <p>Manage and respond to customer support requests.</p>
+          <p>Review and resolve buyer &amp; seller support requests.</p>
         </div>
-        <div className="admin-support-online">
-          <div className="admin-support-online-avatars">
-            {ADMIN_AVATARS.map((avatar) => (
-              <img key={avatar} src={avatar} alt="" />
-            ))}
+
+        <div className="admin-reports-toolbar-actions">
+          <div className="admin-reports-search">
+            <Search size={18} aria-hidden="true" />
+            <Input
+              type="search"
+              placeholder="Search by ID or user name"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              aria-label="Search support requests"
+            />
           </div>
-          <span>2 Admins Online</span>
-        </div>
-      </div>
 
-      <div className="admin-support-filters">
-        <div className="admin-support-search">
-          <Search size={18} aria-hidden="true" />
-          <Input
-            type="search"
-            placeholder="Search by Ticket ID, User Name..."
-            value={searchQuery}
-            onChange={(event) => setSearchQuery(event.target.value)}
-            aria-label="Search support tickets"
-          />
-        </div>
-
-        <label className="admin-support-filter-field">
-          <Select value={userTypeFilter} onValueChange={setUserTypeFilter}>
-            <SelectTrigger className="admin-support-filter-select" aria-label="Filter by user type">
+          <Select value={roleFilter} onValueChange={setRoleFilter}>
+            <SelectTrigger className="admin-reports-filter-select" aria-label="Filter by user role">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">User Type: All</SelectItem>
-              <SelectItem value="buyer">Buyer</SelectItem>
-              <SelectItem value="seller">Seller</SelectItem>
+              {ROLE_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
-        </label>
 
-        <label className="admin-support-filter-field">
+          <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <SelectTrigger className="admin-reports-filter-select" aria-label="Filter by issue type">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {ISSUE_TYPE_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="admin-support-filter-select" aria-label="Filter by status">
+            <SelectTrigger className="admin-reports-filter-select" aria-label="Filter by status">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Status: All</SelectItem>
-              <SelectItem value="open">Open</SelectItem>
-              <SelectItem value="in_progress">In Progress</SelectItem>
-              <SelectItem value="closed">Closed</SelectItem>
+              {STATUS_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
-        </label>
+        </div>
+      </header>
 
-        <Button type="button" variant="ghost" className="admin-support-more-filters">
-          <Filter size={16} aria-hidden="true" />
-          More Filters
-        </Button>
-      </div>
+      {(loadError || actionError) && (
+        <p className="admin-reports-banner-error" role="alert">
+          {loadError || actionError}
+        </p>
+      )}
 
-      <div className="admin-support-layout">
-        <aside className="admin-support-ticket-list">
-          {filteredTickets.length > 0 ? (
-            filteredTickets.map((ticket) => {
-              const status = ticketStatuses[ticket.id] ?? ticket.status;
-              const isSelected = selectedTicket.id === ticket.id;
+      <div className="admin-reports-layout">
+        <Card className="admin-reports-table-panel">
+          <div className="admin-reports-table-wrap">
+            <Table className="admin-reports-table">
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Request ID</TableHead>
+                  <TableHead>From</TableHead>
+                  <TableHead>Subject</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="admin-reports-empty">
+                      Loading requests...
+                    </TableCell>
+                  </TableRow>
+                ) : pagedReports.length > 0 ? (
+                  pagedReports.map((report) => (
+                    <TableRow
+                      key={report.mongoId || report.id}
+                      className={
+                        selectedReport?.id === report.id
+                          ? "admin-reports-row admin-reports-row--selected"
+                          : "admin-reports-row"
+                      }
+                      onClick={() => setSelectedReportId(report.id)}
+                    >
+                      <TableCell className="admin-reports-id">#{report.id}</TableCell>
+                      <TableCell>
+                        <div className="admin-reports-person">
+                          <ReporterAvatar
+                            name={report.reportedBy}
+                            src={report.reporterAvatar}
+                          />
+                          <div className="admin-reports-person-text">
+                            <span>{report.reportedBy}</span>
+                            <small>
+                              {report.reporterRole === "seller" ? "Seller" : "Buyer"}
+                              {report.isDispute ? " · Dispute" : ""}
+                            </small>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>{report.reportAgainst}</TableCell>
+                      <TableCell>
+                        <ReportTypeBadge type={report.reportType} />
+                      </TableCell>
+                      <TableCell className="admin-reports-date">{report.date}</TableCell>
+                      <TableCell>
+                        <StatusBadge status={report.status} />
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={6} className="admin-reports-empty">
+                      {reports.length === 0
+                        ? "No support requests yet."
+                        : "No requests match your filters."}
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
 
-              return (
-                <button
-                  key={ticket.id}
-                  type="button"
-                  className={`admin-support-ticket-item ${
-                    isSelected ? "admin-support-ticket-item--active" : ""
-                  }`}
-                  onClick={() => setSelectedTicketId(ticket.id)}
-                >
-                  <div className="admin-support-ticket-item-top">
-                    <span>#{ticket.id}</span>
-                    <TicketStatusBadge status={status} />
-                  </div>
-                  <h3>{ticket.subject}</h3>
-                  <div className="admin-support-ticket-item-user">
-                    <span>{ticket.userName}</span>
-                    <UserTypeBadge userType={ticket.userType} />
-                  </div>
-                  <div className="admin-support-ticket-item-footer">
-                    <span>{ticket.timestamp}</span>
-                    <ChevronRight size={18} aria-hidden="true" />
-                  </div>
-                </button>
-              );
-            })
-          ) : (
-            <p className="admin-support-empty">No tickets match your filters.</p>
-          )}
-        </aside>
+          <div className="admin-reports-pagination">
+            <p>
+              Showing {pagedReports.length} of {filteredReports.length} requests
+            </p>
+            <div className="admin-reports-pagination-controls">
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                disabled={currentPage <= 1}
+                onClick={() => setPage((p) => p - 1)}
+              >
+                <ChevronLeft size={18} aria-hidden="true" />
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                disabled={currentPage >= totalPages}
+                onClick={() => setPage((p) => p + 1)}
+              >
+                <ChevronRight size={18} aria-hidden="true" />
+              </Button>
+            </div>
+          </div>
+        </Card>
 
-        <article className="admin-support-detail">
-          <div className="admin-support-detail-header">
-            <div className="admin-support-detail-user">
-              <span className="admin-support-user-avatar">{selectedTicket.userInitials}</span>
+        {selectedReport && (
+          <Card className="admin-reports-detail-panel">
+            <div className="admin-reports-detail-header">
               <div>
-                <h2>{selectedTicket.userName}</h2>
-                <p>
-                  {selectedTicket.userEmail} • ID: {selectedTicket.userId}
-                </p>
+                <span className="admin-reports-detail-label">Active Request</span>
+                <h2>#{selectedReport.id}</h2>
               </div>
-            </div>
-            <div className="admin-support-detail-actions">
               <Button
                 type="button"
                 variant="ghost"
-                className="admin-support-outline-btn"
-                onClick={() => updateTicketStatus("in_progress")}
+                size="icon"
+                className="admin-reports-close-btn"
+                onClick={() => setSelectedReportId("")}
+                aria-label="Close detail panel"
               >
-                Mark as In Progress
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                className="admin-support-close-btn"
-                onClick={() => updateTicketStatus("closed")}
-              >
-                Close Ticket
+                <X size={18} />
               </Button>
             </div>
-          </div>
 
-          <div className="admin-support-detail-body">
-            <div className="admin-support-detail-block">
-              <p className="admin-support-detail-label">Subject</p>
-              <p className="admin-support-detail-subject">{selectedTicket.subject}</p>
-            </div>
+            <div className="admin-reports-detail-body">
+              <section>
+                <h3>Reporter</h3>
+                <div className="admin-reports-reporter-card">
+                  <ReporterAvatar
+                    name={selectedReport.reportedBy}
+                    src={selectedReport.reporterAvatar}
+                  />
+                  <div>
+                    <p>{selectedReport.reportedBy}</p>
+                    <span>{selectedReport.reporterMeta}</span>
+                  </div>
+                </div>
+              </section>
 
-            <div className="admin-support-detail-block">
-              <p className="admin-support-detail-label">Original Message</p>
-              <div className="admin-support-original-message">
-                {selectedTicket.originalMessage}
-              </div>
-            </div>
-          </div>
-
-          <section className="admin-support-conversation">
-            <h3>
-              <History size={16} aria-hidden="true" />
-              Conversation History
-            </h3>
-
-            <div className="admin-support-messages">
-              {conversation.map((message, index) => {
-                if (message.type === "system") {
-                  return (
-                    <div key={`${message.time}-${index}`} className="admin-support-system-message">
-                      {message.text} • {message.time}
-                    </div>
-                  );
-                }
-
-                const isAdmin = message.type === "admin";
-
-                return (
-                  <div
-                    key={`${message.time}-${index}`}
-                    className={`admin-support-message-row ${
-                      isAdmin ? "admin-support-message-row--admin" : ""
-                    }`}
-                  >
+              {selectedReport.isDispute && (
+                <section>
+                  <h3>Dispute Parties</h3>
+                  <div className="admin-reports-item-card admin-reports-dispute-card">
                     <div>
-                      <div
-                        className={`admin-support-message-bubble ${
-                          isAdmin
-                            ? "admin-support-message-bubble--admin"
-                            : "admin-support-message-bubble--user"
-                        }`}
-                      >
-                        <p>{message.text}</p>
-                      </div>
-                      <p className="admin-support-message-meta">
-                        {message.author} • {message.time}
+                      <p>
+                        Buyer: {selectedReport.buyerName || selectedReport.reportedBy}
                       </p>
+                      <span>
+                        Seller: {selectedReport.seller || "Unknown"}
+                        {selectedReport.sellerEmail
+                          ? ` • ${selectedReport.sellerEmail}`
+                          : ""}
+                      </span>
+                      {selectedReport.productTitle && (
+                        <span>Product: {selectedReport.productTitle}</span>
+                      )}
+                      {selectedReport.orderId && (
+                        <span>
+                          Order: #{String(selectedReport.orderId).slice(-6).toUpperCase()}
+                        </span>
+                      )}
+                      <span className="admin-reports-stage">
+                        Stage:{" "}
+                        {selectedReport.disputeStage === "awaiting_seller"
+                          ? "Waiting for seller"
+                          : selectedReport.disputeStage === "seller_responded"
+                            ? "Seller responded — ready to decide"
+                            : selectedReport.disputeStage === "resolved"
+                              ? "Resolved"
+                              : "New dispute"}
+                      </span>
                     </div>
                   </div>
-                );
-              })}
+                </section>
+              )}
+
+              <section>
+                <h3>Subject</h3>
+                <div className="admin-reports-item-card">
+                  {selectedReport.itemImage && (
+                    <img src={selectedReport.itemImage} alt="" />
+                  )}
+                  <div>
+                    <p>{selectedReport.reportAgainst}</p>
+                    <span>
+                      Issue type:{" "}
+                      {selectedReport.issueType ||
+                        TYPE_LABELS[selectedReport.reportType]}
+                    </span>
+                  </div>
+                </div>
+              </section>
+
+              <section>
+                <h3>Buyer / User Message</h3>
+                <blockquote className="admin-reports-description">
+                  &ldquo;{selectedReport.description}&rdquo;
+                </blockquote>
+              </section>
+
+              {selectedReport.adminMessageToSeller && (
+                <section>
+                  <h3>Message sent to Seller</h3>
+                  <blockquote className="admin-reports-description">
+                    &ldquo;{selectedReport.adminMessageToSeller}&rdquo;
+                  </blockquote>
+                </section>
+              )}
+
+              {selectedReport.sellerResponse && (
+                <section>
+                  <h3>Seller Response</h3>
+                  <blockquote className="admin-reports-description admin-reports-description--seller">
+                    &ldquo;{selectedReport.sellerResponse}&rdquo;
+                  </blockquote>
+                </section>
+              )}
+
+              {selectedReport.evidence?.length > 0 && (
+                <section>
+                  <div className="admin-reports-evidence-header">
+                    <h3>Uploaded Evidence</h3>
+                    <span>{selectedReport.evidence.length} Photos</span>
+                  </div>
+                  <div className="admin-reports-evidence-grid">
+                    {selectedReport.evidence.map((photo, index) => (
+                      <img key={index} src={photo} alt={`Evidence ${index + 1}`} />
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              <section className="admin-reports-reply-section">
+                <h3>
+                  {selectedReport.isDispute
+                    ? "Message to seller / Final decision"
+                    : "Admin Reply"}
+                </h3>
+                <Textarea
+                  className="admin-reports-reply-input"
+                  placeholder={
+                    selectedReport.isDispute
+                      ? "Write what to ask the seller, or your final decision for both parties..."
+                      : "Type your reply for the user..."
+                  }
+                  value={replyText}
+                  onChange={(event) => setReplyText(event.target.value)}
+                  rows={4}
+                  disabled={actionLoading || isClosed}
+                />
+                <p className="admin-reports-reply-hint">
+                  {selectedReport.isDispute
+                    ? "Use “Ask Seller” to send this text to the seller. Use “Resolve” to publish the final decision to both sides."
+                    : "This reply appears under View in the user’s Support Center."}
+                </p>
+              </section>
             </div>
-          </section>
 
-          <footer className="admin-support-reply">
-            <div className="admin-support-reply-box">
-              <div className="admin-support-reply-toolbar">
-                <Button type="button" variant="ghost" size="icon" aria-label="Bold">
-                  <Bold size={16} />
-                </Button>
-                <Button type="button" variant="ghost" size="icon" aria-label="Italic">
-                  <Italic size={16} />
-                </Button>
-                <Button type="button" variant="ghost" size="icon" aria-label="Attach file">
-                  <Paperclip size={16} />
-                </Button>
-                <span>Typing as Admin...</span>
-              </div>
+            <div className="admin-reports-detail-actions">
+              {!selectedReport.isDispute && !isClosed && (
+                <p className="admin-reports-action-hint">
+                  <strong>Ask Seller</strong> tab dikhega jab buyer ne request mein{" "}
+                  <em>Related Order</em> select ki ho (Order / Rental / Return).
+                  Purani reports bina order ke dispute nahi banti.
+                </p>
+              )}
 
-              <Textarea
-                placeholder="Type your reply here..."
-                value={replyText}
-                onChange={(event) => setReplyText(event.target.value)}
-                rows={5}
-              />
+              {selectedReport.isDispute &&
+                selectedReport.disputeStage === "awaiting_seller" &&
+                !isClosed && (
+                  <p className="admin-reports-action-hint admin-reports-action-hint--waiting">
+                    Seller se jawab manga ja chuka hai. Seller Support Center mein
+                    respond karega — phir yahan unka jawab dikhega.
+                  </p>
+                )}
 
-              <div className="admin-support-reply-footer">
-                <label className="admin-support-notify">
-                  <Checkbox
-                    checked={notifyViaEmail}
-                    onCheckedChange={(checked) => setNotifyViaEmail(checked === true)}
-                  />
-                  <span>Notify user via email</span>
-                </label>
+              <Button
+                type="button"
+                className="admin-reports-action-btn admin-reports-action-btn--primary"
+                onClick={() => setActiveModal("askSeller")}
+                disabled={
+                  actionLoading ||
+                  isClosed ||
+                  !selectedReport.isDispute ||
+                  selectedReport.disputeStage === "awaiting_seller"
+                }
+              >
+                <Send size={16} aria-hidden="true" />
+                Ask Seller for Response
+              </Button>
+
+              <Button
+                type="button"
+                variant="outline"
+                className="admin-reports-action-btn"
+                onClick={() => setActiveModal("resolve")}
+                disabled={actionLoading || isClosed}
+              >
+                <CheckCircle2 size={16} aria-hidden="true" />
+                Resolve with Decision
+              </Button>
+              <div className="admin-reports-action-row">
                 <Button
                   type="button"
-                  className="admin-support-send-btn"
-                  onClick={handleSendReply}
-                  disabled={!replyText.trim() || selectedStatus === "closed"}
+                  variant="outline"
+                  className="admin-reports-action-btn"
+                  onClick={handleMarkInProgress}
+                  disabled={
+                    actionLoading || isClosed || selectedReport.status === "in_progress"
+                  }
                 >
-                  <Send size={16} aria-hidden="true" />
-                  Send Reply
+                  Mark In Progress
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="admin-reports-action-btn"
+                  onClick={() => setActiveModal("reject")}
+                  disabled={actionLoading || isClosed}
+                >
+                  Dismiss
                 </Button>
               </div>
             </div>
-          </footer>
-        </article>
+          </Card>
+        )}
       </div>
+
+      <Dialog open={Boolean(activeModal)} onOpenChange={(open) => !open && setActiveModal(null)}>
+        {modalConfig && ModalIcon && (
+          <DialogContent className="admin-reports-modal" showCloseButton={false}>
+            <div className={`admin-reports-modal-icon ${modalConfig.iconClass}`}>
+              <ModalIcon size={32} aria-hidden="true" />
+            </div>
+            <DialogHeader className="admin-reports-modal-header">
+              <DialogTitle>{modalConfig.title}</DialogTitle>
+              <DialogDescription>{modalConfig.description}</DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="admin-reports-modal-actions">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setActiveModal(null)}
+                disabled={actionLoading}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                className={modalConfig.confirmClass}
+                onClick={handleConfirmModal}
+                disabled={actionLoading}
+              >
+                {actionLoading ? "Saving..." : modalConfig.confirmLabel}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        )}
+      </Dialog>
     </div>
   );
 };

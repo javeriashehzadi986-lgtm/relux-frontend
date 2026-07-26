@@ -7,6 +7,7 @@ import {
   syncAdminSidebarToBody,
   toggleAdminSidebar,
 } from "@/utils/adminSidebar";
+import { useAuth } from "@/context/AuthContext";
 import "./adminLayout.css";
 
 function getActiveLabel(pathname) {
@@ -23,6 +24,7 @@ function getActiveLabel(pathname) {
 const AdminLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { logout } = useAuth();
   const activeLabel = getActiveLabel(location.pathname);
 
   useEffect(() => {
@@ -50,7 +52,8 @@ const AdminLayout = () => {
   };
 
   const handleLogout = () => {
-    navigate("/login");
+    logout();
+    navigate("/login", { replace: true });
   };
 
   return (
