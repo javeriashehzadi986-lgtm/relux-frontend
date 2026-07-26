@@ -529,3 +529,9 @@
     padding: 2rem 3rem;
   }
 }
+
+.profile-bids-status {
+  padding: 1.25rem;
+  text-align: center;
+  color: #5d605f;
+}

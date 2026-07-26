@@ -338,6 +338,12 @@
   color: #5d605f;
 }
 
+.dress-details-bid-error {
+  margin: 0.75rem 0 0;
+  font-size: 0.875rem;
+  color: #b42318;
+}
+
 .dress-details-terms {
   display: flex;
   align-items: flex-start;

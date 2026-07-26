@@ -13,10 +13,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import "./femaleFashion.css";
-import { getDressesByCategory } from "@/data/dressCatalog";
+import { filterProductCards } from "@/data/dressCatalog";
 import { LISTING_SIZE_OPTIONS } from "@/data/listingSpecs";
 import { getStyleOptionsForCategory } from "@/data/styleCategories";
-import { useListingCatalog } from "@/hooks/useListingCatalog";
+import { usePublicListings } from "@/hooks/usePublicListings";
 import { useWishlist } from "@/hooks/useWishlist";
 
 const STYLE_FILTERS = getStyleOptionsForCategory("Female");
@@ -40,11 +40,11 @@ const FemaleFashion = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [activeTags, setActiveTags] = useState([]);
   const { isSaved, toggle: toggleWishlist } = useWishlist();
-  const catalogRevision = useListingCatalog();
+  const { products, loading, error, refresh } = usePublicListings("female");
 
   const filteredProducts = useMemo(
     () =>
-      getDressesByCategory("/femaleFashion", {
+      filterProductCards(products, {
         listingType,
         style: selectedStyle,
         size: selectedSize,
@@ -53,7 +53,7 @@ const FemaleFashion = () => {
         sortBy,
       }),
     [
-      catalogRevision,
+      products,
       listingType,
       selectedStyle,
       selectedSize,
@@ -263,8 +263,30 @@ const FemaleFashion = () => {
             </div>
           )}
 
+          {loading && (
+            <p className="female-catalog-status">Loading listings...</p>
+          )}
+
+          {error && (
+            <div className="female-catalog-status female-catalog-status--error">
+              <p>{error}</p>
+              <Button type="button" variant="outline" onClick={refresh}>
+                Try again
+              </Button>
+            </div>
+          )}
+
+          {!loading && !error && filteredProducts.length === 0 && (
+            <p className="female-catalog-status">
+              No approved listings match your filters yet. Try adjusting filters or check back
+              soon.
+            </p>
+          )}
+
           <div className="female-products-grid">
-            {filteredProducts.map((product) => (
+            {!loading &&
+              !error &&
+              filteredProducts.map((product) => (
               <Card key={product.id} className="female-product-card">
                 <div className="female-product-image-wrap">
                   <img alt={product.title} src={product.image} />
@@ -318,6 +340,7 @@ const FemaleFashion = () => {
             ))}
           </div>
 
+          {!loading && !error && filteredProducts.length > 0 && (
           <div className="female-pagination">
             <Button
               type="button"
@@ -366,6 +389,7 @@ const FemaleFashion = () => {
               <ChevronRight size={20} />
             </Button>
           </div>
+          )}
         </section>
       </div>
     </div>

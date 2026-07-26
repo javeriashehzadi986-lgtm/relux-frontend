@@ -43,7 +43,7 @@ const ProfileWishlist = () => {
   const [activeFilter, setActiveFilter] = useState("all");
   const [sortBy, setSortBy] = useState("recently-added");
   const [searchQuery, setSearchQuery] = useState("");
-  const { items: wishlistItems, remove } = useWishlist();
+  const { items: wishlistItems, remove, loading } = useWishlist();
 
   const filteredItems = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -72,6 +72,10 @@ const ProfileWishlist = () => {
 
   return (
     <section className="profile-wishlist">
+      {loading ? (
+        <p style={{ padding: "2rem", textAlign: "center" }}>Loading your wishlist...</p>
+      ) : (
+        <>
       <header className="profile-wishlist-search-bar">
         <div className="profile-wishlist-search-wrap">
           <Search
@@ -259,6 +263,8 @@ const ProfileWishlist = () => {
           ))}
         </div>
       </section>
+        </>
+      )}
     </section>
   );
 };

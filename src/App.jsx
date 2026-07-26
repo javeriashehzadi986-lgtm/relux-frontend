@@ -106,8 +106,22 @@ function App() {
           <Route path="/femaleFashion" element={<FemaleFashion />} />
           <Route path="/dress/:id" element={<DressDetails />} />
           <Route path="/dress/:id/checkout" element={<FinalizePurchase />} />
-          <Route path="/messages" element={<Messages />} />
-          <Route path="/messages/:conversationId" element={<Messages />} />
+          <Route
+            path="/messages"
+            element={
+              <ProtectedRoute>
+                <Messages />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/messages/:conversationId"
+            element={
+              <ProtectedRoute>
+                <Messages />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/dress/:id/chat" element={<DressChatRedirect />} />
           <Route path="/becomeASeller" element={<BecomeASeller />} />
 
@@ -162,7 +176,14 @@ function App() {
           />
 
           <Route path="/profile" element={<Profile />} />
-          <Route path="/wishlist" element={<Profile section="wishlist" />} />
+          <Route
+            path="/wishlist"
+            element={
+              <ProtectedRoute>
+                <Profile section="wishlist" />
+              </ProtectedRoute>
+            }
+          />
 
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />

@@ -6,17 +6,20 @@ import {
   CheckCircle2,
   Heart,
   Lock,
+  MessageCircle,
   Sparkles,
   Verified,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { formatPkr } from "@/data/dressCatalog";
+import { formatPkr, isMongoListingId } from "@/data/dressCatalog";
 import { useBuyerOrders } from "@/hooks/useBuyerOrders";
+import { useRequireLogin } from "@/hooks/useRequireLogin";
 import { useWishlist } from "@/hooks/useWishlist";
 import { DressDetailsBreadcrumb } from "./dressDetailsBreadcrumb";
 import { DressFitConditionSection } from "./dressFitCondition";
 import { SellerReviewsSection } from "./sellerReviewsSection";
+import "./dressDetails.css";
 import "./rentalDressDetails.css";
 
 const toInputDate = (date) => date.toISOString().split("T")[0];
@@ -45,6 +48,7 @@ const RentalDressDetails = ({ dress }) => {
   const [rentStart, setRentStart] = useState(defaults.start);
   const [rentEnd, setRentEnd] = useState(defaults.end);
   const { isSaved, toggle: toggleWishlist } = useWishlist();
+  const requireLogin = useRequireLogin();
   const { orders, requestRental, cancelOrder } = useBuyerOrders();
   const favorited = isSaved(dress.id);
 
@@ -96,6 +100,20 @@ const RentalDressDetails = ({ dress }) => {
     setShowCancelModal(false);
   };
 
+  const handleChatWithSeller = () => {
+    const chatPath = `/messages/${dress.id}`;
+    if (!requireLogin(chatPath)) return;
+
+    navigate(chatPath, {
+      state: {
+        listingTitle: dress.title,
+        listingImage: dress.mainImage ?? dress.image,
+        productId: isMongoListingId(dress.id) ? dress.id : undefined,
+        sellerId: dress.sellerId,
+      },
+    });
+  };
+
   return (
     <div className="rental-details-page">
       <DressDetailsBreadcrumb dress={dress} listingType="rent" />
@@ -125,15 +143,28 @@ const RentalDressDetails = ({ dress }) => {
         </div>
 
         <div className="rental-details-info">
-          <div className="rental-details-brand-row">
-            <span className="rental-details-brand">{dress.brand}</span>
-            <span className="rental-details-verified">
-              <Verified size={14} fill="currentColor" aria-hidden="true" />
-              Verified Seller
-            </span>
+          <div className="rental-details-header-top">
+            <div>
+              <div className="rental-details-brand-row">
+                <span className="rental-details-brand">{dress.brand}</span>
+                <span className="rental-details-verified">
+                  <Verified size={14} fill="currentColor" aria-hidden="true" />
+                  Verified Seller
+                </span>
+              </div>
+              <h1 className="rental-details-title">{dress.title}</h1>
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className={`dress-details-favorite ${favorited ? "dress-details-favorite--active" : ""}`}
+              aria-label={favorited ? "Remove from favorites" : "Save to favorites"}
+              onClick={() => toggleWishlist(dress)}
+            >
+              <Heart size={20} fill={favorited ? "currentColor" : "none"} />
+            </Button>
           </div>
-
-          <h1 className="rental-details-title">{dress.title}</h1>
 
           <div className="rental-details-pricing">
             <p className="rental-details-daily-rate">
@@ -236,13 +267,11 @@ const RentalDressDetails = ({ dress }) => {
             <Button
               type="button"
               variant="outline"
-              className={`rental-details-wishlist-btn ${
-                favorited ? "rental-details-wishlist-btn--active" : ""
-              }`.trim()}
-              onClick={() => toggleWishlist(dress.id)}
+              className="dress-details-chat-btn"
+              onClick={handleChatWithSeller}
             >
-              <Heart size={18} fill={favorited ? "currentColor" : "none"} aria-hidden="true" />
-              {favorited ? "Saved to Wishlist" : "Add to Wishlist"}
+              <MessageCircle size={18} aria-hidden="true" />
+              Chat with Seller
             </Button>
           </div>
 

@@ -117,6 +117,42 @@ export const api = {
       method: "PATCH",
       body: JSON.stringify(body),
     }),
+  getPublicListings: (category) =>
+    request(category ? `/listings?category=${encodeURIComponent(category)}` : "/listings"),
+  getPublicListing: (id) => request(`/listings/${id}`),
+  getWishlist: () => request("/wishlist/me"),
+  addWishlistItem: (body) =>
+    request("/wishlist", { method: "POST", body: JSON.stringify(body) }),
+  removeWishlistItem: (itemId) =>
+    request(`/wishlist/${encodeURIComponent(itemId)}`, { method: "DELETE" }),
+  toggleWishlistItem: (body) =>
+    request("/wishlist/toggle", { method: "POST", body: JSON.stringify(body) }),
+  getConversations: () => request("/messages/conversations"),
+  openConversation: (body) =>
+    request("/messages/conversations/open", { method: "POST", body: JSON.stringify(body) }),
+  getConversation: (id) => request(`/messages/conversations/${id}`),
+  sendMessage: (id, body) =>
+    request(`/messages/conversations/${id}/messages`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+  markConversationRead: (id) =>
+    request(`/messages/conversations/${id}/read`, { method: "PATCH" }),
+  markAllConversationsRead: () =>
+    request("/messages/conversations/read-all", { method: "PATCH" }),
+  toggleConversationMute: (id) =>
+    request(`/messages/conversations/${id}/mute`, { method: "PATCH" }),
+  clearConversationMessages: (id) =>
+    request(`/messages/conversations/${id}/messages`, { method: "DELETE" }),
+  blockConversation: (id) =>
+    request(`/messages/conversations/${id}/block`, { method: "PATCH" }),
+  getProductBids: (productId) => request(`/bids/product/${productId}`),
+  placeBid: (body) =>
+    request("/bids", { method: "POST", body: JSON.stringify(body) }),
+  getMyBids: () => request("/bids/me"),
+  getSellerReviews: (sellerId) => request(`/reviews/seller/${sellerId}`),
+  createSellerReview: (body) =>
+    request("/reviews", { method: "POST", body: JSON.stringify(body) }),
 };
 
 export default api;

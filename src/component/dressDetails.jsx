@@ -4,8 +4,9 @@ import { Gavel, Heart, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { getDressById, isMongoListingId, mapApiListingToDress } from "@/data/dressCatalog";
+import { getDressById, applyAuctionApiData, isMongoListingId, mapApiListingToDress } from "@/data/dressCatalog";
 import api from "@/services/api";
+import { useRequireLogin } from "@/hooks/useRequireLogin";
 import { useWishlist } from "@/hooks/useWishlist";
 import RentalDressDetails from "./rentalDressDetails";
 import { DressDetailsBreadcrumb } from "./dressDetailsBreadcrumb";
@@ -26,7 +27,24 @@ const DressDetails = () => {
   const [activeImage, setActiveImage] = useState(0);
   const [bidAmount, setBidAmount] = useState("");
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [bidSubmitting, setBidSubmitting] = useState(false);
+  const [bidError, setBidError] = useState("");
   const { isSaved, toggle: toggleWishlist } = useWishlist();
+  const requireLogin = useRequireLogin();
+
+  const handleChatWithSeller = () => {
+    const chatPath = `/messages/${id}`;
+    if (!requireLogin(chatPath)) return;
+
+    navigate(chatPath, {
+      state: {
+        listingTitle: dress.title,
+        listingImage: dress.mainImage ?? dress.image,
+        productId: isMongoListingId(id) ? id : undefined,
+        sellerId: dress.sellerId,
+      },
+    });
+  };
 
   useEffect(() => {
     if (!isMongoListingId(id)) {
@@ -71,20 +89,72 @@ const DressDetails = () => {
     setCountdown(dress.countdown ?? { hours: 14, minutes: 22, seconds: 8 });
   }, [dress]);
 
+  useEffect(() => {
+    if (!dress || dress.listingType !== "resale" || !isMongoListingId(id)) return undefined;
+
+    let cancelled = false;
+
+    api
+      .getProductBids(id)
+      .then((data) => {
+        if (cancelled) return;
+        setDress((current) => applyAuctionApiData(current, data));
+        setHasWonAuction(Boolean(data.viewer?.hasWon));
+        setCountdown(data.summary?.countdown ?? { hours: 0, minutes: 0, seconds: 0 });
+      })
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
+  }, [dress?.id, dress?.listingType, id]);
+
   const proceedToCheckout = () => navigate(`/dress/${id}/checkout`);
 
-  const handlePlaceBid = () => {
-    setHasWonAuction(true);
-    proceedToCheckout();
+  const handlePlaceBid = async () => {
+    setBidError("");
+
+    if (!requireLogin()) return;
+
+    const amount = Number(String(bidAmount).replace(/[^\d.]/g, ""));
+
+    if (!amount) {
+      setBidError("Enter a valid bid amount.");
+      return;
+    }
+
+    if (!isMongoListingId(id)) {
+      if (amount < dress.minimumNextBid) {
+        setBidError(`Your bid must be at least ${dress.minimumNextBidFormatted}.`);
+        return;
+      }
+      setHasWonAuction(true);
+      proceedToCheckout();
+      return;
+    }
+
+    if (amount < dress.minimumNextBid) {
+      setBidError(`Your bid must be at least ${dress.minimumNextBidFormatted}.`);
+      return;
+    }
+
+    setBidSubmitting(true);
+    try {
+      const data = await api.placeBid({ productId: id, amount });
+      setDress((current) => applyAuctionApiData(current, data));
+      setHasWonAuction(Boolean(data.viewer?.hasWon));
+      setCountdown(data.summary?.countdown ?? countdown);
+      setBidAmount("");
+    } catch (error) {
+      setBidError(error.message || "Could not place bid");
+    } finally {
+      setBidSubmitting(false);
+    }
   };
 
   useEffect(() => {
     if (!dress || dress.listingType !== "resale") return undefined;
-    setCountdown(dress.countdown ?? { hours: 14, minutes: 22, seconds: 8 });
-  }, [dress]);
-
-  useEffect(() => {
-    if (!dress || dress.listingType !== "resale") return undefined;
+    if (dress.auctionEnded) return undefined;
 
     const timer = window.setInterval(() => {
       setCountdown((current) => {
@@ -103,7 +173,7 @@ const DressDetails = () => {
     }, 1000);
 
     return () => window.clearInterval(timer);
-  }, [dress?.listingType, dress]);
+  }, [dress?.listingType, dress?.auctionEnded, dress]);
 
   if (loading || !dress) {
     return (
@@ -166,7 +236,7 @@ const DressDetails = () => {
                 size="icon"
                 className={`dress-details-favorite ${favorited ? "dress-details-favorite--active" : ""}`}
                 aria-label={favorited ? "Remove from favorites" : "Save to favorites"}
-                onClick={() => toggleWishlist(dress.id)}
+                onClick={() => toggleWishlist(dress)}
               >
                 <Heart size={20} fill={favorited ? "currentColor" : "none"} />
               </Button>
@@ -230,7 +300,7 @@ const DressDetails = () => {
                   type="button"
                   variant="outline"
                   className="dress-details-chat-btn"
-                  onClick={() => navigate(`/messages/${id}`)}
+                  onClick={handleChatWithSeller}
                 >
                   <MessageCircle size={18} aria-hidden="true" />
                   Chat with Seller
@@ -251,6 +321,21 @@ const DressDetails = () => {
                     </span>
                   </div>
                 </div>
+              </>
+            ) : dress.auctionEnded ? (
+              <>
+                <p className="dress-details-competing">
+                  This auction has ended and is no longer accepting bids.
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="dress-details-chat-btn"
+                  onClick={handleChatWithSeller}
+                >
+                  <MessageCircle size={18} aria-hidden="true" />
+                  Chat with Seller
+                </Button>
               </>
             ) : (
               <>
@@ -287,17 +372,19 @@ const DressDetails = () => {
                 <Button
                   type="button"
                   className="dress-details-place-bid-btn"
-                  disabled={!termsAccepted}
+                  disabled={!termsAccepted || bidSubmitting}
                   onClick={handlePlaceBid}
                 >
-                  Place Bid
+                  {bidSubmitting ? "Placing Bid..." : "Place Bid"}
                 </Button>
+
+                {bidError && <p className="dress-details-bid-error">{bidError}</p>}
 
                 <Button
                   type="button"
                   variant="outline"
                   className="dress-details-chat-btn"
-                  onClick={() => navigate(`/messages/${id}`)}
+                  onClick={handleChatWithSeller}
                 >
                   <MessageCircle size={18} aria-hidden="true" />
                   Chat with Seller
@@ -357,7 +444,7 @@ const DressDetails = () => {
               {dress.bidHistory.length > 0 ? (
                 dress.bidHistory.map((bid) => (
                   <tr
-                    key={`${bid.name}-${bid.timestamp}`}
+                    key={bid.id ?? `${bid.name}-${bid.timestamp}`}
                     className={bid.isWinner ? "dress-details-history-row--winner" : ""}
                   >
                     <td>

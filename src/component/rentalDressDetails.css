@@ -115,6 +115,18 @@
   margin-bottom: 0.5rem;
 }
 
+.rental-details-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.rental-details-header-top .rental-details-title {
+  margin-bottom: 0;
+}
+
 .rental-details-brand {
   font-size: 0.75rem;
   font-weight: 700;

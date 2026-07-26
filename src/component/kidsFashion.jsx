@@ -12,10 +12,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import "./kidsFashion.css";
-import { getDressesByCategory } from "@/data/dressCatalog";
+import { filterProductCards } from "@/data/dressCatalog";
 import { LISTING_SIZE_OPTIONS } from "@/data/listingSpecs";
 import { getStyleOptionsForCategory } from "@/data/styleCategories";
-import { useListingCatalog } from "@/hooks/useListingCatalog";
+import { usePublicListings } from "@/hooks/usePublicListings";
 import { useWishlist } from "@/hooks/useWishlist";
 
 const CATEGORY_FILTERS = getStyleOptionsForCategory("Kids");
@@ -39,11 +39,11 @@ const KidsFashion = () => {
   const [sortBy, setSortBy] = useState("newest");
   const [currentPage, setCurrentPage] = useState(1);
   const { isSaved, toggle: toggleWishlist } = useWishlist();
-  const catalogRevision = useListingCatalog();
+  const { products, loading, error, refresh } = usePublicListings("kids");
 
   const filteredProducts = useMemo(
     () =>
-      getDressesByCategory("/kidsFashion", {
+      filterProductCards(products, {
         listingType,
         style: selectedCategory,
         size: selectedSize,
@@ -52,7 +52,7 @@ const KidsFashion = () => {
         sortBy,
       }),
     [
-      catalogRevision,
+      products,
       selectedCategory,
       selectedSize,
       listingType,
@@ -236,8 +236,29 @@ const KidsFashion = () => {
             </div>
           </div>
 
+          {loading && (
+            <p className="kids-catalog-status">Loading listings...</p>
+          )}
+
+          {error && (
+            <div className="kids-catalog-status kids-catalog-status--error">
+              <p>{error}</p>
+              <Button type="button" variant="outline" onClick={refresh}>
+                Try again
+              </Button>
+            </div>
+          )}
+
+          {!loading && !error && filteredProducts.length === 0 && (
+            <p className="kids-catalog-status">
+              No approved listings match your filters yet. Try adjusting filters or check back
+              soon.
+            </p>
+          )}
+
           <div className="kids-products-grid">
-            {filteredProducts.length > 0 ? (
+            {!loading &&
+              !error &&
               filteredProducts.map((product) => (
                 <Card key={product.id} className="kids-product-card">
                   <div className="kids-product-image-wrap">
@@ -286,12 +307,10 @@ const KidsFashion = () => {
                     </Button>
                   </div>
                 </Card>
-              ))
-            ) : (
-              <p className="kids-empty-state">No outfits match your filters.</p>
-            )}
+              ))}
           </div>
 
+          {!loading && !error && filteredProducts.length > 0 && (
           <div className="kids-pagination">
             <Button
               type="button"
@@ -340,6 +359,7 @@ const KidsFashion = () => {
               <ChevronRight size={20} />
             </Button>
           </div>
+          )}
         </section>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import api from "@/services/api";
+import { syncLocalWishlistToServer } from "@/data/wishlistStore";
 
 const AuthContext = createContext(null);
 
@@ -16,9 +17,10 @@ export function AuthProvider({ children }) {
 
     api
       .getMe()
-      .then((data) => {
+      .then(async (data) => {
         setUser(data.user);
         api.setStoredUser(data.user);
+        await syncLocalWishlistToServer(api).catch(() => {});
       })
       .catch(() => {
         api.setToken(null);
@@ -33,6 +35,7 @@ export function AuthProvider({ children }) {
     api.setToken(data.token);
     api.setStoredUser(data.user);
     setUser(data.user);
+    await syncLocalWishlistToServer(api).catch(() => {});
     return data.user;
   }, []);
 
@@ -41,6 +44,7 @@ export function AuthProvider({ children }) {
     api.setToken(data.token);
     api.setStoredUser(data.user);
     setUser(data.user);
+    await syncLocalWishlistToServer(api).catch(() => {});
     return data.user;
   }, []);
 
@@ -63,6 +67,7 @@ export function AuthProvider({ children }) {
     api.setToken(data.token);
     api.setStoredUser(data.user);
     setUser(data.user);
+    await syncLocalWishlistToServer(api).catch(() => {});
     return data;
   }, []);
 
@@ -71,6 +76,7 @@ export function AuthProvider({ children }) {
     api.setToken(data.token);
     api.setStoredUser(data.user);
     setUser(data.user);
+    await syncLocalWishlistToServer(api).catch(() => {});
     return data;
   }, []);
 

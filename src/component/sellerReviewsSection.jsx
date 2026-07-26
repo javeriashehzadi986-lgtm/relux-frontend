@@ -1,14 +1,9 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  addSellerReport,
-  addSellerReview,
-  getSellerKey,
-  getSellerRatingStats,
-  getSellerReviews,
-} from "@/data/sellerReviewsStore";
+import { useRequireLogin } from "@/hooks/useRequireLogin";
+import { useSellerReviews } from "@/hooks/useSellerReviews";
 import "./rentalDressDetails.css";
 
 const REPORT_REASONS = [
@@ -65,11 +60,23 @@ export function SellerReviewsSection({
   defaultAuthor = "Verified Buyer",
   reviewPlaceholder = "Share your experience with this seller...",
 }) {
-  const sellerKey = getSellerKey(dress);
-  const sellerName = dress.sellerName ?? dress.seller ?? dress.brand;
-  const sellerMemberSince = dress.sellerMemberSince ?? "2022";
+  const requireLogin = useRequireLogin();
+  const {
+    reviews,
+    stats,
+    sellerInfo,
+    loading,
+    error,
+    submitting,
+    submitReview,
+    usesApi,
+  } = useSellerReviews(dress);
 
-  const [reviews, setReviews] = useState(() => getSellerReviews(sellerKey));
+  const sellerName =
+    sellerInfo?.name ?? dress.sellerName ?? dress.seller ?? dress.brand;
+  const sellerMemberSince =
+    sellerInfo?.memberSince ?? dress.sellerMemberSince ?? "2022";
+
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewText, setReviewText] = useState("");
@@ -78,41 +85,46 @@ export function SellerReviewsSection({
   const [reportDetails, setReportDetails] = useState("");
   const [submitNotice, setSubmitNotice] = useState("");
 
-  const sellerStats = useMemo(() => getSellerRatingStats(reviews), [reviews]);
+  const handleToggleReviewForm = () => {
+    if (!showReviewForm && usesApi && !requireLogin()) {
+      return;
+    }
 
-  const handleSubmitReview = (event) => {
+    setShowReviewForm((open) => !open);
+    if (showReviewForm) {
+      setSubmitNotice("");
+    }
+  };
+
+  const handleSubmitReview = async (event) => {
     event.preventDefault();
     if (!reviewRating || !reviewText.trim()) return;
 
-    const author = reviewAuthor.trim() || defaultAuthor;
-
-    addSellerReview(sellerKey, {
-      rating: reviewRating,
-      quote: reviewText.trim(),
-      author,
-    });
-
-    let notice = "Thank you! Your review has been submitted.";
-
-    if (reportReason || reportDetails.trim()) {
-      addSellerReport({
-        sellerKey,
-        dressId: dress.id,
-        reason: reportReason || "other",
-        details: reportDetails.trim() || "No additional details provided.",
-        author,
-      });
-      notice = "Thank you! Your review and report have been submitted to our team.";
+    if (usesApi && !requireLogin()) {
+      return;
     }
 
-    setReviews(getSellerReviews(sellerKey));
-    setReviewRating(0);
-    setReviewText("");
-    setReviewAuthor("");
-    setReportReason("");
-    setReportDetails("");
-    setSubmitNotice(notice);
-    setShowReviewForm(false);
+    const author = reviewAuthor.trim() || defaultAuthor;
+
+    try {
+      const result = await submitReview({
+        rating: reviewRating,
+        quote: reviewText.trim(),
+        author,
+        reportReason,
+        reportDetails,
+      });
+
+      setReviewRating(0);
+      setReviewText("");
+      setReviewAuthor("");
+      setReportReason("");
+      setReportDetails("");
+      setSubmitNotice(result.message);
+      setShowReviewForm(false);
+    } catch {
+      // Error message is shown via hook state.
+    }
   };
 
   return (
@@ -127,9 +139,9 @@ export function SellerReviewsSection({
             <div className="rental-details-seller-meta">
               <span className="rental-details-seller-rating">
                 <Star size={14} fill="currentColor" aria-hidden="true" />
-                {sellerStats.average.toFixed(1)}{" "}
+                {stats.average.toFixed(1)}{" "}
                 <span className="rental-details-deposit">
-                  ({sellerStats.count} Review{sellerStats.count === 1 ? "" : "s"})
+                  ({stats.count} Review{stats.count === 1 ? "" : "s"})
                 </span>
               </span>
               <span aria-hidden="true">•</span>
@@ -146,14 +158,23 @@ export function SellerReviewsSection({
             type="button"
             variant="ghost"
             className="rental-details-write-review"
-            onClick={() => {
-              setShowReviewForm((open) => !open);
-              if (showReviewForm) setSubmitNotice("");
-            }}
+            onClick={handleToggleReviewForm}
           >
             {showReviewForm ? "Cancel" : "Write a Review"}
           </Button>
         </div>
+
+        {loading ? (
+          <p className="rental-details-review-notice" role="status">
+            Loading reviews...
+          </p>
+        ) : null}
+
+        {error && !loading ? (
+          <p className="rental-details-review-notice rental-details-review-notice--error" role="alert">
+            {error}
+          </p>
+        ) : null}
 
         {showReviewForm && (
           <form className="rental-details-review-form" onSubmit={handleSubmitReview}>
@@ -223,9 +244,9 @@ export function SellerReviewsSection({
             <Button
               type="submit"
               className="rental-details-review-submit"
-              disabled={!reviewRating || !reviewText.trim()}
+              disabled={!reviewRating || !reviewText.trim() || submitting}
             >
-              Submit Review
+              {submitting ? "Submitting..." : "Submit Review"}
             </Button>
           </form>
         )}
@@ -237,6 +258,12 @@ export function SellerReviewsSection({
         ) : null}
 
         <div className="rental-details-reviews-grid">
+          {!loading && reviews.length === 0 ? (
+            <p className="rental-details-review-notice">
+              No reviews yet. Be the first to share your experience.
+            </p>
+          ) : null}
+
           {reviews.map((review) => (
             <article key={review.id} className="rental-details-review-card">
               <StarRating rating={review.rating} />

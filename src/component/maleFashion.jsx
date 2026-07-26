@@ -6,14 +6,16 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import "./maleFashion.css";
-import { getDressesByCategory } from "@/data/dressCatalog";
+import { filterProductCards } from "@/data/dressCatalog";
 import { LISTING_SIZE_OPTIONS } from "@/data/listingSpecs";
 import { getStyleOptionsForCategory } from "@/data/styleCategories";
-import { useListingCatalog } from "@/hooks/useListingCatalog";
+import { usePublicListings } from "@/hooks/usePublicListings";
 import { useWishlist } from "@/hooks/useWishlist";
 
 const STYLE_FILTERS = getStyleOptionsForCategory("Male");
 const SIZES = LISTING_SIZE_OPTIONS;
+const PRICE_MIN = 1000;
+const PRICE_MAX = 50000;
 
 const MaleFashion = () => {
   const [searchParams] = useSearchParams();
@@ -25,26 +27,29 @@ const MaleFashion = () => {
       : "all",
   );
   const [selectedSize, setSelectedSize] = useState("");
+  const [priceMax, setPriceMax] = useState(PRICE_MAX);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("newest");
   const [currentPage, setCurrentPage] = useState(1);
   const { isSaved, toggle: toggleWishlist } = useWishlist();
-  const catalogRevision = useListingCatalog();
+  const { products, loading, error, refresh } = usePublicListings("male");
 
   const filteredProducts = useMemo(
     () =>
-      getDressesByCategory("/maleFashion", {
+      filterProductCards(products, {
         listingType,
         style: selectedStyle,
         size: selectedSize,
+        priceMax,
         search: searchQuery,
         sortBy,
       }),
     [
-      catalogRevision,
+      products,
       listingType,
       selectedStyle,
       selectedSize,
+      priceMax,
       searchQuery,
       sortBy,
     ],
@@ -54,6 +59,7 @@ const MaleFashion = () => {
     setSelectedStyle("");
     setSelectedSize("");
     setListingType("all");
+    setPriceMax(PRICE_MAX);
     setSearchQuery("");
   };
 
@@ -136,16 +142,21 @@ const MaleFashion = () => {
               <p className="male-filter-label">Price Range</p>
               <input
                 type="range"
-                min="1000"
-                max="50000"
+                min={PRICE_MIN}
+                max={PRICE_MAX}
                 step="500"
-                defaultValue="25000"
+                value={priceMax}
                 className="male-range-input"
                 aria-label="Price range"
+                onChange={(event) => setPriceMax(Number(event.target.value))}
               />
               <div className="male-range-labels">
-                <span>PKR 1,000</span>
-                <span>PKR 50,000</span>
+                <span>PKR {PRICE_MIN.toLocaleString("en-PK")}</span>
+                <span>
+                  {priceMax >= PRICE_MAX
+                    ? `PKR ${PRICE_MAX.toLocaleString("en-PK")}+`
+                    : `PKR ${priceMax.toLocaleString("en-PK")}`}
+                </span>
               </div>
             </div>
 
@@ -160,7 +171,11 @@ const MaleFashion = () => {
                     className={`male-size-btn ${
                       selectedSize === size ? "male-size-btn--active" : ""
                     }`}
-                    onClick={() => setSelectedSize(size)}
+                    onClick={() =>
+                      setSelectedSize((current) =>
+                        current === size ? "" : size,
+                      )
+                    }
                   >
                     {size}
                   </Button>
@@ -197,8 +212,30 @@ const MaleFashion = () => {
             </div>
           </div>
 
+          {loading && (
+            <p className="male-catalog-status">Loading listings...</p>
+          )}
+
+          {error && (
+            <div className="male-catalog-status male-catalog-status--error">
+              <p>{error}</p>
+              <Button type="button" variant="outline" onClick={refresh}>
+                Try again
+              </Button>
+            </div>
+          )}
+
+          {!loading && !error && filteredProducts.length === 0 && (
+            <p className="male-catalog-status">
+              No approved listings match your filters yet. Try adjusting filters or check back
+              soon.
+            </p>
+          )}
+
           <div className="male-products-grid">
-            {filteredProducts.map((product) => (
+            {!loading &&
+              !error &&
+              filteredProducts.map((product) => (
               <Card key={product.id} className="male-product-card">
                 <div className="male-product-image-wrap">
                   <img alt={product.title} src={product.image} />
@@ -252,6 +289,7 @@ const MaleFashion = () => {
             ))}
           </div>
 
+          {!loading && !error && filteredProducts.length > 0 && (
           <div className="male-pagination">
             <Button
               type="button"
@@ -300,6 +338,7 @@ const MaleFashion = () => {
               <ChevronRight size={20} />
             </Button>
           </div>
+          )}
         </section>
       </div>
     </div>

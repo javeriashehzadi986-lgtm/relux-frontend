@@ -667,6 +667,40 @@ const sortCategoryProducts = (products, sortBy) => {
   return products;
 };
 
+export const filterProductCards = (products, filters = {}) => {
+  const { listingType, style, size, priceMax, search, sortBy } = filters;
+  const query = search?.trim().toLowerCase() ?? "";
+
+  const filtered = products.filter((product) => {
+    if (
+      listingType &&
+      listingType !== "all" &&
+      product.listingType !== listingType
+    ) {
+      return false;
+    }
+    if (!productMatchesStyle(product, style)) {
+      return false;
+    }
+    if (size && product.listingSize !== size) {
+      return false;
+    }
+    if (priceMax != null && product.priceValue > priceMax) {
+      return false;
+    }
+    if (
+      query &&
+      !product.title.toLowerCase().includes(query) &&
+      !product.brand.toLowerCase().includes(query)
+    ) {
+      return false;
+    }
+    return true;
+  });
+
+  return sortCategoryProducts(filtered, sortBy);
+};
+
 const deriveBadge = (dress) => {
   if (dress.listingType === "rent") {
     return { badge: "Pristine", badgeVariant: "primary" };
@@ -696,6 +730,7 @@ export const mapApiListingToDress = (listing) => {
   const isRent = listing.listingType === "rent";
   const dress = {
     id,
+    sellerId: listing.sellerId ? String(listing.sellerId) : undefined,
     title: listing.title,
     brand: listing.brand || "Relux Seller",
     seller: listing.seller ?? listing.sellerName ?? "Relux Seller",
@@ -753,12 +788,20 @@ export const getDressById = (id) => {
 
 export const toProductCardView = (dress) => {
   const enriched = getDressById(dress.id);
+  return toProductCardViewFromDress(enriched);
+};
+
+export const toProductCardViewFromDress = (dress) => {
+  const enriched =
+    dress.listingType === "rent"
+      ? enrichRentalDress(dress)
+      : enrichResaleDress(dress);
   const { badge, badgeVariant } = deriveBadge(enriched);
   const style = enriched.style ?? PRODUCT_STYLES[enriched.id];
   const styles =
     enriched.styles ??
     PRODUCT_MULTI_STYLES[enriched.id] ??
-    (style ? [style] : []);
+    (style ? [style] : enriched.style ? [enriched.style] : []);
   const priceValue = getProductPriceValue(enriched);
 
   return {
@@ -780,7 +823,48 @@ export const toProductCardView = (dress) => {
     image: enriched.mainImage ?? enriched.image,
     categoryPath: enriched.categoryPath,
     seller: enriched.seller ?? enriched.sellerName,
+    sellerId: enriched.sellerId,
     updatedAt: enriched.updatedAt,
+  };
+};
+
+const CATEGORY_PATH_BY_MAIN = {
+  Female: "/femaleFashion",
+  Male: "/maleFashion",
+  Kids: "/kidsFashion",
+};
+
+export const mapPublicListingsToProductCards = (listings) =>
+  (listings ?? []).map((listing) => {
+    const dress = mapApiListingToDress(listing);
+    const card = toProductCardViewFromDress(dress);
+
+    return {
+      ...card,
+      sellerId: dress.sellerId,
+      updatedAt: listing.submittedAt ?? listing.reviewedAt ?? card.updatedAt ?? null,
+      categoryPath: CATEGORY_PATH_BY_MAIN[listing.mainCategory] ?? card.categoryPath ?? "",
+    };
+  });
+
+export const applyAuctionApiData = (dress, auctionData) => {
+  if (!auctionData?.summary) return dress;
+
+  const { summary, history = [], viewer } = auctionData;
+
+  return {
+    ...dress,
+    currentBid: summary.currentBid,
+    currentBidFormatted: summary.currentBidFormatted,
+    minimumNextBid: summary.minimumNextBid,
+    minimumNextBidFormatted: summary.minimumNextBidFormatted,
+    bidderCount: summary.bidderCount,
+    bidStatus: viewer?.bidStatus ?? summary.bidStatus ?? dress.bidStatus,
+    yourHighestBid: viewer?.yourHighestBidFormatted ?? dress.yourHighestBid ?? null,
+    bidHistory: history.length > 0 ? history : dress.bidHistory ?? [],
+    countdown: summary.countdown ?? dress.countdown,
+    auctionWon: viewer?.hasWon ?? false,
+    auctionEnded: summary.auctionEnded ?? false,
   };
 };
 
@@ -796,40 +880,11 @@ const getDressIdsForCategory = (categoryPath) => {
 };
 
 export const getDressesByCategory = (categoryPath, filters = {}) => {
-  const { listingType, style, size, priceMax, search, sortBy } = filters;
-  const query = search?.trim().toLowerCase() ?? "";
-
   const products = getDressIdsForCategory(categoryPath)
     .map((id) => getDressById(id))
-    .map(toProductCardView)
-    .filter((product) => {
-      if (
-        listingType &&
-        listingType !== "all" &&
-        product.listingType !== listingType
-      ) {
-        return false;
-      }
-      if (!productMatchesStyle(product, style)) {
-        return false;
-      }
-      if (size && product.listingSize !== size) {
-        return false;
-      }
-      if (priceMax != null && product.priceValue > priceMax) {
-        return false;
-      }
-      if (
-        query &&
-        !product.title.toLowerCase().includes(query) &&
-        !product.brand.toLowerCase().includes(query)
-      ) {
-        return false;
-      }
-      return true;
-    });
+    .map(toProductCardView);
 
-  return sortCategoryProducts(products, sortBy);
+  return filterProductCards(products, filters);
 };
 
 export const hydrateBuyerOrder = (order) => {

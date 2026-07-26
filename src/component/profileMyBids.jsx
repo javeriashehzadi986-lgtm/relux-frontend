@@ -15,8 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { BUYER_BIDS } from "@/data/buyerBidsData";
-import { hydrateBuyerBid } from "@/data/dressCatalog";
+import { useMyBids } from "@/hooks/useMyBids";
 import "./profileMyBids.css";
 
 const FILTER_TABS = [
@@ -27,16 +26,16 @@ const FILTER_TABS = [
   { id: "expired", label: "Expired" },
 ];
 
-const BIDS = BUYER_BIDS;
 const BIDS_PER_PAGE = 2;
 
 const ProfileMyBids = () => {
+  const { bids, loading, error, refresh } = useMyBids();
   const [activeFilter, setActiveFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
   const filteredBids = useMemo(() => {
-    return BIDS.map(hydrateBuyerBid).filter((bid) => {
+    return bids.filter((bid) => {
       const matchesFilter =
         activeFilter === "all" ||
         bid.status === activeFilter ||
@@ -47,7 +46,7 @@ const ProfileMyBids = () => {
         bid.seller.toLowerCase().includes(searchQuery.trim().toLowerCase());
       return matchesFilter && matchesSearch;
     });
-  }, [activeFilter, searchQuery]);
+  }, [activeFilter, searchQuery, bids]);
 
   const totalPages = Math.max(1, Math.ceil(filteredBids.length / BIDS_PER_PAGE));
 
@@ -129,7 +128,20 @@ const ProfileMyBids = () => {
       </header>
 
       <div className="profile-bids-list">
-        {paginatedBids.length > 0 ? (
+        {loading && <p className="profile-bids-status">Loading your bids...</p>}
+
+        {error && (
+          <Card className="profile-bids-empty">
+            <CardContent className="profile-bids-empty-content">
+              <p>{error}</p>
+              <Button type="button" variant="outline" onClick={refresh}>
+                Try again
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {!loading && !error && paginatedBids.length > 0 ? (
           paginatedBids.map((bid) => (
             <Card
               key={bid.id}
@@ -223,7 +235,15 @@ const ProfileMyBids = () => {
 
                 <div className="profile-bid-actions">
                   <Button type="button" className="profile-bid-primary-btn" asChild>
-                    <Link to={`/dress/${bid.dressId}`}>{bid.primaryAction}</Link>
+                    <Link
+                      to={
+                        bid.hasWon
+                          ? `/dress/${bid.dressId}/checkout`
+                          : `/dress/${bid.dressId}`
+                      }
+                    >
+                      {bid.primaryAction}
+                    </Link>
                   </Button>
                   <Button
                     type="button"
@@ -249,7 +269,7 @@ const ProfileMyBids = () => {
               </CardContent>
             </Card>
           ))
-        ) : (
+        ) : !loading && !error ? (
           <Card className="profile-bids-empty">
             <CardContent className="profile-bids-empty-content">
               <p>No bids match your search or filter.</p>
@@ -258,12 +278,12 @@ const ProfileMyBids = () => {
               </Button>
             </CardContent>
           </Card>
-        )}
+        ) : null}
       </div>
 
       <footer className="profile-bids-footer">
         <p className="profile-bids-footer-count">
-          Showing {filteredBids.length} of {BIDS.length} active bids
+          Showing {filteredBids.length} of {bids.length} active bids
         </p>
         <div className="profile-bids-pagination">
           <Button
