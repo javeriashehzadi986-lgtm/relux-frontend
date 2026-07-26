@@ -12,8 +12,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { SELLER_ORDERS } from "@/data/sellerOrdersData";
 import { hydrateSellerOrder } from "@/data/dressCatalog";
+import { useSellerOrders } from "@/hooks/useSellerOrders";
 import "./sellerOrdersRequests.css";
 
 const filterChips = [
@@ -82,45 +82,37 @@ function OrderActions({ order, onApprove, onReject, onComplete }) {
 }
 
 export function SellerOrdersRequestsContent() {
-  const [orders, setOrders] = useState(SELLER_ORDERS);
+  const { orders, loading, error, approveOrder, rejectOrder, completeOrder } =
+    useSellerOrders();
   const [activeFilter, setActiveFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [actionError, setActionError] = useState("");
 
-  const handleApprove = (orderId) => {
-    setOrders((current) =>
-      current.map((order) =>
-        order.id === orderId
-          ? {
-              ...order,
-              status: "Approved",
-              statusVariant: "approved",
-              actions: "complete",
-              dateIcon: "calendar-check",
-            }
-          : order,
-      ),
-    );
+  const handleApprove = async (orderId) => {
+    setActionError("");
+    try {
+      await approveOrder(orderId);
+    } catch (err) {
+      setActionError(err.message || "Failed to approve");
+    }
   };
 
-  const handleReject = (orderId) => {
-    setOrders((current) => current.filter((order) => order.id !== orderId));
+  const handleReject = async (orderId) => {
+    setActionError("");
+    try {
+      await rejectOrder(orderId);
+    } catch (err) {
+      setActionError(err.message || "Failed to reject");
+    }
   };
 
-  const handleComplete = (orderId) => {
-    setOrders((current) =>
-      current.map((order) =>
-        order.id === orderId
-          ? {
-              ...order,
-              status: "Completed",
-              statusVariant: "completed",
-              actions: "view",
-              dateIcon: "check",
-              dimmed: true,
-            }
-          : order,
-      ),
-    );
+  const handleComplete = async (orderId) => {
+    setActionError("");
+    try {
+      await completeOrder(orderId);
+    } catch (err) {
+      setActionError(err.message || "Failed to complete");
+    }
   };
 
   const filteredOrders = useMemo(() => {
@@ -197,8 +189,20 @@ export function SellerOrdersRequestsContent() {
         </div>
       </section>
 
+      {(error || actionError) && (
+        <p role="alert" style={{ color: "#b42318", marginBottom: "1rem" }}>
+          {actionError || error}
+        </p>
+      )}
+
       <section className="orders-requests-list">
-        {filteredOrders.length > 0 ? (
+        {loading ? (
+          <Card className="orders-requests-empty">
+            <CardContent className="orders-requests-empty-content">
+              <p>Loading orders...</p>
+            </CardContent>
+          </Card>
+        ) : filteredOrders.length > 0 ? (
           filteredOrders.map((order) => (
             <Card
               key={order.id}
@@ -210,7 +214,18 @@ export function SellerOrdersRequestsContent() {
                 <div className="orders-requests-card-top">
                   <div className="orders-requests-customer">
                     <div className="orders-requests-customer-avatar">
-                      <img src={order.customerAvatar} alt={order.customerName} />
+                      {order.customerAvatar ? (
+                        <img src={order.customerAvatar} alt={order.customerName} />
+                      ) : (
+                        <span aria-hidden="true">
+                          {(order.customerName || "B")
+                            .split(/\s+/)
+                            .map((part) => part[0])
+                            .join("")
+                            .slice(0, 2)
+                            .toUpperCase()}
+                        </span>
+                      )}
                     </div>
                     <div>
                       <p className="orders-requests-customer-name">
@@ -258,7 +273,11 @@ export function SellerOrdersRequestsContent() {
         ) : (
           <Card className="orders-requests-empty">
             <CardContent className="orders-requests-empty-content">
-              <p>No orders match your search or filter.</p>
+              <p>
+                {orders.length === 0
+                  ? "No rental requests or sale orders yet. When a buyer requests one of your items, it will appear here."
+                  : "No orders match your search or filter."}
+              </p>
               <Button type="button" className="orders-requests-btn-primary" asChild>
                 <Link to="/sellerProfile?section=listings">View Listings</Link>
               </Button>

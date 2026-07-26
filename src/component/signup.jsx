@@ -69,7 +69,7 @@ const Signup = () => {
     try {
       await register({ name: name.trim(), email, password });
       setsubmitted(true);
-      setTimeout(() => navigate("/home"), 1500);
+      setTimeout(() => navigate("/profile"), 1500);
     } catch (error) {
       setSubmitError(error.message || "Signup failed");
     } finally {
@@ -100,7 +100,8 @@ const Signup = () => {
             <CardHeader className="signup-card-header">
               <CardTitle className="signup-title">Create Your Account</CardTitle>
               <CardDescription className="signup-description">
-                Join Relux Hub to rent or resell stylish outfits
+                Create a buyer account to rent or shop. To sell, use Become a Seller
+                after signup and complete verification.
               </CardDescription>
             </CardHeader>
 

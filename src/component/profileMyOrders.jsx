@@ -74,8 +74,9 @@ const ProfileMyOrders = () => {
   const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const { orders, cancelOrder, removeOrder } = useBuyerOrders();
+  const { orders, loading, error, cancelOrder, removeOrder } = useBuyerOrders();
   const [cancelTarget, setCancelTarget] = useState(null);
+  const [actionError, setActionError] = useState("");
 
   const filteredOrders = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -89,14 +90,19 @@ const ProfileMyOrders = () => {
     });
   }, [activeFilter, orders, searchQuery]);
 
-  const handleOrderAction = (action, order) => {
+  const handleOrderAction = async (action, order) => {
     if (action.id === "cancel") {
       setCancelTarget(order.id);
       return;
     }
 
     if (action.id === "remove") {
-      removeOrder(order.id);
+      setActionError("");
+      try {
+        await removeOrder(order.id);
+      } catch (err) {
+        setActionError(err.message || "Failed to remove order");
+      }
       return;
     }
 
@@ -104,14 +110,24 @@ const ProfileMyOrders = () => {
     if (route) navigate(route);
   };
 
-  const confirmCancel = () => {
+  const confirmCancel = async () => {
     if (!cancelTarget) return;
-    cancelOrder(cancelTarget);
+    setActionError("");
+    try {
+      await cancelOrder(cancelTarget);
+    } catch (err) {
+      setActionError(err.message || "Failed to cancel order");
+    }
     setCancelTarget(null);
   };
 
   return (
     <section className="profile-orders">
+      {(error || actionError) && (
+        <p className="profile-orders-empty-text" role="alert" style={{ color: "#b42318" }}>
+          {actionError || error}
+        </p>
+      )}
       <header className="profile-orders-search-bar">
         <div className="profile-orders-search-wrap">
           <Search
@@ -157,7 +173,11 @@ const ProfileMyOrders = () => {
       </div>
 
       <div className="profile-orders-list">
-        {filteredOrders.length > 0 ? (
+        {loading ? (
+          <div className="profile-orders-empty">
+            <p className="profile-orders-empty-text">Loading your orders...</p>
+          </div>
+        ) : filteredOrders.length > 0 ? (
           filteredOrders.map((order) => (
             <Card key={order.id} className="profile-order-card">
               <CardContent className="profile-order-card-inner">
@@ -274,10 +294,10 @@ const ProfileMyOrders = () => {
               strokeWidth={1}
               aria-hidden="true"
             />
-            <h2 className="profile-orders-empty-title">No orders found</h2>
+            <h2 className="profile-orders-empty-title">No orders yet</h2>
             <p className="profile-orders-empty-text">
-              It seems you haven&apos;t placed any orders yet. Explore our latest
-              premium collection.
+              Your order list is empty. When you rent or buy an item, it will show
+              up here — only your own orders, not anyone else&apos;s.
             </p>
             <Button type="button" className="profile-orders-empty-btn" asChild>
               <Link to="/categories">Start Shopping</Link>

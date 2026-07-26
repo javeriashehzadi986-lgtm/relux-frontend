@@ -144,11 +144,7 @@ function SellerVerification() {
       }
       return;
     }
-
-    if (isAdmin) {
-      navigate("/admin", { replace: true });
-    }
-  }, [loading, isUpdateMode, isAuthenticated, isSeller, isAdmin, user, navigate]);
+  }, [loading, isUpdateMode, isAuthenticated, isSeller, user, navigate]);
 
   const validateFiles = () => {
     let valid = true;
@@ -266,6 +262,42 @@ function SellerVerification() {
       <div className="seller-verification-page">
         <main className="seller-main">
           <p>Loading...</p>
+        </main>
+      </div>
+    );
+  }
+
+  if (isAdmin) {
+    return (
+      <div className="seller-verification-page">
+        <main className="seller-main">
+          <div className="seller-intro">
+            <h1 className="seller-title">Become a Verified Seller</h1>
+            <div className="seller-auth-notice seller-auth-notice--buyer">
+              <p>
+                You are logged in as <strong>admin</strong> ({user?.email}). Admin
+                accounts cannot apply as sellers.
+              </p>
+              <p>
+                To open the seller verification form, log out first, then click
+                Become a Seller again (or use a buyer account).
+              </p>
+            </div>
+            <div className="seller-submit-wrap" style={{ marginTop: "1.5rem" }}>
+              <Button type="button" variant="outline" asChild>
+                <Link to="/admin">Back to Admin Dashboard</Link>
+              </Button>
+              <Button
+                type="button"
+                onClick={() => {
+                  logout();
+                  navigate("/sellerVerification", { replace: true });
+                }}
+              >
+                Log out &amp; Apply as Seller
+              </Button>
+            </div>
+          </div>
         </main>
       </div>
     );

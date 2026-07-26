@@ -71,7 +71,7 @@ const Login = () => {
           navigate("/sellerProfile");
         }
       } else {
-        navigate("/home");
+        navigate("/profile");
       }
     } catch (error) {
       setSubmitError(error.message || "Login failed");

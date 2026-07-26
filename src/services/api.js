@@ -117,6 +117,36 @@ export const api = {
       method: "PATCH",
       body: JSON.stringify(body),
     }),
+  getMyBuyerOrders: () => request("/buyer/orders/me"),
+  createRentalRequest: (body) =>
+    request("/buyer/orders/rental", { method: "POST", body: JSON.stringify(body) }),
+  cancelBuyerOrder: (id) =>
+    request(`/buyer/orders/${id}/cancel`, { method: "PATCH" }),
+  removeBuyerOrder: (id) => request(`/buyer/orders/${id}`, { method: "DELETE" }),
+  getMySellerOrders: () => request("/seller/orders/me"),
+  approveSellerOrder: (id) =>
+    request(`/seller/orders/${id}/approve`, { method: "PATCH" }),
+  rejectSellerOrder: (id) =>
+    request(`/seller/orders/${id}/reject`, { method: "PATCH" }),
+  completeSellerOrder: (id) =>
+    request(`/seller/orders/${id}/complete`, { method: "PATCH" }),
+  getMyReports: () => request("/reports/me"),
+  createReport: (body) =>
+    request("/reports", { method: "POST", body: JSON.stringify(body) }),
+  submitSellerDisputeResponse: (id, body) =>
+    request(`/reports/${id}/seller-response`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+  getAdminReports: (params = {}) => {
+    const query = new URLSearchParams();
+    if (params.status) query.set("status", params.status);
+    if (params.role) query.set("role", params.role);
+    const qs = query.toString();
+    return request(qs ? `/admin/reports?${qs}` : "/admin/reports");
+  },
+  updateAdminReport: (id, body) =>
+    request(`/admin/reports/${id}`, { method: "PATCH", body: JSON.stringify(body) }),
 };
 
 export default api;

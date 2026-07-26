@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatPkr } from "@/data/dressCatalog";
+import { useAuth } from "@/context/AuthContext";
 import { useBuyerOrders } from "@/hooks/useBuyerOrders";
 import { useWishlist } from "@/hooks/useWishlist";
 import { DressDetailsBreadcrumb } from "./dressDetailsBreadcrumb";
@@ -39,6 +40,7 @@ const getRentalDays = (start, end) => {
 
 const RentalDressDetails = ({ dress }) => {
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
   const defaults = useMemo(() => getDefaultDates(), []);
   const [activeImage, setActiveImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState(dress.listingSize ?? "M");
@@ -47,6 +49,8 @@ const RentalDressDetails = ({ dress }) => {
   const { isSaved, toggle: toggleWishlist } = useWishlist();
   const { orders, requestRental, cancelOrder } = useBuyerOrders();
   const favorited = isSaved(dress.id);
+  const [requestError, setRequestError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const pendingRequest = useMemo(
     () =>
@@ -79,21 +83,41 @@ const RentalDressDetails = ({ dress }) => {
     document.getElementById("rental-size-guide")?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const handleRentRequest = () => {
-    requestRental({
-      dressId: dress.id,
-      size: selectedSize,
-      rentStart,
-      rentEnd,
-      rentalDays,
-    });
-    navigate("/profile?section=orders");
+  const handleRentRequest = async () => {
+    if (!isAuthenticated || user?.role !== "buyer") {
+      navigate("/login", { state: { from: `/dress/${dress.id}` } });
+      return;
+    }
+
+    setRequestError("");
+    setSubmitting(true);
+    try {
+      await requestRental({
+        dressId: dress.id,
+        size: selectedSize,
+        rentStart,
+        rentEnd,
+        rentalDays,
+        sellerId: dress.sellerId,
+        customerName: user.name,
+      });
+      navigate("/profile?section=orders");
+    } catch (error) {
+      setRequestError(error.message || "Failed to submit rental request");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const handleCancelRequest = () => {
+  const handleCancelRequest = async () => {
     if (!pendingRequest) return;
-    cancelOrder(pendingRequest.id);
-    setShowCancelModal(false);
+    try {
+      await cancelOrder(pendingRequest.id);
+      setShowCancelModal(false);
+    } catch (error) {
+      setRequestError(error.message || "Failed to cancel request");
+      setShowCancelModal(false);
+    }
   };
 
   return (
@@ -208,6 +232,11 @@ const RentalDressDetails = ({ dress }) => {
           </div>
 
           <div className="rental-details-actions">
+            {requestError ? (
+              <p className="rental-details-pending-note" role="alert">
+                {requestError}
+              </p>
+            ) : null}
             {pendingRequest ? (
               <>
                 <p className="rental-details-pending-note">
@@ -228,8 +257,9 @@ const RentalDressDetails = ({ dress }) => {
                 type="button"
                 className="rental-details-rent-btn"
                 onClick={handleRentRequest}
+                disabled={submitting}
               >
-                Request for Rent
+                {submitting ? "Submitting..." : "Request for Rent"}
                 <ArrowRight size={20} aria-hidden="true" />
               </Button>
             )}

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   AlertTriangle,
@@ -29,6 +29,7 @@ import ProfileMyBids from "./profileMyBids";
 import ProfileMyOrders from "./profileMyOrders";
 import ProfileWishlist from "./profileWishlist";
 import ProfileSupportCenter from "./profileSupportCenter";
+import { useAuth } from "@/context/AuthContext";
 
 const SIDEBAR_ITEMS = [
   { id: "orders", label: "My Orders", icon: ShoppingBag },
@@ -37,13 +38,27 @@ const SIDEBAR_ITEMS = [
   { id: "profile", label: "My Profile", icon: User },
 ];
 
-const INITIAL_PROFILE = {
-  fullName: "Ayesha Khan",
-  email: "ayesha@example.com",
-  phone: "+92 300 1234567",
-  city: "Lahore",
-  address: "Gulberg III, Lahore",
-};
+function userToProfile(user) {
+  return {
+    fullName: user?.name ?? "",
+    email: user?.email ?? "",
+    phone: user?.phone ?? "",
+    city: user?.city ?? "",
+    address: "",
+  };
+}
+
+function formatFieldValue(value) {
+  const text = value?.trim();
+  return text || "—";
+}
+
+function getInitials(name) {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "B";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+}
 
 const VALID_SECTIONS = new Set([
   "orders",
@@ -63,6 +78,7 @@ const resolveSection = (sectionProp, sectionFromQuery) => {
 
 const Profile = ({ section: sectionProp }) => {
   const navigate = useNavigate();
+  const { user, updateProfile, logout } = useAuth();
   const [searchParams] = useSearchParams();
   const sectionFromQuery = searchParams.get("section");
   const [activeSection, setActiveSection] = useState(() =>
@@ -70,14 +86,24 @@ const Profile = ({ section: sectionProp }) => {
   );
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [profile, setProfile] = useState(INITIAL_PROFILE);
-  const [draft, setDraft] = useState(INITIAL_PROFILE);
+  const profile = useMemo(() => userToProfile(user), [user]);
+  const [draft, setDraft] = useState(profile);
   const [isEditing, setIsEditing] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const sidebarInitials = useMemo(() => getInitials(user?.name ?? ""), [user?.name]);
 
   useEffect(() => {
     setActiveSection(resolveSection(sectionProp, sectionFromQuery));
   }, [sectionProp, sectionFromQuery]);
+
+  useEffect(() => {
+    if (!isEditing) {
+      setDraft(profile);
+    }
+  }, [profile, isEditing]);
 
   const handleSectionChange = (sectionId) => {
     setActiveSection(sectionId);
@@ -100,12 +126,24 @@ const Profile = ({ section: sectionProp }) => {
     setSaved(false);
   };
 
-  const handleSave = (event) => {
+  const handleSave = async (event) => {
     event.preventDefault();
-    setProfile(draft);
-    setIsEditing(false);
-    setSaved(true);
-    window.setTimeout(() => setSaved(false), 2500);
+    setSaveError("");
+    setSaving(true);
+    try {
+      await updateProfile({
+        name: draft.fullName.trim(),
+        phone: draft.phone.trim(),
+        city: draft.city.trim(),
+      });
+      setIsEditing(false);
+      setSaved(true);
+      window.setTimeout(() => setSaved(false), 2500);
+    } catch (error) {
+      setSaveError(error.message || "Could not save profile");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const updateDraft = (field) => (event) => {
@@ -114,6 +152,7 @@ const Profile = ({ section: sectionProp }) => {
 
   const handleLogoutConfirm = () => {
     setShowLogoutConfirm(false);
+    logout();
     navigate("/login");
   };
 
@@ -228,7 +267,8 @@ const Profile = ({ section: sectionProp }) => {
                         type="email"
                         className="profile-input"
                         value={draft.email}
-                        onChange={updateDraft("email")}
+                        readOnly
+                        disabled
                       />
                     </Field>
                     <Field className="profile-field">
@@ -267,8 +307,13 @@ const Profile = ({ section: sectionProp }) => {
                     />
                   </Field>
                   <div className="profile-form-actions">
-                    <Button type="submit" size="lg" className="profile-save-btn">
-                      Save Changes
+                    {saveError ? (
+                      <p className="profile-saved-message" style={{ color: "#b42318" }}>
+                        {saveError}
+                      </p>
+                    ) : null}
+                    <Button type="submit" size="lg" className="profile-save-btn" disabled={saving}>
+                      {saving ? "Saving..." : "Save Changes"}
                     </Button>
                     <Button
                       type="button"
@@ -285,23 +330,23 @@ const Profile = ({ section: sectionProp }) => {
               <dl className="profile-details">
                 <div className="profile-detail">
                   <dt className="profile-label">Full Name</dt>
-                  <dd className="profile-detail-value">{profile.fullName}</dd>
+                  <dd className="profile-detail-value">{formatFieldValue(profile.fullName)}</dd>
                 </div>
                 <div className="profile-detail">
                   <dt className="profile-label">Email Address</dt>
-                  <dd className="profile-detail-value">{profile.email}</dd>
+                  <dd className="profile-detail-value">{formatFieldValue(profile.email)}</dd>
                 </div>
                 <div className="profile-detail">
                   <dt className="profile-label">Phone Number</dt>
-                  <dd className="profile-detail-value">{profile.phone}</dd>
+                  <dd className="profile-detail-value">{formatFieldValue(profile.phone)}</dd>
                 </div>
                 <div className="profile-detail">
                   <dt className="profile-label">City</dt>
-                  <dd className="profile-detail-value">{profile.city}</dd>
+                  <dd className="profile-detail-value">{formatFieldValue(profile.city)}</dd>
                 </div>
                 <div className="profile-detail profile-detail--full">
                   <dt className="profile-label">Delivery Address</dt>
-                  <dd className="profile-detail-value">{profile.address}</dd>
+                  <dd className="profile-detail-value">{formatFieldValue(profile.address)}</dd>
                 </div>
               </dl>
             )}
@@ -369,6 +414,17 @@ const Profile = ({ section: sectionProp }) => {
     <div className="profile-page">
       <aside className="profile-sidebar" aria-label="Account navigation">
         <h2 className="profile-sidebar-heading">Dashboard</h2>
+        {user ? (
+          <div className="profile-sidebar-user">
+            <div className="profile-sidebar-avatar" aria-hidden="true">
+              {sidebarInitials}
+            </div>
+            <div>
+              <p className="profile-sidebar-name">{user.name}</p>
+              <p className="profile-sidebar-email">{user.email}</p>
+            </div>
+          </div>
+        ) : null}
         {renderSidebarNav()}
         <div className="profile-sidebar-footer">
           <Button

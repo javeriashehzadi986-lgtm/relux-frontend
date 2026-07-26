@@ -35,7 +35,6 @@ import AdminReviews from "./component/admin/adminReviews";
 import AdminSupportCenter from "./component/admin/adminSupportCenter";
 import AdminNotifications from "./component/admin/adminNotifications";
 import AdminPayments from "./component/admin/adminPayments";
-import AdminReportsComplaints from "./component/admin/adminReportsComplaints";
 import AdminUserManagement from "./component/admin/AdminUserManagement";
 import AdminSellerVerification from "./component/admin/AdminSellerVerification";
 import AdminProductManagement from "./component/admin/AdminProductManagement";
@@ -161,8 +160,22 @@ function App() {
             element={<Navigate to="/sellerProfile?section=support" replace />}
           />
 
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/wishlist" element={<Profile section="wishlist" />} />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute roles={["buyer"]}>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/wishlist"
+            element={
+              <ProtectedRoute roles={["buyer"]}>
+                <Profile section="wishlist" />
+              </ProtectedRoute>
+            }
+          />
 
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
@@ -183,7 +196,7 @@ function App() {
           <Route path="/adminPayments" element={<Navigate to="/admin/payments" replace />} />
           <Route
             path="/adminReportsComplaints"
-            element={<Navigate to="/admin/reports" replace />}
+            element={<Navigate to="/admin/support" replace />}
           />
 
           <Route
@@ -205,7 +218,7 @@ function App() {
             <Route path="payments" element={<AdminPayments />} />
             <Route path="notifications" element={<AdminNotifications />} />
             <Route path="support" element={<AdminSupportCenter />} />
-            <Route path="reports" element={<AdminReportsComplaints />} />
+            <Route path="reports" element={<Navigate to="/admin/support" replace />} />
             <Route path="profile" element={<AdminProfile />} />
           </Route>
         </Routes>
