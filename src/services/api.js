@@ -161,12 +161,29 @@ export const api = {
     request(`/seller/listings/${id}`),
 
   // Public Listings
-  getPublicListings: (category) =>
-    request(
-      category
-        ? `/catalog/listings?category=${category}`
-        : "/catalog/listings",
-    ),
+  getPublicListings: (categoryOrOptions) => {
+    const options =
+      typeof categoryOrOptions === "string"
+        ? { category: categoryOrOptions }
+        : categoryOrOptions ?? {};
+    const query = new URLSearchParams();
+
+    if (options.category) {
+      query.set("category", options.category);
+    }
+
+    if (options.type) {
+      query.set("type", options.type);
+    }
+
+    if (options.limit) {
+      query.set("limit", String(options.limit));
+    }
+
+    const qs = query.toString();
+
+    return request(qs ? `/catalog/listings?${qs}` : "/catalog/listings");
+  },
 
   getPublicListing: (id) =>
     request(`/catalog/listings/${id}`),
@@ -214,6 +231,9 @@ export const api = {
   // Messages
   getConversations: () =>
     request("/messages/conversations"),
+
+  getUnreadMessageCount: () =>
+    request("/messages/unread-count"),
 
   openConversation: (body) =>
     request("/messages/conversations/open", {
@@ -359,6 +379,20 @@ export const api = {
       method: "PATCH",
       body: JSON.stringify(body),
     }),
+
+  // Notifications
+  getMyNotifications: (filter = "all") =>
+    request(
+      filter && filter !== "all"
+        ? `/notifications/me?filter=${encodeURIComponent(filter)}`
+        : "/notifications/me",
+    ),
+
+  markNotificationRead: (id) =>
+    request(`/notifications/${id}/read`, { method: "PATCH" }),
+
+  markAllNotificationsRead: () =>
+    request("/notifications/read-all", { method: "PATCH" }),
 };
 
 export default api;

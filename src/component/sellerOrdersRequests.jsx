@@ -229,7 +229,17 @@ export function SellerOrdersRequestsContent() {
                     </div>
                     <div>
                       <p className="orders-requests-customer-name">
-                        <Link to="/messages">{order.customerName}</Link>
+                        <Link
+                          to={`/messages/${order.dressId}`}
+                          state={{
+                            buyerId: order.buyerId,
+                            productId: order.dressId,
+                            listingTitle: order.itemTitle,
+                            listingImage: order.itemImage,
+                          }}
+                        >
+                          {order.customerName}
+                        </Link>
                       </p>
                       <span className="orders-requests-order-type">
                         {order.orderType}

@@ -1,4 +1,4 @@
-import { getDressById, isMongoListingId, toProductCardView } from "./dressCatalog";
+import { isMongoListingId } from "./dressCatalog";
 
 const STORAGE_KEY = "relux-wishlist";
 
@@ -77,11 +77,6 @@ export function wishlistItemToApiPayload(item) {
   };
 }
 
-function wishlistItemFromId(id, addedAt = Date.now()) {
-  const product = toProductCardView(getDressById(id));
-  return productToWishlistItem(product, addedAt);
-}
-
 export function getWishlistIds() {
   return new Set(loadWishlistEntries().map((entry) => entry.id));
 }
@@ -92,25 +87,22 @@ export function isInWishlist(id) {
 
 export function getWishlistItems() {
   return loadWishlistEntries()
-    .map((entry) => {
-      try {
-        const fresh = wishlistItemFromId(entry.id, entry.addedAt);
-        return { ...fresh, addedAt: entry.addedAt };
-      } catch {
-        return entry;
-      }
-    })
+    .filter((entry) => isMongoListingId(entry.id))
     .sort((a, b) => b.addedAt - a.addedAt);
 }
 
 export function addToWishlist(productOrId) {
   const item =
     typeof productOrId === "string"
-      ? wishlistItemFromId(productOrId)
+      ? { id: productOrId, title: "Saved item", brand: "", listingType: "resale", price: "" }
       : productToWishlistItem(productOrId);
 
+  if (!isMongoListingId(item.id)) {
+    return false;
+  }
+
   const entries = loadWishlistEntries().filter((entry) => entry.id !== item.id);
-  entries.unshift(item);
+  entries.unshift(typeof productOrId === "string" ? item : productToWishlistItem(productOrId));
   persist(entries);
   return true;
 }
@@ -161,16 +153,15 @@ export function resolveWishlistPayload(productOrId) {
     throw new Error("Wishlist item id is required");
   }
 
-  if (isMongoListingId(id)) {
-    return {
-      itemId: id,
-      id,
-      productId: id,
-    };
+  if (!isMongoListingId(id)) {
+    throw new Error("Only live listings can be saved to your wishlist");
   }
 
-  const item = wishlistItemFromId(id);
-  return wishlistItemToApiPayload(item);
+  return {
+    itemId: id,
+    id,
+    productId: id,
+  };
 }
 
 export function clearLocalWishlist() {
@@ -180,7 +171,7 @@ export function clearLocalWishlist() {
 }
 
 export async function syncLocalWishlistToServer(apiClient) {
-  const entries = loadWishlistEntries();
+  const entries = loadWishlistEntries().filter((entry) => isMongoListingId(entry.id));
   if (entries.length === 0) return;
 
   await Promise.all(

@@ -37,6 +37,7 @@ export function useMessaging(conversationParam) {
         listingKey,
         productId: isMongoListingId(listingKey) ? listingKey : state.productId,
         sellerId: state.sellerId,
+        buyerId: state.buyerId,
         listingTitle: state.listingTitle,
         listingImage: state.listingImage,
         dressId: listingKey,
@@ -107,6 +108,24 @@ export function useMessaging(conversationParam) {
     };
   }, [user, resolveConversation]);
 
+  useEffect(() => {
+    if (!user) return undefined;
+
+    const poll = async () => {
+      try {
+        await loadConversations();
+        if (conversationParam) {
+          await loadConversation(conversationParam);
+        }
+      } catch {
+        // ignore polling errors
+      }
+    };
+
+    const pollTimer = window.setInterval(poll, 15000);
+    return () => window.clearInterval(pollTimer);
+  }, [user, conversationParam, loadConversations, loadConversation]);
+
   const activeId = conversationParam ?? activeConversation?.id ?? conversations[0]?.id;
 
   const refreshActive = useCallback(async () => {
@@ -116,9 +135,12 @@ export function useMessaging(conversationParam) {
   }, [activeId, loadConversation, loadConversations]);
 
   const sendMessage = useCallback(
-    async (text) => {
+    async (text, image = "") => {
       if (!activeId || !text.trim()) return;
-      await api.sendMessage(activeId, { text: text.trim() });
+      await api.sendMessage(activeId, {
+        text: text.trim(),
+        ...(image ? { image } : {}),
+      });
       await refreshActive();
     },
     [activeId, refreshActive],
@@ -181,6 +203,7 @@ export function useMessaging(conversationParam) {
     clearHistory,
     blockConversation,
     selectConversation,
+    markConversationRead,
     refreshActive,
   };
 }

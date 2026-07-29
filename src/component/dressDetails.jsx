@@ -4,7 +4,7 @@ import { Gavel, Heart, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { getDressById, applyAuctionApiData, isMongoListingId, mapApiListingToDress } from "@/data/dressCatalog";
+import { applyAuctionApiData, isMongoListingId, mapApiListingToDress } from "@/data/dressCatalog";
 import api from "@/services/api";
 import { useRequireLogin } from "@/hooks/useRequireLogin";
 import { useWishlist } from "@/hooks/useWishlist";
@@ -20,10 +20,9 @@ const formatCountdown = ({ hours, minutes, seconds }) =>
 const DressDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [dress, setDress] = useState(() =>
-    isMongoListingId(id) ? null : getDressById(id),
-  );
-  const [loading, setLoading] = useState(isMongoListingId(id));
+  const [dress, setDress] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [activeImage, setActiveImage] = useState(0);
   const [bidAmount, setBidAmount] = useState("");
   const [termsAccepted, setTermsAccepted] = useState(false);
@@ -48,13 +47,15 @@ const DressDetails = () => {
 
   useEffect(() => {
     if (!isMongoListingId(id)) {
-      setDress(getDressById(id));
+      setDress(null);
+      setLoadError("This listing is no longer available.");
       setLoading(false);
       return undefined;
     }
 
     let cancelled = false;
     setLoading(true);
+    setLoadError("");
 
     api
       .getPublicListing(id)
@@ -63,9 +64,10 @@ const DressDetails = () => {
           setDress(mapApiListingToDress(listing));
         }
       })
-      .catch(() => {
+      .catch((err) => {
         if (!cancelled) {
-          setDress(getDressById(id));
+          setDress(null);
+          setLoadError(err.message || "Could not load this listing.");
         }
       })
       .finally(() => {
@@ -124,12 +126,7 @@ const DressDetails = () => {
     }
 
     if (!isMongoListingId(id)) {
-      if (amount < dress.minimumNextBid) {
-        setBidError(`Your bid must be at least ${dress.minimumNextBidFormatted}.`);
-        return;
-      }
-      setHasWonAuction(true);
-      proceedToCheckout();
+      setBidError("This listing is not available for bidding.");
       return;
     }
 
@@ -175,10 +172,20 @@ const DressDetails = () => {
     return () => window.clearInterval(timer);
   }, [dress?.listingType, dress?.auctionEnded, dress]);
 
-  if (loading || !dress) {
+  if (loading) {
     return (
       <div className="dress-details-page">
         <p style={{ padding: "2rem", textAlign: "center" }}>Loading dress details...</p>
+      </div>
+    );
+  }
+
+  if (!dress || loadError) {
+    return (
+      <div className="dress-details-page">
+        <p style={{ padding: "2rem", textAlign: "center" }}>
+          {loadError || "This listing could not be found."}
+        </p>
       </div>
     );
   }

@@ -272,6 +272,40 @@
   font-style: italic;
 }
 
+.notification-status {
+  margin: 0 0 1.5rem;
+  text-align: center;
+  color: #5d605f;
+}
+
+.notification-status--error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.notification-item--clickable {
+  cursor: pointer;
+}
+
+.notification-item--clickable:hover {
+  background: rgba(49, 104, 93, 0.04);
+}
+
+.notification-item-link {
+  display: inline-block;
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #31685d;
+  text-decoration: none;
+}
+
+.notification-item-link:hover {
+  text-decoration: underline;
+}
+
 @media (min-width: 768px) {
   .notification-header {
     flex-direction: row;

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getDressById } from "@/data/dressCatalog";
+import { isMongoListingId } from "@/data/dressCatalog";
 import {
   LISTING_CONDITION_OPTIONS,
   LISTING_SIZE_OPTIONS,
@@ -117,92 +117,61 @@ const SellerAddListing = () => {
   );
 
   useEffect(() => {
-    if (!editListingId) return;
+    if (!editListingId) return undefined;
 
-    const isApiListing = /^[a-f0-9]{24}$/i.test(editListingId);
-
-    if (isApiListing) {
-      let cancelled = false;
-
-      api
-        .getMyListing(editListingId)
-        .then(({ listing }) => {
-          if (cancelled || !listing) return;
-
-          setTitle(listing.title || "");
-          setBrand(listing.brand || "");
-          setDescription(listing.description || "");
-          setListingType(listing.listingType === "rent" ? "rent" : "sale");
-          setMainCategory(listing.mainCategory || "Female");
-          setStyle(listing.style || "Casual");
-          setClothingType(listing.clothingType || "Dress");
-
-          if (listing.listingType === "rent") {
-            setRentPrice(listing.rentPrice || "");
-            setItemPrice(listing.itemPrice || "");
-          } else {
-            setSalePrice(listing.salePrice || "");
-            setStartingBid(listing.startingBid || "");
-            setMinBid(listing.minBid || "");
-            setAuctionEndDate(listing.auctionEndDate || "");
-          }
-
-          if (listing.listingSize) {
-            setSize(normalizeListingSize(listing.listingSize));
-          }
-          if (listing.listingCondition) {
-            setCondition(normalizeListingCondition(listing.listingCondition));
-          }
-
-          const gallery = listing.gallery?.length
-            ? listing.gallery
-            : listing.mainImage
-              ? [listing.mainImage]
-              : [];
-          if (gallery.length) {
-            setPreviewHeroImage(gallery[0]);
-            setPreviewImages(gallery);
-          }
-        })
-        .catch(() => {
-          // keep empty form if listing cannot be loaded
-        });
-
-      return () => {
-        cancelled = true;
-      };
+    if (!isMongoListingId(editListingId)) {
+      return undefined;
     }
 
-    const dress = getDressById(editListingId);
-    setTitle(dress.title);
-    setBrand(dress.brand ?? "");
-    setDescription(dress.fabric ?? dress.occasion ?? "");
-    setListingType(dress.listingType === "rent" ? "rent" : "sale");
-    if (dress.listingType === "rent") {
-      setRentPrice(String(dress.dailyRate ?? ""));
-      setItemPrice(String(dress.securityDeposit ?? dress.fullDressPrice ?? ""));
-    } else {
-      setSalePrice(String(dress.price ?? ""));
-      setStartingBid(String(dress.currentBid ?? dress.price ?? ""));
-      setMinBid(String(dress.minimumNextBid ?? ""));
-    }
-    if (dress.listingSize) {
-      setSize(normalizeListingSize(dress.listingSize));
-    } else if (dress.sizes?.[0]) {
-      setSize(normalizeListingSize(dress.sizes[0]));
-    }
-    if (dress.mainImage ?? dress.image) {
-      const hero = dress.mainImage ?? dress.image;
-      setPreviewHeroImage(hero);
-      setPreviewImages((current) => [hero, ...current.slice(1)]);
-    }
-    if (dress.listingCondition) {
-      setCondition(normalizeListingCondition(dress.listingCondition));
-    } else if (dress.conditionStatus || dress.condition) {
-      setCondition(
-        normalizeListingCondition(dress.conditionStatus ?? dress.condition),
-      );
-    }
+    let cancelled = false;
+
+    api
+      .getMyListing(editListingId)
+      .then(({ listing }) => {
+        if (cancelled || !listing) return;
+
+        setTitle(listing.title || "");
+        setBrand(listing.brand || "");
+        setDescription(listing.description || "");
+        setListingType(listing.listingType === "rent" ? "rent" : "sale");
+        setMainCategory(listing.mainCategory || "Female");
+        setStyle(listing.style || "Casual");
+        setClothingType(listing.clothingType || "Dress");
+
+        if (listing.listingType === "rent") {
+          setRentPrice(listing.rentPrice || "");
+          setItemPrice(listing.itemPrice || "");
+        } else {
+          setSalePrice(listing.salePrice || "");
+          setStartingBid(listing.startingBid || "");
+          setMinBid(listing.minBid || "");
+          setAuctionEndDate(listing.auctionEndDate || "");
+        }
+
+        if (listing.listingSize) {
+          setSize(normalizeListingSize(listing.listingSize));
+        }
+        if (listing.listingCondition) {
+          setCondition(normalizeListingCondition(listing.listingCondition));
+        }
+
+        const gallery = listing.gallery?.length
+          ? listing.gallery
+          : listing.mainImage
+            ? [listing.mainImage]
+            : [];
+        if (gallery.length) {
+          setPreviewHeroImage(gallery[0]);
+          setPreviewImages(gallery);
+        }
+      })
+      .catch(() => {
+        // keep empty form if listing cannot be loaded
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [editListingId]);
 
   useEffect(() => {

@@ -833,6 +833,13 @@
   line-height: 1.3;
 }
 
+.seller-chat-attach-error {
+  margin: 0.5rem 0 0;
+  text-align: center;
+  font-size: 0.75rem;
+  color: #b42318;
+}
+
 .seller-chat-empty-panel {
   flex: 1;
   display: none;

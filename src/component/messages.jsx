@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useMessaging } from "@/hooks/useMessaging";
+import api from "@/services/api";
 import "./messages.css";
 
 const useIsDesktop = () => {
@@ -110,6 +111,7 @@ const MessagesContent = () => {
     clearHistory,
     blockConversation,
     selectConversation,
+    markConversationRead,
     refreshActive,
   } = useMessaging(conversationId);
 
@@ -119,8 +121,10 @@ const MessagesContent = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [actionNotice, setActionNotice] = useState("");
   const [sending, setSending] = useState(false);
+  const [attachError, setAttachError] = useState("");
   const textareaRef = useRef(null);
   const menuRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   const filteredConversations = useMemo(
     () => filterConversations(conversations, chatFilter, searchQuery, isSeller),
@@ -189,7 +193,10 @@ const MessagesContent = () => {
     try {
       switch (action) {
         case "markRead":
-          await refreshActive();
+          if (activeId) {
+            await markConversationRead(activeId);
+            await refreshActive();
+          }
           setActionNotice("Conversation marked as read.");
           break;
         case "viewListing":
@@ -208,7 +215,20 @@ const MessagesContent = () => {
           setActionNotice("Chat history cleared.");
           break;
         case "report":
-          setActionNotice("Report submitted. Our concierge team will review this conversation.");
+          await api.createReport({
+            issueType: "Other",
+            subject: `Report conversation with ${partnerName ?? "user"}`,
+            message: [
+              `Conversation ID: ${activeId}`,
+              listingTitle ? `Listing: ${listingTitle}` : null,
+              `Reported by: ${isSeller ? "seller" : "buyer"}`,
+              "",
+              "This report was submitted from the messages screen.",
+            ]
+              .filter(Boolean)
+              .join("\n"),
+          });
+          setActionNotice("Report submitted. Our support team will review this conversation.");
           break;
         case "block":
           await blockConversation();
@@ -224,19 +244,63 @@ const MessagesContent = () => {
     setMenuOpen(false);
   };
 
-  const handleSend = async () => {
+  const handleSend = async (image = "") => {
     const trimmed = message.trim();
     if (!trimmed || !activeId || sending) return;
 
     setSending(true);
+    setAttachError("");
     try {
-      await sendMessage(trimmed);
+      await sendMessage(trimmed, image);
       setMessage("");
       if (textareaRef.current) {
         textareaRef.current.style.height = "auto";
       }
     } catch (err) {
       setActionNotice(err.message || "Failed to send message.");
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const handleAttachImage = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleImageSelected = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file || !activeId) return;
+
+    if (!file.type.startsWith("image/")) {
+      setAttachError("Please choose an image file.");
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      setAttachError("Image must be under 2MB.");
+      return;
+    }
+
+    setAttachError("");
+    setSending(true);
+
+    try {
+      const dataUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error("Could not read image"));
+        reader.readAsDataURL(file);
+      });
+
+      const caption = message.trim() || "Shared an image";
+      await sendMessage(caption, String(dataUrl));
+      setMessage("");
+      if (textareaRef.current) {
+        textareaRef.current.style.height = "auto";
+      }
+    } catch (err) {
+      setActionNotice(err.message || "Failed to send image.");
     } finally {
       setSending(false);
     }
@@ -534,6 +598,11 @@ const MessagesContent = () => {
                     <div key={item.id} className="seller-chat-message seller-chat-message--sent">
                       <div className="seller-chat-message-content">
                         <div className="seller-chat-bubble seller-chat-bubble--sent">{item.text}</div>
+                        {item.image ? (
+                          <div className="seller-chat-message-image">
+                            <img src={item.image} alt="Attachment" />
+                          </div>
+                        ) : null}
                         <span className="seller-chat-message-time">
                           {item.time}
                           {item.status ? ` • ${item.status}` : ""}
@@ -546,6 +615,24 @@ const MessagesContent = () => {
 
               <footer className="seller-chat-footer">
                 <div className="seller-chat-footer-inner">
+                  <div className="seller-chat-footer-actions">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      hidden
+                      onChange={handleImageSelected}
+                    />
+                    <button
+                      type="button"
+                      className="seller-chat-icon-btn"
+                      aria-label="Attach image"
+                      onClick={handleAttachImage}
+                      disabled={sending || !activeId}
+                    >
+                      <span className="material-symbols-outlined">attach_file</span>
+                    </button>
+                  </div>
                   <div className="seller-chat-input-wrap">
                     <textarea
                       ref={textareaRef}
@@ -562,12 +649,17 @@ const MessagesContent = () => {
                     type="button"
                     className="seller-chat-send-btn"
                     aria-label="Send message"
-                    onClick={handleSend}
-                    disabled={sending}
+                    onClick={() => handleSend()}
+                    disabled={sending || !message.trim()}
                   >
                     <span className="material-symbols-outlined">send</span>
                   </button>
                 </div>
+                {attachError ? (
+                  <p className="seller-chat-attach-error" role="alert">
+                    {attachError}
+                  </p>
+                ) : null}
                 <p className="seller-chat-protection">
                   {isSeller
                     ? "Keep all payments and agreements inside Relux Hub for your protection."

@@ -8,6 +8,8 @@ import {
   MessageCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/context/AuthContext";
+import { useUnreadMessageCount } from "@/hooks/useUnreadMessageCount";
 import {
   isDashboardRoute,
   isDashboardSidebarOpen,
@@ -20,6 +22,8 @@ import {
 
 const Navbar = () => {
   const location = useLocation();
+  const { isAuthenticated } = useAuth();
+  const { unreadCount } = useUnreadMessageCount();
   const onDashboard = isDashboardRoute(location.pathname);
   const [sidebarOpen, setSidebarOpen] = useState(() => isDashboardSidebarOpen());
 
@@ -84,8 +88,11 @@ const Navbar = () => {
 
         <div className="nav-right">
           <div className="nav-icons">
-            <Link to="/messages" aria-label="Messages">
+            <Link to="/messages" aria-label="Messages" className="nav-icon-link">
               <MessageCircle size={22} />
+              {isAuthenticated && unreadCount > 0 ? (
+                <span className="nav-icon-badge">{unreadCount > 9 ? "9+" : unreadCount}</span>
+              ) : null}
             </Link>
 
             <Link to="/wishlist" aria-label="Wishlist">

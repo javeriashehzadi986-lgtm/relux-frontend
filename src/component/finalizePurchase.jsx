@@ -1,8 +1,9 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import { BadgeCheck, ShieldCheck, Truck, Verified } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getDressById, getDressConditionLabel } from "@/data/dressCatalog";
+import { getDressConditionLabel, isMongoListingId, mapApiListingToDress } from "@/data/dressCatalog";
+import api from "@/services/api";
 import "./finalizePurchase.css";
 
 const CITIES = ["Lahore", "Karachi", "Islamabad", "Faisalabad"];
@@ -22,7 +23,45 @@ const getEstimatedDelivery = () => {
 const FinalizePurchase = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const dress = useMemo(() => getDressById(id), [id]);
+  const [dress, setDress] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+
+  useEffect(() => {
+    if (!isMongoListingId(id)) {
+      setDress(null);
+      setLoadError("This listing is no longer available.");
+      setLoading(false);
+      return undefined;
+    }
+
+    let cancelled = false;
+    setLoading(true);
+    setLoadError("");
+
+    api
+      .getPublicListing(id)
+      .then(({ listing }) => {
+        if (!cancelled) {
+          setDress(mapApiListingToDress(listing));
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setDress(null);
+          setLoadError(err.message || "Could not load this listing.");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
 
   const [form, setForm] = useState({
     fullName: "Ayesha Khan",
@@ -32,6 +71,24 @@ const FinalizePurchase = () => {
     city: "Lahore",
     specialInstructions: "",
   });
+
+  if (loading) {
+    return (
+      <div className="finalize-purchase-page">
+        <p style={{ padding: "2rem", textAlign: "center" }}>Loading checkout...</p>
+      </div>
+    );
+  }
+
+  if (!dress || loadError) {
+    return (
+      <div className="finalize-purchase-page">
+        <p style={{ padding: "2rem", textAlign: "center" }}>
+          {loadError || "This listing could not be found."}
+        </p>
+      </div>
+    );
+  }
 
   if (dress.listingType !== "resale") {
     return <Navigate to={`/dress/${id}`} replace />;

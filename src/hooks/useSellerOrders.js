@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { refreshPublicCatalog } from "@/data/catalogStore";
 import api from "@/services/api";
 
 export function useSellerOrders() {
@@ -18,6 +19,7 @@ export function useSellerOrders() {
     setLoading(true);
     setError("");
     try {
+      await refreshPublicCatalog();
       const data = await api.getMySellerOrders();
       setOrders(data.orders ?? []);
     } catch (err) {

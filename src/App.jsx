@@ -174,13 +174,6 @@ function App() {
             element={<Navigate to="/sellerProfile?section=support" replace />}
           />
 
-<<<<<<< HEAD
-          <Route path="/profile" element={<Profile />} />
-          <Route
-            path="/wishlist"
-            element={
-              <ProtectedRoute>
-=======
           <Route
             path="/profile"
             element={
@@ -193,7 +186,6 @@ function App() {
             path="/wishlist"
             element={
               <ProtectedRoute roles={["buyer"]}>
->>>>>>> 7e7e7d9da0c624dcf0a52fb48e99c6baec6e557a
                 <Profile section="wishlist" />
               </ProtectedRoute>
             }
@@ -210,7 +202,14 @@ function App() {
           <Route path="/help" element={<Help />} />
 
           <Route path="/cart" element={<Navigate to="/wishlist" replace />} />
-          <Route path="/notification" element={<Notification />} />
+          <Route
+            path="/notification"
+            element={
+              <ProtectedRoute>
+                <Notification />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/adminProfile" element={<Navigate to="/admin/profile" replace />} />
           <Route path="/adminReviews" element={<Navigate to="/admin/reviews" replace />} />
           <Route path="/adminSupportCenter" element={<Navigate to="/admin/support" replace />} />
