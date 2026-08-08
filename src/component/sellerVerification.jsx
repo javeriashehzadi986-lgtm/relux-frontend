@@ -285,7 +285,7 @@ function SellerVerification() {
             </div>
             <div className="seller-submit-wrap" style={{ marginTop: "1.5rem" }}>
               <Button type="button" variant="outline" asChild>
-                <Link to="/admin">Back to Admin Dashboard</Link>
+                <Link to="/admin/profile">Back to Admin</Link>
               </Button>
               <Button
                 type="button"

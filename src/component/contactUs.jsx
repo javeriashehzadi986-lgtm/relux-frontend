@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import api from "@/services/api";
 import "./contactUs.css";
 
 const CONTACT_IMAGE =
@@ -8,22 +9,30 @@ const CONTACT_IMAGE =
 
 function ContactUs() {
   const [submitState, setSubmitState] = useState("idle");
+  const [error, setError] = useState("");
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     if (submitState !== "idle") return;
 
     const form = event.currentTarget;
-    setSubmitState("sending");
+    const formData = new FormData(form);
+    const name = String(formData.get("name") || "").trim();
+    const email = String(formData.get("email") || "").trim();
+    const message = String(formData.get("message") || "").trim();
 
-    window.setTimeout(() => {
+    setSubmitState("sending");
+    setError("");
+
+    try {
+      await api.submitContactMessage({ name, email, message });
       setSubmitState("sent");
       form.reset();
-
-      window.setTimeout(() => {
-        setSubmitState("idle");
-      }, 3000);
-    }, 1200);
+      window.setTimeout(() => setSubmitState("idle"), 3000);
+    } catch (err) {
+      setError(err.message || "Could not send your message. Please try again.");
+      setSubmitState("idle");
+    }
   };
 
   const buttonLabel =
@@ -65,6 +74,16 @@ function ContactUs() {
           </aside>
 
           <div className="contact-form-wrap">
+            {error && (
+              <p className="contact-form-error" role="alert">
+                {error}
+              </p>
+            )}
+            {submitState === "sent" && (
+              <p className="contact-form-success" role="status">
+                Thanks — your message was sent to Relux Hub support.
+              </p>
+            )}
             <form className="contact-form" onSubmit={handleSubmit}>
               <div className="contact-form-row">
                 <div className="contact-field">
@@ -78,7 +97,7 @@ function ContactUs() {
                     type="text"
                     placeholder="Evelyn Harper"
                     required
-                    disabled={submitState !== "idle"}
+                    disabled={submitState === "sending"}
                   />
                 </div>
                 <div className="contact-field">
@@ -92,7 +111,7 @@ function ContactUs() {
                     type="email"
                     placeholder="evelyn@example.com"
                     required
-                    disabled={submitState !== "idle"}
+                    disabled={submitState === "sending"}
                   />
                 </div>
               </div>
@@ -107,7 +126,7 @@ function ContactUs() {
                   placeholder="Tell us how we can help..."
                   rows={6}
                   required
-                  disabled={submitState !== "idle"}
+                  disabled={submitState === "sending"}
                 />
               </div>
               <div className="contact-submit-wrap">
@@ -115,7 +134,7 @@ function ContactUs() {
                   type="submit"
                   variant="default"
                   className={`contact-submit-btn ${submitState === "sent" ? "contact-submit-btn--sent" : ""} ${submitState === "sending" ? "contact-submit-btn--sending" : ""}`}
-                  disabled={submitState !== "idle"}
+                  disabled={submitState === "sending"}
                 >
                   {buttonLabel}
                 </Button>

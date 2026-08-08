@@ -359,6 +359,54 @@ export const api = {
       method: "PATCH",
       body: JSON.stringify(body),
     }),
+
+  // Admin Users
+  getAdminUsers: (params = {}) => {
+    const query = new URLSearchParams();
+    if (params.role) query.set("role", params.role);
+    if (params.status) query.set("status", params.status);
+    if (params.q) query.set("q", params.q);
+    const qs = query.toString();
+    return request(qs ? `/admin/users?${qs}` : "/admin/users");
+  },
+  suspendAdminUser: (id) =>
+    request(`/admin/users/${id}/suspend`, { method: "PATCH" }),
+  reactivateAdminUser: (id) =>
+    request(`/admin/users/${id}/reactivate`, { method: "PATCH" }),
+  approveAdminUser: (id) =>
+    request(`/admin/users/${id}/approve`, { method: "PATCH" }),
+
+  // Admin Orders
+  getAdminRentalOrders: () => request("/admin/orders/rental"),
+  getAdminResaleOrders: () => request("/admin/orders/resale"),
+  updateAdminOrderStatus: (id, body) =>
+    request(`/admin/orders/${id}/status`, {
+      method: "PATCH",
+      body: JSON.stringify(body),
+    }),
+
+  // Contact
+  submitContactMessage: (body) =>
+    request("/contact", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+  getAdminContactMessages: (params = {}) => {
+    const query = new URLSearchParams();
+    if (params.status) query.set("status", params.status);
+    const qs = query.toString();
+    return request(qs ? `/admin/contact?${qs}` : "/admin/contact");
+  },
+  updateAdminContactMessage: (id, body) =>
+    request(`/admin/contact/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(body),
+    }),
+  replyAdminContactMessage: (id, body) =>
+    request(`/admin/contact/${id}/reply`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
 };
 
 export default api;

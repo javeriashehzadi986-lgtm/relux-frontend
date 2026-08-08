@@ -220,6 +220,28 @@
   margin: 0;
 }
 
+/* Search empty state */
+.help-empty {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 32px 20px 48px;
+  text-align: center;
+}
+
+.help-empty-title {
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--help-on-surface);
+  margin: 0 0 8px;
+}
+
+.help-empty-desc {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--help-on-surface-variant);
+}
+
 /* FAQ */
 .help-faq {
   max-width: 48rem;

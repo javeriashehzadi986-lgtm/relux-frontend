@@ -61,7 +61,7 @@ const Login = () => {
       if (redirectTo) {
         navigate(redirectTo, { replace: true });
       } else if (user.role === "admin") {
-        navigate("/admin");
+        navigate("/admin/profile");
       } else if (user.role === "seller") {
         if (user.status === "pending") {
           navigate("/seller-pending");

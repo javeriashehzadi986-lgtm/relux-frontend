@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from "react";
-import { ADMIN_USERS, ADMIN_USER_STATS } from "@/data/adminUsersData";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import api from "@/services/api";
 import { toggleAdminSidebar } from "@/utils/adminSidebar";
 import "./adminUserManagement.css";
 
@@ -15,19 +15,27 @@ const STATUS_LABELS = {
   active: "Active",
   pending: "Pending",
   suspended: "Suspended",
+  rejected: "Rejected",
 };
 
-function getInitials(name) {
-  return name
-    .split(" ")
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
+const PAGE_SIZE = 10;
+
+function getInitials(name = "") {
+  return (
+    name
+      .split(" ")
+      .filter(Boolean)
+      .map((part) => part[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase() || "?"
+  );
 }
 
 function formatDate(iso) {
-  return new Date(`${iso}T12:00:00`).toLocaleDateString("en-US", {
+  if (!iso) return "—";
+  const value = iso.includes("T") ? iso : `${iso}T12:00:00`;
+  return new Date(value).toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -35,15 +43,53 @@ function formatDate(iso) {
 }
 
 const AdminUserManagement = () => {
+  const [users, setUsers] = useState([]);
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    buyers: 0,
+    sellers: 0,
+    pendingVerification: 0,
+  });
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [actionError, setActionError] = useState("");
+  const [actionLoading, setActionLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [page, setPage] = useState(1);
+
+  const loadUsers = useCallback(async () => {
+    setLoading(true);
+    setLoadError("");
+    try {
+      const data = await api.getAdminUsers();
+      setUsers(data.users ?? []);
+      setStats(
+        data.stats ?? {
+          totalUsers: 0,
+          buyers: 0,
+          sellers: 0,
+          pendingVerification: 0,
+        },
+      );
+    } catch (error) {
+      setLoadError(error.message || "Failed to load users");
+      setUsers([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadUsers();
+  }, [loadUsers]);
 
   const filteredUsers = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
 
-    return ADMIN_USERS.filter((user) => {
+    return users.filter((user) => {
       const matchesSearch =
         !query ||
         user.name.toLowerCase().includes(query) ||
@@ -54,12 +100,78 @@ const AdminUserManagement = () => {
 
       return matchesSearch && matchesRole && matchesStatus;
     });
-  }, [roleFilter, searchQuery, statusFilter]);
+  }, [roleFilter, searchQuery, statusFilter, users]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const pagedUsers = filteredUsers.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE,
+  );
+
+  useEffect(() => {
+    setPage(1);
+  }, [searchQuery, roleFilter, statusFilter]);
+
+  const selectedUser =
+    users.find((user) => user.id === selectedUserId) ?? null;
 
   const clearFilters = () => {
     setSearchQuery("");
     setRoleFilter("all");
     setStatusFilter("all");
+  };
+
+  const applyUpdatedUser = (updated) => {
+    setUsers((current) =>
+      current.map((user) => (user.id === updated.id ? updated : user)),
+    );
+    setSelectedUserId(updated.id);
+  };
+
+  const handleApprove = async () => {
+    if (!selectedUser) return;
+    setActionLoading(true);
+    setActionError("");
+    try {
+      const data = await api.approveAdminUser(selectedUser.id);
+      applyUpdatedUser(data.user);
+      await loadUsers();
+    } catch (error) {
+      setActionError(error.message || "Failed to approve user");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleSuspend = async () => {
+    if (!selectedUser) return;
+    setActionLoading(true);
+    setActionError("");
+    try {
+      const data = await api.suspendAdminUser(selectedUser.id);
+      applyUpdatedUser(data.user);
+      await loadUsers();
+    } catch (error) {
+      setActionError(error.message || "Failed to suspend user");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleReactivate = async () => {
+    if (!selectedUser) return;
+    setActionLoading(true);
+    setActionError("");
+    try {
+      const data = await api.reactivateAdminUser(selectedUser.id);
+      applyUpdatedUser(data.user);
+      await loadUsers();
+    } catch (error) {
+      setActionError(error.message || "Failed to reactivate user");
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   return (
@@ -99,6 +211,12 @@ const AdminUserManagement = () => {
       </header>
 
       <div className="admin-users-body">
+        {(loadError || actionError) && (
+          <p className="admin-users-error" role="alert">
+            {loadError || actionError}
+          </p>
+        )}
+
         <div className="admin-users-mobile-search">
           <span className="material-symbols-outlined" aria-hidden="true">
             search
@@ -114,22 +232,22 @@ const AdminUserManagement = () => {
         <div className="admin-users-stats">
           <article className="admin-users-stat-card">
             <p className="admin-users-stat-label">Total Users</p>
-            <p className="admin-users-stat-value">{ADMIN_USER_STATS.totalUsers.toLocaleString()}</p>
+            <p className="admin-users-stat-value">{stats.totalUsers.toLocaleString()}</p>
           </article>
           <article className="admin-users-stat-card">
             <p className="admin-users-stat-label">Buyers</p>
             <p className="admin-users-stat-value admin-users-stat-value--secondary">
-              {ADMIN_USER_STATS.buyers.toLocaleString()}
+              {stats.buyers.toLocaleString()}
             </p>
           </article>
           <article className="admin-users-stat-card">
             <p className="admin-users-stat-label">Sellers</p>
-            <p className="admin-users-stat-value">{ADMIN_USER_STATS.sellers.toLocaleString()}</p>
+            <p className="admin-users-stat-value">{stats.sellers.toLocaleString()}</p>
           </article>
           <article className="admin-users-stat-card">
             <p className="admin-users-stat-label">Pending Verification</p>
             <p className="admin-users-stat-value admin-users-stat-value--error">
-              {ADMIN_USER_STATS.pendingVerification}
+              {stats.pendingVerification}
             </p>
           </article>
         </div>
@@ -158,6 +276,7 @@ const AdminUserManagement = () => {
                 <option value="active">Active</option>
                 <option value="pending">Pending</option>
                 <option value="suspended">Suspended</option>
+                <option value="rejected">Rejected</option>
               </select>
             </label>
           </div>
@@ -165,11 +284,8 @@ const AdminUserManagement = () => {
             <button type="button" className="admin-users-btn-ghost" onClick={clearFilters}>
               Clear Filters
             </button>
-            <button type="button" className="admin-users-btn-export">
-              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
-                download
-              </span>
-              Export CSV
+            <button type="button" className="admin-users-btn-ghost" onClick={loadUsers}>
+              Refresh
             </button>
           </div>
         </div>
@@ -188,60 +304,90 @@ const AdminUserManagement = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredUsers.map((user) => (
-                <tr key={user.id} onClick={() => setSelectedUser(user)}>
-                  <td>
-                    <div className="admin-users-user-cell">
-                      <div className="admin-users-user-avatar">
-                        {user.avatar ? (
-                          <img src={user.avatar} alt="" />
-                        ) : (
-                          getInitials(user.name)
-                        )}
-                      </div>
-                      <div>
-                        <p className="admin-users-user-name">{user.name}</p>
-                        <p className="admin-users-user-id">{user.id}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td>{user.email}</td>
-                  <td>
-                    <span className={`admin-users-role-badge admin-users-role-badge--${user.role}`}>
-                      {ROLE_LABELS[user.role]}
-                    </span>
-                  </td>
-                  <td>
-                    <span
-                      className={`admin-users-status-badge admin-users-status-badge--${user.status}`}
-                    >
-                      {STATUS_LABELS[user.status]}
-                    </span>
-                  </td>
-                  <td>{formatDate(user.joinedAt)}</td>
-                  <td>{user.ordersCount}</td>
-                  <td>
-                    <span className="material-symbols-outlined" aria-hidden="true">
-                      chevron_right
-                    </span>
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="admin-users-empty">
+                    Loading users...
                   </td>
                 </tr>
-              ))}
+              ) : pagedUsers.length > 0 ? (
+                pagedUsers.map((user) => (
+                  <tr key={user.id} onClick={() => setSelectedUserId(user.id)}>
+                    <td>
+                      <div className="admin-users-user-cell">
+                        <div className="admin-users-user-avatar">
+                          {user.avatar ? (
+                            <img src={user.avatar} alt="" />
+                          ) : (
+                            getInitials(user.name)
+                          )}
+                        </div>
+                        <div>
+                          <p className="admin-users-user-name">{user.name}</p>
+                          <p className="admin-users-user-id">
+                            #{user.id.slice(-6).toUpperCase()}
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+                    <td>{user.email}</td>
+                    <td>
+                      <span className={`admin-users-role-badge admin-users-role-badge--${user.role}`}>
+                        {ROLE_LABELS[user.role] || user.role}
+                      </span>
+                    </td>
+                    <td>
+                      <span
+                        className={`admin-users-status-badge admin-users-status-badge--${user.status}`}
+                      >
+                        {STATUS_LABELS[user.status] || user.status}
+                      </span>
+                    </td>
+                    <td>{formatDate(user.joinedAt)}</td>
+                    <td>{user.ordersCount}</td>
+                    <td>
+                      <span className="material-symbols-outlined" aria-hidden="true">
+                        chevron_right
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={7} className="admin-users-empty">
+                    {users.length === 0
+                      ? "No buyers or sellers registered yet."
+                      : "No users match your filters."}
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
 
           <div className="admin-users-table-footer">
             <p>
-              Showing {filteredUsers.length} of {ADMIN_USERS.length} users
+              Showing {pagedUsers.length} of {filteredUsers.length} users
             </p>
             <div className="admin-users-pagination">
-              <button type="button" className="admin-users-page-btn" disabled aria-label="Previous page">
+              <button
+                type="button"
+                className="admin-users-page-btn"
+                disabled={currentPage <= 1}
+                aria-label="Previous page"
+                onClick={() => setPage((p) => p - 1)}
+              >
                 <span className="material-symbols-outlined">chevron_left</span>
               </button>
               <button type="button" className="admin-users-page-btn admin-users-page-btn--active">
-                1
+                {currentPage}
               </button>
-              <button type="button" className="admin-users-page-btn" aria-label="Next page">
+              <button
+                type="button"
+                className="admin-users-page-btn"
+                disabled={currentPage >= totalPages}
+                aria-label="Next page"
+                onClick={() => setPage((p) => p + 1)}
+              >
                 <span className="material-symbols-outlined">chevron_right</span>
               </button>
             </div>
@@ -255,7 +401,7 @@ const AdminUserManagement = () => {
             type="button"
             className="admin-users-panel-overlay"
             aria-label="Close user details"
-            onClick={() => setSelectedUser(null)}
+            onClick={() => setSelectedUserId(null)}
           />
           <aside className="admin-users-panel" aria-labelledby="admin-user-panel-title">
             <div className="admin-users-panel-inner">
@@ -265,7 +411,7 @@ const AdminUserManagement = () => {
                   type="button"
                   className="admin-users-panel-close"
                   aria-label="Close panel"
-                  onClick={() => setSelectedUser(null)}
+                  onClick={() => setSelectedUserId(null)}
                 >
                   <span className="material-symbols-outlined">close</span>
                 </button>
@@ -286,15 +432,15 @@ const AdminUserManagement = () => {
               <div className="admin-users-panel-meta">
                 <div className="admin-users-panel-meta-row">
                   <span>User ID</span>
-                  <span>{selectedUser.id}</span>
+                  <span>#{selectedUser.id.slice(-6).toUpperCase()}</span>
                 </div>
                 <div className="admin-users-panel-meta-row">
                   <span>Role</span>
-                  <span>{ROLE_LABELS[selectedUser.role]}</span>
+                  <span>{ROLE_LABELS[selectedUser.role] || selectedUser.role}</span>
                 </div>
                 <div className="admin-users-panel-meta-row">
                   <span>Status</span>
-                  <span>{STATUS_LABELS[selectedUser.status]}</span>
+                  <span>{STATUS_LABELS[selectedUser.status] || selectedUser.status}</span>
                 </div>
                 <div className="admin-users-panel-meta-row">
                   <span>Phone</span>
@@ -320,19 +466,31 @@ const AdminUserManagement = () => {
 
               <div className="admin-users-panel-actions">
                 {selectedUser.status === "pending" && (
-                  <button type="button" className="admin-users-panel-btn-primary">
-                    Approve Verification
+                  <button
+                    type="button"
+                    className="admin-users-panel-btn-primary"
+                    onClick={handleApprove}
+                    disabled={actionLoading}
+                  >
+                    {actionLoading ? "Saving..." : "Approve Verification"}
                   </button>
                 )}
-                <button type="button" className="admin-users-panel-btn-outline">
-                  View Activity
-                </button>
                 {selectedUser.status !== "suspended" ? (
-                  <button type="button" className="admin-users-panel-btn-danger">
+                  <button
+                    type="button"
+                    className="admin-users-panel-btn-danger"
+                    onClick={handleSuspend}
+                    disabled={actionLoading}
+                  >
                     Suspend Account
                   </button>
                 ) : (
-                  <button type="button" className="admin-users-panel-btn-primary">
+                  <button
+                    type="button"
+                    className="admin-users-panel-btn-primary"
+                    onClick={handleReactivate}
+                    disabled={actionLoading}
+                  >
                     Reactivate Account
                   </button>
                 )}

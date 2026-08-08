@@ -784,3 +784,36 @@
     display: none;
   }
 }
+
+.admin-rental-error {
+  margin: 0 0 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  background: #ffdad6;
+  color: #93000a;
+  font-family: Manrope, system-ui, sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.admin-rental-empty {
+  padding: 2rem 1.5rem !important;
+  text-align: center;
+  color: #414942;
+}
+
+.admin-rental-panel-image-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 12rem;
+  background: #eae8e0;
+  color: #3b6848;
+  font-weight: 700;
+  font-size: 1.5rem;
+}
+
+.admin-rental-status-badge--cancelled {
+  background: #ffdad6;
+  color: #93000a;
+}

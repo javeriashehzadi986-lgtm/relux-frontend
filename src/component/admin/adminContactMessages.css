@@ -1,0 +1,294 @@
+.admin-contact-page {
+  --c-bg: #fbf9f1;
+  --c-primary: #3b6848;
+  --c-text: #1b1c17;
+  --c-muted: #414942;
+  --c-card: #ffffff;
+  --c-line: #c1c9bf;
+  --c-error: #93000a;
+  --c-error-bg: #ffdad6;
+
+  max-width: 90rem;
+  margin: 0 auto;
+  padding: 1.5rem 1.5rem 4rem;
+  background: var(--c-bg);
+  color: var(--c-text);
+  font-family: "Newsreader", Georgia, serif;
+}
+
+.admin-contact-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.admin-contact-header-left {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.admin-contact-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: var(--c-primary);
+}
+
+.admin-contact-header p {
+  margin: 0.25rem 0 0;
+  font-size: 0.875rem;
+  color: var(--c-muted);
+}
+
+.admin-contact-menu-btn,
+.admin-contact-refresh,
+.admin-contact-actions button {
+  border: 1px solid var(--c-line);
+  background: var(--c-card);
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.85rem;
+  cursor: pointer;
+  font-family: "Manrope", system-ui, sans-serif;
+  font-size: 0.85rem;
+}
+
+.admin-contact-error {
+  margin: 0 0 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  background: var(--c-error-bg);
+  color: var(--c-error);
+  font-family: "Manrope", system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.admin-contact-success {
+  margin: 0 0 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  background: rgba(203, 235, 207, 0.65);
+  color: #224f32;
+  font-family: "Manrope", system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.admin-contact-reply-section {
+  margin: 1.25rem 0 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(193, 201, 191, 0.6);
+}
+
+.admin-contact-reply-section h3 {
+  margin: 0 0 0.65rem;
+  font-size: 1.05rem;
+  color: var(--c-primary);
+}
+
+.admin-contact-reply-input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--c-line);
+  border-radius: 0.5rem;
+  padding: 0.75rem 0.85rem;
+  font-family: "Manrope", system-ui, sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  resize: vertical;
+  background: #fff;
+  color: var(--c-text);
+}
+
+.admin-contact-reply-hint,
+.admin-contact-reply-saved {
+  margin: 0.5rem 0 0;
+  font-family: "Manrope", system-ui, sans-serif;
+  font-size: 0.8rem;
+  color: var(--c-muted);
+  line-height: 1.4;
+}
+
+.admin-contact-reply-saved {
+  color: #224f32;
+  font-weight: 600;
+}
+
+.admin-contact-reply-btn {
+  margin-top: 0.75rem;
+  border: 1px solid var(--c-primary);
+  background: var(--c-primary);
+  color: #fff;
+  border-radius: 0.5rem;
+  padding: 0.55rem 1rem;
+  cursor: pointer;
+  font-family: "Manrope", system-ui, sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.admin-contact-reply-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.admin-contact-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.admin-contact-stats article {
+  background: var(--c-card);
+  border: 1px solid rgba(193, 201, 191, 0.5);
+  border-radius: 0.75rem;
+  padding: 1rem;
+}
+
+.admin-contact-stats span {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--c-muted);
+  font-family: "Manrope", system-ui, sans-serif;
+}
+
+.admin-contact-stats strong {
+  font-size: 1.5rem;
+  color: var(--c-primary);
+}
+
+.admin-contact-toolbar {
+  margin-bottom: 1rem;
+}
+
+.admin-contact-toolbar select {
+  border: 1px solid var(--c-line);
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--c-card);
+  font-family: "Manrope", system-ui, sans-serif;
+}
+
+.admin-contact-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  gap: 1rem;
+}
+
+.admin-contact-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 70vh;
+  overflow: auto;
+}
+
+.admin-contact-item {
+  text-align: left;
+  border: 1px solid rgba(193, 201, 191, 0.5);
+  background: var(--c-card);
+  border-radius: 0.75rem;
+  padding: 0.85rem 1rem;
+  cursor: pointer;
+}
+
+.admin-contact-item--active {
+  border-color: var(--c-primary);
+  box-shadow: 0 0 0 1px rgba(59, 104, 72, 0.2);
+}
+
+.admin-contact-item-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.admin-contact-item p,
+.admin-contact-item small {
+  margin: 0;
+  font-family: "Manrope", system-ui, sans-serif;
+  color: var(--c-muted);
+  font-size: 0.8rem;
+}
+
+.admin-contact-badge {
+  font-family: "Manrope", system-ui, sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+}
+
+.admin-contact-badge--new {
+  background: rgba(59, 104, 72, 0.15);
+  color: var(--c-primary);
+}
+
+.admin-contact-badge--read {
+  background: #eae8e0;
+  color: var(--c-muted);
+}
+
+.admin-contact-badge--resolved {
+  background: rgba(203, 235, 207, 0.6);
+  color: #224f32;
+}
+
+.admin-contact-detail {
+  background: var(--c-card);
+  border: 1px solid rgba(193, 201, 191, 0.5);
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+}
+
+.admin-contact-detail h2 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.admin-contact-email,
+.admin-contact-date {
+  margin: 0.25rem 0 0;
+  font-family: "Manrope", system-ui, sans-serif;
+  color: var(--c-muted);
+  font-size: 0.85rem;
+}
+
+.admin-contact-detail blockquote {
+  margin: 1rem 0;
+  padding: 0.85rem 1rem;
+  border-left: 3px solid var(--c-primary);
+  background: #f5f4ec;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.admin-contact-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.admin-contact-actions button:first-child {
+  background: var(--c-primary);
+  color: #fff;
+  border-color: var(--c-primary);
+}
+
+.admin-contact-empty {
+  margin: 0;
+  padding: 1.5rem;
+  color: var(--c-muted);
+  font-family: "Manrope", system-ui, sans-serif;
+}
+
+@media (max-width: 900px) {
+  .admin-contact-layout {
+    grid-template-columns: 1fr;
+  }
+}

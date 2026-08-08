@@ -691,3 +691,50 @@
     margin-left: 0;
   }
 }
+
+.admin-resale-error {
+  margin: 0 0 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  background: #ffdad6;
+  color: #93000a;
+  font-family: Manrope, system-ui, sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.admin-resale-empty {
+  padding: 2rem 1.5rem !important;
+  text-align: center;
+  color: #414942;
+}
+
+.admin-resale-refresh-btn {
+  border: 1px solid #c1c9bf;
+  background: #fff;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.875rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.admin-resale-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+}
+
+.admin-resale-person-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 9999px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #224f32;
+  background: #bcefc7;
+}

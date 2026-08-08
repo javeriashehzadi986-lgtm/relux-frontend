@@ -386,6 +386,28 @@
   color: var(--admin-on-error-container);
 }
 
+.admin-users-status-badge--rejected {
+  background: rgba(186, 26, 26, 0.12);
+  color: var(--admin-error);
+}
+
+.admin-users-error {
+  margin: 0 0 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  background: var(--admin-error-container);
+  color: var(--admin-on-error-container);
+  font-family: "Manrope", system-ui, sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.admin-users-empty {
+  padding: 2rem 1.5rem !important;
+  text-align: center;
+  color: var(--admin-on-surface-variant);
+}
+
 .admin-users-table-footer {
   display: flex;
   align-items: center;

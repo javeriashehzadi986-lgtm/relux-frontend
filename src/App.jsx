@@ -29,12 +29,12 @@ import SellerAddListing from "./component/sellerAddListing";
 import SellerPending from "./component/sellerPending";
 import SellerRejected from "./component/sellerRejected";
 import AdminLayout from "./component/admin/AdminLayout";
-import AdminDashboard from "./component/admin/AdminDashboard";
 import AdminProfile from "./component/admin/adminProfile";
 import AdminReviews from "./component/admin/adminReviews";
 import AdminSupportCenter from "./component/admin/adminSupportCenter";
 import AdminNotifications from "./component/admin/adminNotifications";
 import AdminPayments from "./component/admin/adminPayments";
+import AdminContactMessages from "./component/admin/AdminContactMessages";
 import AdminUserManagement from "./component/admin/AdminUserManagement";
 import AdminSellerVerification from "./component/admin/AdminSellerVerification";
 import AdminProductManagement from "./component/admin/AdminProductManagement";
@@ -174,13 +174,6 @@ function App() {
             element={<Navigate to="/sellerProfile?section=support" replace />}
           />
 
-<<<<<<< HEAD
-          <Route path="/profile" element={<Profile />} />
-          <Route
-            path="/wishlist"
-            element={
-              <ProtectedRoute>
-=======
           <Route
             path="/profile"
             element={
@@ -193,7 +186,6 @@ function App() {
             path="/wishlist"
             element={
               <ProtectedRoute roles={["buyer"]}>
->>>>>>> 7e7e7d9da0c624dcf0a52fb48e99c6baec6e557a
                 <Profile section="wishlist" />
               </ProtectedRoute>
             }
@@ -229,7 +221,7 @@ function App() {
               </ProtectedRoute>
             }
           >
-            <Route index element={<AdminDashboard />} />
+            <Route index element={<Navigate to="/admin/profile" replace />} />
             <Route path="users" element={<AdminUserManagement />} />
             <Route path="seller-verification" element={<AdminSellerVerification />} />
             <Route path="products" element={<AdminProductManagement />} />
@@ -239,6 +231,7 @@ function App() {
             <Route path="reviews" element={<AdminReviews />} />
             <Route path="payments" element={<AdminPayments />} />
             <Route path="notifications" element={<AdminNotifications />} />
+            <Route path="contact" element={<AdminContactMessages />} />
             <Route path="support" element={<AdminSupportCenter />} />
             <Route path="reports" element={<Navigate to="/admin/support" replace />} />
             <Route path="profile" element={<AdminProfile />} />

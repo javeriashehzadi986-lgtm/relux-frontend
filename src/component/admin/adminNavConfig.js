@@ -1,9 +1,5 @@
 export const ADMIN_NAV_SECTIONS = [
   {
-    label: "Overview",
-    items: [{ path: "/admin", label: "Dashboard", icon: "dashboard", end: true }],
-  },
-  {
     label: "Marketplace",
     items: [
       { path: "/admin/users", label: "Users", icon: "group" },
@@ -25,6 +21,7 @@ export const ADMIN_NAV_SECTIONS = [
       { path: "/admin/reviews", label: "Reviews", icon: "rate_review" },
       { path: "/admin/payments", label: "Payments", icon: "payments" },
       { path: "/admin/notifications", label: "Notifications", icon: "notifications" },
+      { path: "/admin/contact", label: "Contact Messages", icon: "mail" },
       { path: "/admin/support", label: "Support Center", icon: "support_agent" },
     ],
   },

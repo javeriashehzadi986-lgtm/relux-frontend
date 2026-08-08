@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -20,6 +20,12 @@ import {
   Headphones,
 } from "lucide-react";
 import "./help.css";
+
+function matchesQuery(text, query) {
+  return String(text || "")
+    .toLowerCase()
+    .includes(query);
+}
 
 const categories = [
   {
@@ -85,6 +91,31 @@ const faqs = [
 
 function Help() {
   const [searchFocused, setSearchFocused] = useState(false);
+  const [query, setQuery] = useState("");
+
+  const normalizedQuery = query.trim().toLowerCase();
+  const isSearching = normalizedQuery.length > 0;
+
+  const filteredCategories = useMemo(() => {
+    if (!isSearching) return categories;
+    return categories.filter(
+      (item) =>
+        matchesQuery(item.label, normalizedQuery) ||
+        matchesQuery(item.description, normalizedQuery),
+    );
+  }, [isSearching, normalizedQuery]);
+
+  const filteredFaqs = useMemo(() => {
+    if (!isSearching) return faqs;
+    return faqs.filter(
+      (item) =>
+        matchesQuery(item.question, normalizedQuery) ||
+        matchesQuery(item.answer, normalizedQuery),
+    );
+  }, [isSearching, normalizedQuery]);
+
+  const noResults =
+    isSearching && filteredCategories.length === 0 && filteredFaqs.length === 0;
 
   return (
     <div className="help-page">
@@ -104,51 +135,83 @@ function Help() {
             <Search className="help-search-icon" size={22} strokeWidth={1.75} />
             <Input
               className="help-search-input"
-              type="text"
+              type="search"
               placeholder="Search for questions..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
               onFocus={() => setSearchFocused(true)}
               onBlur={() => setSearchFocused(false)}
+              aria-label="Search help articles"
             />
           </div>
         </section>
 
-        <section className="help-categories">
-          <div className="help-categories-grid">
-            {categories.map(({ label, description, icon: Icon }) => (
-              <Card key={label} className="help-category-card">
-                <div className="help-category-icon">
-                  <Icon size={28} strokeWidth={1.75} />
+        {noResults ? (
+          <section className="help-empty" aria-live="polite">
+            <p className="help-empty-title">No results for “{query.trim()}”</p>
+            <p className="help-empty-desc">
+              Try another word, or contact support below.
+            </p>
+          </section>
+        ) : (
+          <>
+            {filteredCategories.length > 0 && (
+              <section className="help-categories">
+                <div className="help-categories-grid">
+                  {filteredCategories.map(({ label, description, icon: Icon }) => (
+                    <Card
+                      key={label}
+                      className="help-category-card"
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => setQuery(label)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          setQuery(label);
+                        }
+                      }}
+                    >
+                      <div className="help-category-icon">
+                        <Icon size={28} strokeWidth={1.75} />
+                      </div>
+                      <h3 className="help-category-label">{label}</h3>
+                      <p className="help-category-desc">{description}</p>
+                    </Card>
+                  ))}
                 </div>
-                <h3 className="help-category-label">{label}</h3>
-                <p className="help-category-desc">{description}</p>
-              </Card>
-            ))}
-          </div>
-        </section>
+              </section>
+            )}
 
-        <section className="help-faq">
-          <h2 className="help-faq-title">Frequently Asked Questions</h2>
-          <Accordion
-            type="single"
-            collapsible
-            className="help-faq-accordion"
-          >
-            {faqs.map((faq) => (
-              <AccordionItem
-                key={faq.question}
-                value={faq.question}
-                className="help-faq-item"
-              >
-                <AccordionTrigger className="help-faq-trigger">
-                  {faq.question}
-                </AccordionTrigger>
-                <AccordionContent className="help-faq-content">
-                  <p className="help-faq-answer">{faq.answer}</p>
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-        </section>
+            {filteredFaqs.length > 0 && (
+              <section className="help-faq">
+                <h2 className="help-faq-title">Frequently Asked Questions</h2>
+                <Accordion
+                  key={isSearching ? `search-${normalizedQuery}` : "all"}
+                  type="single"
+                  collapsible
+                  className="help-faq-accordion"
+                  defaultValue={isSearching ? filteredFaqs[0]?.question : undefined}
+                >
+                  {filteredFaqs.map((faq) => (
+                    <AccordionItem
+                      key={faq.question}
+                      value={faq.question}
+                      className="help-faq-item"
+                    >
+                      <AccordionTrigger className="help-faq-trigger">
+                        {faq.question}
+                      </AccordionTrigger>
+                      <AccordionContent className="help-faq-content">
+                        <p className="help-faq-answer">{faq.answer}</p>
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </section>
+            )}
+          </>
+        )}
 
         <section className="help-cta">
           <h2 className="help-cta-title">Can&apos;t find what you&apos;re looking for?</h2>
