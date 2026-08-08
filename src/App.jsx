@@ -202,7 +202,14 @@ function App() {
           <Route path="/help" element={<Help />} />
 
           <Route path="/cart" element={<Navigate to="/wishlist" replace />} />
-          <Route path="/notification" element={<Notification />} />
+          <Route
+            path="/notification"
+            element={
+              <ProtectedRoute>
+                <Notification />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/adminProfile" element={<Navigate to="/admin/profile" replace />} />
           <Route path="/adminReviews" element={<Navigate to="/admin/reviews" replace />} />
           <Route path="/adminSupportCenter" element={<Navigate to="/admin/support" replace />} />

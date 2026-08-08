@@ -43,7 +43,7 @@ const getRentalDays = (start, end) => {
 
 const RentalDressDetails = ({ dress }) => {
   const navigate = useNavigate();
-  const { user, isAuthenticated } = useAuth();
+  const { user } = useAuth();
   const defaults = useMemo(() => getDefaultDates(), []);
   const [activeImage, setActiveImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState(dress.listingSize ?? "M");
@@ -88,8 +88,13 @@ const RentalDressDetails = ({ dress }) => {
   };
 
   const handleRentRequest = async () => {
-    if (!isAuthenticated || user?.role !== "buyer") {
-      navigate("/login", { state: { from: `/dress/${dress.id}` } });
+    const returnPath = `/dress/${dress.id}`;
+    if (!requireLogin(returnPath)) {
+      return;
+    }
+
+    if (user?.role !== "buyer") {
+      setRequestError("Only buyer accounts can request rentals.");
       return;
     }
 
@@ -115,6 +120,8 @@ const RentalDressDetails = ({ dress }) => {
 
   const handleCancelRequest = async () => {
     if (!pendingRequest) return;
+    if (!requireLogin(`/dress/${dress.id}`)) return;
+
     try {
       await cancelOrder(pendingRequest.id);
       setShowCancelModal(false);

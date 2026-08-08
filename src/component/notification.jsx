@@ -1,13 +1,19 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   CheckCheck,
   CheckCircle2,
   CalendarClock,
   ClipboardCheck,
   CreditCard,
+  Megaphone,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
+import {
+  formatNotificationTime,
+  useNotifications,
+} from "@/hooks/useNotifications";
 import "./notification.css";
 
 const FILTERS = [
@@ -17,91 +23,52 @@ const FILTERS = [
   { id: "payments", label: "Payments" },
 ];
 
-const INITIAL_NOTIFICATIONS = [
-  {
-    id: "booking",
-    title: "Booking Confirmed",
-    time: "2 hours ago",
-    unread: true,
-    category: "orders",
-    icon: CheckCircle2,
-    iconVariant: "primary",
-    body: (
-      <>
-        Your dress booking for the{" "}
-        <strong className="notification-highlight">Emerald Silk Drape</strong> has
-        been confirmed. Get ready to shine!
-      </>
-    ),
-  },
-  {
-    id: "return",
-    title: "Return Reminder",
-    time: "5 hours ago",
-    unread: false,
-    category: "orders",
-    icon: CalendarClock,
-    iconVariant: "secondary",
-    body: (
-      <>
-        Your rental return date for the{" "}
-        <em className="notification-italic">Champagne Zardozi</em> is tomorrow.
-        Please prepare for courier pickup.
-      </>
-    ),
-  },
-  {
-    id: "listing",
-    title: "Listing Accepted",
-    time: "1 day ago",
-    unread: false,
-    category: "orders",
-    icon: ClipboardCheck,
-    iconVariant: "tertiary",
-    body: (
-      <>
-        A seller has accepted your listing request for the{" "}
-        <strong>Ivory Sculpt</strong> gown. Your item is now live.
-      </>
-    ),
-  },
-  {
-    id: "collection",
-    title: "New Collection",
-    time: "2 days ago",
-    unread: false,
-    category: "orders",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/ADBb0uiFJh-4krbzfm2r7ndHuGhvCoCWU4sh5muhVNh4dTiDAJNOsaMX330FJgowNJhpgEwgto2z63Eu67OqBo4tPwe6cZmebAYqoBC9E0gn4SNd_0BZlBce1WBK1OtlWRBzGfwLdXPLb97iX3UadKqY2mkm3WxREsTkvBSZetpxdUry0-X4hN8sFxq0df_bnhkd-lDPWu1DOoB_Ezdyzd3MVXk7EEwOWRgGelEZ_18oy1wT6Wo3Fy3YROcht65vQm03K3wxyUjru_fzRTQ",
-    body: (
-      <>
-        The new bridal collection has been added to the atelier. Explore curated
-        looks for your special day.
-      </>
-    ),
-  },
-  {
-    id: "payment",
-    title: "Payment Successful",
-    time: "3 days ago",
-    unread: false,
-    category: "payments",
-    icon: CreditCard,
-    iconVariant: "muted",
-    body: (
-      <>
-        Payment for your recent rental has been completed successfully. Thank you
-        for choosing Relux Hub.
-      </>
-    ),
-  },
-];
+const ICONS = {
+  orders: CheckCircle2,
+  payments: CreditCard,
+  listings: ClipboardCheck,
+  bids: CalendarClock,
+  system: Megaphone,
+};
 
 const NOTIFICATIONS_PREF_KEY = "relux-notifications-enabled";
 
+function NotificationBody({ message, highlight }) {
+  if (!highlight) {
+    return message;
+  }
+
+  const parts = message.split(highlight);
+  if (parts.length === 1) {
+    return (
+      <>
+        {message}{" "}
+        <strong className="notification-highlight">{highlight}</strong>
+      </>
+    );
+  }
+
+  return parts.map((part, index) => (
+    <React.Fragment key={`${part}-${index}`}>
+      {part}
+      {index < parts.length - 1 ? (
+        <strong className="notification-highlight">{highlight}</strong>
+      ) : null}
+    </React.Fragment>
+  ));
+}
+
 const Notification = () => {
+  const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState("all");
-  const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
+  const {
+    notifications,
+    loading,
+    error,
+    refresh,
+    markAllAsRead,
+    markAsRead,
+  } = useNotifications(activeFilter);
   const [notificationsEnabled, setNotificationsEnabled] = useState(() => {
     try {
       return localStorage.getItem(NOTIFICATIONS_PREF_KEY) === "true";
@@ -139,7 +106,7 @@ const Notification = () => {
 
       if (permission === "denied") {
         setPermissionMessage(
-          "Notifications are blocked in your browser. Enable them in browser settings to receive alerts."
+          "Notifications are blocked in your browser. Enable them in browser settings to receive alerts.",
         );
         return;
       }
@@ -156,30 +123,25 @@ const Notification = () => {
     }
   };
 
-  const filteredNotifications = useMemo(() => {
-    return notifications.filter((item) => {
-      if (activeFilter === "unread") return item.unread;
-      if (activeFilter === "orders") return item.category === "orders";
-      if (activeFilter === "payments") return item.category === "payments";
-      return true;
-    });
-  }, [notifications, activeFilter]);
+  const handleNotificationClick = async (item) => {
+    if (item.unread) {
+      await markAsRead(item.id);
+    }
 
-  const markAllAsRead = () => {
-    setNotifications((current) =>
-      current.map((item) => ({ ...item, unread: false }))
-    );
+    if (item.link) {
+      navigate(item.link);
+    }
   };
 
   return (
     <div className="notification-page">
       <div className="notification-permission-bar">
-        <span className="notification-permission-label">Allow notifications</span>
+        <span className="notification-permission-label">Allow browser alerts</span>
         <button
           type="button"
           role="switch"
           aria-checked={notificationsEnabled}
-          aria-label="Allow notifications"
+          aria-label="Allow browser alerts"
           className={`notification-toggle ${
             notificationsEnabled ? "notification-toggle--on" : ""
           }`}
@@ -205,6 +167,7 @@ const Notification = () => {
           size="sm"
           className="notification-mark-read-btn"
           onClick={markAllAsRead}
+          disabled={loading || notifications.every((item) => !item.unread)}
         >
           <CheckCheck size={16} />
           Mark all as read
@@ -228,56 +191,104 @@ const Notification = () => {
         ))}
       </div>
 
-      <Card className="notification-list-card py-0 gap-0 ring-0 shadow-none">
-        <CardContent className="notification-list-content">
-          {filteredNotifications.map((item, index) => {
-            const Icon = item.icon;
-            const isLast = index === filteredNotifications.length - 1;
+      {loading && (
+        <p className="notification-status" role="status">
+          Loading notifications...
+        </p>
+      )}
 
-            return (
-              <article
-                key={item.id}
-                className={`notification-item ${
-                  item.unread ? "is-unread" : ""
-                } ${isLast ? "is-last" : ""}`}
-              >
-                {item.image ? (
-                  <div className="notification-icon notification-icon--image">
-                    <img alt="" src={item.image} />
-                  </div>
-                ) : (
-                  <div
-                    className={`notification-icon notification-icon--${item.iconVariant}`}
-                  >
-                    <Icon size={22} />
-                  </div>
-                )}
+      {error && !loading && (
+        <div className="notification-status notification-status--error" role="alert">
+          <p>{error}</p>
+          <Button type="button" variant="outline" onClick={refresh}>
+            Try again
+          </Button>
+        </div>
+      )}
 
-                <div className="notification-item-body">
-                  <div className="notification-item-top">
-                    <CardTitle
-                      className={`notification-item-title ${
-                        item.unread ? "is-bold" : ""
-                      }`}
+      {!loading && !error && notifications.length === 0 && (
+        <p className="notification-status">
+          No notifications yet. Activity on your orders, listings, and bids will appear here.
+        </p>
+      )}
+
+      {!loading && !error && notifications.length > 0 && (
+        <Card className="notification-list-card py-0 gap-0 ring-0 shadow-none">
+          <CardContent className="notification-list-content">
+            {notifications.map((item, index) => {
+              const Icon = ICONS[item.category] ?? CheckCircle2;
+              const isLast = index === notifications.length - 1;
+
+              return (
+                <article
+                  key={item.id}
+                  className={`notification-item ${
+                    item.unread ? "is-unread" : ""
+                  } ${isLast ? "is-last" : ""} ${
+                    item.link ? "notification-item--clickable" : ""
+                  }`}
+                  onClick={() => handleNotificationClick(item)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      handleNotificationClick(item);
+                    }
+                  }}
+                  role={item.link ? "button" : undefined}
+                  tabIndex={item.link ? 0 : undefined}
+                >
+                  {item.imageUrl ? (
+                    <div className="notification-icon notification-icon--image">
+                      <img alt="" src={item.imageUrl} />
+                    </div>
+                  ) : (
+                    <div
+                      className={`notification-icon notification-icon--${item.iconVariant}`}
                     >
-                      {item.title}
-                    </CardTitle>
-                    <span
-                      className={`notification-time ${
-                        item.unread ? "is-unread" : ""
-                      }`}
-                    >
-                      {item.unread && <span className="notification-dot" />}
-                      {item.time}
-                    </span>
+                      <Icon size={22} />
+                    </div>
+                  )}
+
+                  <div className="notification-item-body">
+                    <div className="notification-item-top">
+                      <CardTitle
+                        className={`notification-item-title ${
+                          item.unread ? "is-bold" : ""
+                        }`}
+                      >
+                        {item.title}
+                      </CardTitle>
+                      <span
+                        className={`notification-time ${
+                          item.unread ? "is-unread" : ""
+                        }`}
+                      >
+                        {item.unread && <span className="notification-dot" />}
+                        {formatNotificationTime(item.createdAt)}
+                      </span>
+                    </div>
+                    <p className="notification-item-text">
+                      <NotificationBody
+                        message={item.message}
+                        highlight={item.highlight}
+                      />
+                    </p>
+                    {item.link ? (
+                      <Link
+                        to={item.link}
+                        className="notification-item-link"
+                        onClick={(event) => event.stopPropagation()}
+                      >
+                        View details
+                      </Link>
+                    ) : null}
                   </div>
-                  <p className="notification-item-text">{item.body}</p>
-                </div>
-              </article>
-            );
-          })}
-        </CardContent>
-      </Card>
+                </article>
+              );
+            })}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

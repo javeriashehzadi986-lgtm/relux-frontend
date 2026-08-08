@@ -8,10 +8,8 @@ import {
   CardDescription,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  FEATURED_RENTAL_PRODUCTS,
-  FEATURED_RENTALS_EXPLORE_PATH,
-} from "@/data/featuredRentals";
+import { useFeaturedRentals } from "@/hooks/useFeaturedRentals";
+import { useRequireLogin } from "@/hooks/useRequireLogin";
 import { useWishlist } from "@/hooks/useWishlist";
 import "./home.css";
 
@@ -64,9 +62,12 @@ const steps = [
 ];
 
 const Home = () => {
+  const requireLogin = useRequireLogin();
   const { isSaved, toggle: toggleWishlist } = useWishlist();
+  const { products: featuredRentals, loading, error, refresh } = useFeaturedRentals(6);
 
   const toggleFavorite = (product) => {
+    if (!requireLogin()) return;
     toggleWishlist(product);
   };
 
@@ -128,53 +129,77 @@ const Home = () => {
             <h2>Featured Rentals</h2>
             <p>Our most coveted pieces of the season</p>
           </div>
-          <div className="home-products-grid">
-            {FEATURED_RENTAL_PRODUCTS.map((product) => (
-              <Card key={product.id} className="home-product-card">
-                <div className="home-product-image-wrap">
-                  <img alt={product.title} src={product.image} />
-                  <span
-                    className={`home-product-badge home-product-badge--${product.badgeVariant}`}
-                  >
-                    {product.badge}
-                  </span>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className={`home-product-favorite ${
-                      isSaved(product.id) ? "home-product-favorite--active" : ""
-                    }`}
-                    aria-label={`Save ${product.title}`}
-                    onClick={() => toggleFavorite(product)}
-                  >
-                    <Heart
-                      size={18}
-                      fill={isSaved(product.id) ? "currentColor" : "none"}
-                    />
-                  </Button>
-                </div>
-                <CardContent className="home-product-body">
-                  <div>
-                    <p className="home-product-brand">{product.brand}</p>
-                    <CardTitle className="home-product-title">{product.title}</CardTitle>
+          {loading && (
+            <p className="home-catalog-status" role="status">
+              Loading featured rentals...
+            </p>
+          )}
+
+          {error && (
+            <div className="home-catalog-status home-catalog-status--error" role="alert">
+              <p>{error}</p>
+              <Button type="button" variant="outline" onClick={refresh}>
+                Try again
+              </Button>
+            </div>
+          )}
+
+          {!loading && !error && featuredRentals.length === 0 && (
+            <p className="home-catalog-status">
+              No rental listings yet. Check back soon or explore all categories.
+            </p>
+          )}
+
+          {!loading && !error && featuredRentals.length > 0 && (
+            <div className="home-products-grid">
+              {featuredRentals.map((product) => (
+                <Card key={product.id} className="home-product-card">
+                  <div className="home-product-image-wrap">
+                    <img alt={product.title} src={product.image} />
+                    <span
+                      className={`home-product-badge home-product-badge--${product.badgeVariant}`}
+                    >
+                      {product.badge}
+                    </span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className={`home-product-favorite ${
+                        isSaved(product.id) ? "home-product-favorite--active" : ""
+                      }`}
+                      aria-label={`Save ${product.title}`}
+                      onClick={() => toggleFavorite(product)}
+                    >
+                      <Heart
+                        size={18}
+                        fill={isSaved(product.id) ? "currentColor" : "none"}
+                      />
+                    </Button>
                   </div>
-                  <div className="home-product-prices">
+                  <CardContent className="home-product-body">
                     <div>
-                      <span className="home-price-label">Rent</span>
-                      <span className="home-price-rental">{product.price}</span>
+                      <p className="home-product-brand">{product.brand}</p>
+                      <CardTitle className="home-product-title">{product.title}</CardTitle>
                     </div>
-                  </div>
-                  <Button type="button" className="home-view-btn" asChild>
-                    <Link to={`/dress/${product.id}`}>View Details</Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                    <div className="home-product-prices">
+                      <div>
+                        <span className="home-price-label">Rent</span>
+                        <span className="home-price-rental">{product.price}</span>
+                      </div>
+                    </div>
+                    <Button type="button" className="home-view-btn" asChild>
+                      <Link to={`/dress/${product.id}`}>View Details</Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+
           <div className="home-featured-more">
             <Button size="lg" asChild>
-              <Link to={FEATURED_RENTALS_EXPLORE_PATH}>Explore More</Link>
+              <Link to="/femaleFashion?type=rent">Explore More</Link>
             </Button>
           </div>
         </div>

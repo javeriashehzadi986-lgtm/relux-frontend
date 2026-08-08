@@ -179,6 +179,21 @@
 }
 
 /* FEATURED RENTALS */
+.home-catalog-status {
+  margin: 0 auto 1.5rem;
+  max-width: 42rem;
+  text-align: center;
+  color: rgba(48, 51, 51, 0.72);
+  font-size: 0.95rem;
+}
+
+.home-catalog-status--error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
 .home-products-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));

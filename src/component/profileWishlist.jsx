@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { FEATURED_RENTAL_PRODUCTS } from "@/data/featuredRentals";
+import { useFeaturedRentals } from "@/hooks/useFeaturedRentals";
 import { useWishlist } from "@/hooks/useWishlist";
 import "./profileWishlist.css";
 
@@ -24,8 +24,6 @@ const SORT_OPTIONS = [
   { id: "price-low", label: "Price: Low to High" },
   { id: "price-high", label: "Price: High to Low" },
 ];
-
-const RECOMMENDED = FEATURED_RENTAL_PRODUCTS.slice(0, 4);
 
 const sortItems = (items, sortBy) => {
   const sorted = [...items];
@@ -44,6 +42,7 @@ const ProfileWishlist = () => {
   const [sortBy, setSortBy] = useState("recently-added");
   const [searchQuery, setSearchQuery] = useState("");
   const { items: wishlistItems, remove, loading } = useWishlist();
+  const { products: recommendedProducts } = useFeaturedRentals(4);
 
   const filteredItems = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -236,31 +235,37 @@ const ProfileWishlist = () => {
         </div>
 
         <div ref={carouselRef} className="profile-wishlist-carousel">
-          {RECOMMENDED.map((product) => (
-            <article key={product.id} className="profile-wishlist-carousel-item">
-              <Link
-                to={`/dress/${product.id}`}
-                className="profile-wishlist-carousel-card"
-              >
-                <div className="profile-wishlist-carousel-image-wrap">
-                  <img alt={product.title} src={product.image} />
-                  <span
-                    className={`profile-wishlist-product-badge profile-wishlist-product-badge--${product.badgeVariant}`}
-                  >
-                    {product.badge}
-                  </span>
-                </div>
-                <p className="profile-wishlist-carousel-brand">{product.brand}</p>
-                <h3 className="profile-wishlist-carousel-item-title">{product.title}</h3>
-                <p className="profile-wishlist-carousel-price">
-                  <span className="profile-wishlist-carousel-price-label">
-                    {product.listingType === "rent" ? "Rent" : "Resale"}
-                  </span>
-                  {product.price}
-                </p>
-              </Link>
-            </article>
-          ))}
+          {recommendedProducts.length > 0 ? (
+            recommendedProducts.map((product) => (
+              <article key={product.id} className="profile-wishlist-carousel-item">
+                <Link
+                  to={`/dress/${product.id}`}
+                  className="profile-wishlist-carousel-card"
+                >
+                  <div className="profile-wishlist-carousel-image-wrap">
+                    <img alt={product.title} src={product.image} />
+                    <span
+                      className={`profile-wishlist-product-badge profile-wishlist-product-badge--${product.badgeVariant}`}
+                    >
+                      {product.badge}
+                    </span>
+                  </div>
+                  <p className="profile-wishlist-carousel-brand">{product.brand}</p>
+                  <h3 className="profile-wishlist-carousel-item-title">{product.title}</h3>
+                  <p className="profile-wishlist-carousel-price">
+                    <span className="profile-wishlist-carousel-price-label">
+                      {product.listingType === "rent" ? "Rent" : "Resale"}
+                    </span>
+                    {product.price}
+                  </p>
+                </Link>
+              </article>
+            ))
+          ) : (
+            <p className="profile-wishlist-carousel-empty">
+              <Link to="/femaleFashion?type=rent">Browse rentals</Link> to discover more items.
+            </p>
+          )}
         </div>
       </section>
         </>
