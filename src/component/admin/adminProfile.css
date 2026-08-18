@@ -1,29 +1,10 @@
 .admin-profile-page {
-  --admin-bg: #fbf9f1;
-  --admin-surface: #fbf9f1;
-  --admin-surface-container: #f0eee6;
-  --admin-surface-container-high: #eae8e0;
-  --admin-surface-container-highest: #e4e3db;
-  --admin-white: #ffffff;
-  --admin-on-surface: #1b1c17;
-  --admin-on-surface-variant: #414942;
-  --admin-primary: #3b6848;
-  --admin-primary-container: #98c9a3;
-  --admin-on-primary: #ffffff;
-  --admin-on-primary-container: #285537;
-  --admin-secondary: #49654f;
-  --admin-secondary-container: #cbebcf;
-  --admin-on-secondary-container: #4f6b55;
-  --admin-outline-variant: #c1c9bf;
-  --admin-error: #ba1a1a;
-  --admin-border: #e8eee8;
-
   max-width: 90rem;
   margin: 0 auto;
   padding: 2rem 1.5rem 5rem;
   background: var(--admin-bg);
   color: var(--admin-on-surface);
-  font-family: "Newsreader", Georgia, serif;
+  font-family: inherit;
 }
 
 .admin-profile-page-header {
@@ -88,6 +69,62 @@
   border: 4px solid var(--admin-surface-container-high);
   border-radius: 9999px;
   object-fit: cover;
+}
+
+.admin-profile-avatar-initials {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 6rem;
+  height: 6rem;
+  border: 4px solid var(--admin-surface-container-high);
+  border-radius: 9999px;
+  background: var(--admin-secondary-container);
+  color: var(--admin-on-secondary-container);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.admin-profile-edit-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  text-align: left;
+}
+
+.admin-profile-form-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--admin-on-surface-variant);
+}
+
+.admin-profile-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
+.admin-profile-saved-message,
+.admin-profile-message {
+  margin: 0.75rem 0 0;
+  font-size: 0.875rem;
+  color: var(--admin-primary);
+}
+
+.admin-profile-message--error {
+  color: var(--admin-error);
+}
+
+.admin-profile-dialog-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0 1.75rem 1rem;
 }
 
 .admin-profile-avatar-edit {

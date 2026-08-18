@@ -105,6 +105,18 @@ export const api = {
       body: JSON.stringify(body),
     }),
 
+  updateEmail: (body) =>
+    request("/auth/me/email", {
+      method: "PATCH",
+      body: JSON.stringify(body),
+    }),
+
+  deactivateAccount: (body) =>
+    request("/auth/me/deactivate", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+
   // Seller Verification
   applyAsSeller: (body) =>
     request("/seller/verification/apply", {

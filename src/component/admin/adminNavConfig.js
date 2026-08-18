@@ -1,3 +1,9 @@
+export const ADMIN_PROFILE_LINK = {
+  path: "/admin/profile",
+  label: "My Profile",
+  icon: "person",
+};
+
 export const ADMIN_NAV_SECTIONS = [
   {
     label: "Marketplace",
@@ -24,10 +30,6 @@ export const ADMIN_NAV_SECTIONS = [
       { path: "/admin/contact", label: "Contact Messages", icon: "mail" },
       { path: "/admin/support", label: "Support Center", icon: "support_agent" },
     ],
-  },
-  {
-    label: "Account",
-    items: [{ path: "/admin/profile", label: "My Profile", icon: "person" }],
   },
 ];
 

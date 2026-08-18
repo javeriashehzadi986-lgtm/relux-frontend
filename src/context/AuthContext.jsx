@@ -62,6 +62,20 @@ export function AuthProvider({ children }) {
     return data.user;
   }, []);
 
+  const updateEmail = useCallback(async (payload) => {
+    const data = await api.updateEmail(payload);
+    setUser(data.user);
+    api.setStoredUser(data.user);
+    return data.user;
+  }, []);
+
+  const deactivateAccount = useCallback(async (payload) => {
+    await api.deactivateAccount(payload);
+    api.setToken(null);
+    api.setStoredUser(null);
+    setUser(null);
+  }, []);
+
   const applyAsSeller = useCallback(async (payload) => {
     const data = await api.applyAsSeller(payload);
     api.setToken(data.token);
@@ -98,11 +112,13 @@ export function AuthProvider({ children }) {
       register,
       refreshUser,
       updateProfile,
+      updateEmail,
+      deactivateAccount,
       applyAsSeller,
       submitSellerVerification,
       logout,
     }),
-    [user, loading, login, register, refreshUser, updateProfile, applyAsSeller, submitSellerVerification, logout],
+    [user, loading, login, register, refreshUser, updateProfile, updateEmail, deactivateAccount, applyAsSeller, submitSellerVerification, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

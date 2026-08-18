@@ -1,32 +1,10 @@
 .admin-payments-page {
-  --admin-bg: #fbf9f1;
-  --admin-white: #ffffff;
-  --admin-on-surface: #1b1c17;
-  --admin-on-surface-variant: #414942;
-  --admin-primary: #3b6848;
-  --admin-primary-container: #98c9a3;
-  --admin-on-primary: #ffffff;
-  --admin-on-primary-container: #285537;
-  --admin-primary-fixed: #bcefc7;
-  --admin-on-primary-fixed-variant: #224f32;
-  --admin-secondary-fixed: #cbebcf;
-  --admin-on-secondary-fixed-variant: #324d38;
-  --admin-tertiary-fixed: #dfe3e0;
-  --admin-on-tertiary-fixed-variant: #434845;
-  --admin-surface-container: #f0eee6;
-  --admin-surface-container-low: #f5f4ec;
-  --admin-surface-container-high: #eae8e0;
-  --admin-outline: #717971;
-  --admin-outline-variant: #c1c9bf;
-  --admin-error-container: #ffdad6;
-  --admin-on-error-container: #93000a;
-
   max-width: 90rem;
   margin: 0 auto;
   padding: 2rem 1.5rem 5rem;
   background: var(--admin-bg);
   color: var(--admin-on-surface);
-  font-family: "Newsreader", Georgia, serif;
+  font-family: inherit;
 }
 
 .admin-payments-header {
