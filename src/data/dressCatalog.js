@@ -177,6 +177,21 @@ const sortCategoryProducts = (products, sortBy) => {
 
 export const isMongoListingId = (id) => /^[a-f0-9]{24}$/i.test(String(id ?? ""));
 
+export function normalizeMongoId(value) {
+  if (!value) return null;
+  if (typeof value === "string") {
+    return isMongoListingId(value) ? value : null;
+  }
+  if (typeof value === "object") {
+    const id = value._id ?? value.id;
+    if (id && isMongoListingId(String(id))) {
+      return String(id);
+    }
+  }
+  const asString = String(value);
+  return isMongoListingId(asString) ? asString : null;
+}
+
 export const mapApiListingToDress = (listing) => {
   const id = String(listing.id);
   const isRent = listing.listingType === "rent";
@@ -190,7 +205,7 @@ export const mapApiListingToDress = (listing) => {
 
   const dress = {
     id,
-    sellerId: listing.sellerId ? String(listing.sellerId) : null,
+    sellerId: normalizeMongoId(listing.sellerId),
     title: listing.title,
     brand: listing.brand || "Relux Seller",
     seller: listing.seller ?? listing.sellerName ?? "Relux Seller",

@@ -446,3 +446,13 @@
     order: -1;
   }
 }
+
+.admin-reviews-error {
+  margin: 0 0 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  background: #ffdad6;
+  color: #93000a;
+  font-family: Manrope, system-ui, sans-serif;
+  font-size: 0.875rem;
+}
