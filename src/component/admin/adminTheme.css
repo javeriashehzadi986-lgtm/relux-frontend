@@ -1,0 +1,81 @@
+/* Shared admin tokens aligned with Relux Hub marketplace UI */
+.admin-layout {
+  --admin-sidebar-width: 260px;
+
+  --admin-primary: #31685d;
+  --admin-on-primary: #e3fff6;
+  --admin-primary-container: #b4eedf;
+  --admin-on-primary-container: #235c51;
+  --admin-primary-fixed: #b4eedf;
+  --admin-primary-fixed-dim: #c8e8dc;
+  --admin-on-primary-fixed: #235c51;
+  --admin-on-primary-fixed-variant: #235c51;
+
+  --admin-secondary: #31685d;
+  --admin-secondary-container: #e8ede9;
+  --admin-secondary-fixed: #e8ede9;
+  --admin-on-secondary-fixed: #235c51;
+  --admin-on-secondary-fixed-variant: #31685d;
+  --admin-on-secondary-container: #31685d;
+
+  --admin-tertiary-container: #e7e8e7;
+  --admin-on-tertiary-container: #5d605f;
+  --admin-tertiary-fixed: #f3f4f3;
+  --admin-tertiary-fixed-dim: #e7e8e7;
+  --admin-on-tertiary-fixed-variant: #5d605f;
+
+  --admin-surface: #faf9f8;
+  --admin-bg: #faf9f8;
+  --admin-background: #faf9f8;
+  --admin-white: #ffffff;
+  --admin-surface-container: #f3f4f3;
+  --admin-surface-container-low: #faf9f8;
+  --admin-surface-container-lowest: #ffffff;
+  --admin-surface-container-high: #e7e8e7;
+  --admin-surface-container-highest: #e1e3e2;
+  --admin-surface-variant: #f0eee6;
+  --admin-surface-dim: #e7e8e7;
+
+  --admin-on-surface: #303333;
+  --admin-on-surface-variant: #5d605f;
+
+  --admin-outline: #787b7a;
+  --admin-outline-variant: #e1e3e2;
+  --admin-border: #e1e3e2;
+
+  --admin-error: #a83836;
+  --admin-error-container: #ffdad6;
+  --admin-on-error-container: #93000a;
+
+  font-family: "Newsreader", Georgia, "Times New Roman", serif;
+  color: var(--admin-on-surface);
+  background: var(--admin-surface);
+}
+
+.admin-layout .material-symbols-outlined,
+.admin-layout .admin-page .material-symbols-outlined {
+  font-family: "Material Symbols Outlined";
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  display: inline-block;
+  vertical-align: middle;
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+}
+
+.admin-layout .admin-page {
+  max-width: 90rem;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 5rem;
+  background: var(--admin-bg);
+  color: var(--admin-on-surface);
+  font-family: inherit;
+}
+
+.admin-layout .admin-page-header h1,
+.admin-layout .admin-page h1 {
+  color: var(--admin-on-surface);
+  font-family: inherit;
+  letter-spacing: -0.02em;
+}

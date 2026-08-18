@@ -1,26 +1,10 @@
 .admin-reviews-page {
-  --admin-bg: #fbf9f1;
-  --admin-white: #ffffff;
-  --admin-on-surface: #1b1c17;
-  --admin-on-surface-variant: #414942;
-  --admin-primary: #3b6848;
-  --admin-primary-container: #98c9a3;
-  --admin-on-primary: #ffffff;
-  --admin-secondary-fixed: #cbebcf;
-  --admin-on-secondary-fixed: #05200f;
-  --admin-surface-container: #f0eee6;
-  --admin-surface-container-low: #f5f4ec;
-  --admin-surface-container-high: #eae8e0;
-  --admin-outline: #717971;
-  --admin-outline-variant: #c1c9bf;
-  --admin-error: #ba1a1a;
-
   max-width: 90rem;
   margin: 0 auto;
   padding: 2rem 1.5rem 5rem;
   background: var(--admin-bg);
   color: var(--admin-on-surface);
-  font-family: "Newsreader", Georgia, serif;
+  font-family: inherit;
 }
 
 .admin-reviews-header {
@@ -159,7 +143,7 @@
   padding: 0.5rem 1rem;
   border: none;
   border-radius: 0.75rem;
-  font-family: "Newsreader", Georgia, serif;
+  font-family: inherit;
   font-size: 0.875rem;
   text-transform: none;
   letter-spacing: normal;
@@ -445,4 +429,14 @@
   .admin-reviews-detail-panel {
     order: -1;
   }
+}
+
+.admin-reviews-error {
+  margin: 0 0 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  background: var(--admin-error-container);
+  color: var(--admin-on-error-container);
+  font-family: inherit;
+  font-size: 0.875rem;
 }

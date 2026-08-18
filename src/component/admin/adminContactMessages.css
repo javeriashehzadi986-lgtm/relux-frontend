@@ -1,19 +1,19 @@
 .admin-contact-page {
-  --c-bg: #fbf9f1;
-  --c-primary: #3b6848;
-  --c-text: #1b1c17;
-  --c-muted: #414942;
-  --c-card: #ffffff;
-  --c-line: #c1c9bf;
-  --c-error: #93000a;
-  --c-error-bg: #ffdad6;
+  --c-bg: var(--admin-bg);
+  --c-primary: var(--admin-primary);
+  --c-text: var(--admin-on-surface);
+  --c-muted: var(--admin-on-surface-variant);
+  --c-card: var(--admin-white);
+  --c-line: var(--admin-outline-variant);
+  --c-error: var(--admin-on-error-container);
+  --c-error-bg: var(--admin-error-container);
 
   max-width: 90rem;
   margin: 0 auto;
   padding: 1.5rem 1.5rem 4rem;
   background: var(--c-bg);
   color: var(--c-text);
-  font-family: "Newsreader", Georgia, serif;
+  font-family: inherit;
 }
 
 .admin-contact-header {
@@ -50,7 +50,7 @@
   border-radius: 0.5rem;
   padding: 0.5rem 0.85rem;
   cursor: pointer;
-  font-family: "Manrope", system-ui, sans-serif;
+  font-family: inherit;
   font-size: 0.85rem;
 }
 
@@ -60,7 +60,7 @@
   border-radius: 0.5rem;
   background: var(--c-error-bg);
   color: var(--c-error);
-  font-family: "Manrope", system-ui, sans-serif;
+  font-family: inherit;
   font-weight: 600;
   font-size: 0.875rem;
 }
@@ -70,8 +70,8 @@
   padding: 0.75rem 1rem;
   border-radius: 0.5rem;
   background: rgba(203, 235, 207, 0.65);
-  color: #224f32;
-  font-family: "Manrope", system-ui, sans-serif;
+  color: var(--admin-on-primary-container);
+  font-family: inherit;
   font-weight: 600;
   font-size: 0.875rem;
 }
@@ -94,25 +94,25 @@
   border: 1px solid var(--c-line);
   border-radius: 0.5rem;
   padding: 0.75rem 0.85rem;
-  font-family: "Manrope", system-ui, sans-serif;
+  font-family: inherit;
   font-size: 0.9rem;
   line-height: 1.45;
   resize: vertical;
-  background: #fff;
+  background: var(--admin-white);
   color: var(--c-text);
 }
 
 .admin-contact-reply-hint,
 .admin-contact-reply-saved {
   margin: 0.5rem 0 0;
-  font-family: "Manrope", system-ui, sans-serif;
+  font-family: inherit;
   font-size: 0.8rem;
   color: var(--c-muted);
   line-height: 1.4;
 }
 
 .admin-contact-reply-saved {
-  color: #224f32;
+  color: var(--admin-on-primary-container);
   font-weight: 600;
 }
 
@@ -120,11 +120,11 @@
   margin-top: 0.75rem;
   border: 1px solid var(--c-primary);
   background: var(--c-primary);
-  color: #fff;
+  color: var(--admin-on-primary);
   border-radius: 0.5rem;
   padding: 0.55rem 1rem;
   cursor: pointer;
-  font-family: "Manrope", system-ui, sans-serif;
+  font-family: inherit;
   font-size: 0.85rem;
   font-weight: 600;
 }
@@ -152,7 +152,7 @@
   display: block;
   font-size: 0.8rem;
   color: var(--c-muted);
-  font-family: "Manrope", system-ui, sans-serif;
+  font-family: inherit;
 }
 
 .admin-contact-stats strong {
@@ -169,7 +169,7 @@
   border-radius: 0.5rem;
   padding: 0.5rem 0.75rem;
   background: var(--c-card);
-  font-family: "Manrope", system-ui, sans-serif;
+  font-family: inherit;
 }
 
 .admin-contact-layout {
@@ -210,13 +210,13 @@
 .admin-contact-item p,
 .admin-contact-item small {
   margin: 0;
-  font-family: "Manrope", system-ui, sans-serif;
+  font-family: inherit;
   color: var(--c-muted);
   font-size: 0.8rem;
 }
 
 .admin-contact-badge {
-  font-family: "Manrope", system-ui, sans-serif;
+  font-family: inherit;
   font-size: 0.7rem;
   font-weight: 700;
   padding: 0.15rem 0.45rem;
@@ -224,23 +224,23 @@
 }
 
 .admin-contact-badge--new {
-  background: rgba(59, 104, 72, 0.15);
+  background: color-mix(in srgb, var(--c-primary) 15%, transparent);
   color: var(--c-primary);
 }
 
 .admin-contact-badge--read {
-  background: #eae8e0;
+  background: var(--admin-surface-container-high);
   color: var(--c-muted);
 }
 
 .admin-contact-badge--resolved {
-  background: rgba(203, 235, 207, 0.6);
-  color: #224f32;
+  background: color-mix(in srgb, var(--admin-primary-container) 60%, transparent);
+  color: var(--admin-on-primary-container);
 }
 
 .admin-contact-detail {
   background: var(--c-card);
-  border: 1px solid rgba(193, 201, 191, 0.5);
+  border: 1px solid var(--admin-outline-variant);
   border-radius: 0.75rem;
   padding: 1.25rem;
 }
@@ -253,7 +253,7 @@
 .admin-contact-email,
 .admin-contact-date {
   margin: 0.25rem 0 0;
-  font-family: "Manrope", system-ui, sans-serif;
+  font-family: inherit;
   color: var(--c-muted);
   font-size: 0.85rem;
 }
@@ -262,7 +262,7 @@
   margin: 1rem 0;
   padding: 0.85rem 1rem;
   border-left: 3px solid var(--c-primary);
-  background: #f5f4ec;
+  background: var(--admin-surface-container-low);
   font-size: 0.95rem;
   line-height: 1.5;
   white-space: pre-wrap;
@@ -276,7 +276,7 @@
 
 .admin-contact-actions button:first-child {
   background: var(--c-primary);
-  color: #fff;
+  color: var(--admin-on-primary);
   border-color: var(--c-primary);
 }
 
@@ -284,7 +284,7 @@
   margin: 0;
   padding: 1.5rem;
   color: var(--c-muted);
-  font-family: "Manrope", system-ui, sans-serif;
+  font-family: inherit;
 }
 
 @media (max-width: 900px) {

@@ -105,6 +105,18 @@ export const api = {
       body: JSON.stringify(body),
     }),
 
+  updateEmail: (body) =>
+    request("/auth/me/email", {
+      method: "PATCH",
+      body: JSON.stringify(body),
+    }),
+
+  deactivateAccount: (body) =>
+    request("/auth/me/deactivate", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+
   // Seller Verification
   applyAsSeller: (body) =>
     request("/seller/verification/apply", {
@@ -427,6 +439,23 @@ export const api = {
       method: "POST",
       body: JSON.stringify(body),
     }),
+
+  // Admin Reviews
+  getAdminReviews: (params = {}) => {
+    const query = new URLSearchParams();
+    if (params.q) query.set("q", params.q);
+    if (params.rating) query.set("rating", params.rating);
+    if (params.status) query.set("status", params.status);
+    const qs = query.toString();
+    return request(qs ? `/admin/reviews?${qs}` : "/admin/reviews");
+  },
+  updateAdminReviewStatus: (id, body) =>
+    request(`/admin/reviews/${id}/status`, {
+      method: "PATCH",
+      body: JSON.stringify(body),
+    }),
+  deleteAdminReview: (id) =>
+    request(`/admin/reviews/${id}`, { method: "DELETE" }),
 
   // Notifications
   getMyNotifications: (filter = "all") =>

@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { ADMIN_NAV_SECTIONS, ADMIN_USER } from "./adminNavConfig";
+import { ADMIN_NAV_SECTIONS, ADMIN_PROFILE_LINK } from "./adminNavConfig";
 import {
   resetAdminSidebar,
   setAdminSidebarOpen,
@@ -8,9 +8,17 @@ import {
   toggleAdminSidebar,
 } from "@/utils/adminSidebar";
 import { useAuth } from "@/context/AuthContext";
+import "./adminTheme.css";
 import "./adminLayout.css";
 
 function getActiveLabel(pathname) {
+  if (
+    pathname === ADMIN_PROFILE_LINK.path ||
+    pathname.startsWith(`${ADMIN_PROFILE_LINK.path}/`)
+  ) {
+    return ADMIN_PROFILE_LINK.label;
+  }
+
   for (const section of ADMIN_NAV_SECTIONS) {
     for (const item of section.items) {
       if (item.end ? pathname === item.path : pathname.startsWith(item.path)) {
@@ -71,6 +79,20 @@ const AdminLayout = () => {
           <p>Marketplace Admin</p>
         </div>
 
+        <NavLink
+          to={ADMIN_PROFILE_LINK.path}
+          end
+          className={({ isActive }) =>
+            `admin-sidebar-link admin-sidebar-profile-link ${isActive ? "admin-sidebar-link--active" : ""}`.trim()
+          }
+          onClick={closeSidebarOnMobile}
+        >
+          <span className="material-symbols-outlined" aria-hidden="true">
+            {ADMIN_PROFILE_LINK.icon}
+          </span>
+          {ADMIN_PROFILE_LINK.label}
+        </NavLink>
+
         <nav className="admin-sidebar-nav">
           {ADMIN_NAV_SECTIONS.map((section) => (
             <div key={section.label}>
@@ -98,13 +120,6 @@ const AdminLayout = () => {
         </nav>
 
         <div className="admin-sidebar-footer">
-          <div className="admin-sidebar-user">
-            <img src={ADMIN_USER.avatar} alt={ADMIN_USER.name} />
-            <div>
-              <strong>{ADMIN_USER.name}</strong>
-              <span>{ADMIN_USER.role}</span>
-            </div>
-          </div>
           <button type="button" className="admin-sidebar-logout" onClick={handleLogout}>
             <span className="material-symbols-outlined" aria-hidden="true">
               logout

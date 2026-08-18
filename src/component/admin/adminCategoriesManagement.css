@@ -1,32 +1,8 @@
 .admin-categories-page {
-  --admin-primary: #3b6848;
-  --admin-on-primary: #ffffff;
-  --admin-primary-container: #98c9a3;
-  --admin-on-primary-container: #285537;
-  --admin-primary-fixed: #bcefc7;
-  --admin-on-primary-fixed: #00210e;
-  --admin-primary-fixed-dim: #a1d2ac;
-  --admin-secondary: #49654f;
-  --admin-secondary-container: #cbebcf;
-  --admin-on-secondary-container: #4f6b55;
-  --admin-tertiary: #5b5f5d;
-  --admin-tertiary-fixed-dim: #c3c7c4;
-  --admin-surface: #fbf9f1;
-  --admin-background: #fbf9f1;
-  --admin-surface-container: #f0eee6;
-  --admin-surface-container-low: #f5f4ec;
-  --admin-surface-container-lowest: #ffffff;
-  --admin-surface-container-highest: #e4e3db;
-  --admin-on-surface: #1b1c17;
-  --admin-on-surface-variant: #414942;
-  --admin-outline: #717971;
-  --admin-outline-variant: #c1c9bf;
-  --admin-error: #ba1a1a;
-
   min-height: 100vh;
   background: var(--admin-background);
   color: var(--admin-on-surface);
-  font-family: "Newsreader", Georgia, serif;
+  font-family: inherit;
 }
 
 .admin-categories-page .material-symbols-outlined {

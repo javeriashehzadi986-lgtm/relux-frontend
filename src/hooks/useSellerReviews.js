@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import api from "@/services/api";
-import { isMongoListingId } from "@/data/dressCatalog";
+import { isMongoListingId, normalizeMongoId } from "@/data/dressCatalog";
 import {
   addSellerReport,
   addSellerReview,
@@ -14,10 +14,7 @@ export function isMongoSellerId(id) {
 }
 
 export function useSellerReviews(dress) {
-  const sellerId =
-    dress?.sellerId && isMongoSellerId(dress.sellerId)
-      ? String(dress.sellerId)
-      : null;
+  const sellerId = normalizeMongoId(dress?.sellerId);
   const sellerKey = getSellerKey(dress);
   const usesApi = Boolean(sellerId);
 
@@ -108,15 +105,14 @@ export function useSellerReviews(dress) {
           reportDetails: reportDetails.trim(),
         });
 
-        setReviews((current) => [data.review, ...current]);
-        if (data.stats) {
-          setStats(data.stats);
-        }
+        await load();
 
         return {
           message:
             data.message ||
-            "Thank you! Your review has been submitted.",
+            (reportReason || reportDetails.trim()
+              ? "Thank you! Your review is live and our team has been notified about your report."
+              : "Thank you! Your review has been submitted."),
         };
       } catch (err) {
         const message = err.message || "Could not submit review";
@@ -126,7 +122,7 @@ export function useSellerReviews(dress) {
         setSubmitting(false);
       }
     },
-    [dress?.id, sellerId, sellerKey, usesApi],
+    [dress?.id, sellerId, sellerKey, usesApi, load],
   );
 
   return {
