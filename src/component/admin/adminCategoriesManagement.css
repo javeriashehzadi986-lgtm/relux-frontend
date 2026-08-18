@@ -694,3 +694,124 @@
   color: var(--admin-on-surface-variant);
   font-size: 0.875rem;
 }
+
+.admin-categories-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.admin-categories-menu-btn,
+.admin-categories-refresh {
+  border: 1px solid var(--admin-outline-variant);
+  background: var(--admin-white);
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.85rem;
+  cursor: pointer;
+  font-family: "Manrope", system-ui, sans-serif;
+  font-size: 0.85rem;
+}
+
+.admin-categories-banner {
+  margin: 0 0 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  font-family: "Manrope", system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.admin-categories-banner--error {
+  background: var(--admin-error-container);
+  color: var(--admin-on-error-container);
+}
+
+.admin-categories-banner--success {
+  background: rgba(203, 235, 207, 0.65);
+  color: #224f32;
+}
+
+.admin-categories-sub-card-main small {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.72rem;
+  color: var(--admin-on-surface-variant);
+  font-family: "Manrope", system-ui, sans-serif;
+}
+
+.admin-categories-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(27, 28, 23, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.admin-categories-modal {
+  width: min(100%, 28rem);
+  background: var(--admin-white);
+  border-radius: 0.85rem;
+  padding: 1.25rem;
+  box-shadow: 0 20px 40px rgba(27, 28, 23, 0.18);
+}
+
+.admin-categories-modal h3 {
+  margin: 0 0 1rem;
+  font-size: 1.25rem;
+  color: var(--admin-primary);
+}
+
+.admin-categories-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.admin-categories-modal-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-family: "Manrope", system-ui, sans-serif;
+  font-size: 0.85rem;
+  color: var(--admin-on-surface-variant);
+}
+
+.admin-categories-modal-form input,
+.admin-categories-modal-form select {
+  border: 1px solid var(--admin-outline-variant);
+  border-radius: 0.5rem;
+  padding: 0.55rem 0.7rem;
+  font-family: "Manrope", system-ui, sans-serif;
+  font-size: 0.9rem;
+}
+
+.admin-categories-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.admin-categories-modal-actions button {
+  border: 1px solid var(--admin-outline-variant);
+  background: var(--admin-white);
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.9rem;
+  cursor: pointer;
+  font-family: "Manrope", system-ui, sans-serif;
+}
+
+.admin-categories-modal-actions button[type="submit"] {
+  background: var(--admin-primary);
+  color: var(--admin-on-primary);
+  border-color: var(--admin-primary);
+}
+
+.admin-categories-modal-actions button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

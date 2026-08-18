@@ -441,6 +441,34 @@ export const api = {
 
   markAllNotificationsRead: () =>
     request("/notifications/read-all", { method: "PATCH" }),
+
+  getUnreadNotificationCount: () =>
+    request("/notifications/unread-count"),
+
+  getAdminBroadcasts: () => request("/admin/notifications"),
+  getAdminNotificationRecipients: () =>
+    request("/admin/notifications/recipients"),
+  sendAdminBroadcast: (body) =>
+    request("/admin/notifications", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+
+  getAdminCategories: () => request("/admin/categories"),
+  createAdminCategory: (body) =>
+    request("/admin/categories", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+  updateAdminCategory: (id, body) =>
+    request(`/admin/categories/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(body),
+    }),
+  deleteAdminCategory: (id) =>
+    request(`/admin/categories/${id}`, {
+      method: "DELETE",
+    }),
 };
 
 export default api;

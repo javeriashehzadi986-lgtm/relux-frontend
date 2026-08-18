@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { useUnreadMessageCount } from "@/hooks/useUnreadMessageCount";
+import { useUnreadNotificationCount } from "@/hooks/useUnreadNotificationCount";
 import {
   isDashboardRoute,
   isDashboardSidebarOpen,
@@ -24,6 +25,7 @@ const Navbar = () => {
   const location = useLocation();
   const { isAuthenticated } = useAuth();
   const { unreadCount } = useUnreadMessageCount();
+  const { unreadCount: unreadNotifications } = useUnreadNotificationCount();
   const onDashboard = isDashboardRoute(location.pathname);
   const [sidebarOpen, setSidebarOpen] = useState(() => isDashboardSidebarOpen());
 
@@ -99,8 +101,13 @@ const Navbar = () => {
               <Heart size={22} />
             </Link>
 
-            <Link to="/notification" aria-label="Notifications">
+            <Link to="/notification" aria-label="Notifications" className="nav-icon-link">
               <Bell size={22} />
+              {isAuthenticated && unreadNotifications > 0 ? (
+                <span className="nav-icon-badge">
+                  {unreadNotifications > 9 ? "9+" : unreadNotifications}
+                </span>
+              ) : null}
             </Link>
           </div>
 

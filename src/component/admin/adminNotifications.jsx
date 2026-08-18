@@ -1,13 +1,12 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
-  Calendar,
   Filter,
   History,
   Lightbulb,
   Megaphone,
-  Plus,
   Send,
 } from "lucide-react";
+import api from "@/services/api";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,57 +30,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { toggleAdminSidebar } from "@/utils/adminSidebar";
 import "./adminNotifications.css";
 
-const NOTIFICATION_HISTORY = [
-  {
-    id: "hist-1",
-    title: "Fall Collection Launch",
-    preview: "The new sustainable knits are here...",
-    sentTo: "All Users",
-    priority: "normal",
-    status: "sent",
-    time: "Oct 12, 10:30 AM",
-  },
-  {
-    id: "hist-2",
-    title: "Shipping Delay Update",
-    preview: "Regional logistics disruption in Central Europe...",
-    sentTo: "Buyers Only",
-    priority: "important",
-    status: "sent",
-    time: "Oct 11, 04:15 PM",
-  },
-  {
-    id: "hist-3",
-    title: "Inventory Policy Change",
-    preview: "Updated guidelines for vintage item listing...",
-    sentTo: "Sellers Only",
-    priority: "normal",
-    status: "sent",
-    time: "Oct 09, 11:00 AM",
-  },
-  {
-    id: "hist-4",
-    title: "Payout System Maintenance",
-    preview: "Brief outage expected on Sunday morning...",
-    sentTo: "Sellers Only",
-    priority: "important",
-    status: "sent",
-    time: "Oct 08, 02:00 PM",
-  },
-];
-
-const RECIPIENT_OPTIONS = [
-  { id: "all", label: "All Users", count: "12.4k" },
-  { id: "buyers", label: "Buyers Only", count: "8.1k" },
-  { id: "sellers", label: "Sellers Only", count: "4.3k" },
-];
+const DEFAULT_COUNTS = { all: 0, buyers: 0, sellers: 0 };
 
 function PriorityBadge({ priority }) {
-  const label = priority === "important" ? "Important" : "Normal";
+  const label =
+    priority === "urgent" ? "Urgent" : priority === "important" ? "Important" : "Normal";
+  const tone = priority === "urgent" ? "important" : priority;
   return (
-    <Badge variant="outline" className={`admin-notifications-priority admin-notifications-priority--${priority}`}>
+    <Badge variant="outline" className={`admin-notifications-priority admin-notifications-priority--${tone}`}>
       {label}
     </Badge>
   );
@@ -93,41 +52,102 @@ const AdminNotifications = () => {
   const [priority, setPriority] = useState("normal");
   const [recipients, setRecipients] = useState("all");
   const [submitState, setSubmitState] = useState("idle");
+  const [history, setHistory] = useState([]);
+  const [counts, setCounts] = useState(DEFAULT_COUNTS);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  const handleSubmit = (event) => {
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const [historyData, recipientData] = await Promise.all([
+        api.getAdminBroadcasts(),
+        api.getAdminNotificationRecipients(),
+      ]);
+      setHistory(historyData.broadcasts ?? []);
+      setCounts(recipientData.counts ?? DEFAULT_COUNTS);
+    } catch (err) {
+      setError(err.message || "Failed to load notifications");
+      setHistory([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const recipientOptions = [
+    { id: "all", label: "All Users", count: counts.all },
+    { id: "buyers", label: "Buyers Only", count: counts.buyers },
+    { id: "sellers", label: "Sellers Only", count: counts.sellers },
+  ];
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
     if (!title.trim() || !message.trim() || submitState !== "idle") return;
 
     setSubmitState("sending");
-    window.setTimeout(() => {
+    setError("");
+    setSuccess("");
+    try {
+      const data = await api.sendAdminBroadcast({
+        title: title.trim(),
+        message: message.trim(),
+        recipients,
+        priority,
+      });
       setSubmitState("sent");
-      window.setTimeout(() => {
-        setTitle("");
-        setMessage("");
-        setPriority("normal");
-        setRecipients("all");
-        setSubmitState("idle");
-      }, 2000);
-    }, 1500);
+      setSuccess(data.message || "Notification sent");
+      setTitle("");
+      setMessage("");
+      setPriority("normal");
+      setRecipients("all");
+      await loadData();
+      window.setTimeout(() => setSubmitState("idle"), 2000);
+    } catch (err) {
+      setSubmitState("idle");
+      setError(err.message || "Could not send notification");
+    }
   };
+
+  const totalReached = history.reduce((sum, item) => sum + (item.sentCount || 0), 0);
 
   return (
     <div className="admin-notifications-page">
       <section className="admin-notifications-header">
-        <div>
-          <h1>Notifications</h1>
-          <p>Create and send announcements to users on Relux Hub.</p>
+        <div className="admin-notifications-header-left">
+          <button
+            type="button"
+            className="admin-notifications-menu-btn"
+            aria-label="Open menu"
+            onClick={toggleAdminSidebar}
+          >
+            <span className="material-symbols-outlined">menu</span>
+          </button>
+          <div>
+            <h1>Notifications</h1>
+            <p>Create and send announcements to users on Relux Hub.</p>
+          </div>
         </div>
-        <div className="admin-notifications-header-actions">
-          <Button type="button" variant="ghost" className="admin-notifications-outline-btn">
-            View Analytics
-          </Button>
-          <Button type="button" className="admin-notifications-primary-btn">
-            <Plus size={18} aria-hidden="true" />
-            Draft Template
-          </Button>
-        </div>
+        <Button type="button" variant="ghost" className="admin-notifications-outline-btn" onClick={loadData}>
+          Refresh
+        </Button>
       </section>
+
+      {error && (
+        <p className="admin-notifications-banner admin-notifications-banner--error" role="alert">
+          {error}
+        </p>
+      )}
+      {success && (
+        <p className="admin-notifications-banner admin-notifications-banner--success" role="status">
+          {success}
+        </p>
+      )}
 
       <div className="admin-notifications-grid">
         <div className="admin-notifications-form-column">
@@ -176,20 +196,12 @@ const AdminNotifications = () => {
                     </SelectContent>
                   </Select>
                 </Field>
-
-                <Field className="admin-notifications-field">
-                  <FieldLabel htmlFor="notification-schedule">Schedule</FieldLabel>
-                  <div className="admin-notifications-schedule">
-                    <Input id="notification-schedule" type="text" value="Now" readOnly aria-label="Schedule" />
-                    <Calendar size={18} aria-hidden="true" />
-                  </div>
-                </Field>
               </div>
 
               <fieldset className="admin-notifications-recipients">
                 <legend>Target Recipients</legend>
                 <RadioGroup value={recipients} onValueChange={setRecipients}>
-                  {RECIPIENT_OPTIONS.map((option) => (
+                  {recipientOptions.map((option) => (
                     <Label key={option.id} className="admin-notifications-recipient" htmlFor={`recipient-${option.id}`}>
                       <RadioGroupItem value={option.id} id={`recipient-${option.id}`} />
                       <span>
@@ -224,10 +236,11 @@ const AdminNotifications = () => {
               <Lightbulb size={20} aria-hidden="true" />
             </div>
             <div>
-              <h3>Design Tip</h3>
+              <h3>How it works</h3>
               <p>
-                High-priority notifications trigger push alerts immediately. Use
-                &quot;Urgent&quot; sparingly for service disruptions or security updates only.
+                Send goes to the selected users&apos; in-app Notification page
+                (bell icon). Admin accounts are not included — use a buyer or seller
+                login to test.
               </p>
             </div>
             </CardContent>
@@ -241,7 +254,7 @@ const AdminNotifications = () => {
                 <History size={20} aria-hidden="true" />
                 <CardTitle>Recent History</CardTitle>
               </div>
-              <Button type="button" variant="ghost" size="icon" className="admin-notifications-filter-btn" aria-label="Filter history">
+              <Button type="button" variant="ghost" size="icon" className="admin-notifications-filter-btn" aria-label="Refresh history" onClick={loadData}>
                 <Filter size={18} />
               </Button>
             </CardHeader>
@@ -258,52 +271,59 @@ const AdminNotifications = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {NOTIFICATION_HISTORY.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell>
-                        <span className="admin-notifications-history-title">{item.title}</span>
-                        <span className="admin-notifications-history-preview">{item.preview}</span>
-                      </TableCell>
-                      <TableCell>
-                        <span className="admin-notifications-audience">{item.sentTo}</span>
-                      </TableCell>
-                      <TableCell>
-                        <PriorityBadge priority={item.priority} />
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="admin-notifications-status">
-                          <span aria-hidden="true" />
-                          Sent
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="admin-notifications-time">{item.time}</TableCell>
+                  {loading ? (
+                    <TableRow>
+                      <TableCell colSpan={5}>Loading history...</TableCell>
                     </TableRow>
-                  ))}
+                  ) : history.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5}>No announcements sent yet.</TableCell>
+                    </TableRow>
+                  ) : (
+                    history.map((item) => (
+                      <TableRow key={item.id}>
+                        <TableCell>
+                          <span className="admin-notifications-history-title">{item.title}</span>
+                          <span className="admin-notifications-history-preview">{item.preview}</span>
+                        </TableCell>
+                        <TableCell>
+                          <span className="admin-notifications-audience">
+                            {item.sentTo} ({item.sentCount})
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <PriorityBadge priority={item.priority} />
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="admin-notifications-status">
+                            <span aria-hidden="true" />
+                            Sent
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="admin-notifications-time">{item.time}</TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
-            </div>
-
-            <div className="admin-notifications-archive">
-              <Button type="button" variant="ghost">View Full Notification Archive</Button>
             </div>
           </Card>
 
           <Card className="admin-notifications-metrics">
             <CardContent>
-            <h3>Reach Metrics</h3>
+            <h3>Reach</h3>
             <p>
-              In the last 30 days, your announcements have reached over 45,000 unique users
-              with a 12% average click-through rate.
+              Total in-app notifications delivered from this panel.
             </p>
             <div className="admin-notifications-metrics-stats">
               <div>
-                <strong>88.4%</strong>
-                <span>Open Rate</span>
+                <strong>{totalReached}</strong>
+                <span>Delivered</span>
               </div>
               <div aria-hidden="true" />
               <div>
-                <strong>+1.2m</strong>
-                <span>Total Impressions</span>
+                <strong>{history.length}</strong>
+                <span>Announcements</span>
               </div>
             </div>
             </CardContent>
