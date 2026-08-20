@@ -76,6 +76,12 @@
   gap: 0.5rem;
 }
 
+.female-filter-empty {
+  margin: 0;
+  font-size: 0.85rem;
+  color: rgba(48, 51, 51, 0.55);
+}
+
 .female-filter-checkbox {
   display: flex;
   align-items: center;
@@ -177,6 +183,14 @@
   display: flex;
   flex-direction: column;
   gap: 2.5rem;
+}
+
+.female-page-heading {
+  margin: 0;
+  font-family: "Manrope", system-ui, sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a2e22;
 }
 
 .female-toolbar {

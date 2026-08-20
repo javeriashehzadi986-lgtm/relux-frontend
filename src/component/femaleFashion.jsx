@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import React, { useEffect, useMemo, useState } from "react";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import {
   ChevronDown,
   ChevronLeft,
@@ -15,19 +15,23 @@ import { Card } from "@/components/ui/card";
 import "./femaleFashion.css";
 import { filterProductCards } from "@/data/dressCatalog";
 import { LISTING_SIZE_OPTIONS } from "@/data/listingSpecs";
-import { getStyleOptionsForCategory } from "@/data/styleCategories";
 import { usePublicListings } from "@/hooks/usePublicListings";
+import {
+  usePublicMainCategories,
+  usePublicStyleFilters,
+} from "@/hooks/usePublicStyleFilters";
 import { useWishlist } from "@/hooks/useWishlist";
 
-const STYLE_FILTERS = getStyleOptionsForCategory("Female");
 const SIZES = LISTING_SIZE_OPTIONS;
 const PRICE_MIN = 5000;
 const PRICE_MAX = 150000;
 
-const FemaleFashion = () => {
+/** Shared fashion browse for any admin-managed main category slug. */
+export function FashionBrowse({ categorySlug = "female" }) {
   const [searchParams] = useSearchParams();
   const initialListingType = searchParams.get("type");
-  const [selectedStyle, setSelectedStyle] = useState("");
+  const initialStyle = searchParams.get("style") || "";
+  const [selectedStyle, setSelectedStyle] = useState(initialStyle);
   const [listingType, setListingType] = useState(
     initialListingType === "rent" || initialListingType === "resale"
       ? initialListingType
@@ -40,7 +44,23 @@ const FemaleFashion = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [activeTags, setActiveTags] = useState([]);
   const { isSaved, toggle: toggleWishlist } = useWishlist();
-  const { products, loading, error, refresh } = usePublicListings("female");
+  const { products, loading, error, refresh } = usePublicListings(categorySlug);
+  const styleFilters = usePublicStyleFilters(categorySlug);
+  const mains = usePublicMainCategories();
+  const categoryMeta = mains.find((item) => item.slug === categorySlug);
+  const pageTitle = categoryMeta?.title || `${categorySlug} Fashion`;
+
+  useEffect(() => {
+    const fromUrl = searchParams.get("style") || "";
+    if (fromUrl) setSelectedStyle(fromUrl);
+  }, [searchParams, categorySlug]);
+
+  useEffect(() => {
+    if (selectedStyle && !styleFilters.some((item) => item.key === selectedStyle)) {
+      // Keep URL style if filters still loading; clear only after styles arrived.
+      if (styleFilters.length > 0) setSelectedStyle("");
+    }
+  }, [selectedStyle, styleFilters]);
 
   const filteredProducts = useMemo(
     () =>
@@ -107,24 +127,28 @@ const FemaleFashion = () => {
             <div className="female-filter-block">
               <p className="female-filter-label">Style</p>
               <div className="female-filter-options">
-                {STYLE_FILTERS.map((category) => (
-                  <label key={category} className="female-filter-checkbox">
-                    <Checkbox
-                      checked={selectedStyle === category}
-                      onCheckedChange={() => selectStyle(category)}
-                      aria-label={`Style: ${category}`}
-                    />
-                    <span
-                      className={
-                        selectedStyle === category
-                          ? "female-filter-checkbox-text is-active"
-                          : "female-filter-checkbox-text"
-                      }
-                    >
-                      {category}
-                    </span>
-                  </label>
-                ))}
+                {styleFilters.length === 0 ? (
+                  <p className="female-filter-empty">No styles added yet.</p>
+                ) : (
+                  styleFilters.map((style) => (
+                    <label key={style.key} className="female-filter-checkbox">
+                      <Checkbox
+                        checked={selectedStyle === style.key}
+                        onCheckedChange={() => selectStyle(style.key)}
+                        aria-label={`Style: ${style.label}`}
+                      />
+                      <span
+                        className={
+                          selectedStyle === style.key
+                            ? "female-filter-checkbox-text is-active"
+                            : "female-filter-checkbox-text"
+                        }
+                      >
+                        {style.label}
+                      </span>
+                    </label>
+                  ))
+                )}
               </div>
             </div>
 
@@ -212,6 +236,7 @@ const FemaleFashion = () => {
         </aside>
 
         <section className="female-main">
+          <h1 className="female-page-heading">{pageTitle}</h1>
           <div className="female-toolbar">
             <div className="female-search-wrap">
               <Search className="female-search-icon" size={18} aria-hidden="true" />
@@ -278,8 +303,9 @@ const FemaleFashion = () => {
 
           {!loading && !error && filteredProducts.length === 0 && (
             <p className="female-catalog-status">
-              No approved listings match your filters yet. Try adjusting filters or check back
-              soon.
+              {selectedStyle
+                ? `No approved products found for this style in ${pageTitle}. Seller must list the item under this main category and this style, then admin must approve it.`
+                : `No approved listings in ${pageTitle} yet.`}
             </p>
           )}
 
@@ -396,4 +422,11 @@ const FemaleFashion = () => {
   );
 };
 
-export default FemaleFashion;
+export default function FemaleFashion() {
+  return <FashionBrowse categorySlug="female" />;
+}
+
+export function CategoryFashion() {
+  const { slug } = useParams();
+  return <FashionBrowse categorySlug={slug || "female"} />;
+}

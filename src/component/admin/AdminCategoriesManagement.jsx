@@ -3,29 +3,27 @@ import api from "@/services/api";
 import { toggleAdminSidebar } from "@/utils/adminSidebar";
 import "./adminCategoriesManagement.css";
 
-const STYLE_KEYS = [
-  "Casual",
-  "Formal",
-  "Party",
-  "Traditional",
-  "Winter Wear",
-  "Bridal",
-  "Groom",
-  "Sports Wear",
-  "Summer Wear",
-];
-
-const ICON_OPTIONS = [
-  { value: "woman", label: "Woman" },
-  { value: "man", label: "Man" },
-  { value: "child_care", label: "Kids" },
-  { value: "category", label: "Category" },
+const CATEGORY_ICONS = [
+  "checkroom",
+  "apparel",
+  "styler",
+  "shopping_bag",
+  "dry_cleaning",
+  "iron",
+  "watch",
+  "diamond",
+  "spa",
+  "sports",
+  "child_care",
+  "woman",
+  "man",
+  "category",
 ];
 
 const ICON_VARIANTS = [
-  { value: "primary-dim", label: "Primary dim" },
-  { value: "primary-container", label: "Primary container" },
-  { value: "tertiary", label: "Tertiary" },
+  { value: "primary-dim", label: "Soft green" },
+  { value: "primary-container", label: "Green fill" },
+  { value: "tertiary", label: "Warm accent" },
 ];
 
 function formatListings(count) {
@@ -37,8 +35,13 @@ const emptyForm = {
   icon: "category",
   iconVariant: "primary-dim",
   imageUrl: "",
-  productStyleKey: "Casual",
+  productStyleKey: "",
 };
+
+function suggestStyleKeyFromName(name = "") {
+  const cleaned = name.trim().replace(/\s+wear$/i, "").trim();
+  return cleaned || name.trim();
+}
 
 const AdminCategoriesManagement = () => {
   const [mainCategories, setMainCategories] = useState([]);
@@ -114,7 +117,7 @@ const AdminCategoriesManagement = () => {
               icon: item.icon,
               iconVariant: item.iconVariant,
               imageUrl: "",
-              productStyleKey: "Casual",
+              productStyleKey: "",
             }
           : { ...emptyForm },
       });
@@ -131,18 +134,35 @@ const AdminCategoriesManagement = () => {
             icon: "category",
             iconVariant: "primary-dim",
             imageUrl: item.imageUrl || item.image || "",
-            productStyleKey: item.productStyleKey || "Casual",
+            productStyleKey: item.productStyleKey || suggestStyleKeyFromName(item.name),
           }
-        : { ...emptyForm, productStyleKey: "Casual" },
+        : { ...emptyForm },
     });
   };
 
   const closeModal = () => setModal(null);
 
   const updateForm = (field, value) => {
-    setModal((current) =>
-      current ? { ...current, form: { ...current.form, [field]: value } } : current,
-    );
+    setModal((current) => {
+      if (!current) return current;
+      const nextForm = { ...current.form, [field]: value };
+      // While creating a subcategory, keep style key in sync with the name
+      // unless the admin already typed a custom key.
+      if (
+        current.type === "sub" &&
+        current.mode === "create" &&
+        field === "name"
+      ) {
+        const autoFromOld = suggestStyleKeyFromName(current.form.name);
+        const keyStillAuto =
+          !current.form.productStyleKey ||
+          current.form.productStyleKey === autoFromOld;
+        if (keyStillAuto) {
+          nextForm.productStyleKey = suggestStyleKeyFromName(value);
+        }
+      }
+      return { ...current, form: nextForm };
+    });
   };
 
   const saveModal = async (event) => {
@@ -161,7 +181,7 @@ const AdminCategoriesManagement = () => {
           icon: modal.form.icon,
           iconVariant: modal.form.iconVariant,
           imageUrl: modal.form.imageUrl,
-          productStyleKey: modal.form.productStyleKey,
+          productStyleKey: modal.form.productStyleKey.trim(),
         });
         setSuccess(
           modal.type === "main" ? "Main category created" : "Subcategory created",
@@ -172,7 +192,7 @@ const AdminCategoriesManagement = () => {
           icon: modal.form.icon,
           iconVariant: modal.form.iconVariant,
           imageUrl: modal.form.imageUrl,
-          productStyleKey: modal.form.productStyleKey,
+          productStyleKey: modal.form.productStyleKey.trim(),
         });
         setSuccess("Category updated");
       }
@@ -185,16 +205,39 @@ const AdminCategoriesManagement = () => {
     }
   };
 
-  const deleteCategory = async (item, type) => {
-    const confirmed = window.confirm(`Delete "${item.name}"?`);
+  const deleteCategory = async (item) => {
+    const isMain = item.type === "main" || (!item.parentSlug && !item.productStyleKey && mainCategories.some((m) => m.id === item.id));
+    const confirmed = window.confirm(
+      isMain
+        ? `Delete main category "${item.name}"? Remove its subcategories first if any are still active.`
+        : `Delete "${item.name}"?`,
+    );
     if (!confirmed) return;
 
     setActionLoading(true);
     setError("");
     setSuccess("");
     try {
-      await api.deleteAdminCategory(item.id);
-      setSuccess("Category deleted");
+      const data = await api.deleteAdminCategory(item.id);
+      if (isMain) {
+        setMainCategories((current) => current.filter((main) => main.id !== item.id));
+        setSubcategories((current) => {
+          const next = { ...current };
+          delete next[item.slug];
+          return next;
+        });
+        setSelectedCategorySlug((current) =>
+          current === item.slug ? "" : current,
+        );
+      } else {
+        setSubcategories((current) => {
+          const parentSlug = item.parentSlug || selectedCategorySlug;
+          const next = { ...current };
+          next[parentSlug] = (next[parentSlug] ?? []).filter((sub) => sub.id !== item.id);
+          return next;
+        });
+      }
+      setSuccess(data.message || "Category deleted");
       await loadCategories();
     } catch (err) {
       setError(err.message || "Could not delete category");
@@ -279,16 +322,6 @@ const AdminCategoriesManagement = () => {
                     className={`admin-categories-main-card ${
                       isSelected ? "admin-categories-main-card--selected" : ""
                     }`.trim()}
-                    onClick={() => setSelectedCategorySlug(category.slug)}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter" || event.key === " ") {
-                        event.preventDefault();
-                        setSelectedCategorySlug(category.slug);
-                      }
-                    }}
-                    role="button"
-                    tabIndex={0}
-                    aria-pressed={isSelected}
                   >
                     <div className="admin-categories-main-card-top">
                       <div
@@ -333,10 +366,7 @@ const AdminCategoriesManagement = () => {
                             ? "admin-categories-view-btn--selected"
                             : "admin-categories-view-btn--default"
                         }`.trim()}
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          setSelectedCategorySlug(category.slug);
-                        }}
+                        onClick={() => setSelectedCategorySlug(category.slug)}
                       >
                         View Category
                       </button>
@@ -344,12 +374,18 @@ const AdminCategoriesManagement = () => {
                         type="button"
                         className="admin-categories-edit-btn"
                         aria-label={`Edit ${category.name} category`}
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          openModal("main", category);
-                        }}
+                        onClick={() => openModal("main", category)}
                       >
                         <span className="material-symbols-outlined">edit</span>
+                      </button>
+                      <button
+                        type="button"
+                        className="admin-categories-edit-btn admin-categories-edit-btn--danger"
+                        aria-label={`Delete ${category.name} category`}
+                        onClick={() => deleteCategory({ ...category, type: "main" })}
+                        disabled={actionLoading}
+                      >
+                        <span className="material-symbols-outlined">delete</span>
                       </button>
                     </div>
                   </article>
@@ -483,21 +519,35 @@ const AdminCategoriesManagement = () => {
 
               {modal.type === "main" ? (
                 <>
+                  <fieldset className="admin-categories-icon-picker">
+                    <legend>Choose icon</legend>
+                    <div className="admin-categories-icon-grid" role="listbox" aria-label="Category icons">
+                      {(CATEGORY_ICONS.includes(modal.form.icon)
+                        ? CATEGORY_ICONS
+                        : [modal.form.icon, ...CATEGORY_ICONS]
+                      ).map((icon) => {
+                        const selected = modal.form.icon === icon;
+                        return (
+                          <button
+                            key={icon}
+                            type="button"
+                            role="option"
+                            aria-selected={selected}
+                            className={`admin-categories-icon-choice ${
+                              selected ? "admin-categories-icon-choice--selected" : ""
+                            }`}
+                            onClick={() => updateForm("icon", icon)}
+                          >
+                            <span className="material-symbols-outlined" aria-hidden="true">
+                              {icon}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </fieldset>
                   <label>
-                    Icon
-                    <select
-                      value={modal.form.icon}
-                      onChange={(e) => updateForm("icon", e.target.value)}
-                    >
-                      {ICON_OPTIONS.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label>
-                    Icon style
+                    Icon color
                     <select
                       value={modal.form.iconVariant}
                       onChange={(e) => updateForm("iconVariant", e.target.value)}
@@ -513,17 +563,14 @@ const AdminCategoriesManagement = () => {
               ) : (
                 <>
                   <label>
-                    Product style key
-                    <select
+                    Style key
+                    <input
+                      type="text"
                       value={modal.form.productStyleKey}
                       onChange={(e) => updateForm("productStyleKey", e.target.value)}
-                    >
-                      {STYLE_KEYS.map((key) => (
-                        <option key={key} value={key}>
-                          {key}
-                        </option>
-                      ))}
-                    </select>
+                      placeholder="e.g. Ethnic"
+                      required
+                    />
                   </label>
                   <label>
                     Image URL (optional)

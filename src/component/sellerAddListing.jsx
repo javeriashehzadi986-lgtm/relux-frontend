@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { CloudUpload, Plus, X, Lightbulb, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ import {
 import api from "@/services/api";
 import { prepareImageList, prepareImageSource } from "@/utils/imageUpload";
 import "./sellerAddListing.css";
-import { getStyleOptionsForCategory } from "@/data/styleCategories";
+import { usePublicMainCategories, usePublicStyleFilters } from "@/hooks/usePublicStyleFilters";
 
 const clothingTypes = [
   "Select Type",
@@ -24,8 +24,6 @@ const clothingTypes = [
   "Knitwear",
   "Outerwear",
 ];
-
-const categoryOptions = ["Female", "Male", "Kids"];
 
 const sizeOptions = LISTING_SIZE_OPTIONS;
 const conditionOptions = LISTING_CONDITION_OPTIONS;
@@ -111,10 +109,15 @@ const SellerAddListing = () => {
   const listingImagesRef = useRef(null);
   const addThumbRef = useRef(null);
 
-  const styleOptions = useMemo(
-    () => getStyleOptionsForCategory(mainCategory),
-    [mainCategory],
-  );
+  const mainOptions = usePublicMainCategories();
+  const selectedMain = mainOptions.find((item) => item.name === mainCategory);
+  const styleOptions = usePublicStyleFilters(selectedMain?.slug || "");
+
+  useEffect(() => {
+    if (!mainOptions.length) return;
+    if (mainOptions.some((item) => item.name === mainCategory)) return;
+    setMainCategory(mainOptions[0].name);
+  }, [mainOptions, mainCategory]);
 
   useEffect(() => {
     if (!editListingId) return undefined;
@@ -175,13 +178,15 @@ const SellerAddListing = () => {
   }, [editListingId]);
 
   useEffect(() => {
-    if (styleOptions.includes(style)) return;
-    if (style === "Bridal" && styleOptions.includes("Groom")) {
+    if (!styleOptions.length) return;
+    const keys = styleOptions.map((item) => item.key);
+    if (keys.includes(style)) return;
+    if (style === "Bridal" && keys.includes("Groom")) {
       setStyle("Groom");
-    } else if (style === "Groom" && styleOptions.includes("Bridal")) {
+    } else if (style === "Groom" && keys.includes("Bridal")) {
       setStyle("Bridal");
     } else {
-      setStyle("Casual");
+      setStyle(keys[0]);
     }
   }, [mainCategory, styleOptions, style]);
 
@@ -388,9 +393,9 @@ const SellerAddListing = () => {
                       value={mainCategory}
                       onChange={(e) => setMainCategory(e.target.value)}
                     >
-                      {categoryOptions.map((category) => (
-                        <option key={category} value={category}>
-                          {category}
+                      {mainOptions.map((category) => (
+                        <option key={category.slug} value={category.name}>
+                          {category.name}
                         </option>
                       ))}
                     </SelectField>
@@ -401,8 +406,8 @@ const SellerAddListing = () => {
                       onChange={(e) => setStyle(e.target.value)}
                     >
                       {styleOptions.map((option) => (
-                        <option key={option} value={option}>
-                          {option}
+                        <option key={option.key} value={option.key}>
+                          {option.label}
                         </option>
                       ))}
                     </SelectField>

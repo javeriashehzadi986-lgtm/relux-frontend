@@ -8,7 +8,7 @@ import Navbar from "./component/navbar";
 import Home from "./component/home";
 import MaleFashion from "./component/maleFashion";
 import KidsFashion from "./component/kidsFashion";
-import FemaleFashion from "./component/femaleFashion";
+import FemaleFashion, { CategoryFashion } from "./component/femaleFashion";
 import DressDetails from "./component/dressDetails";
 import FinalizePurchase from "./component/finalizePurchase";
 import Messages from "./component/messages";
@@ -100,6 +100,7 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/categories" element={<Categories />} />
           <Route path="/rentDresses" element={<Navigate to="/categories" replace />} />
+          <Route path="/category/:slug" element={<CategoryFashion />} />
           <Route path="/maleFashion" element={<MaleFashion />} />
           <Route path="/kidsFashion" element={<KidsFashion />} />
           <Route path="/femaleFashion" element={<FemaleFashion />} />

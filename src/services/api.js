@@ -484,6 +484,7 @@ export const api = {
     }),
 
   getAdminCategories: () => request("/admin/categories"),
+  getPublicCategories: () => request("/categories"),
   createAdminCategory: (body) =>
     request("/admin/categories", {
       method: "POST",

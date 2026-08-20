@@ -150,13 +150,17 @@ const getProductPriceValue = (dress) => {
 
 const productMatchesStyle = (product, style) => {
   if (!style) return true;
+  const wanted = String(style).trim().toLowerCase();
+  if (!wanted) return true;
+
   const styles =
     product.styles?.length > 0
       ? product.styles
       : product.style
         ? [product.style]
         : [];
-  return styles.includes(style);
+
+  return styles.some((item) => String(item).trim().toLowerCase() === wanted);
 };
 
 const sortCategoryProducts = (products, sortBy) => {

@@ -194,13 +194,12 @@
   border-radius: 0.75rem;
   background: var(--admin-surface-container-lowest);
   box-shadow: 0 4px 20px -2px rgba(73, 101, 79, 0.08);
-  cursor: pointer;
-  transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+  cursor: default;
+  transition: border-color 0.3s, box-shadow 0.3s;
 }
 
 .admin-categories-main-card:hover {
   border-color: rgba(59, 104, 72, 0.3);
-  transform: translateY(-4px);
 }
 
 .admin-categories-main-card--selected {
@@ -209,7 +208,7 @@
 }
 
 .admin-categories-main-card--selected:hover {
-  transform: translateY(-4px);
+  border-color: var(--admin-primary);
 }
 
 .admin-categories-main-card-top {
@@ -375,6 +374,12 @@
 .admin-categories-edit-btn:hover {
   background: var(--admin-surface-container);
   color: var(--admin-on-surface);
+}
+
+.admin-categories-edit-btn--danger:hover {
+  background: rgba(186, 26, 26, 0.08);
+  border-color: rgba(186, 26, 26, 0.35);
+  color: #ba1a1a;
 }
 
 .admin-categories-subsection {
@@ -754,6 +759,59 @@
   font-family: "Manrope", system-ui, sans-serif;
   font-size: 0.85rem;
   color: var(--admin-on-surface-variant);
+}
+
+.admin-categories-field-hint {
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--admin-outline);
+}
+
+.admin-categories-icon-picker {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.admin-categories-icon-picker legend {
+  margin-bottom: 0.5rem;
+  font-family: "Manrope", system-ui, sans-serif;
+  font-size: 0.85rem;
+  color: var(--admin-on-surface-variant);
+}
+
+.admin-categories-icon-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.admin-categories-icon-choice {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 1;
+  border: 1px solid var(--admin-outline-variant);
+  border-radius: 0.65rem;
+  background: var(--admin-surface-container-low, #f3f6f3);
+  color: var(--admin-on-surface);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.admin-categories-icon-choice .material-symbols-outlined {
+  font-size: 1.35rem;
+}
+
+.admin-categories-icon-choice:hover {
+  border-color: var(--admin-primary);
+}
+
+.admin-categories-icon-choice--selected {
+  border-color: var(--admin-primary);
+  background: rgba(152, 201, 163, 0.28);
+  box-shadow: 0 0 0 2px rgba(152, 201, 163, 0.35);
 }
 
 .admin-categories-modal-form input,

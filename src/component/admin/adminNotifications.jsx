@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useState } from "react";
 import {
   Filter,
   History,
-  Lightbulb,
   Megaphone,
   Send,
 } from "lucide-react";
@@ -183,13 +182,19 @@ const AdminNotifications = () => {
               </Field>
 
               <div className="admin-notifications-field-row">
-                <Field className="admin-notifications-field">
+                <Field className="admin-notifications-field admin-notifications-priority-field">
                   <FieldLabel>Priority Level</FieldLabel>
                   <Select value={priority} onValueChange={setPriority}>
                     <SelectTrigger className="admin-notifications-filter-select" aria-label="Priority level">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent
+                      position="popper"
+                      side="bottom"
+                      align="start"
+                      sideOffset={6}
+                      className="admin-notifications-priority-menu"
+                    >
                       <SelectItem value="normal">Normal</SelectItem>
                       <SelectItem value="important">Important</SelectItem>
                       <SelectItem value="urgent">Urgent</SelectItem>
@@ -227,22 +232,6 @@ const AdminNotifications = () => {
                     : "Send Notification"}
               </Button>
             </form>
-            </CardContent>
-          </Card>
-
-          <Card className="admin-notifications-tip">
-            <CardContent className="admin-notifications-tip-content">
-            <div className="admin-notifications-tip-icon">
-              <Lightbulb size={20} aria-hidden="true" />
-            </div>
-            <div>
-              <h3>How it works</h3>
-              <p>
-                Send goes to the selected users&apos; in-app Notification page
-                (bell icon). Admin accounts are not included — use a buyer or seller
-                login to test.
-              </p>
-            </div>
             </CardContent>
           </Card>
         </div>

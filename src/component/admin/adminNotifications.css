@@ -174,6 +174,41 @@
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
+.admin-notifications-priority-field {
+  position: relative;
+  z-index: 2;
+}
+
+.admin-notifications-priority-field .admin-notifications-filter-select {
+  width: 100%;
+  min-height: 2.75rem;
+  justify-content: space-between;
+}
+
+.admin-notifications-priority-menu {
+  z-index: 80 !important;
+  min-width: var(--radix-select-trigger-width);
+  width: var(--radix-select-trigger-width);
+  padding: 0.35rem;
+  border: 1px solid rgba(193, 201, 191, 0.45);
+  border-radius: 0.75rem;
+  background: var(--admin-white, #fff) !important;
+  color: var(--admin-on-surface);
+  box-shadow: 0 12px 28px rgba(30, 50, 40, 0.16);
+}
+
+.admin-notifications-priority-menu [data-slot="select-item"] {
+  border-radius: 0.5rem;
+  padding: 0.55rem 0.75rem;
+  padding-right: 2rem;
+  cursor: pointer;
+}
+
+.admin-notifications-priority-menu [data-slot="select-item"][data-highlighted] {
+  background: var(--admin-surface-container-low, #eef3ef);
+  color: var(--admin-on-surface);
+}
+
 .admin-notifications-field textarea {
   resize: none;
   min-height: 6rem;
@@ -185,12 +220,6 @@
   outline: none;
   border-color: var(--admin-primary);
   box-shadow: 0 0 0 2px rgba(152, 201, 163, 0.2);
-}
-
-.admin-notifications-tip-content {
-  display: flex;
-  gap: 1rem;
-  padding: 1.25rem !important;
 }
 
 .admin-notifications-card [data-slot="card-content"] {
@@ -279,41 +308,6 @@
 
 .admin-notifications-send-btn--success {
   background: var(--admin-secondary) !important;
-}
-
-.admin-notifications-tip {
-  display: flex;
-  gap: 1rem;
-  padding: 1.5rem;
-  border: 1px solid rgba(152, 201, 163, 0.4);
-  border-radius: 1.5rem;
-  background: rgba(152, 201, 163, 0.2);
-}
-
-.admin-notifications-tip-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.75rem;
-  height: 2.75rem;
-  border-radius: 9999px;
-  background: var(--admin-primary-container);
-  color: var(--admin-on-primary-container);
-  flex-shrink: 0;
-}
-
-.admin-notifications-tip h3 {
-  margin: 0;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--admin-on-primary-container);
-}
-
-.admin-notifications-tip p {
-  margin: 0.25rem 0 0;
-  font-size: 0.875rem;
-  line-height: 1.5;
-  color: rgba(40, 85, 55, 0.8);
 }
 
 .admin-notifications-history-header {
