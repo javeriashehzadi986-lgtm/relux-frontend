@@ -1,7 +1,8 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import { getPostAuthPath } from "@/utils/authRedirect";
 
-export default function ProtectedRoute({ children, roles, redirectTo = "/login" }) {
+export default function ProtectedRoute({ children, roles, redirectTo = "/signup" }) {
   const { user, loading } = useAuth();
   const location = useLocation();
 
@@ -18,7 +19,7 @@ export default function ProtectedRoute({ children, roles, redirectTo = "/login" 
   }
 
   if (roles?.length && !roles.includes(user.role)) {
-    return <Navigate to="/home" replace />;
+    return <Navigate to={getPostAuthPath(user)} replace />;
   }
 
   return children;

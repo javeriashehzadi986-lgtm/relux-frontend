@@ -44,7 +44,7 @@ function userToProfile(user) {
     email: user?.email ?? "",
     phone: user?.phone ?? "",
     city: user?.city ?? "",
-    address: "",
+    address: user?.address ?? "",
   };
 }
 
@@ -135,6 +135,7 @@ const Profile = ({ section: sectionProp }) => {
         name: draft.fullName.trim(),
         phone: draft.phone.trim(),
         city: draft.city.trim(),
+        address: draft.address.trim(),
       });
       setIsEditing(false);
       setSaved(true);

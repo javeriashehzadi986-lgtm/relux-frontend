@@ -18,6 +18,7 @@ import {
   FieldSeparator,
 } from "@/components/ui/field";
 import { useAuth } from "@/context/AuthContext";
+import { getPostAuthPath } from "@/utils/authRedirect";
 
 const LOGIN_IMAGE =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuBSnYGdanF0GYhv0vCxLzPcHcKTIzsyWHGMBv9agRIlHAXHLiLRIKpquL8JMbhuAoqsTDkdGDTELSWmxXQi4_Z96O5DbrRXRxkNqqEENu95HT90prKHhQ7l7pPvfa7VaHSJqm0L9KwHEwYoXXTx1dAlvGt1y2YFnpL7A59XleADEloG4hmHU5edTw9cFXygFzUj3uLLnksJ1SUiXDcbqG-jNDJeNpmPu6AnMJg3gH197CC5qNo_bu41kyK9cULkpYyk1BpAXK2g0zoT";
@@ -57,22 +58,7 @@ const Login = () => {
     setLoading(true);
     try {
       const user = await login(email, password);
-      const redirectTo = location.state?.from;
-      if (redirectTo) {
-        navigate(redirectTo, { replace: true });
-      } else if (user.role === "admin") {
-        navigate("/admin/profile");
-      } else if (user.role === "seller") {
-        if (user.status === "pending") {
-          navigate("/seller-pending");
-        } else if (user.status === "rejected") {
-          navigate("/seller-rejected");
-        } else {
-          navigate("/sellerProfile");
-        }
-      } else {
-        navigate("/profile");
-      }
+      navigate(getPostAuthPath(user, location.state?.from), { replace: true });
     } catch (error) {
       setSubmitError(error.message || "Login failed");
     } finally {
@@ -173,7 +159,9 @@ const Login = () => {
 
             <p className="login-signup-pivot">
               Don&apos;t have an account?
-              <Link to="/signup">Sign Up</Link>
+              <Link to="/signup" state={location.state}>
+                Sign Up
+              </Link>
             </p>
           </CardContent>
         </Card>

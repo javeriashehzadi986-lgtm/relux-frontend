@@ -451,6 +451,10 @@ const AdminUserManagement = () => {
                   <span>{selectedUser.city}</span>
                 </div>
                 <div className="admin-users-panel-meta-row">
+                  <span>Address</span>
+                  <span>{selectedUser.address || "Not provided"}</span>
+                </div>
+                <div className="admin-users-panel-meta-row">
                   <span>Joined</span>
                   <span>{formatDate(selectedUser.joinedAt)}</span>
                 </div>

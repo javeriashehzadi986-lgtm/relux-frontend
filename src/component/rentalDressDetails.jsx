@@ -83,10 +83,6 @@ const RentalDressDetails = ({ dress }) => {
 
   const [showCancelModal, setShowCancelModal] = useState(false);
 
-  const scrollToSizeGuide = () => {
-    document.getElementById("rental-size-guide")?.scrollIntoView({ behavior: "smooth" });
-  };
-
   const handleRentRequest = async () => {
     const returnPath = `/dress/${dress.id}`;
     if (!requireLogin(returnPath)) {
@@ -213,7 +209,6 @@ const RentalDressDetails = ({ dress }) => {
             selectedSize={selectedSize}
             onSizeChange={setSelectedSize}
             allowSizeSelect
-            onSizeGuideClick={scrollToSizeGuide}
           />
 
           <div className="rental-details-booking">
@@ -330,36 +325,6 @@ const RentalDressDetails = ({ dress }) => {
       </div>
 
       <div className="rental-details-grid">
-        <div className="rental-details-card">
-          <h3>Dress Information</h3>
-          <dl>
-            <div>
-              <dt>Fabric</dt>
-              <dd>{dress.fabric}</dd>
-            </div>
-            <div>
-              <dt>Occasion</dt>
-              <dd>{dress.occasion}</dd>
-            </div>
-            <div>
-              <dt>Care Instructions</dt>
-              <dd>{dress.careInstructions}</dd>
-            </div>
-          </dl>
-        </div>
-
-        <div className="rental-details-card" id="rental-size-guide">
-          <h3>Size Guide ({selectedSize})</h3>
-          <div>
-            {Object.entries(dress.sizeGuide).map(([label, value]) => (
-              <div key={label} className="rental-details-measure-row">
-                <span>{label.charAt(0).toUpperCase() + label.slice(1)}</span>
-                <span>{value}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
         <div className="rental-details-card rental-details-policy-card">
           <h3>Rental Policy &amp; Instructions</h3>
           <ul className="rental-details-policy-list">

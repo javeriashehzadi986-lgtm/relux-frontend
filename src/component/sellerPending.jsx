@@ -16,7 +16,7 @@ export default function SellerPending() {
     const checkStatus = async () => {
       const freshUser = await refreshUser();
       if (!freshUser) {
-        navigate("/login", { replace: true });
+        navigate("/signup", { replace: true });
         return;
       }
       if (freshUser.role !== "seller") {
@@ -73,14 +73,14 @@ export default function SellerPending() {
 
   return (
     <div className="seller-pending-page">
-      <Card className="seller-pending-card">
-        <CardHeader className="seller-pending-header">
+      <Card className="seller-pending-card py-0 gap-0">
+        <CardHeader className="seller-pending-header px-0">
           <span className="seller-pending-icon" aria-hidden="true">
             <Clock size={28} strokeWidth={1.75} />
           </span>
           <CardTitle className="seller-pending-title">Application Under Review</CardTitle>
         </CardHeader>
-        <CardContent className="seller-pending-content">
+        <CardContent className="seller-pending-content px-0">
           <p className="seller-pending-lead">
             Thank you, <strong>{user.name}</strong>. Your seller verification has been submitted
             successfully.

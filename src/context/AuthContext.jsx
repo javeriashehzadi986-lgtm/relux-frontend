@@ -5,12 +5,19 @@ import { syncLocalWishlistToServer } from "@/data/wishlistStore";
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(() => api.getStoredUser());
+  const [user, setUser] = useState(() => {
+    if (!api.getToken()) {
+      return null;
+    }
+    return api.getStoredUser();
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const token = api.getToken();
     if (!token) {
+      api.setStoredUser(null);
+      setUser(null);
       setLoading(false);
       return;
     }
@@ -104,7 +111,7 @@ export function AuthProvider({ children }) {
     () => ({
       user,
       loading,
-      isAuthenticated: Boolean(user),
+      isAuthenticated: Boolean(user && api.getToken()),
       isAdmin: user?.role === "admin",
       isSeller: user?.role === "seller",
       isSellerActive: user?.role === "seller" && user?.status === "active",

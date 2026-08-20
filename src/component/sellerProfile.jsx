@@ -77,7 +77,7 @@ function userToProfile(user) {
     email: user?.email ?? "",
     phone: user?.phone ?? "",
     city: user?.city ?? "",
-    address: "",
+    address: user?.address ?? "",
   };
 }
 
@@ -226,6 +226,7 @@ function SellerProfileSection() {
         name: draft.fullName.trim(),
         phone: draft.phone.trim(),
         city: draft.city.trim(),
+        address: draft.address.trim(),
       });
       setDraft(userToProfile(updatedUser));
       setIsEditing(false);

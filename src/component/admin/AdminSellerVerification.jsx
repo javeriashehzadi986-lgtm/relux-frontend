@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import api from "@/services/api";
 import { toggleAdminSidebar } from "@/utils/adminSidebar";
+import AdminRejectReasonDialog from "./AdminRejectReasonDialog";
 import "./adminSellerVerification.css";
 
 const ADMIN_AVATAR =
@@ -36,6 +37,9 @@ const AdminSellerVerification = () => {
   const [loading, setLoading] = useState(true);
   const [actionError, setActionError] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
+  const [showRejectDialog, setShowRejectDialog] = useState(false);
+  const [rejectReason, setRejectReason] = useState("");
+  const [rejectError, setRejectError] = useState("");
 
   const loadApplications = useCallback(async () => {
     setLoading(true);
@@ -96,16 +100,31 @@ const AdminSellerVerification = () => {
     }
   };
 
-  const handleReject = async () => {
+  const openRejectDialog = () => {
+    setRejectReason("");
+    setRejectError("");
+    setShowRejectDialog(true);
+  };
+
+  const handleRejectConfirm = async () => {
     if (!selectedApplication) return;
+    const adminNote = rejectReason.trim();
+    if (!adminNote) {
+      setRejectError("Please enter a rejection reason.");
+      return;
+    }
+
     setActionLoading(true);
+    setRejectError("");
     setActionError("");
     try {
-      await api.rejectSellerApplication(selectedApplication.id);
+      await api.rejectSellerApplication(selectedApplication.id, { adminNote });
+      setShowRejectDialog(false);
+      setRejectReason("");
       await loadApplications();
       setSelectedId(null);
     } catch (error) {
-      setActionError(error.message || "Failed to reject seller");
+      setRejectError(error.message || "Failed to reject seller");
     } finally {
       setActionLoading(false);
     }
@@ -317,7 +336,7 @@ const AdminSellerVerification = () => {
                   <button
                     type="button"
                     className="admin-verify-btn-reject"
-                    onClick={handleReject}
+                    onClick={openRejectDialog}
                     disabled={actionLoading}
                   >
                     Reject Application
@@ -331,6 +350,19 @@ const AdminSellerVerification = () => {
           </section>
         </div>
       </div>
+
+      <AdminRejectReasonDialog
+        open={showRejectDialog}
+        onOpenChange={setShowRejectDialog}
+        title="Reject seller application"
+        description="This reason will be shown to the seller on their rejected application page."
+        confirmLabel="Reject Application"
+        loading={actionLoading}
+        error={rejectError}
+        reason={rejectReason}
+        onReasonChange={setRejectReason}
+        onConfirm={handleRejectConfirm}
+      />
     </div>
   );
 };

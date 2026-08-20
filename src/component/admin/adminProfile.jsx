@@ -43,6 +43,11 @@ function formatFieldValue(value) {
   return text || "—";
 }
 
+function formatAddressValue(value) {
+  const text = value?.trim?.() ?? String(value ?? "").trim();
+  return text || "Not provided";
+}
+
 function formatRole(role) {
   if (role === "admin") return "Admin";
   if (role === "seller") return "Seller";
@@ -63,6 +68,7 @@ function userToProfile(user) {
     email: user?.email ?? "",
     phone: user?.phone ?? "",
     city: user?.city ?? "",
+    address: user?.address ?? "",
   };
 }
 
@@ -139,7 +145,9 @@ const AdminProfile = () => {
         name: draft.fullName.trim(),
         phone: draft.phone.trim(),
         city: draft.city.trim(),
+        address: draft.address.trim(),
       });
+      await refreshUser();
       setIsEditing(false);
       setSaved(true);
       window.setTimeout(() => setSaved(false), 2500);
@@ -255,11 +263,15 @@ const AdminProfile = () => {
                   <dl className="admin-profile-details">
                     <div>
                       <dt>Phone Number</dt>
-                      <dd>{formatFieldValue(user.phone)}</dd>
+                      <dd>{formatFieldValue(profile.phone)}</dd>
                     </div>
                     <div>
                       <dt>City</dt>
-                      <dd>{formatFieldValue(user.city)}</dd>
+                      <dd>{formatFieldValue(profile.city)}</dd>
+                    </div>
+                    <div>
+                      <dt>Address</dt>
+                      <dd>{formatAddressValue(profile.address)}</dd>
                     </div>
                   </dl>
 
@@ -311,6 +323,15 @@ const AdminProfile = () => {
                     onChange={updateDraft("city")}
                   />
 
+                  <label className="admin-profile-form-label" htmlFor="admin-profile-address">
+                    Address
+                  </label>
+                  <Input
+                    id="admin-profile-address"
+                    value={draft.address}
+                    onChange={updateDraft("address")}
+                  />
+
                   {saveError ? (
                     <p className="admin-profile-message admin-profile-message--error" role="alert">
                       {saveError}
@@ -347,6 +368,10 @@ const AdminProfile = () => {
                     <span className="admin-profile-status-dot" aria-hidden="true" />
                     {formatStatus(user.status)}
                   </span>
+                </div>
+                <div className="admin-profile-info-row">
+                  <span>Address</span>
+                  <span>{formatAddressValue(profile.address)}</span>
                 </div>
               </div>
             </CardContent>

@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import api from "@/services/api";
 import { toggleAdminSidebar } from "@/utils/adminSidebar";
+import AdminRejectReasonDialog from "./AdminRejectReasonDialog";
 import "./adminProductManagement.css";
 
 const ADMIN_AVATAR =
@@ -50,6 +51,9 @@ const AdminProductManagement = () => {
   const [loading, setLoading] = useState(true);
   const [actionError, setActionError] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
+  const [showRejectDialog, setShowRejectDialog] = useState(false);
+  const [rejectReason, setRejectReason] = useState("");
+  const [rejectError, setRejectError] = useState("");
 
   const [draftName, setDraftName] = useState("");
   const [draftType, setDraftType] = useState("all");
@@ -150,15 +154,30 @@ const AdminProductManagement = () => {
     }
   };
 
-  const handleReject = async () => {
+  const openRejectDialog = () => {
+    setRejectReason("");
+    setRejectError("");
+    setShowRejectDialog(true);
+  };
+
+  const handleRejectConfirm = async () => {
     if (!selectedProduct) return;
+    const adminNote = rejectReason.trim();
+    if (!adminNote) {
+      setRejectError("Please enter a rejection reason.");
+      return;
+    }
+
     setActionLoading(true);
+    setRejectError("");
     setActionError("");
     try {
-      await api.rejectListing(selectedProduct.id);
+      await api.rejectListing(selectedProduct.id, { adminNote });
+      setShowRejectDialog(false);
+      setRejectReason("");
       await loadListings();
     } catch (error) {
-      setActionError(error.message || "Failed to reject listing");
+      setRejectError(error.message || "Failed to reject listing");
     } finally {
       setActionLoading(false);
     }
@@ -415,7 +434,7 @@ const AdminProductManagement = () => {
                   <button
                     type="button"
                     className="admin-products-btn-danger"
-                    onClick={handleReject}
+                    onClick={openRejectDialog}
                     disabled={actionLoading}
                   >
                     Reject Listing
@@ -428,6 +447,19 @@ const AdminProductManagement = () => {
           )}
         </div>
       </div>
+
+      <AdminRejectReasonDialog
+        open={showRejectDialog}
+        onOpenChange={setShowRejectDialog}
+        title="Reject listing"
+        description="This reason will be shown to the seller on their listing in My Listings."
+        confirmLabel="Reject Listing"
+        loading={actionLoading}
+        error={rejectError}
+        reason={rejectReason}
+        onReasonChange={setRejectReason}
+        onConfirm={handleRejectConfirm}
+      />
     </div>
   );
 };

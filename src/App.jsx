@@ -43,6 +43,7 @@ import AdminRentalOrders from "./component/admin/AdminRentalOrders";
 import AdminCategoriesManagement from "./component/admin/AdminCategoriesManagement";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import SellerRoute from "./routes/SellerRoute";
+import WishlistRoute from "./routes/WishlistRoute";
 
 const DressChatRedirect = () => {
   const { id } = useParams();
@@ -186,8 +187,8 @@ function App() {
           <Route
             path="/wishlist"
             element={
-              <ProtectedRoute roles={["buyer"]}>
-                <Profile section="wishlist" />
+              <ProtectedRoute>
+                <WishlistRoute />
               </ProtectedRoute>
             }
           />

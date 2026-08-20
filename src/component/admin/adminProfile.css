@@ -189,6 +189,14 @@
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--admin-on-surface);
+  max-width: 55%;
+  text-align: right;
+  word-break: break-word;
+}
+
+.admin-profile-card-content {
+  width: 100%;
+  padding: 0 !important;
 }
 
 .admin-profile-edit-btn {
@@ -216,10 +224,6 @@
 
 .admin-profile-card-title--spaced {
   margin-bottom: 2rem;
-}
-
-.admin-profile-card-content {
-  padding: 0 !important;
 }
 
 .admin-profile-card-title h3,

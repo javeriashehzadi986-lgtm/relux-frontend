@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import "./signup.css";
 import { Button } from "@/components/ui/button";
@@ -20,9 +20,11 @@ import {
   FieldSeparator,
 } from "@/components/ui/field";
 import { useAuth } from "@/context/AuthContext";
+import { getPostAuthPath } from "@/utils/authRedirect";
 
 const Signup = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { register } = useAuth();
   const [submitted, setsubmitted] = useState(false);
   const [name, setname] = useState("");
@@ -67,9 +69,11 @@ const Signup = () => {
 
     setLoading(true);
     try {
-      await register({ name: name.trim(), email, password });
+      const user = await register({ name: name.trim(), email, password });
       setsubmitted(true);
-      setTimeout(() => navigate("/profile"), 1500);
+      window.setTimeout(() => {
+        navigate(getPostAuthPath(user, location.state?.from), { replace: true });
+      }, 1200);
     } catch (error) {
       setSubmitError(error.message || "Signup failed");
     } finally {
@@ -223,7 +227,9 @@ const Signup = () => {
 
                 <p className="signup-login-pivot">
                   Already have an account?
-                  <Link to="/login">Login</Link>
+                  <Link to="/login" state={location.state}>
+                    Login
+                  </Link>
                 </p>
               </div>
             </CardContent>

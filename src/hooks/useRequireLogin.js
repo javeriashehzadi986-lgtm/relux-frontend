@@ -10,7 +10,7 @@ export function useRequireLogin() {
   return useCallback(
     (returnTo) => {
       if (isAuthenticated) return true;
-      navigate("/login", {
+      navigate("/signup", {
         state: { from: returnTo ?? location.pathname },
       });
       return false;

@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import "./navbar.css";
 import {
   Heart,
@@ -11,63 +11,70 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { useUnreadMessageCount } from "@/hooks/useUnreadMessageCount";
 import { useUnreadNotificationCount } from "@/hooks/useUnreadNotificationCount";
+import { getNavbarButtonConfig, getPostAuthPath } from "@/utils/authRedirect";
 import {
   isDashboardRoute,
-  isDashboardSidebarOpen,
   resetDashboardSidebar,
   setDashboardSidebarOpen,
-  subscribeDashboardSidebar,
   syncDashboardSidebarToBody,
-  toggleDashboardSidebar,
 } from "@/utils/dashboardSidebar";
 
 const Navbar = () => {
   const location = useLocation();
-  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const { user, isAuthenticated, loading } = useAuth();
   const { unreadCount } = useUnreadMessageCount();
   const { unreadCount: unreadNotifications } = useUnreadNotificationCount();
   const onDashboard = isDashboardRoute(location.pathname);
-  const [sidebarOpen, setSidebarOpen] = useState(() => isDashboardSidebarOpen());
+
+  const { label: dashboardLabel, path: dashboardPath, isGuest } = getNavbarButtonConfig(
+    user,
+    { isAuthenticated, loading },
+  );
 
   useEffect(() => {
-    if (onDashboard) {
+    if (onDashboard && isAuthenticated) {
       setDashboardSidebarOpen(true);
       syncDashboardSidebarToBody();
     } else {
       resetDashboardSidebar();
-      setDashboardSidebarOpen(false);
     }
+  }, [onDashboard, isAuthenticated, location.pathname]);
 
-    setSidebarOpen(isDashboardSidebarOpen());
-    return subscribeDashboardSidebar(setSidebarOpen);
-  }, [onDashboard, location.pathname]);
+  const goToSignup = (returnTo) => {
+    navigate("/signup", { state: { from: returnTo ?? location.pathname } });
+  };
+
+  const handleProtectedNav = (path) => (event) => {
+    if (!isAuthenticated) {
+      event.preventDefault();
+      goToSignup(path);
+    }
+  };
 
   const handleMenuClick = () => {
-    if (!onDashboard) return;
-    toggleDashboardSidebar();
+    if (isGuest) {
+      goToSignup(location.pathname);
+      return;
+    }
+
+    navigate(getPostAuthPath(user));
   };
 
   return (
     <nav className="navbar">
       <div className="navbar-inner">
         <div className="navbar-start">
-          {onDashboard && (
-            <Button
-              type="button"
-              variant="icon"
-              size="icon"
-              className={`navbar-menu-btn ${
-                sidebarOpen ? "navbar-menu-btn--active" : ""
-              }`}
-              aria-label={
-                sidebarOpen ? "Hide dashboard menu" : "Show dashboard menu"
-              }
-              aria-expanded={sidebarOpen}
-              onClick={handleMenuClick}
-            >
-              <Menu size={22} />
-            </Button>
-          )}
+          <Button
+            type="button"
+            variant="icon"
+            size="icon"
+            className="navbar-menu-btn"
+            aria-label="Sign up to continue"
+            onClick={handleMenuClick}
+          >
+            <Menu size={22} />
+          </Button>
           <Link to="/home" className="logo">
             Relux Hub
           </Link>
@@ -90,18 +97,32 @@ const Navbar = () => {
 
         <div className="nav-right">
           <div className="nav-icons">
-            <Link to="/messages" aria-label="Messages" className="nav-icon-link">
+            <Link
+              to="/messages"
+              aria-label="Messages"
+              className="nav-icon-link"
+              onClick={handleProtectedNav("/messages")}
+            >
               <MessageCircle size={22} />
               {isAuthenticated && unreadCount > 0 ? (
                 <span className="nav-icon-badge">{unreadCount > 9 ? "9+" : unreadCount}</span>
               ) : null}
             </Link>
 
-            <Link to="/wishlist" aria-label="Wishlist">
+            <Link
+              to="/wishlist"
+              aria-label="Wishlist"
+              onClick={handleProtectedNav("/wishlist")}
+            >
               <Heart size={22} />
             </Link>
 
-            <Link to="/notification" aria-label="Notifications" className="nav-icon-link">
+            <Link
+              to="/notification"
+              aria-label="Notifications"
+              className="nav-icon-link"
+              onClick={handleProtectedNav("/notification")}
+            >
               <Bell size={22} />
               {isAuthenticated && unreadNotifications > 0 ? (
                 <span className="nav-icon-badge">
@@ -111,12 +132,24 @@ const Navbar = () => {
             </Link>
           </div>
 
-          <Link to="/signup" className="signup-btn">
-            Sign up
+          <Link
+            to={dashboardPath}
+            className="signup-btn"
+            onClick={
+              isGuest
+                ? (event) => {
+                    event.preventDefault();
+                    goToSignup(location.pathname);
+                  }
+                : undefined
+            }
+          >
+            {dashboardLabel}
           </Link>
         </div>
       </div>
     </nav>
   );
 };
+
 export default Navbar;
