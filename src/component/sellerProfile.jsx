@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/context/AuthContext";
+import { useSellerReviews } from "@/hooks/useSellerReviews";
 import api from "@/services/api";
 import { SellerMyListingsContent } from "./sellerMyListings";
 import { SellerOrdersRequestsContent } from "./sellerOrdersRequests";
@@ -91,29 +92,6 @@ const verificationDocs = [
   { id: "cnic-back", label: "CNIC Back", icon: IdCard },
 ];
 
-const reviews = [
-  {
-    id: "review-1",
-    stars: 5,
-    text: '"The quality was even better than described. Zarish is a fantastic seller..."',
-  },
-  {
-    id: "review-2",
-    stars: 4.5,
-    text: '"Beautifully packaged and shipped very fast. Will definitely buy again!"',
-  },
-  {
-    id: "review-3",
-    stars: 5,
-    text: '"Accurate sizing and the dress looked exactly like the photos. Highly recommend!"',
-  },
-  {
-    id: "review-4",
-    stars: 4,
-    text: '"Great communication throughout the rental period. Would rent again."',
-  },
-];
-
 function getInitials(name) {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return "Z";
@@ -154,6 +132,12 @@ function SellerProfileSection() {
   );
   const [saveError, setSaveError] = useState("");
   const [saving, setSaving] = useState(false);
+  const {
+    reviews,
+    stats,
+    loading: reviewsLoading,
+    error: reviewsError,
+  } = useSellerReviews(user?.id);
 
   useEffect(() => {
     if (!isEditing) {
@@ -194,6 +178,8 @@ function SellerProfileSection() {
   const initials = useMemo(() => getInitials(profile.fullName), [profile.fullName]);
   const draftInitials = useMemo(() => getInitials(draft.fullName), [draft.fullName]);
   const visibleReviews = showAllReviews ? reviews : reviews.slice(0, 2);
+  const averageRating = Number(stats?.average || 0);
+  const reviewCount = Number(stats?.count || 0);
 
   const viewFields = [
     { id: "fullName", label: "Full Name", value: formatFieldValue(profile.fullName) },
@@ -536,29 +522,52 @@ function SellerProfileSection() {
                 </CardTitle>
                 <div className="seller-profile-rating-summary">
                   <div className="seller-profile-rating-score">
-                    <span>4.8</span>
+                    <span>{reviewCount > 0 ? averageRating.toFixed(1) : "—"}</span>
                     <Star size={20} fill="currentColor" strokeWidth={0} />
                   </div>
-                  <span className="seller-profile-rating-count">(124 reviews)</span>
+                  <span className="seller-profile-rating-count">
+                    ({reviewCount} {reviewCount === 1 ? "review" : "reviews"})
+                  </span>
                 </div>
               </CardHeader>
               <CardContent className="seller-profile-section-content">
-                <div className="seller-profile-reviews">
-                  {visibleReviews.map((review) => (
-                    <div key={review.id} className="seller-profile-review">
-                      <StarRating rating={review.stars} />
-                      <p className="seller-profile-review-text">{review.text}</p>
+                {reviewsLoading ? (
+                  <p className="seller-profile-reviews-empty">Loading reviews...</p>
+                ) : reviewsError ? (
+                  <p className="seller-profile-reviews-empty">{reviewsError}</p>
+                ) : reviews.length === 0 ? (
+                  <p className="seller-profile-reviews-empty">
+                    No reviews yet. Reviews from buyers will appear here.
+                  </p>
+                ) : (
+                  <>
+                    <div className="seller-profile-reviews">
+                      {visibleReviews.map((review) => (
+                        <div key={review.id} className="seller-profile-review">
+                          <div className="seller-profile-review-meta">
+                            <StarRating rating={Number(review.rating) || 0} />
+                            <span className="seller-profile-review-author">
+                              {review.author || "Verified Buyer"}
+                            </span>
+                          </div>
+                          <p className="seller-profile-review-text">
+                            &ldquo;{review.quote}&rdquo;
+                          </p>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-                <Button
-                  type="button"
-                  variant="link"
-                  className="seller-profile-reviews-link"
-                  onClick={() => setShowAllReviews((current) => !current)}
-                >
-                  {showAllReviews ? "Show fewer reviews" : "View all reviews"}
-                </Button>
+                    {reviews.length > 2 && (
+                      <Button
+                        type="button"
+                        variant="link"
+                        className="seller-profile-reviews-link"
+                        onClick={() => setShowAllReviews((current) => !current)}
+                      >
+                        {showAllReviews ? "Show fewer reviews" : "View all reviews"}
+                      </Button>
+                    )}
+                  </>
+                )}
               </CardContent>
             </Card>
           </>

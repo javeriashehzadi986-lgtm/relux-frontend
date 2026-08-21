@@ -13,9 +13,16 @@ export function isMongoSellerId(id) {
   return /^[a-f0-9]{24}$/i.test(String(id ?? ""));
 }
 
-export function useSellerReviews(dress) {
-  const sellerId = normalizeMongoId(dress?.sellerId);
-  const sellerKey = getSellerKey(dress);
+export function useSellerReviews(dressOrSellerId) {
+  const sellerId =
+    typeof dressOrSellerId === "string" || typeof dressOrSellerId === "number"
+      ? normalizeMongoId(dressOrSellerId)
+      : normalizeMongoId(dressOrSellerId?.sellerId);
+  const sellerKey =
+    typeof dressOrSellerId === "object" && dressOrSellerId
+      ? getSellerKey(dressOrSellerId)
+      : getSellerKey({ sellerId });
+  const dress = typeof dressOrSellerId === "object" ? dressOrSellerId : null;
   const usesApi = Boolean(sellerId);
 
   const [reviews, setReviews] = useState(() =>

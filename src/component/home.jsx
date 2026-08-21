@@ -9,33 +9,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useFeaturedRentals } from "@/hooks/useFeaturedRentals";
+import { usePublicMainCategories } from "@/hooks/usePublicStyleFilters";
 import { useRequireLogin } from "@/hooks/useRequireLogin";
 import { useWishlist } from "@/hooks/useWishlist";
 import "./home.css";
-
-const categories = [
-  {
-    title: "Female Fashion",
-    to: "/femaleFashion",
-    subtitle: "Elevate your wardrobe with consciously crafted feminine silhouettes.",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCiukL7lSowGGH1BNwfMAuup6a8qUrB5S2pBcM2k76YsM95ete1CKxoRlOz8gZYhKv9P7FSMnYvvQRfmXqbGHXDuS3T9-lgAALWZOlhXkvfnRk7biekOv8gkuW3HXT_RxXSwzGwHkgRW5bn4aAd-TQL8IYO2a6uTOX6DhXc4DmMq8pHr092RKKGkfmbTj7dzefQZWyaldzYKvWMeAlzzFwG2-ETdaCBmA8vuli47HBmfdUL5YEwQMj77rtmCVET6JJFJXMdpbqB0pXm",
-  },
-  {
-    title: "Male Fashion",
-    to: "/maleFashion",
-    subtitle: "Shop pre-loved men's fashion curated for timeless style.",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBaq_12MLIjP788-IcuyL49DoE_LqVyMo-bT2kI6tbfr1IRlATc7JAkbZvXTAJ5iSWIezBzWltEPOzV5rzcJ8Hsj6ynHOZGSRUB9tb-n90tbADlW5bbnSaVWxbwJwBHzrjd0sXY9iukLhUUwDiZ998w_h1mSMG2Q5Xv1njglITUncIDEjUcwdUVbcsa8PwVa-bPzA6EMX7cEWqqfgSOREUSRSw4ALLsAs6HhGg87ez0fvWMw3ecpvT30UeJImAlTyZQn2Ls4fVwYSHu",
-  },
-  {
-    title: "Kids Fashion",
-    to: "/kidsFashion",
-    subtitle: "Gentle on the planet, perfect for the next generation of style.",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuA2byFAgLoJ73OybxhWp_M92XJtCnNdZJ9CUqa73mYX6qoO-ood2-CpKvlk3Fh_cV1ajJM0dS2DZYq7SXGG3uh5rxeYjtJFiPBIm3GmVbxPZ7RUPz2lIWIEgeF9S2dVSN8vVYJ8FOIjthXFarAaCdDtzLg7a-oYSbMnfy0bK9kmi-nGi9lT6a9uLV3wZ1klYuJE_85sAwPs1CoA-F2OmSGcTCIeZxcr1pIGOVm2mc1NIVo91LRTj0DJSp6uP1PaHjmxtsB8KWmY64Sg",
-  },
-];
 
 const steps = [
   {
@@ -65,6 +42,7 @@ const Home = () => {
   const requireLogin = useRequireLogin();
   const { isSaved, toggle: toggleWishlist } = useWishlist();
   const { products: featuredRentals, loading, error, refresh } = useFeaturedRentals(6);
+  const categories = usePublicMainCategories();
 
   const toggleFavorite = (product) => {
     if (!requireLogin()) return;
@@ -101,13 +79,19 @@ const Home = () => {
         <div className="home-categories-grid">
           {categories.map((category) => (
             <Link
-              key={category.title}
+              key={category.slug || category.title}
               to={category.to}
               className="home-category-card"
             >
               <Card className="home-category-shadcn-card">
                 <div className="home-category-image">
-                  <img alt={category.title} src={category.image} />
+                  <img
+                    alt={category.title}
+                    src={
+                      category.image ||
+                      "https://lh3.googleusercontent.com/aida-public/AB6AXuB2L3I-cDT-SAbb8wlj0WN8JPJXqWgxnBrT6R8CYt3vZVetG4pVDlkvqJ2PNhFiU7E11IELJBlheSge3StWoTNBYefLoyfUgO8yw55_kmCpweSfyKaC5MxJPkKd68Y89J3EZ7Jb0bjDFQceN16v11DAQjLcYRKuddl9fbDmtp3ri5Cu60PdrAFq5T5z0o0vORXYCAhrnoDWYXMqyvdhEcTgtjibPxGYBAbwGzrguaqVBNAWHZhKfAU2j2Ez7tt4lRQDSKEMRKxcAe4"
+                    }
+                  />
                 </div>
                 <CardContent className="home-category-card-content">
                   <CardTitle className="home-category-title">

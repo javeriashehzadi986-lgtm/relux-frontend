@@ -13,6 +13,7 @@ import {
   normalizeListingSize,
 } from "@/data/listingSpecs";
 import api from "@/services/api";
+import { useAuth } from "@/context/AuthContext";
 import { prepareImageList, prepareImageSource } from "@/utils/imageUpload";
 import "./sellerAddListing.css";
 import { usePublicMainCategories, usePublicStyleFilters } from "@/hooks/usePublicStyleFilters";
@@ -36,8 +37,12 @@ const previewThumbs = [
 const previewHero =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuDlwhyF6SS6jajGCbROAAXC1Renqpw5TnYlrL6dFzceDZ_2kRwE9dNAibtUk6ZrRLJRn3XFwdfRfvnrZopuYbS_9CrCzgW27ZehzyZtZYbySZTlQ3TLxkhqozYHhZ4TJW8uwKxaR4guh0AMevUrs9qnhRc8Q6NqCoe6iEgZMqzcDQLfrzj6uZeAeNi951t7Es2AQ7B0kNgQZNpo6EjbVArqNB8M4HL1Np63Vf1XWcoN4XbyPD0V3keWBU9VirgS5BQ9FPRaaHI6mObD";
 
-const sellerAvatar =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuDyGJnM5y4jfBXKtcNuJxlOcnx-svsckJx4IBXueyqKrdSWM2hdBbjYXW9ULTgFvuDDjMiIkdeKwFw1CGFXRdx2-POSdMys1dLYfFWv0TqiR_S80yjHVwQY0gjuY9rns4zDRGLBLJ9CM997am3u4ki1hxgMDDG0CgUrFpoSOai4bJiJDq5Uc7fz-gtM0UYOrnpJO51zYCTNFAxJILA4DSC2uGczqhHctdvgaZUzLK2HEXgI6moIjb9RBs4DUOg9nO3QkvfB3LsNLVUT";
+function getSellerInitials(name = "") {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "S";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+}
 
 function ChipGroup({ options, value, onChange }) {
   return (
@@ -86,6 +91,7 @@ function SelectField({ id, label, value, onChange, children, optional }) {
 const SellerAddListing = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
   const editListingId = location.state?.editListingId;
   const [listingType, setListingType] = useState("sale");
   const [size, setSize] = useState("S");
@@ -193,6 +199,8 @@ const SellerAddListing = () => {
   const securityDeposit = itemPrice;
 
   const previewTitle = title.trim() || "Silk Midi Dress";
+  const sellerDisplayName = user?.name?.trim() || "Seller";
+  const sellerInitials = getSellerInitials(sellerDisplayName);
   const previewPrice =
     listingType === "sale"
       ? salePrice
@@ -635,8 +643,10 @@ const SellerAddListing = () => {
                   <p className="add-listing-preview-price">{previewPrice}</p>
                 </div>
                 <div className="add-listing-preview-seller">
-                  <img src={sellerAvatar} alt="Zarish" />
-                  <span>Zarish</span>
+                  <span className="add-listing-preview-seller-avatar" aria-hidden="true">
+                    {sellerInitials}
+                  </span>
+                  <span>{sellerDisplayName}</span>
                 </div>
               </CardContent>
             </Card>

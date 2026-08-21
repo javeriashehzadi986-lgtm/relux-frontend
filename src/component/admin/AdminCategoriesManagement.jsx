@@ -54,6 +54,7 @@ const AdminCategoriesManagement = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategorySlug, setSelectedCategorySlug] = useState("female");
   const [modal, setModal] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   const loadCategories = useCallback(async () => {
     setLoading(true);
@@ -205,14 +206,28 @@ const AdminCategoriesManagement = () => {
     }
   };
 
-  const deleteCategory = async (item) => {
-    const isMain = item.type === "main" || (!item.parentSlug && !item.productStyleKey && mainCategories.some((m) => m.id === item.id));
-    const confirmed = window.confirm(
-      isMain
-        ? `Delete main category "${item.name}"? Remove its subcategories first if any are still active.`
-        : `Delete "${item.name}"?`,
-    );
-    if (!confirmed) return;
+  const askDeleteCategory = (item, type = "sub") => {
+    const isMain =
+      type === "main" ||
+      item.type === "main" ||
+      (!item.parentSlug &&
+        !item.productStyleKey &&
+        mainCategories.some((m) => m.id === item.id));
+    setDeleteTarget({
+      ...item,
+      type: isMain ? "main" : "sub",
+    });
+  };
+
+  const closeDeleteDialog = () => {
+    if (actionLoading) return;
+    setDeleteTarget(null);
+  };
+
+  const deleteCategory = async () => {
+    if (!deleteTarget) return;
+    const item = deleteTarget;
+    const isMain = item.type === "main";
 
     setActionLoading(true);
     setError("");
@@ -226,9 +241,7 @@ const AdminCategoriesManagement = () => {
           delete next[item.slug];
           return next;
         });
-        setSelectedCategorySlug((current) =>
-          current === item.slug ? "" : current,
-        );
+        setSelectedCategorySlug((current) => (current === item.slug ? "" : current));
       } else {
         setSubcategories((current) => {
           const parentSlug = item.parentSlug || selectedCategorySlug;
@@ -238,6 +251,7 @@ const AdminCategoriesManagement = () => {
         });
       }
       setSuccess(data.message || "Category deleted");
+      setDeleteTarget(null);
       await loadCategories();
     } catch (err) {
       setError(err.message || "Could not delete category");
@@ -382,7 +396,7 @@ const AdminCategoriesManagement = () => {
                         type="button"
                         className="admin-categories-edit-btn admin-categories-edit-btn--danger"
                         aria-label={`Delete ${category.name} category`}
-                        onClick={() => deleteCategory({ ...category, type: "main" })}
+                        onClick={() => askDeleteCategory({ ...category, type: "main" }, "main")}
                         disabled={actionLoading}
                       >
                         <span className="material-symbols-outlined">delete</span>
@@ -452,7 +466,7 @@ const AdminCategoriesManagement = () => {
                                 className="admin-categories-sub-action-btn admin-categories-sub-action-btn--danger"
                                 aria-label={`Delete ${subcategory.name}`}
                                 title="Delete Subcategory"
-                                onClick={() => deleteCategory(subcategory, "sub")}
+                                onClick={() => askDeleteCategory(subcategory, "sub")}
                                 disabled={actionLoading}
                               >
                                 <span className="material-symbols-outlined">delete</span>
@@ -593,6 +607,38 @@ const AdminCategoriesManagement = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {deleteTarget && (
+        <div className="admin-categories-modal-backdrop" onClick={closeDeleteDialog}>
+          <div
+            className="admin-categories-modal admin-categories-delete-dialog"
+            onClick={(event) => event.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="admin-categories-delete-title"
+          >
+            <h3 id="admin-categories-delete-title">Delete category?</h3>
+            <p className="admin-categories-delete-text">
+              {deleteTarget.type === "main"
+                ? `Delete main category "${deleteTarget.name}"? Remove its subcategories first if any are still active.`
+                : `Delete subcategory "${deleteTarget.name}"? It will be hidden from admin and public lists.`}
+            </p>
+            <div className="admin-categories-modal-actions">
+              <button type="button" onClick={closeDeleteDialog} disabled={actionLoading}>
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="admin-categories-delete-confirm"
+                onClick={deleteCategory}
+                disabled={actionLoading}
+              >
+                {actionLoading ? "Deleting..." : "Delete"}
+              </button>
+            </div>
           </div>
         </div>
       )}

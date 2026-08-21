@@ -849,3 +849,21 @@
   opacity: 0.55;
   cursor: not-allowed;
 }
+
+.admin-categories-delete-dialog {
+  max-width: 26rem;
+}
+
+.admin-categories-delete-text {
+  margin: 0 0 1.25rem;
+  font-family: "Manrope", system-ui, sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--admin-on-surface-variant);
+}
+
+.admin-categories-delete-confirm {
+  background: #ba1a1a !important;
+  border-color: #ba1a1a !important;
+  color: #fff !important;
+}

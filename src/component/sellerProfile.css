@@ -395,6 +395,12 @@
   gap: 1rem;
 }
 
+.seller-profile-reviews-empty {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #707974;
+}
+
 .seller-profile-review {
   padding: 1rem;
   border-radius: 0.5rem;
@@ -402,10 +408,23 @@
   background: rgba(242, 244, 241, 0.5);
 }
 
+.seller-profile-review-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.25rem;
+}
+
+.seller-profile-review-author {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #707974;
+}
+
 .seller-profile-stars {
   display: flex;
   gap: 0.125rem;
-  margin-bottom: 0.25rem;
   color: #306855;
 }
 

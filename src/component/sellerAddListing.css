@@ -665,11 +665,19 @@
   border-top: 1px solid rgba(191, 201, 195, 0.2);
 }
 
-.add-listing-preview-seller img {
+.add-listing-preview-seller-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 1.5rem;
   height: 1.5rem;
   border-radius: 9999px;
-  object-fit: cover;
+  background: #306855;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  flex-shrink: 0;
 }
 
 .add-listing-preview-seller span {
