@@ -153,6 +153,12 @@ export const api = {
       body: JSON.stringify(body),
     }),
 
+  requestSellerMoreInfo: (id, body = {}) =>
+    request(`/admin/seller-verifications/${id}/request-info`, {
+      method: "PATCH",
+      body: JSON.stringify(body),
+    }),
+
   // Seller Listings
   createListing: (body) =>
     request("/seller/listings", {
@@ -464,6 +470,8 @@ export const api = {
         ? `/notifications/me?filter=${encodeURIComponent(filter)}`
         : "/notifications/me",
     ),
+
+  getNotification: (id) => request(`/notifications/${id}`),
 
   markNotificationRead: (id) =>
     request(`/notifications/${id}/read`, { method: "PATCH" }),

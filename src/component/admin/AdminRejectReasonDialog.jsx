@@ -16,6 +16,8 @@ export default function AdminRejectReasonDialog({
   title,
   description,
   confirmLabel = "Confirm Rejection",
+  reasonLabel = "Rejection reason",
+  reasonPlaceholder = "Explain why this is being rejected...",
   loading = false,
   error = "",
   reason = "",
@@ -34,14 +36,14 @@ export default function AdminRejectReasonDialog({
 
         <div className="admin-profile-dialog-fields">
           <label className="admin-profile-form-label" htmlFor="admin-reject-reason">
-            Rejection reason
+            {reasonLabel}
           </label>
           <Textarea
             id="admin-reject-reason"
             value={reason}
             onChange={(event) => onReasonChange(event.target.value)}
             rows={4}
-            placeholder="Explain why this is being rejected..."
+            placeholder={reasonPlaceholder}
           />
           {error ? (
             <p className="admin-profile-message admin-profile-message--error" role="alert">

@@ -38,8 +38,11 @@ const AdminSellerVerification = () => {
   const [actionError, setActionError] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
   const [showRejectDialog, setShowRejectDialog] = useState(false);
+  const [showInfoDialog, setShowInfoDialog] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
+  const [infoReason, setInfoReason] = useState("");
   const [rejectError, setRejectError] = useState("");
+  const [infoError, setInfoError] = useState("");
 
   const loadApplications = useCallback(async () => {
     setLoading(true);
@@ -104,6 +107,36 @@ const AdminSellerVerification = () => {
     setRejectReason("");
     setRejectError("");
     setShowRejectDialog(true);
+  };
+
+  const openInfoDialog = () => {
+    setInfoReason("");
+    setInfoError("");
+    setShowInfoDialog(true);
+  };
+
+  const handleInfoConfirm = async () => {
+    if (!selectedApplication) return;
+    const adminNote = infoReason.trim();
+    if (!adminNote) {
+      setInfoError("Please describe what information is needed.");
+      return;
+    }
+
+    setActionLoading(true);
+    setInfoError("");
+    setActionError("");
+    try {
+      await api.requestSellerMoreInfo(selectedApplication.id, { adminNote });
+      setShowInfoDialog(false);
+      setInfoReason("");
+      await loadApplications();
+      setSelectedId(null);
+    } catch (error) {
+      setInfoError(error.message || "Failed to request more information");
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   const handleRejectConfirm = async () => {
@@ -341,7 +374,12 @@ const AdminSellerVerification = () => {
                   >
                     Reject Application
                   </button>
-                  <button type="button" className="admin-verify-btn-secondary">
+                  <button
+                    type="button"
+                    className="admin-verify-btn-secondary"
+                    onClick={openInfoDialog}
+                    disabled={actionLoading}
+                  >
                     Request More Info
                   </button>
                 </div>
@@ -362,6 +400,21 @@ const AdminSellerVerification = () => {
         reason={rejectReason}
         onReasonChange={setRejectReason}
         onConfirm={handleRejectConfirm}
+      />
+
+      <AdminRejectReasonDialog
+        open={showInfoDialog}
+        onOpenChange={setShowInfoDialog}
+        title="Request more information"
+        description="The seller will see this message on their pending application page and can upload updated documents."
+        confirmLabel="Send Request"
+        reasonLabel="Information needed"
+        reasonPlaceholder="e.g. Please upload a clearer CNIC front image and add your bank account details."
+        loading={actionLoading}
+        error={infoError}
+        reason={infoReason}
+        onReasonChange={setInfoReason}
+        onConfirm={handleInfoConfirm}
       />
     </div>
   );

@@ -21,6 +21,7 @@ import Privacy from "./component/privacy";
 import ContactUs from "./component/contactUs";
 import Help from "./component/help";
 import Notification from "./component/notification";
+import NotificationDetail from "./component/notificationDetail";
 import SellerVerification from "./component/sellerVerification";
 import ForgotPassword from "./component/forgotPassword";
 import Profile from "./component/profile";
@@ -209,6 +210,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Notification />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/notification/:id"
+            element={
+              <ProtectedRoute>
+                <NotificationDetail />
               </ProtectedRoute>
             }
           />

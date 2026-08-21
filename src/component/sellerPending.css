@@ -86,6 +86,39 @@
   font-size: 0.9rem;
 }
 
+.seller-pending-status-badge--info {
+  background: #fdebd2;
+  color: #9a5b00;
+}
+
+.seller-pending-info-box {
+  margin: 0;
+  padding: 1rem 1.125rem;
+  border-radius: 10px;
+  background: #fff8ef;
+  border: 1px solid #f0d5a8;
+  color: #4a4036;
+  line-height: 1.55;
+}
+
+.seller-pending-info-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  color: #9a5b00;
+}
+
+.seller-pending-info-box p {
+  margin: 0;
+}
+
+.seller-pending-info-help {
+  margin-top: 0.625rem !important;
+  font-size: 0.92rem;
+  color: #6b6156;
+}
+
 .seller-pending-list {
   margin: 0;
   padding: 0;

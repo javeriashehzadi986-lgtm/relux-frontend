@@ -1,14 +1,29 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Clock, ShieldCheck, Mail } from "lucide-react";
+import { Clock, ShieldCheck, Mail, AlertCircle, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
+import api from "@/services/api";
 import "./sellerPending.css";
 
 export default function SellerPending() {
   const navigate = useNavigate();
   const { user, loading, logout, refreshUser } = useAuth();
+  const [verification, setVerification] = useState(null);
+
+  const loadVerification = async () => {
+    try {
+      const data = await api.getSellerVerification();
+      setVerification(data?.verification ?? null);
+    } catch {
+      setVerification(null);
+    }
+  };
+
+  useEffect(() => {
+    loadVerification();
+  }, [user?.id]);
 
   useEffect(() => {
     if (loading) return;
@@ -43,6 +58,7 @@ export default function SellerPending() {
     const checkApproval = async () => {
       try {
         const freshUser = await refreshUser();
+        await loadVerification();
         if (freshUser.status === "active") {
           navigate("/sellerProfile", { replace: true });
         } else if (freshUser.status === "rejected") {
@@ -71,6 +87,9 @@ export default function SellerPending() {
     );
   }
 
+  const needsMoreInfo = verification?.verificationStatus === "info_requested";
+  const adminNote = verification?.adminNote?.trim() || "";
+
   return (
     <div className="seller-pending-page">
       <Card className="seller-pending-card py-0 gap-0">
@@ -88,8 +107,27 @@ export default function SellerPending() {
 
           <div className="seller-pending-status-box">
             <p className="seller-pending-status-label">Current status</p>
-            <span className="seller-pending-status-badge">Pending approval</span>
+            <span
+              className={`seller-pending-status-badge ${
+                needsMoreInfo ? "seller-pending-status-badge--info" : ""
+              }`.trim()}
+            >
+              {needsMoreInfo ? "More information needed" : "Pending approval"}
+            </span>
           </div>
+
+          {needsMoreInfo && adminNote ? (
+            <div className="seller-pending-info-box" role="alert">
+              <div className="seller-pending-info-heading">
+                <AlertCircle size={18} strokeWidth={1.75} />
+                <strong>Admin request</strong>
+              </div>
+              <p>{adminNote}</p>
+              <p className="seller-pending-info-help">
+                Upload updated documents below so our team can continue reviewing your application.
+              </p>
+            </div>
+          ) : null}
 
           <ul className="seller-pending-list">
             <li>
@@ -108,20 +146,18 @@ export default function SellerPending() {
           </p>
 
           <div className="seller-pending-actions">
-            <Button
-              type="button"
-              variant="default"
-              onClick={async () => {
-                const freshUser = await refreshUser();
-                if (freshUser?.status === "active") {
-                  navigate("/sellerProfile", { replace: true });
-                } else if (freshUser?.status === "rejected") {
-                  navigate("/seller-rejected", { replace: true });
+            {needsMoreInfo ? (
+              <Button
+                type="button"
+                variant="default"
+                onClick={() =>
+                  navigate("/sellerVerification", { state: { updateDocuments: true } })
                 }
-              }}
-            >
-              Check Approval Status
-            </Button>
+              >
+                <Upload size={18} strokeWidth={1.75} />
+                Update Documents
+              </Button>
+            ) : null}
             <Button type="button" variant="default" asChild>
               <Link to="/home">Back to Home</Link>
             </Button>

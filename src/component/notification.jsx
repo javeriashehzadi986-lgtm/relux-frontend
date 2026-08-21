@@ -67,7 +67,6 @@ const Notification = () => {
     error,
     refresh,
     markAllAsRead,
-    markAsRead,
   } = useNotifications(activeFilter);
   const [notificationsEnabled, setNotificationsEnabled] = useState(() => {
     try {
@@ -124,13 +123,7 @@ const Notification = () => {
   };
 
   const handleNotificationClick = async (item) => {
-    if (item.unread) {
-      await markAsRead(item.id);
-    }
-
-    if (item.link) {
-      navigate(item.link);
-    }
+    navigate(`/notification/${item.id}`);
   };
 
   return (
@@ -224,9 +217,7 @@ const Notification = () => {
                   key={item.id}
                   className={`notification-item ${
                     item.unread ? "is-unread" : ""
-                  } ${isLast ? "is-last" : ""} ${
-                    item.link ? "notification-item--clickable" : ""
-                  }`}
+                  } ${isLast ? "is-last" : ""} notification-item--clickable`}
                   onClick={() => handleNotificationClick(item)}
                   onKeyDown={(event) => {
                     if (event.key === "Enter" || event.key === " ") {
@@ -234,8 +225,8 @@ const Notification = () => {
                       handleNotificationClick(item);
                     }
                   }}
-                  role={item.link ? "button" : undefined}
-                  tabIndex={item.link ? 0 : undefined}
+                  role="button"
+                  tabIndex={0}
                 >
                   {item.imageUrl ? (
                     <div className="notification-icon notification-icon--image">
@@ -273,15 +264,13 @@ const Notification = () => {
                         highlight={item.highlight}
                       />
                     </p>
-                    {item.link ? (
-                      <Link
-                        to={item.link}
-                        className="notification-item-link"
-                        onClick={(event) => event.stopPropagation()}
-                      >
-                        View details
-                      </Link>
-                    ) : null}
+                    <Link
+                      to={`/notification/${item.id}`}
+                      className="notification-item-link"
+                      onClick={(event) => event.stopPropagation()}
+                    >
+                      View details
+                    </Link>
                   </div>
                 </article>
               );
