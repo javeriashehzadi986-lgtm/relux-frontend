@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Gavel, Heart, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { applyAuctionApiData, isMongoListingId, mapApiListingToDress } from "@/data/dressCatalog";
 import api from "@/services/api";
 import { useRequireLogin } from "@/hooks/useRequireLogin";
+import { useAuctionSocket } from "@/hooks/useAuctionSocket";
 import { useWishlist } from "@/hooks/useWishlist";
 import RentalDressDetails from "./rentalDressDetails";
 import { DressDetailsBreadcrumb } from "./dressDetailsBreadcrumb";
@@ -110,6 +111,30 @@ const DressDetails = () => {
       cancelled = true;
     };
   }, [dress?.id, dress?.listingType, id]);
+
+  const handleRealtimeAuctionUpdate = useCallback((updater) => {
+    setDress((current) => {
+      if (!current) return current;
+      const next = updater(current);
+      if (next?.auctionWon !== undefined) {
+        setHasWonAuction(Boolean(next.auctionWon));
+      }
+      if (next?.countdown) {
+        setCountdown(next.countdown);
+      }
+      return next;
+    });
+  }, []);
+
+  useAuctionSocket({
+    productId: id,
+    enabled: Boolean(
+      dress?.listingType === "resale" &&
+        isMongoListingId(id) &&
+        !dress?.auctionEnded,
+    ),
+    onUpdate: handleRealtimeAuctionUpdate,
+  });
 
   const proceedToCheckout = () => navigate(`/dress/${id}/checkout`);
 
