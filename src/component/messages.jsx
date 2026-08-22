@@ -105,7 +105,10 @@ const MessagesContent = () => {
     loading,
     error,
     muted,
+    typingUser,
+    socketConnected,
     sendMessage,
+    notifyTyping,
     markAllRead,
     toggleMute,
     clearHistory,
@@ -315,6 +318,7 @@ const MessagesContent = () => {
 
   const handleInput = (event) => {
     setMessage(event.target.value);
+    notifyTyping();
     event.target.style.height = "auto";
     event.target.style.height = `${Math.min(event.target.scrollHeight, 80)}px`;
   };
@@ -497,8 +501,12 @@ const MessagesContent = () => {
                   <div className="seller-chat-header-info">
                     <h2>{partnerName}</h2>
                     <span>
-                      {thread.online ? "Online" : "Offline"} •{" "}
-                      {isSeller ? "Buyer inquiry" : "Responds in 5 mins"}
+                      {typingUser
+                        ? `${typingUser} is typing...`
+                        : socketConnected
+                          ? "Live chat connected"
+                          : "Connecting..."}{" "}
+                      • {isSeller ? "Buyer inquiry" : "Seller chat"}
                     </span>
                   </div>
                 </div>
@@ -612,6 +620,12 @@ const MessagesContent = () => {
                   ),
                 )}
               </div>
+
+              {typingUser ? (
+                <p className="seller-chat-typing-indicator" aria-live="polite">
+                  {typingUser} is typing...
+                </p>
+              ) : null}
 
               <footer className="seller-chat-footer">
                 <div className="seller-chat-footer-inner">

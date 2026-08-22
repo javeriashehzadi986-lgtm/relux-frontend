@@ -718,6 +718,14 @@
   box-shadow: 0 -2px 8px rgba(48, 51, 51, 0.04);
 }
 
+.seller-chat-typing-indicator {
+  margin: 0;
+  padding: 0.5rem 1.25rem 0;
+  font-size: 0.8125rem;
+  color: #31685d;
+  font-style: italic;
+}
+
 .seller-chat-footer-inner {
   width: 100%;
   max-width: none;
