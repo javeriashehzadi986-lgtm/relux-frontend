@@ -102,16 +102,11 @@
   color: var(--c-text);
 }
 
-.admin-contact-reply-hint,
 .admin-contact-reply-saved {
   margin: 0.5rem 0 0;
   font-family: inherit;
   font-size: 0.8rem;
-  color: var(--c-muted);
   line-height: 1.4;
-}
-
-.admin-contact-reply-saved {
   color: var(--admin-on-primary-container);
   font-weight: 600;
 }

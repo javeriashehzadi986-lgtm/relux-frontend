@@ -521,6 +521,20 @@ body.dashboard-sidebar-closed .profile-main {
   color: #5d605f !important;
 }
 
+.profile-logout-modal-body {
+  padding: 0 1.75rem 0.25rem !important;
+}
+
+.profile-delete-password-field {
+  gap: 0.5rem;
+}
+
+.profile-delete-error {
+  margin: 0.75rem 0 0;
+  font-size: 0.875rem;
+  color: #b42318;
+}
+
 .profile-logout-modal-actions {
   display: flex;
   gap: 0.75rem;

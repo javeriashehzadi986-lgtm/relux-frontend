@@ -120,12 +120,18 @@ function formatFieldValue(value) {
 
 function SellerProfileSection() {
   const navigate = useNavigate();
-  const { user, updateProfile } = useAuth();
+  const { user, updateProfile, deactivateAccount } = useAuth();
   const profile = useMemo(() => userToProfile(user), [user]);
   const [isEditing, setIsEditing] = useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [showDeactivateConfirm, setShowDeactivateConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deactivatePassword, setDeactivatePassword] = useState("");
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deactivateError, setDeactivateError] = useState("");
+  const [deleteError, setDeleteError] = useState("");
+  const [deactivating, setDeactivating] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [draft, setDraft] = useState(profile);
   const [verificationStatus, setVerificationStatus] = useState(() =>
     user?.status === "active" ? "approved" : "pending",
@@ -180,6 +186,48 @@ function SellerProfileSection() {
   const visibleReviews = showAllReviews ? reviews : reviews.slice(0, 2);
   const averageRating = Number(stats?.average || 0);
   const reviewCount = Number(stats?.count || 0);
+
+  const handleAccountDeactivate = async () => {
+    setDeactivateError("");
+    setDeactivating(true);
+    try {
+      await deactivateAccount({ password: deactivatePassword });
+      setShowDeactivateConfirm(false);
+      setDeactivatePassword("");
+      navigate("/login", { replace: true });
+    } catch (error) {
+      setDeactivateError(error.message || "Could not deactivate account");
+    } finally {
+      setDeactivating(false);
+    }
+  };
+
+  const handleAccountDelete = async () => {
+    setDeleteError("");
+    setDeleting(true);
+    try {
+      await deactivateAccount({ password: deletePassword });
+      setShowDeleteConfirm(false);
+      setDeletePassword("");
+      navigate("/login", { replace: true });
+    } catch (error) {
+      setDeleteError(error.message || "Could not delete account");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const openDeactivateConfirm = () => {
+    setDeactivatePassword("");
+    setDeactivateError("");
+    setShowDeactivateConfirm(true);
+  };
+
+  const openDeleteConfirm = () => {
+    setDeletePassword("");
+    setDeleteError("");
+    setShowDeleteConfirm(true);
+  };
 
   const viewFields = [
     { id: "fullName", label: "Full Name", value: formatFieldValue(profile.fullName) },
@@ -495,14 +543,14 @@ function SellerProfileSection() {
                     type="button"
                     variant="outline"
                     className="seller-profile-deactivate-btn"
-                    onClick={() => setShowDeactivateConfirm(true)}
+                    onClick={openDeactivateConfirm}
                   >
                     Deactivate Account
                   </Button>
                   <Button
                     type="button"
                     className="seller-profile-delete-btn"
-                    onClick={() => setShowDeleteConfirm(true)}
+                    onClick={openDeleteConfirm}
                   >
                     Delete Account
                   </Button>
@@ -593,9 +641,28 @@ function SellerProfileSection() {
                 Deactivate account?
               </CardTitle>
               <CardDescription className="profile-logout-modal-description">
-                Your listings will be hidden until you sign in and reactivate your account.
+                Your seller account will be deactivated and your active listings will be
+                hidden. Enter your password to confirm.
               </CardDescription>
             </CardHeader>
+            <CardContent className="profile-logout-modal-body">
+              <Field className="profile-delete-password-field">
+                <FieldLabel htmlFor="seller-deactivate-password">Current Password</FieldLabel>
+                <Input
+                  id="seller-deactivate-password"
+                  type="password"
+                  value={deactivatePassword}
+                  onChange={(event) => setDeactivatePassword(event.target.value)}
+                  autoComplete="current-password"
+                  required
+                />
+              </Field>
+              {deactivateError ? (
+                <p className="profile-delete-error" role="alert">
+                  {deactivateError}
+                </p>
+              ) : null}
+            </CardContent>
             <CardContent className="profile-logout-modal-actions">
               <Button
                 type="button"
@@ -608,12 +675,10 @@ function SellerProfileSection() {
               <Button
                 type="button"
                 className="profile-logout-confirm-btn"
-                onClick={() => {
-                  setShowDeactivateConfirm(false);
-                  navigate("/login");
-                }}
+                disabled={deactivating || !deactivatePassword}
+                onClick={handleAccountDeactivate}
               >
-                Deactivate
+                {deactivating ? "Deactivating..." : "Deactivate"}
               </Button>
             </CardContent>
           </Card>
@@ -640,9 +705,28 @@ function SellerProfileSection() {
                 Delete account permanently?
               </CardTitle>
               <CardDescription className="profile-logout-modal-description">
-                This action cannot be undone. Your listings and seller data will be removed.
+                This action cannot be undone. Your seller account and active listings will
+                be removed. Enter your password to confirm.
               </CardDescription>
             </CardHeader>
+            <CardContent className="profile-logout-modal-body">
+              <Field className="profile-delete-password-field">
+                <FieldLabel htmlFor="seller-delete-password">Current Password</FieldLabel>
+                <Input
+                  id="seller-delete-password"
+                  type="password"
+                  value={deletePassword}
+                  onChange={(event) => setDeletePassword(event.target.value)}
+                  autoComplete="current-password"
+                  required
+                />
+              </Field>
+              {deleteError ? (
+                <p className="profile-delete-error" role="alert">
+                  {deleteError}
+                </p>
+              ) : null}
+            </CardContent>
             <CardContent className="profile-logout-modal-actions">
               <Button
                 type="button"
@@ -655,12 +739,10 @@ function SellerProfileSection() {
               <Button
                 type="button"
                 className="seller-profile-delete-confirm-btn"
-                onClick={() => {
-                  setShowDeleteConfirm(false);
-                  navigate("/login");
-                }}
+                disabled={deleting || !deletePassword}
+                onClick={handleAccountDelete}
               >
-                Delete Account
+                {deleting ? "Deleting..." : "Delete Account"}
               </Button>
             </CardContent>
           </Card>

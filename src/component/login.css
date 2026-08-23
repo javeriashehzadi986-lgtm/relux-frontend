@@ -223,6 +223,20 @@
   text-underline-offset: 4px;
 }
 
+.login-deleted-hint {
+  margin: 0.75rem 0 0;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: #5d605f;
+  text-align: center;
+}
+
+.login-deleted-hint a {
+  color: #31685d;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
 @media (min-width: 768px) {
   .login-page {
     flex-direction: row;

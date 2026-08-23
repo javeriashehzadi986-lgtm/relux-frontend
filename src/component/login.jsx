@@ -32,11 +32,13 @@ const Login = () => {
   const [emailerror, setemailerror] = useState("");
   const [passworderror, setpassworderror] = useState("");
   const [submitError, setSubmitError] = useState("");
+  const [showDeletedHint, setShowDeletedHint] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const onsubmitted = async (e) => {
     e.preventDefault();
     setSubmitError("");
+    setShowDeletedHint(false);
 
     const isEmailValid = email.includes("@") && email.includes(".");
     const isPasswordValid = password.length >= 6;
@@ -60,7 +62,12 @@ const Login = () => {
       const user = await login(email, password);
       navigate(getPostAuthPath(user, location.state?.from), { replace: true });
     } catch (error) {
-      setSubmitError(error.message || "Login failed");
+      const message = error.message || "Login failed";
+      setSubmitError(message);
+      setShowDeletedHint(
+        error.code === "ACCOUNT_DELETED" ||
+          message.toLowerCase().includes("account was deleted"),
+      );
     } finally {
       setLoading(false);
     }
@@ -147,6 +154,15 @@ const Login = () => {
                   {loading ? "Logging in..." : "Login"}
                 </Button>
                 {submitError && <FieldError>{submitError}</FieldError>}
+                {showDeletedHint ? (
+                  <p className="login-deleted-hint">
+                    Deleted account ke baad dubara{" "}
+                    <Link to="/signup" state={location.state}>
+                      Sign Up
+                    </Link>{" "}
+                    karo — same email chalegi.
+                  </p>
+                ) : null}
               </FieldGroup>
             </form>
 

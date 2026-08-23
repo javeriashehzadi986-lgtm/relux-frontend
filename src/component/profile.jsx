@@ -78,7 +78,7 @@ const resolveSection = (sectionProp, sectionFromQuery) => {
 
 const Profile = ({ section: sectionProp }) => {
   const navigate = useNavigate();
-  const { user, updateProfile, logout } = useAuth();
+  const { user, updateProfile, logout, deactivateAccount } = useAuth();
   const [searchParams] = useSearchParams();
   const sectionFromQuery = searchParams.get("section");
   const [activeSection, setActiveSection] = useState(() =>
@@ -86,6 +86,9 @@ const Profile = ({ section: sectionProp }) => {
   );
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deleteError, setDeleteError] = useState("");
+  const [deleting, setDeleting] = useState(false);
   const profile = useMemo(() => userToProfile(user), [user]);
   const [draft, setDraft] = useState(profile);
   const [isEditing, setIsEditing] = useState(false);
@@ -157,9 +160,25 @@ const Profile = ({ section: sectionProp }) => {
     navigate("/login");
   };
 
-  const handleDeleteConfirm = () => {
-    setShowDeleteConfirm(false);
-    navigate("/login");
+  const handleDeleteConfirm = async () => {
+    setDeleteError("");
+    setDeleting(true);
+    try {
+      await deactivateAccount({ password: deletePassword });
+      setShowDeleteConfirm(false);
+      setDeletePassword("");
+      navigate("/login", { replace: true });
+    } catch (error) {
+      setDeleteError(error.message || "Could not delete account");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const openDeleteConfirm = () => {
+    setDeletePassword("");
+    setDeleteError("");
+    setShowDeleteConfirm(true);
   };
 
   const renderSidebarNav = (className = "") => (
@@ -393,7 +412,7 @@ const Profile = ({ section: sectionProp }) => {
             <Button
               type="button"
               className="profile-delete-btn"
-              onClick={() => setShowDeleteConfirm(true)}
+              onClick={openDeleteConfirm}
             >
               Delete Account
             </Button>
@@ -519,10 +538,28 @@ const Profile = ({ section: sectionProp }) => {
                 Delete account permanently?
               </CardTitle>
               <CardDescription className="profile-logout-modal-description">
-                This action cannot be undone. Your buyer account and saved data will
-                be removed.
+                This action cannot be undone. Enter your password to permanently deactivate
+                your buyer account.
               </CardDescription>
             </CardHeader>
+            <CardContent className="profile-logout-modal-body">
+              <Field className="profile-delete-password-field">
+                <FieldLabel htmlFor="profile-delete-password">Current Password</FieldLabel>
+                <Input
+                  id="profile-delete-password"
+                  type="password"
+                  value={deletePassword}
+                  onChange={(event) => setDeletePassword(event.target.value)}
+                  autoComplete="current-password"
+                  required
+                />
+              </Field>
+              {deleteError ? (
+                <p className="profile-delete-error" role="alert">
+                  {deleteError}
+                </p>
+              ) : null}
+            </CardContent>
             <CardContent className="profile-logout-modal-actions">
               <Button
                 type="button"
@@ -535,9 +572,10 @@ const Profile = ({ section: sectionProp }) => {
               <Button
                 type="button"
                 className="profile-delete-confirm-btn"
+                disabled={deleting || !deletePassword}
                 onClick={handleDeleteConfirm}
               >
-                Delete Account
+                {deleting ? "Deleting..." : "Delete Account"}
               </Button>
             </CardContent>
           </Card>

@@ -225,10 +225,6 @@ const AdminContactMessages = () => {
                 onChange={(e) => setReplyText(e.target.value)}
                 disabled={actionLoading}
               />
-              <p className="admin-contact-reply-hint">
-                Reply save hogi aur aapki email app (Gmail / Outlook) open hogi —
-                wahan Send dabao. User ko email pe jawab milega.
-              </p>
               {selected.adminReply ? (
                 <p className="admin-contact-reply-saved">
                   Last reply saved

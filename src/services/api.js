@@ -69,7 +69,11 @@ async function request(path, options = {}) {
               ? "You do not have access. Use the correct account (seller for seller dashboard, admin for admin panel)."
               : "Request failed");
 
-    throw new Error(message);
+    const error = new Error(message);
+    if (data.code) {
+      error.code = data.code;
+    }
+    throw error;
   }
 
   return data;

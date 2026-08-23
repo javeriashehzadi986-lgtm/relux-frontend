@@ -75,7 +75,13 @@ const Signup = () => {
         navigate(getPostAuthPath(user, location.state?.from), { replace: true });
       }, 1200);
     } catch (error) {
-      setSubmitError(error.message || "Signup failed");
+      if (error.code === "EMAIL_IN_USE") {
+        setSubmitError(
+          "This email is already registered on an active account. Log in instead, or delete that account first from Profile settings.",
+        );
+      } else {
+        setSubmitError(error.message || "Signup failed");
+      }
     } finally {
       setLoading(false);
     }
