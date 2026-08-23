@@ -68,10 +68,11 @@ const applyListingSpecs = (dress) => {
 };
 
 const enrichResaleDress = (dress) => {
-  const price = parsePrice(dress.price);
-  const estimatedValue =
-    dress.originalRetailPrice ?? dress.estimatedValue ?? Math.round(price * 2.27);
-  const currentBid = dress.currentBid ?? price;
+  const salePrice = parsePrice(dress.salePrice ?? dress.price);
+  const startingBid = parsePrice(dress.startingBid) || salePrice;
+  const price = salePrice;
+  const estimatedValue = dress.originalRetailPrice ?? dress.estimatedValue ?? null;
+  const currentBid = dress.currentBid ?? startingBid;
   const minimumNextBid = dress.minimumNextBid ?? currentBid + 2500;
   const mainImage = dress.mainImage ?? dress.image ?? "";
   const gallery =
@@ -92,8 +93,12 @@ const enrichResaleDress = (dress) => {
     gallery,
     mainImage: gallery[0] ?? mainImage,
     rating: dress.rating ?? 5.0,
+    salePrice,
+    salePriceFormatted: dress.salePriceFormatted ?? formatRs(salePrice),
+    startingBid,
+    startingBidFormatted: dress.startingBidFormatted ?? formatRs(startingBid),
     estimatedValue,
-    estimatedValueFormatted: formatRs(estimatedValue),
+    estimatedValueFormatted: estimatedValue ? formatRs(estimatedValue) : null,
     currentBid,
     minimumNextBid,
     bidderCount,
@@ -236,9 +241,11 @@ export const mapApiListingToDress = (listing) => {
         }
       : {
           listingType: "resale",
+          salePrice: parsePrice(listing.salePrice),
+          startingBid: parsePrice(listing.startingBid),
           price: parsePrice(listing.salePrice),
           currentBid: parsePrice(listing.startingBid || listing.salePrice),
-          minimumNextBid: parsePrice(listing.minBid || listing.startingBid || listing.salePrice),
+          minimumNextBid: parsePrice(listing.startingBid || listing.salePrice),
         }),
   };
 

@@ -274,9 +274,14 @@ const DressDetails = () => {
               </Button>
             </div>
             <div className="dress-details-meta">
-              <span className="dress-details-est-value">
-                Est. Val. <s>{dress.estimatedValueFormatted}</s>
+              <span className="dress-details-sale-price">
+                Sale Price: <strong>{dress.salePriceFormatted ?? dress.priceFormatted}</strong>
               </span>
+              {dress.estimatedValueFormatted ? (
+                <span className="dress-details-est-value">
+                  Est. Val. <s>{dress.estimatedValueFormatted}</s>
+                </span>
+              ) : null}
             </div>
           </section>
 

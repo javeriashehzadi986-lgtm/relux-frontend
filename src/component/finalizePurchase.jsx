@@ -95,9 +95,9 @@ const FinalizePurchase = () => {
   }
 
   const deliveryCharges = dress.deliveryCharges ?? 1500;
-  const winningBid = dress.currentBid ?? dress.price;
+  const winningBid = dress.currentBid ?? dress.startingBid ?? dress.salePrice ?? dress.price;
   const originalRetail =
-    dress.originalRetailPrice ?? dress.estimatedValue ?? winningBid * 2;
+    dress.originalRetailPrice ?? dress.estimatedValue ?? dress.salePrice ?? dress.price;
   const totalAmount = winningBid + deliveryCharges;
   const summaryImage = dress.image ?? dress.mainImage ?? dress.gallery?.[0];
 

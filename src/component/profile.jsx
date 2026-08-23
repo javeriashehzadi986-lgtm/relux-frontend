@@ -298,7 +298,7 @@ const Profile = ({ section: sectionProp }) => {
                   </div>
                   <Field className="profile-field">
                     <FieldLabel htmlFor="profile-address" className="profile-label">
-                      Delivery Address
+                      Address
                     </FieldLabel>
                     <Input
                       id="profile-address"
@@ -346,7 +346,7 @@ const Profile = ({ section: sectionProp }) => {
                   <dd className="profile-detail-value">{formatFieldValue(profile.city)}</dd>
                 </div>
                 <div className="profile-detail profile-detail--full">
-                  <dt className="profile-label">Delivery Address</dt>
+                  <dt className="profile-label">Address</dt>
                   <dd className="profile-detail-value">{formatFieldValue(profile.address)}</dd>
                 </div>
               </dl>

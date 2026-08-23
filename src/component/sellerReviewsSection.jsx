@@ -134,7 +134,7 @@ export function SellerReviewsSection({
           <div>
             <div className="rental-details-seller-name-row">
               <h4 className="rental-details-seller-name">{sellerName}</h4>
-              <span className="rental-details-elite-badge">Elite Member</span>
+              <span className="rental-details-elite-badge">Approved Seller</span>
             </div>
             <div className="rental-details-seller-meta">
               <span className="rental-details-seller-rating">

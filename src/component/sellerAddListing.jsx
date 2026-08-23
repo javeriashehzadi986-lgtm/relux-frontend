@@ -204,7 +204,7 @@ const SellerAddListing = () => {
   const previewPrice =
     listingType === "sale"
       ? salePrice
-        ? `$${salePrice}`
+        ? `Rs. ${Number(salePrice).toLocaleString("en-PK")}`
         : "$450"
       : rentPrice
         ? `$${rentPrice} / day`
@@ -501,7 +501,7 @@ const SellerAddListing = () => {
                 {listingType === "sale" ? (
                   <FieldGroup className="add-listing-pricing-grid">
                     <Field className="add-listing-field">
-                      <FieldLabel htmlFor="sale-price">Selling Price ($)</FieldLabel>
+                      <FieldLabel htmlFor="sale-price">Selling Price (Rs.)</FieldLabel>
                       <Input
                         id="sale-price"
                         type="number"
@@ -519,7 +519,7 @@ const SellerAddListing = () => {
                         Sale listings require bidding. Set your auction details below.
                       </p>
                       <Field className="add-listing-field">
-                        <FieldLabel htmlFor="starting-bid">Starting Bid ($)</FieldLabel>
+                        <FieldLabel htmlFor="starting-bid">Starting Bid (Rs.)</FieldLabel>
                         <Input
                           id="starting-bid"
                           type="number"
@@ -533,7 +533,7 @@ const SellerAddListing = () => {
                         />
                       </Field>
                       <Field className="add-listing-field">
-                        <FieldLabel htmlFor="min-bid">Minimum Bid ($)</FieldLabel>
+                        <FieldLabel htmlFor="min-bid">Minimum Bid Increment (Rs.)</FieldLabel>
                         <Input
                           id="min-bid"
                           type="number"

@@ -31,7 +31,7 @@ function formatListingPrice(listing) {
   if (listing.listingType === "rent") {
     return listing.rentPrice ? `$${listing.rentPrice} / day` : "—";
   }
-  return listing.salePrice ? `$${listing.salePrice}` : "—";
+  return listing.salePrice ? `Rs. ${Number(listing.salePrice).toLocaleString("en-PK")}` : "—";
 }
 
 function formatListingDetail(listing) {

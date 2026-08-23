@@ -188,7 +188,7 @@ function SellerProfileSection() {
     { id: "city", label: "City", value: formatFieldValue(profile.city) },
     {
       id: "address",
-      label: "Delivery Address",
+      label: "Address",
       value: formatFieldValue(profile.address),
       fullWidth: true,
     },
@@ -284,7 +284,7 @@ function SellerProfileSection() {
                   />
                 </Field>
                 <Field className="seller-dashboard-field seller-dashboard-field--full">
-                  <FieldLabel htmlFor="edit-address">Delivery Address</FieldLabel>
+                  <FieldLabel htmlFor="edit-address">Address</FieldLabel>
                   <Input
                     id="edit-address"
                     value={draft.address}
