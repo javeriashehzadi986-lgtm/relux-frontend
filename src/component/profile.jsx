@@ -78,7 +78,7 @@ const resolveSection = (sectionProp, sectionFromQuery) => {
 
 const Profile = ({ section: sectionProp }) => {
   const navigate = useNavigate();
-  const { user, updateProfile, logout, deactivateAccount } = useAuth();
+  const { user, updateProfile, logout, deactivateAccount, changePassword } = useAuth();
   const [searchParams] = useSearchParams();
   const sectionFromQuery = searchParams.get("section");
   const [activeSection, setActiveSection] = useState(() =>
@@ -89,6 +89,13 @@ const Profile = ({ section: sectionProp }) => {
   const [deletePassword, setDeletePassword] = useState("");
   const [deleteError, setDeleteError] = useState("");
   const [deleting, setDeleting] = useState(false);
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordSuccess, setPasswordSuccess] = useState("");
+  const [changingPassword, setChangingPassword] = useState(false);
   const profile = useMemo(() => userToProfile(user), [user]);
   const [draft, setDraft] = useState(profile);
   const [isEditing, setIsEditing] = useState(false);
@@ -179,6 +186,35 @@ const Profile = ({ section: sectionProp }) => {
     setDeletePassword("");
     setDeleteError("");
     setShowDeleteConfirm(true);
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    setPasswordError("");
+    setPasswordSuccess("");
+
+    if (newPassword.length < 6) {
+      setPasswordError("New password must be at least 6 characters");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError("New passwords do not match");
+      return;
+    }
+
+    setChangingPassword(true);
+    try {
+      await changePassword({ currentPassword, newPassword });
+      setPasswordSuccess("Password updated. A confirmation email was sent.");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setShowPasswordForm(false);
+    } catch (error) {
+      setPasswordError(error.message || "Could not update password");
+    } finally {
+      setChangingPassword(false);
+    }
   };
 
   const renderSidebarNav = (className = "") => (
@@ -378,14 +414,70 @@ const Profile = ({ section: sectionProp }) => {
                   type="button"
                   variant="ghost"
                   className="profile-settings-btn"
-                  asChild
+                  onClick={() => {
+                    setShowPasswordForm((open) => !open);
+                    setPasswordError("");
+                    setPasswordSuccess("");
+                  }}
                 >
-                  <Link to="/forgot-password">
-                    <Lock size={18} aria-hidden="true" />
-                    Change Password
-                  </Link>
+                  <Lock size={18} aria-hidden="true" />
+                  Change Password
                 </Button>
               </div>
+
+              {passwordSuccess ? (
+                <p className="profile-save-success" role="status">
+                  {passwordSuccess}
+                </p>
+              ) : null}
+
+              {showPasswordForm ? (
+                <form className="profile-password-form" onSubmit={handleChangePassword}>
+                  <FieldGroup>
+                    <Field>
+                      <FieldLabel htmlFor="profile-current-password">Current Password</FieldLabel>
+                      <Input
+                        id="profile-current-password"
+                        type="password"
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
+                        required
+                        autoComplete="current-password"
+                      />
+                    </Field>
+                    <Field>
+                      <FieldLabel htmlFor="profile-new-password">New Password</FieldLabel>
+                      <Input
+                        id="profile-new-password"
+                        type="password"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        required
+                        autoComplete="new-password"
+                      />
+                    </Field>
+                    <Field>
+                      <FieldLabel htmlFor="profile-confirm-password">Confirm New Password</FieldLabel>
+                      <Input
+                        id="profile-confirm-password"
+                        type="password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        required
+                        autoComplete="new-password"
+                      />
+                    </Field>
+                  </FieldGroup>
+                  {passwordError ? (
+                    <p className="profile-save-error" role="alert">
+                      {passwordError}
+                    </p>
+                  ) : null}
+                  <Button type="submit" disabled={changingPassword || !currentPassword || !newPassword}>
+                    {changingPassword ? "Updating..." : "Update Password"}
+                  </Button>
+                </form>
+              ) : null}
             </div>
           </CardContent>
         </Card>

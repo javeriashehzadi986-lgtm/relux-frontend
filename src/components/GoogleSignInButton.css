@@ -1,0 +1,15 @@
+.google-signin-host {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.google-signin-host > div {
+  width: 100% !important;
+  display: flex;
+  justify-content: center;
+}
+
+.google-signin-host iframe {
+  max-width: 100%;
+}

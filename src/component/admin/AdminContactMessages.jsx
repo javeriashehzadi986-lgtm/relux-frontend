@@ -99,14 +99,13 @@ const AdminContactMessages = () => {
       );
       setReplyText(data.contact?.adminReply || trimmed);
       setSuccess(
-        "Reply saved. Your email app will open — press Send there to email the user.",
+        data.emailSent
+          ? "Reply emailed to the user successfully."
+          : data.message || "Reply saved.",
       );
-      if (data.mailto) {
-        window.location.href = data.mailto;
-      }
       await loadMessages();
     } catch (err) {
-      setError(err.message || "Failed to save reply");
+      setError(err.message || "Failed to send reply");
     } finally {
       setActionLoading(false);
     }

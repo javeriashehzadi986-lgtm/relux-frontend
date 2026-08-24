@@ -80,6 +80,7 @@ const AdminProfile = () => {
     refreshUser,
     updateProfile,
     updateEmail,
+    changePassword,
     deactivateAccount,
   } = useAuth();
 
@@ -97,10 +98,16 @@ const AdminProfile = () => {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [showDeactivateConfirm, setShowDeactivateConfirm] = useState(false);
   const [showEmailDialog, setShowEmailDialog] = useState(false);
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [emailDraft, setEmailDraft] = useState("");
   const [emailPassword, setEmailPassword] = useState("");
   const [emailError, setEmailError] = useState("");
   const [emailSaving, setEmailSaving] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordSaving, setPasswordSaving] = useState(false);
   const [deactivatePassword, setDeactivatePassword] = useState("");
   const [deactivateError, setDeactivateError] = useState("");
   const [deactivating, setDeactivating] = useState(false);
@@ -200,6 +207,31 @@ const AdminProfile = () => {
       setEmailError(error.message || "Could not update email");
     } finally {
       setEmailSaving(false);
+    }
+  };
+
+  const handlePasswordSubmit = async (event) => {
+    event.preventDefault();
+    setPasswordError("");
+    if (newPassword.length < 6) {
+      setPasswordError("New password must be at least 6 characters");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError("New passwords do not match");
+      return;
+    }
+    setPasswordSaving(true);
+    try {
+      await changePassword({ currentPassword, newPassword });
+      setShowPasswordDialog(false);
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error) {
+      setPasswordError(error.message || "Could not update password");
+    } finally {
+      setPasswordSaving(false);
     }
   };
 
@@ -397,7 +429,13 @@ const AdminProfile = () => {
                     type="button"
                     variant="ghost"
                     className="admin-profile-secondary-btn"
-                    onClick={() => navigate("/forgot-password")}
+                    onClick={() => {
+                      setCurrentPassword("");
+                      setNewPassword("");
+                      setConfirmPassword("");
+                      setPasswordError("");
+                      setShowPasswordDialog(true);
+                    }}
                   >
                     Change Password
                     <ChevronRight size={16} />
@@ -525,6 +563,72 @@ const AdminProfile = () => {
               </Button>
               <Button type="submit" className="profile-logout-confirm-btn" disabled={emailSaving}>
                 {emailSaving ? "Saving..." : "Update Email"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
+        <DialogContent className="profile-logout-modal" showCloseButton={false}>
+          <form onSubmit={handlePasswordSubmit}>
+            <DialogHeader className="profile-logout-modal-header">
+              <DialogTitle className="profile-logout-modal-title">Change password</DialogTitle>
+              <DialogDescription className="profile-logout-modal-description">
+                Enter your current password and choose a new one. A confirmation email will be sent.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="admin-profile-dialog-fields">
+              <label className="admin-profile-form-label" htmlFor="admin-current-password">
+                Current Password
+              </label>
+              <Input
+                id="admin-current-password"
+                type="password"
+                value={currentPassword}
+                onChange={(event) => setCurrentPassword(event.target.value)}
+                required
+                autoComplete="current-password"
+              />
+              <label className="admin-profile-form-label" htmlFor="admin-new-password">
+                New Password
+              </label>
+              <Input
+                id="admin-new-password"
+                type="password"
+                value={newPassword}
+                onChange={(event) => setNewPassword(event.target.value)}
+                required
+                autoComplete="new-password"
+              />
+              <label className="admin-profile-form-label" htmlFor="admin-confirm-password">
+                Confirm New Password
+              </label>
+              <Input
+                id="admin-confirm-password"
+                type="password"
+                value={confirmPassword}
+                onChange={(event) => setConfirmPassword(event.target.value)}
+                required
+                autoComplete="new-password"
+              />
+              {passwordError ? (
+                <p className="admin-profile-message admin-profile-message--error" role="alert">
+                  {passwordError}
+                </p>
+              ) : null}
+            </div>
+            <DialogFooter className="profile-logout-modal-actions">
+              <Button
+                type="button"
+                variant="ghost"
+                className="profile-logout-cancel-btn"
+                onClick={() => setShowPasswordDialog(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" className="profile-logout-confirm-btn" disabled={passwordSaving}>
+                {passwordSaving ? "Updating..." : "Update Password"}
               </Button>
             </DialogFooter>
           </form>

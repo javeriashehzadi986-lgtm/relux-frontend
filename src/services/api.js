@@ -101,6 +101,24 @@ export const api = {
       body: JSON.stringify(body),
     }),
 
+  googleAuth: (body) =>
+    request("/auth/google", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+
+  forgotPassword: (body) =>
+    request("/auth/forgot-password", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+
+  resetPassword: (body) =>
+    request("/auth/reset-password", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+
   getMe: () => request("/auth/me"),
 
   updateProfile: (body) =>
@@ -111,6 +129,12 @@ export const api = {
 
   updateEmail: (body) =>
     request("/auth/me/email", {
+      method: "PATCH",
+      body: JSON.stringify(body),
+    }),
+
+  changePassword: (body) =>
+    request("/auth/me/password", {
       method: "PATCH",
       body: JSON.stringify(body),
     }),

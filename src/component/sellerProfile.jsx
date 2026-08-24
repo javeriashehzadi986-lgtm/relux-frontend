@@ -82,11 +82,6 @@ function userToProfile(user) {
   };
 }
 
-const accountSettings = [
-  { id: "password", label: "Change Password", icon: Lock, to: "/forgot-password" },
-  { id: "privacy", label: "Privacy Settings", icon: Shield, to: "/privacy" },
-];
-
 const verificationDocs = [
   { id: "cnic-front", label: "CNIC Front", icon: IdCard },
   { id: "cnic-back", label: "CNIC Back", icon: IdCard },
@@ -120,7 +115,7 @@ function formatFieldValue(value) {
 
 function SellerProfileSection() {
   const navigate = useNavigate();
-  const { user, updateProfile, deactivateAccount } = useAuth();
+  const { user, updateProfile, deactivateAccount, changePassword } = useAuth();
   const profile = useMemo(() => userToProfile(user), [user]);
   const [isEditing, setIsEditing] = useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
@@ -132,6 +127,13 @@ function SellerProfileSection() {
   const [deleteError, setDeleteError] = useState("");
   const [deactivating, setDeactivating] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordSuccess, setPasswordSuccess] = useState("");
+  const [changingPassword, setChangingPassword] = useState(false);
   const [draft, setDraft] = useState(profile);
   const [verificationStatus, setVerificationStatus] = useState(() =>
     user?.status === "active" ? "approved" : "pending",
@@ -214,6 +216,33 @@ function SellerProfileSection() {
       setDeleteError(error.message || "Could not delete account");
     } finally {
       setDeleting(false);
+    }
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    setPasswordError("");
+    setPasswordSuccess("");
+    if (newPassword.length < 6) {
+      setPasswordError("New password must be at least 6 characters");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError("New passwords do not match");
+      return;
+    }
+    setChangingPassword(true);
+    try {
+      await changePassword({ currentPassword, newPassword });
+      setPasswordSuccess("Password updated. A confirmation email was sent.");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setShowPasswordForm(false);
+    } catch (error) {
+      setPasswordError(error.message || "Could not update password");
+    } finally {
+      setChangingPassword(false);
     }
   };
 
@@ -413,20 +442,73 @@ function SellerProfileSection() {
                   Account Settings
                 </h3>
                 <div className="seller-profile-account-settings-list">
-                  {accountSettings.map((item) => {
-                    const Icon = item.icon;
-                    return (
-                      <Link
-                        key={item.id}
-                        to={item.to}
-                        className="seller-profile-account-settings-row"
-                      >
-                        <Icon size={20} strokeWidth={1.75} />
-                        <span>{item.label}</span>
-                      </Link>
-                    );
-                  })}
+                  <button
+                    type="button"
+                    className="seller-profile-account-settings-row"
+                    onClick={() => {
+                      setShowPasswordForm((open) => !open);
+                      setPasswordError("");
+                      setPasswordSuccess("");
+                    }}
+                  >
+                    <Lock size={20} strokeWidth={1.75} />
+                    <span>Change Password</span>
+                  </button>
+                  <Link to="/privacy" className="seller-profile-account-settings-row">
+                    <Shield size={20} strokeWidth={1.75} />
+                    <span>Privacy Settings</span>
+                  </Link>
                 </div>
+                {passwordSuccess ? (
+                  <p className="seller-profile-save-success" role="status">
+                    {passwordSuccess}
+                  </p>
+                ) : null}
+                {showPasswordForm ? (
+                  <form className="seller-profile-password-form" onSubmit={handleChangePassword}>
+                    <Field>
+                      <FieldLabel htmlFor="seller-current-password">Current Password</FieldLabel>
+                      <Input
+                        id="seller-current-password"
+                        type="password"
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
+                        required
+                        autoComplete="current-password"
+                      />
+                    </Field>
+                    <Field>
+                      <FieldLabel htmlFor="seller-new-password">New Password</FieldLabel>
+                      <Input
+                        id="seller-new-password"
+                        type="password"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        required
+                        autoComplete="new-password"
+                      />
+                    </Field>
+                    <Field>
+                      <FieldLabel htmlFor="seller-confirm-password">Confirm New Password</FieldLabel>
+                      <Input
+                        id="seller-confirm-password"
+                        type="password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        required
+                        autoComplete="new-password"
+                      />
+                    </Field>
+                    {passwordError ? (
+                      <p className="seller-profile-save-error" role="alert">
+                        {passwordError}
+                      </p>
+                    ) : null}
+                    <Button type="submit" disabled={changingPassword || !currentPassword || !newPassword}>
+                      {changingPassword ? "Updating..." : "Update Password"}
+                    </Button>
+                  </form>
+                ) : null}
               </div>
             </section>
 

@@ -7,21 +7,34 @@ import {
   Card,
   CardContent,
 } from "@/components/ui/card";
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
+import api from "@/services/api";
 import "./forgotPassword.css";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
-    setSubmitted(true);
+    setError("");
+    setLoading(true);
+    try {
+      await api.forgotPassword({ email: email.trim() });
+      setSubmitted(true);
+    } catch (err) {
+      setError(err.message || "Could not send reset link. Try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleTryAgain = () => {
     setSubmitted(false);
     setEmail("");
+    setError("");
   };
 
   return (
@@ -52,7 +65,7 @@ const ForgotPassword = () => {
 
                   <form className="forgot-password-form" onSubmit={onSubmit}>
                     <FieldGroup className="forgot-password-field-group">
-                      <Field className="forgot-password-field">
+                      <Field data-invalid={!!error} className="forgot-password-field">
                         <FieldLabel
                           htmlFor="forgot-email"
                           className="forgot-password-field-label"
@@ -65,17 +78,22 @@ const ForgotPassword = () => {
                           className="forgot-password-input"
                           placeholder="e.g. name@example.com"
                           value={email}
-                          onChange={(e) => setEmail(e.target.value)}
+                          onChange={(e) => {
+                            setEmail(e.target.value);
+                            setError("");
+                          }}
                           required
                         />
+                        {error ? <FieldError>{error}</FieldError> : null}
                       </Field>
 
                       <Button
                         type="submit"
                         size="auth"
                         className="forgot-password-submit"
+                        disabled={loading || !email.trim()}
                       >
-                        Send Reset Link
+                        {loading ? "Sending..." : "Send Reset Link"}
                         <ArrowRight size={20} aria-hidden="true" />
                       </Button>
                     </FieldGroup>
@@ -88,8 +106,9 @@ const ForgotPassword = () => {
                   </div>
                   <h3 className="forgot-password-success-title">Check your inbox</h3>
                   <p className="forgot-password-success-text">
-                    We&apos;ve sent a password reset link to your email. Please check
-                    your spam folder if you don&apos;t see it.
+                    If an account exists for <strong>{email}</strong>, we sent a
+                    password reset link. Check spam if you don&apos;t see it. The
+                    link expires in 1 hour.
                   </p>
                   <Button
                     type="button"

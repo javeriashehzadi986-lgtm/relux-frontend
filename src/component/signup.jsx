@@ -4,7 +4,6 @@ import { Eye, EyeOff } from "lucide-react";
 import "./signup.css";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import GoogleIcon from "@/components/GoogleIcon";
 import {
   Card,
   CardContent,
@@ -21,11 +20,13 @@ import {
 } from "@/components/ui/field";
 import { useAuth } from "@/context/AuthContext";
 import { getPostAuthPath } from "@/utils/authRedirect";
+import GoogleSignInButton from "@/components/GoogleSignInButton";
+import "@/components/GoogleSignInButton.css";
 
 const Signup = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { register } = useAuth();
+  const { register, loginWithGoogle } = useAuth();
   const [submitted, setsubmitted] = useState(false);
   const [name, setname] = useState("");
   const [email, setemail] = useState("");
@@ -33,12 +34,14 @@ const Signup = () => {
   const [confirmPassword, setconfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const [nameerror, setnameerror] = useState("");
   const [emailerror, setemailerror] = useState("");
   const [passworderror, setpassworderror] = useState("");
   const [confirmError, setconfirmError] = useState("");
   const [submitError, setSubmitError] = useState("");
+  const [googleError, setGoogleError] = useState("");
 
   const onsubmitted = async (e) => {
     e.preventDefault();
@@ -84,6 +87,26 @@ const Signup = () => {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setGoogleError("");
+    setGoogleLoading(true);
+    try {
+      const data = await loginWithGoogle(credentialResponse.credential);
+      setsubmitted(true);
+      window.setTimeout(() => {
+        navigate(getPostAuthPath(data.user, location.state?.from), { replace: true });
+      }, 800);
+    } catch (error) {
+      if (error.code === "EMAIL_IN_USE") {
+        setGoogleError("This email is already registered. Log in with email/password or Google.");
+      } else {
+        setGoogleError(error.message || "Google sign-up failed");
+      }
+    } finally {
+      setGoogleLoading(false);
     }
   };
 
@@ -226,10 +249,12 @@ const Signup = () => {
               <div className="signup-bottom">
                 <FieldSeparator className="signup-divider">OR</FieldSeparator>
 
-                <Button type="button" variant="google" size="auth">
-                  <GoogleIcon />
-                  Continue with Google
-                </Button>
+                <GoogleSignInButton
+                  disabled={loading || googleLoading}
+                  onSuccess={handleGoogleSuccess}
+                  onError={(error) => setGoogleError(error.message || "Google sign-up failed")}
+                />
+                {googleError ? <FieldError>{googleError}</FieldError> : null}
 
                 <p className="signup-login-pivot">
                   Already have an account?

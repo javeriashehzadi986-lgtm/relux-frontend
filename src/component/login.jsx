@@ -9,7 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import GoogleIcon from "@/components/GoogleIcon";
 import {
   Field,
   FieldError,
@@ -19,6 +18,8 @@ import {
 } from "@/components/ui/field";
 import { useAuth } from "@/context/AuthContext";
 import { getPostAuthPath } from "@/utils/authRedirect";
+import GoogleSignInButton from "@/components/GoogleSignInButton";
+import "@/components/GoogleSignInButton.css";
 
 const LOGIN_IMAGE =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuBSnYGdanF0GYhv0vCxLzPcHcKTIzsyWHGMBv9agRIlHAXHLiLRIKpquL8JMbhuAoqsTDkdGDTELSWmxXQi4_Z96O5DbrRXRxkNqqEENu95HT90prKHhQ7l7pPvfa7VaHSJqm0L9KwHEwYoXXTx1dAlvGt1y2YFnpL7A59XleADEloG4hmHU5edTw9cFXygFzUj3uLLnksJ1SUiXDcbqG-jNDJeNpmPu6AnMJg3gH197CC5qNo_bu41kyK9cULkpYyk1BpAXK2g0zoT";
@@ -26,14 +27,16 @@ const LOGIN_IMAGE =
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login } = useAuth();
+  const { login, loginWithGoogle } = useAuth();
   const [email, setemail] = useState("");
   const [password, setpassword] = useState("");
   const [emailerror, setemailerror] = useState("");
   const [passworderror, setpassworderror] = useState("");
   const [submitError, setSubmitError] = useState("");
+  const [googleError, setGoogleError] = useState("");
   const [showDeletedHint, setShowDeletedHint] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const onsubmitted = async (e) => {
     e.preventDefault();
@@ -70,6 +73,25 @@ const Login = () => {
       );
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setGoogleError("");
+    setShowDeletedHint(false);
+    setGoogleLoading(true);
+    try {
+      const data = await loginWithGoogle(credentialResponse.credential);
+      navigate(getPostAuthPath(data.user, location.state?.from), { replace: true });
+    } catch (error) {
+      const message = error.message || "Google sign-in failed";
+      setGoogleError(message);
+      setShowDeletedHint(
+        error.code === "ACCOUNT_DELETED" ||
+          message.toLowerCase().includes("account was deleted"),
+      );
+    } finally {
+      setGoogleLoading(false);
     }
   };
 
@@ -168,10 +190,12 @@ const Login = () => {
 
             <FieldSeparator className="login-divider">OR</FieldSeparator>
 
-            <Button type="button" variant="google" size="auth">
-              <GoogleIcon />
-              Continue with Google
-            </Button>
+            <GoogleSignInButton
+              disabled={loading || googleLoading}
+              onSuccess={handleGoogleSuccess}
+              onError={(error) => setGoogleError(error.message || "Google sign-in failed")}
+            />
+            {googleError ? <FieldError>{googleError}</FieldError> : null}
 
             <p className="login-signup-pivot">
               Don&apos;t have an account?
