@@ -95,6 +95,15 @@ export const api = {
       body: JSON.stringify(body),
     }),
 
+  verifyEmail: ({ token }) =>
+    request(`/auth/verify-email?token=${encodeURIComponent(token)}`),
+
+  resendVerification: (body) =>
+    request("/auth/resend-verification", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+
   login: (body) =>
     request("/auth/login", {
       method: "POST",

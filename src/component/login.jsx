@@ -71,6 +71,9 @@ const Login = () => {
         error.code === "ACCOUNT_DELETED" ||
           message.toLowerCase().includes("account was deleted"),
       );
+      if (error.code === "EMAIL_NOT_VERIFIED") {
+        setemailerror("");
+      }
     } finally {
       setLoading(false);
     }

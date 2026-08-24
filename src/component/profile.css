@@ -372,6 +372,68 @@ body.dashboard-sidebar-closed .profile-main {
   text-decoration: none;
 }
 
+.profile-password-form {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.profile-password-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.profile-password-field {
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 0.5rem !important;
+}
+
+.profile-password-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+}
+
+.profile-forgot-link {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #31685d;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.profile-forgot-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  color: #31685d;
+}
+
+.profile-password-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.profile-save-success,
+.profile-save-error {
+  margin: 0.75rem 0 0;
+  font-size: 0.875rem;
+}
+
+.profile-save-success {
+  color: #31685d;
+}
+
+.profile-save-error {
+  color: #b42318;
+}
+
 .profile-card--danger {
   margin-top: 1.5rem;
   border: 1px solid rgba(186, 26, 26, 0.1);

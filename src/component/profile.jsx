@@ -433,9 +433,16 @@ const Profile = ({ section: sectionProp }) => {
 
               {showPasswordForm ? (
                 <form className="profile-password-form" onSubmit={handleChangePassword}>
-                  <FieldGroup>
-                    <Field>
-                      <FieldLabel htmlFor="profile-current-password">Current Password</FieldLabel>
+                  <FieldGroup className="profile-password-fields">
+                    <Field className="profile-password-field">
+                      <div className="profile-password-header">
+                        <FieldLabel htmlFor="profile-current-password">
+                          Current Password
+                        </FieldLabel>
+                        <Link to="/forgot-password" className="profile-forgot-link">
+                          Forgot Password?
+                        </Link>
+                      </div>
                       <Input
                         id="profile-current-password"
                         type="password"
@@ -445,7 +452,7 @@ const Profile = ({ section: sectionProp }) => {
                         autoComplete="current-password"
                       />
                     </Field>
-                    <Field>
+                    <Field className="profile-password-field">
                       <FieldLabel htmlFor="profile-new-password">New Password</FieldLabel>
                       <Input
                         id="profile-new-password"
@@ -453,17 +460,21 @@ const Profile = ({ section: sectionProp }) => {
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
                         required
+                        minLength={6}
                         autoComplete="new-password"
                       />
                     </Field>
-                    <Field>
-                      <FieldLabel htmlFor="profile-confirm-password">Confirm New Password</FieldLabel>
+                    <Field className="profile-password-field">
+                      <FieldLabel htmlFor="profile-confirm-password">
+                        Confirm New Password
+                      </FieldLabel>
                       <Input
                         id="profile-confirm-password"
                         type="password"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         required
+                        minLength={6}
                         autoComplete="new-password"
                       />
                     </Field>
@@ -473,9 +484,28 @@ const Profile = ({ section: sectionProp }) => {
                       {passwordError}
                     </p>
                   ) : null}
-                  <Button type="submit" disabled={changingPassword || !currentPassword || !newPassword}>
-                    {changingPassword ? "Updating..." : "Update Password"}
-                  </Button>
+                  <div className="profile-password-actions">
+                    <Button
+                      type="submit"
+                      disabled={changingPassword || !currentPassword || !newPassword || !confirmPassword}
+                    >
+                      {changingPassword ? "Updating..." : "Update Password"}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="profile-cancel-btn"
+                      onClick={() => {
+                        setShowPasswordForm(false);
+                        setCurrentPassword("");
+                        setNewPassword("");
+                        setConfirmPassword("");
+                        setPasswordError("");
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
                 </form>
               ) : null}
             </div>
@@ -635,8 +665,17 @@ const Profile = ({ section: sectionProp }) => {
               </CardDescription>
             </CardHeader>
             <CardContent className="profile-logout-modal-body">
-              <Field className="profile-delete-password-field">
-                <FieldLabel htmlFor="profile-delete-password">Current Password</FieldLabel>
+              <Field className="profile-delete-password-field profile-password-field">
+                <div className="profile-password-header">
+                  <FieldLabel htmlFor="profile-delete-password">Current Password</FieldLabel>
+                  <Link
+                    to="/forgot-password"
+                    className="profile-forgot-link"
+                    onClick={() => setShowDeleteConfirm(false)}
+                  >
+                    Forgot Password?
+                  </Link>
+                </div>
                 <Input
                   id="profile-delete-password"
                   type="password"

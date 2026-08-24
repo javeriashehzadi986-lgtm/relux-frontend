@@ -122,6 +122,10 @@
   gap: 0.75rem;
 }
 
+.seller-profile-account-settings-list + .seller-profile-account-settings-list {
+  margin-top: 0.75rem;
+}
+
 .seller-profile-account-settings-row {
   display: flex;
   align-items: center;

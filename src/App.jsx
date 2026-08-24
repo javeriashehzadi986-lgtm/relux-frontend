@@ -25,6 +25,7 @@ import NotificationDetail from "./component/notificationDetail";
 import SellerVerification from "./component/sellerVerification";
 import ForgotPassword from "./component/forgotPassword";
 import ResetPassword from "./component/resetPassword";
+import VerifyEmail from "./component/verifyEmail";
 import Profile from "./component/profile";
 import SellerProfile from "./component/sellerProfile";
 import SellerAddListing from "./component/sellerAddListing";
@@ -65,6 +66,7 @@ function App() {
     "/login",
     "/forgot-password",
     "/reset-password",
+    "/verify-email",
   ];
 
   const hideNavbar = hideNavbarRoutes.includes(location.pathname);
@@ -73,7 +75,8 @@ function App() {
     location.pathname === "/login" ||
     location.pathname === "/signup" ||
     location.pathname === "/forgot-password" ||
-    location.pathname === "/reset-password";
+    location.pathname === "/reset-password" ||
+    location.pathname === "/verify-email";
 
   const isMessagesPage = location.pathname.startsWith("/messages");
 
@@ -201,6 +204,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
 
           <Route path="/sustainability" element={<Sustainability />} />
           <Route path="/terms" element={<Terms />} />

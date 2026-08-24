@@ -21,6 +21,7 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import { getPostAuthPath } from "@/utils/authRedirect";
 import GoogleSignInButton from "@/components/GoogleSignInButton";
+import api from "@/services/api";
 import "@/components/GoogleSignInButton.css";
 
 const Signup = () => {
@@ -28,6 +29,9 @@ const Signup = () => {
   const location = useLocation();
   const { register, loginWithGoogle } = useAuth();
   const [submitted, setsubmitted] = useState(false);
+  const [pendingEmail, setPendingEmail] = useState("");
+  const [resendMessage, setResendMessage] = useState("");
+  const [resendLoading, setResendLoading] = useState(false);
   const [name, setname] = useState("");
   const [email, setemail] = useState("");
   const [password, setpassword] = useState("");
@@ -72,11 +76,18 @@ const Signup = () => {
 
     setLoading(true);
     try {
-      const user = await register({ name: name.trim(), email, password });
-      setsubmitted(true);
-      window.setTimeout(() => {
-        navigate(getPostAuthPath(user, location.state?.from), { replace: true });
-      }, 1200);
+      const data = await register({ name: name.trim(), email, password });
+      if (data.requiresVerification) {
+        setPendingEmail(data.email || email);
+        setsubmitted(true);
+        return;
+      }
+      if (data.user) {
+        setsubmitted(true);
+        window.setTimeout(() => {
+          navigate(getPostAuthPath(data.user, location.state?.from), { replace: true });
+        }, 1200);
+      }
     } catch (error) {
       if (error.code === "EMAIL_IN_USE") {
         setSubmitError(
@@ -110,6 +121,20 @@ const Signup = () => {
     }
   };
 
+  const handleResendVerification = async () => {
+    if (!pendingEmail) return;
+    setResendMessage("");
+    setResendLoading(true);
+    try {
+      const data = await api.resendVerification({ email: pendingEmail });
+      setResendMessage(data.message || "Verification email sent.");
+    } catch (error) {
+      setResendMessage(error.message || "Could not resend verification email.");
+    } finally {
+      setResendLoading(false);
+    }
+  };
+
   return (
     <div className="signup-page">
       <header className="signup-brand-header">
@@ -125,7 +150,40 @@ const Signup = () => {
         {submitted ? (
           <Card className="signup-card">
             <CardContent className="signup-card-content">
-              <p className="signup-success">Account Created</p>
+              <p className="signup-success">
+                {pendingEmail
+                  ? "Check your email to verify your account"
+                  : "Account Created"}
+              </p>
+              {pendingEmail ? (
+                <>
+                  <p className="signup-description" style={{ marginTop: "1rem", textAlign: "center" }}>
+                    We sent a verification link to <strong>{pendingEmail}</strong>. Click the
+                    link in that email to activate your account. The link expires in 24 hours.
+                  </p>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="signup-submit-btn"
+                    style={{ marginTop: "1rem" }}
+                    disabled={resendLoading}
+                    onClick={handleResendVerification}
+                  >
+                    {resendLoading ? "Sending..." : "Resend verification email"}
+                  </Button>
+                  {resendMessage ? (
+                    <p className="signup-description" style={{ marginTop: "0.75rem", textAlign: "center" }}>
+                      {resendMessage}
+                    </p>
+                  ) : null}
+                  <p className="signup-login-pivot" style={{ marginTop: "1.25rem" }}>
+                    Already verified?
+                    <Link to="/login" state={location.state}>
+                      Login
+                    </Link>
+                  </p>
+                </>
+              ) : null}
             </CardContent>
           </Card>
         ) : (

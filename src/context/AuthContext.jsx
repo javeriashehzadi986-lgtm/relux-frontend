@@ -57,11 +57,21 @@ export function AuthProvider({ children }) {
 
   const register = useCallback(async (payload) => {
     const data = await api.register(payload);
-    api.setToken(data.token);
-    api.setStoredUser(data.user);
-    setUser(data.user);
+    if (data.token && data.user) {
+      api.setToken(data.token);
+      api.setStoredUser(data.user);
+      setUser(data.user);
+      await syncLocalWishlistToServer(api).catch(() => {});
+    }
+    return data;
+  }, []);
+
+  const loginWithToken = useCallback(async (token, userData) => {
+    api.setToken(token);
+    api.setStoredUser(userData);
+    setUser(userData);
     await syncLocalWishlistToServer(api).catch(() => {});
-    return data.user;
+    return userData;
   }, []);
 
   const refreshUser = useCallback(async () => {
@@ -130,6 +140,7 @@ export function AuthProvider({ children }) {
       isSellerActive: user?.role === "seller" && user?.status === "active",
       login,
       loginWithGoogle,
+      loginWithToken,
       register,
       refreshUser,
       updateProfile,
@@ -140,7 +151,7 @@ export function AuthProvider({ children }) {
       submitSellerVerification,
       logout,
     }),
-    [user, loading, login, loginWithGoogle, register, refreshUser, updateProfile, updateEmail, changePassword, deactivateAccount, applyAsSeller, submitSellerVerification, logout],
+    [user, loading, login, loginWithGoogle, loginWithToken, register, refreshUser, updateProfile, updateEmail, changePassword, deactivateAccount, applyAsSeller, submitSellerVerification, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

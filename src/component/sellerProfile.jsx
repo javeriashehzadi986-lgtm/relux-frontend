@@ -454,10 +454,6 @@ function SellerProfileSection() {
                     <Lock size={20} strokeWidth={1.75} />
                     <span>Change Password</span>
                   </button>
-                  <Link to="/privacy" className="seller-profile-account-settings-row">
-                    <Shield size={20} strokeWidth={1.75} />
-                    <span>Privacy Settings</span>
-                  </Link>
                 </div>
                 {passwordSuccess ? (
                   <p className="seller-profile-save-success" role="status">
@@ -465,50 +461,90 @@ function SellerProfileSection() {
                   </p>
                 ) : null}
                 {showPasswordForm ? (
-                  <form className="seller-profile-password-form" onSubmit={handleChangePassword}>
-                    <Field>
-                      <FieldLabel htmlFor="seller-current-password">Current Password</FieldLabel>
-                      <Input
-                        id="seller-current-password"
-                        type="password"
-                        value={currentPassword}
-                        onChange={(e) => setCurrentPassword(e.target.value)}
-                        required
-                        autoComplete="current-password"
-                      />
-                    </Field>
-                    <Field>
-                      <FieldLabel htmlFor="seller-new-password">New Password</FieldLabel>
-                      <Input
-                        id="seller-new-password"
-                        type="password"
-                        value={newPassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
-                        required
-                        autoComplete="new-password"
-                      />
-                    </Field>
-                    <Field>
-                      <FieldLabel htmlFor="seller-confirm-password">Confirm New Password</FieldLabel>
-                      <Input
-                        id="seller-confirm-password"
-                        type="password"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        required
-                        autoComplete="new-password"
-                      />
-                    </Field>
+                  <form className="seller-profile-password-form profile-password-form" onSubmit={handleChangePassword}>
+                    <FieldGroup className="profile-password-fields">
+                      <Field className="profile-password-field">
+                        <div className="profile-password-header">
+                          <FieldLabel htmlFor="seller-current-password">
+                            Current Password
+                          </FieldLabel>
+                          <Link to="/forgot-password" className="profile-forgot-link">
+                            Forgot Password?
+                          </Link>
+                        </div>
+                        <Input
+                          id="seller-current-password"
+                          type="password"
+                          value={currentPassword}
+                          onChange={(e) => setCurrentPassword(e.target.value)}
+                          required
+                          autoComplete="current-password"
+                        />
+                      </Field>
+                      <Field className="profile-password-field">
+                        <FieldLabel htmlFor="seller-new-password">New Password</FieldLabel>
+                        <Input
+                          id="seller-new-password"
+                          type="password"
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          required
+                          minLength={6}
+                          autoComplete="new-password"
+                        />
+                      </Field>
+                      <Field className="profile-password-field">
+                        <FieldLabel htmlFor="seller-confirm-password">
+                          Confirm New Password
+                        </FieldLabel>
+                        <Input
+                          id="seller-confirm-password"
+                          type="password"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          required
+                          minLength={6}
+                          autoComplete="new-password"
+                        />
+                      </Field>
+                    </FieldGroup>
                     {passwordError ? (
                       <p className="seller-profile-save-error" role="alert">
                         {passwordError}
                       </p>
                     ) : null}
-                    <Button type="submit" disabled={changingPassword || !currentPassword || !newPassword}>
-                      {changingPassword ? "Updating..." : "Update Password"}
-                    </Button>
+                    <div className="profile-password-actions">
+                      <Button
+                        type="submit"
+                        disabled={
+                          changingPassword || !currentPassword || !newPassword || !confirmPassword
+                        }
+                      >
+                        {changingPassword ? "Updating..." : "Update Password"}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        className="profile-cancel-btn"
+                        onClick={() => {
+                          setShowPasswordForm(false);
+                          setCurrentPassword("");
+                          setNewPassword("");
+                          setConfirmPassword("");
+                          setPasswordError("");
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
                   </form>
                 ) : null}
+                <div className="seller-profile-account-settings-list">
+                  <Link to="/privacy" className="seller-profile-account-settings-row">
+                    <Shield size={20} strokeWidth={1.75} />
+                    <span>Privacy Settings</span>
+                  </Link>
+                </div>
               </div>
             </section>
 
@@ -728,8 +764,17 @@ function SellerProfileSection() {
               </CardDescription>
             </CardHeader>
             <CardContent className="profile-logout-modal-body">
-              <Field className="profile-delete-password-field">
-                <FieldLabel htmlFor="seller-deactivate-password">Current Password</FieldLabel>
+              <Field className="profile-delete-password-field profile-password-field">
+                <div className="profile-password-header">
+                  <FieldLabel htmlFor="seller-deactivate-password">Current Password</FieldLabel>
+                  <Link
+                    to="/forgot-password"
+                    className="profile-forgot-link"
+                    onClick={() => setShowDeactivateConfirm(false)}
+                  >
+                    Forgot Password?
+                  </Link>
+                </div>
                 <Input
                   id="seller-deactivate-password"
                   type="password"
@@ -792,8 +837,17 @@ function SellerProfileSection() {
               </CardDescription>
             </CardHeader>
             <CardContent className="profile-logout-modal-body">
-              <Field className="profile-delete-password-field">
-                <FieldLabel htmlFor="seller-delete-password">Current Password</FieldLabel>
+              <Field className="profile-delete-password-field profile-password-field">
+                <div className="profile-password-header">
+                  <FieldLabel htmlFor="seller-delete-password">Current Password</FieldLabel>
+                  <Link
+                    to="/forgot-password"
+                    className="profile-forgot-link"
+                    onClick={() => setShowDeleteConfirm(false)}
+                  >
+                    Forgot Password?
+                  </Link>
+                </div>
                 <Input
                   id="seller-delete-password"
                   type="password"
