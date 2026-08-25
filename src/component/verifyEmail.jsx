@@ -8,6 +8,8 @@ import { useAuth } from "@/context/AuthContext";
 import { getPostAuthPath } from "@/utils/authRedirect";
 import "./forgotPassword.css";
 
+const VERIFY_TIMEOUT_MS = 30000;
+
 const VerifyEmail = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -24,29 +26,48 @@ const VerifyEmail = () => {
       return;
     }
 
-    let active = true;
+    let cancelled = false;
+
+    const timeoutId = window.setTimeout(() => {
+      if (cancelled) return;
+      setStatus("error");
+      setMessage(
+        "Verification is taking too long. Make sure the backend is running (npm start in the Backend folder), then try the link again.",
+      );
+    }, VERIFY_TIMEOUT_MS);
 
     api
       .verifyEmail({ token })
       .then(async (data) => {
-        if (!active) return;
+        if (cancelled) return;
+
+        window.clearTimeout(timeoutId);
+
         if (data.token && data.user) {
-          await loginWithToken(data.token, data.user);
+          // Do not block the success UI on wishlist sync.
+          loginWithToken(data.token, data.user).catch(() => {});
         }
+
         setStatus("success");
         setMessage(data.message || "Your account is now active.");
+
         window.setTimeout(() => {
-          navigate(getPostAuthPath(data.user), { replace: true });
+          if (!cancelled) {
+            navigate(getPostAuthPath(data.user), { replace: true });
+          }
         }, 1500);
       })
       .catch((error) => {
-        if (!active) return;
+        if (cancelled) return;
+
+        window.clearTimeout(timeoutId);
         setStatus("error");
         setMessage(error.message || "Could not verify your email.");
       });
 
     return () => {
-      active = false;
+      cancelled = true;
+      window.clearTimeout(timeoutId);
     };
   }, [token, navigate, loginWithToken]);
 
