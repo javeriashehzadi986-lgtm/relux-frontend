@@ -96,7 +96,12 @@ export function AuthProvider({ children }) {
   }, []);
 
   const changePassword = useCallback(async (payload) => {
-    return api.changePassword(payload);
+    const data = await api.changePassword(payload);
+    if (data?.user) {
+      setUser(data.user);
+      api.setStoredUser(data.user);
+    }
+    return data;
   }, []);
 
   const deactivateAccount = useCallback(async (payload) => {

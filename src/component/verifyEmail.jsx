@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowRight, Check, MailCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,8 @@ const VerifyEmail = () => {
   const navigate = useNavigate();
   const { loginWithToken } = useAuth();
   const token = useMemo(() => String(searchParams.get("token") ?? "").trim(), [searchParams]);
+  const loginWithTokenRef = useRef(loginWithToken);
+  loginWithTokenRef.current = loginWithToken;
 
   const [status, setStatus] = useState("loading");
   const [message, setMessage] = useState("");
@@ -27,12 +29,13 @@ const VerifyEmail = () => {
     }
 
     let cancelled = false;
+    const controller = new AbortController();
 
     const timeoutId = window.setTimeout(() => {
       if (cancelled) return;
       setStatus("error");
       setMessage(
-        "Verification is taking too long. Make sure the backend is running (npm start in the Backend folder), then try the link again.",
+        "Verification is taking too long. Make sure the backend is running (npm start in the Backend folder), then open the latest verification email and try again.",
       );
     }, VERIFY_TIMEOUT_MS);
 
@@ -44,8 +47,11 @@ const VerifyEmail = () => {
         window.clearTimeout(timeoutId);
 
         if (data.token && data.user) {
-          // Do not block the success UI on wishlist sync.
-          loginWithToken(data.token, data.user).catch(() => {});
+          try {
+            await loginWithTokenRef.current(data.token, data.user);
+          } catch {
+            // Account is verified even if local session sync fails.
+          }
         }
 
         setStatus("success");
@@ -67,9 +73,10 @@ const VerifyEmail = () => {
 
     return () => {
       cancelled = true;
+      controller.abort();
       window.clearTimeout(timeoutId);
     };
-  }, [token, navigate, loginWithToken]);
+  }, [token, navigate]);
 
   return (
     <div className="forgot-password-page">

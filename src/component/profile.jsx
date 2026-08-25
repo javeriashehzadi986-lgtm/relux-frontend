@@ -167,11 +167,20 @@ const Profile = ({ section: sectionProp }) => {
     navigate("/login");
   };
 
+  const hasPassword =
+    user?.authProvider === "google"
+      ? user?.hasPassword === true
+      : Boolean(user?.hasPassword);
+
   const handleDeleteConfirm = async () => {
     setDeleteError("");
     setDeleting(true);
     try {
-      await deactivateAccount({ password: deletePassword });
+      if (hasPassword) {
+        await deactivateAccount({ password: deletePassword });
+      } else {
+        await deactivateAccount({ confirm: true });
+      }
       setShowDeleteConfirm(false);
       setDeletePassword("");
       navigate("/login", { replace: true });
@@ -204,8 +213,15 @@ const Profile = ({ section: sectionProp }) => {
 
     setChangingPassword(true);
     try {
-      await changePassword({ currentPassword, newPassword });
-      setPasswordSuccess("Password updated. A confirmation email was sent.");
+      const payload = hasPassword
+        ? { currentPassword, newPassword }
+        : { newPassword };
+      await changePassword(payload);
+      setPasswordSuccess(
+        hasPassword
+          ? "Password updated. A confirmation email was sent."
+          : "Password set. You can now also log in with email and password.",
+      );
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
@@ -421,7 +437,7 @@ const Profile = ({ section: sectionProp }) => {
                   }}
                 >
                   <Lock size={18} aria-hidden="true" />
-                  Change Password
+                  {hasPassword ? "Change Password" : "Set Password"}
                 </Button>
               </div>
 
@@ -434,24 +450,31 @@ const Profile = ({ section: sectionProp }) => {
               {showPasswordForm ? (
                 <form className="profile-password-form" onSubmit={handleChangePassword}>
                   <FieldGroup className="profile-password-fields">
-                    <Field className="profile-password-field">
-                      <div className="profile-password-header">
-                        <FieldLabel htmlFor="profile-current-password">
-                          Current Password
-                        </FieldLabel>
-                        <Link to="/forgot-password" className="profile-forgot-link">
-                          Forgot Password?
-                        </Link>
-                      </div>
-                      <Input
-                        id="profile-current-password"
-                        type="password"
-                        value={currentPassword}
-                        onChange={(e) => setCurrentPassword(e.target.value)}
-                        required
-                        autoComplete="current-password"
-                      />
-                    </Field>
+                    {hasPassword ? (
+                      <Field className="profile-password-field">
+                        <div className="profile-password-header">
+                          <FieldLabel htmlFor="profile-current-password">
+                            Current Password
+                          </FieldLabel>
+                          <Link to="/forgot-password" className="profile-forgot-link">
+                            Forgot Password?
+                          </Link>
+                        </div>
+                        <Input
+                          id="profile-current-password"
+                          type="password"
+                          value={currentPassword}
+                          onChange={(e) => setCurrentPassword(e.target.value)}
+                          required
+                          autoComplete="current-password"
+                        />
+                      </Field>
+                    ) : (
+                      <p className="profile-password-hint">
+                        You signed in with Google. Set a Relux Hub password to also log in
+                        with email, or to confirm sensitive actions.
+                      </p>
+                    )}
                     <Field className="profile-password-field">
                       <FieldLabel htmlFor="profile-new-password">New Password</FieldLabel>
                       <Input
@@ -487,9 +510,18 @@ const Profile = ({ section: sectionProp }) => {
                   <div className="profile-password-actions">
                     <Button
                       type="submit"
-                      disabled={changingPassword || !currentPassword || !newPassword || !confirmPassword}
+                      disabled={
+                        changingPassword ||
+                        !newPassword ||
+                        !confirmPassword ||
+                        (hasPassword && !currentPassword)
+                      }
                     >
-                      {changingPassword ? "Updating..." : "Update Password"}
+                      {changingPassword
+                        ? "Saving..."
+                        : hasPassword
+                          ? "Update Password"
+                          : "Set Password"}
                     </Button>
                     <Button
                       type="button"
@@ -660,31 +692,34 @@ const Profile = ({ section: sectionProp }) => {
                 Delete account permanently?
               </CardTitle>
               <CardDescription className="profile-logout-modal-description">
-                This action cannot be undone. Enter your password to permanently deactivate
-                your buyer account.
+                {hasPassword
+                  ? "This action cannot be undone. Enter your password to permanently deactivate your buyer account."
+                  : "This action cannot be undone. You signed in with Google, so confirm below to delete your account — no Relux password needed."}
               </CardDescription>
             </CardHeader>
             <CardContent className="profile-logout-modal-body">
-              <Field className="profile-delete-password-field profile-password-field">
-                <div className="profile-password-header">
-                  <FieldLabel htmlFor="profile-delete-password">Current Password</FieldLabel>
-                  <Link
-                    to="/forgot-password"
-                    className="profile-forgot-link"
-                    onClick={() => setShowDeleteConfirm(false)}
-                  >
-                    Forgot Password?
-                  </Link>
-                </div>
-                <Input
-                  id="profile-delete-password"
-                  type="password"
-                  value={deletePassword}
-                  onChange={(event) => setDeletePassword(event.target.value)}
-                  autoComplete="current-password"
-                  required
-                />
-              </Field>
+              {hasPassword ? (
+                <Field className="profile-delete-password-field profile-password-field">
+                  <div className="profile-password-header">
+                    <FieldLabel htmlFor="profile-delete-password">Current Password</FieldLabel>
+                    <Link
+                      to="/forgot-password"
+                      className="profile-forgot-link"
+                      onClick={() => setShowDeleteConfirm(false)}
+                    >
+                      Forgot Password?
+                    </Link>
+                  </div>
+                  <Input
+                    id="profile-delete-password"
+                    type="password"
+                    value={deletePassword}
+                    onChange={(event) => setDeletePassword(event.target.value)}
+                    autoComplete="current-password"
+                    required
+                  />
+                </Field>
+              ) : null}
               {deleteError ? (
                 <p className="profile-delete-error" role="alert">
                   {deleteError}
@@ -703,7 +738,7 @@ const Profile = ({ section: sectionProp }) => {
               <Button
                 type="button"
                 className="profile-delete-confirm-btn"
-                disabled={deleting || !deletePassword}
+                disabled={deleting || (hasPassword && !deletePassword)}
                 onClick={handleDeleteConfirm}
               >
                 {deleting ? "Deleting..." : "Delete Account"}

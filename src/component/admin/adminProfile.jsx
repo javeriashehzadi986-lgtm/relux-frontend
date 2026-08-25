@@ -113,6 +113,10 @@ const AdminProfile = () => {
   const [deactivating, setDeactivating] = useState(false);
 
   const initials = useMemo(() => getInitials(user?.name ?? ""), [user?.name]);
+  const hasPassword =
+    user?.authProvider === "google"
+      ? user?.hasPassword === true
+      : Boolean(user?.hasPassword);
 
   useEffect(() => {
     refreshUser().catch(() => {});
@@ -223,7 +227,10 @@ const AdminProfile = () => {
     }
     setPasswordSaving(true);
     try {
-      await changePassword({ currentPassword, newPassword });
+      const payload = hasPassword
+        ? { currentPassword, newPassword }
+        : { newPassword };
+      await changePassword(payload);
       setShowPasswordDialog(false);
       setCurrentPassword("");
       setNewPassword("");
@@ -245,7 +252,11 @@ const AdminProfile = () => {
     setDeactivateError("");
     setDeactivating(true);
     try {
-      await deactivateAccount({ password: deactivatePassword });
+      if (hasPassword) {
+        await deactivateAccount({ password: deactivatePassword });
+      } else {
+        await deactivateAccount({ confirm: true });
+      }
       setShowDeactivateConfirm(false);
       setDeactivatePassword("");
       navigate("/login", { replace: true });
@@ -437,7 +448,7 @@ const AdminProfile = () => {
                       setShowPasswordDialog(true);
                     }}
                   >
-                    Change Password
+                    {hasPassword ? "Change Password" : "Set Password"}
                     <ChevronRight size={16} />
                   </Button>
                 </div>
@@ -573,25 +584,33 @@ const AdminProfile = () => {
         <DialogContent className="profile-logout-modal" showCloseButton={false}>
           <form onSubmit={handlePasswordSubmit}>
             <DialogHeader className="profile-logout-modal-header">
-              <DialogTitle className="profile-logout-modal-title">Change password</DialogTitle>
+              <DialogTitle className="profile-logout-modal-title">
+                {hasPassword ? "Change password" : "Set password"}
+              </DialogTitle>
               <DialogDescription className="profile-logout-modal-description">
-                Enter your current password and choose a new one. A confirmation email will be sent.
+                {hasPassword
+                  ? "Enter your current password and choose a new one. A confirmation email will be sent."
+                  : "You signed in with Google. Set a Relux password to also use email login."}
               </DialogDescription>
             </DialogHeader>
             <div className="admin-profile-dialog-fields">
-              <label className="admin-profile-form-label" htmlFor="admin-current-password">
-                Current Password
-              </label>
-              <Input
-                id="admin-current-password"
-                type="password"
-                value={currentPassword}
-                onChange={(event) => setCurrentPassword(event.target.value)}
-                required
-                autoComplete="current-password"
-              />
+              {hasPassword ? (
+                <>
+                  <label className="admin-profile-form-label" htmlFor="admin-current-password">
+                    Current Password
+                  </label>
+                  <Input
+                    id="admin-current-password"
+                    type="password"
+                    value={currentPassword}
+                    onChange={(event) => setCurrentPassword(event.target.value)}
+                    required
+                    autoComplete="current-password"
+                  />
+                </>
+              ) : null}
               <label className="admin-profile-form-label" htmlFor="admin-new-password">
-                New Password
+                {hasPassword ? "New Password" : "Password"}
               </label>
               <Input
                 id="admin-new-password"
@@ -602,7 +621,7 @@ const AdminProfile = () => {
                 autoComplete="new-password"
               />
               <label className="admin-profile-form-label" htmlFor="admin-confirm-password">
-                Confirm New Password
+                Confirm Password
               </label>
               <Input
                 id="admin-confirm-password"
@@ -628,7 +647,7 @@ const AdminProfile = () => {
                 Cancel
               </Button>
               <Button type="submit" className="profile-logout-confirm-btn" disabled={passwordSaving}>
-                {passwordSaving ? "Updating..." : "Update Password"}
+                {passwordSaving ? "Saving..." : hasPassword ? "Update Password" : "Set Password"}
               </Button>
             </DialogFooter>
           </form>
@@ -668,20 +687,26 @@ const AdminProfile = () => {
               Deactivate account?
             </DialogTitle>
             <DialogDescription className="profile-logout-modal-description">
-              This will suspend your admin account. Enter your password to confirm.
+              {hasPassword
+                ? "This will suspend your admin account. Enter your password to confirm."
+                : "This will suspend your admin account. Confirm below — no Relux password needed for Google accounts."}
             </DialogDescription>
           </DialogHeader>
           <div className="admin-profile-dialog-fields">
-            <label className="admin-profile-form-label" htmlFor="admin-deactivate-password">
-              Current Password
-            </label>
-            <Input
-              id="admin-deactivate-password"
-              type="password"
-              value={deactivatePassword}
-              onChange={(event) => setDeactivatePassword(event.target.value)}
-              required
-            />
+            {hasPassword ? (
+              <>
+                <label className="admin-profile-form-label" htmlFor="admin-deactivate-password">
+                  Current Password
+                </label>
+                <Input
+                  id="admin-deactivate-password"
+                  type="password"
+                  value={deactivatePassword}
+                  onChange={(event) => setDeactivatePassword(event.target.value)}
+                  required
+                />
+              </>
+            ) : null}
             {deactivateError ? (
               <p className="admin-profile-message admin-profile-message--error" role="alert">
                 {deactivateError}
@@ -700,7 +725,7 @@ const AdminProfile = () => {
             <Button
               type="button"
               className="profile-delete-confirm-btn"
-              disabled={deactivating || !deactivatePassword}
+              disabled={deactivating || (hasPassword && !deactivatePassword)}
               onClick={handleDeactivateConfirm}
             >
               {deactivating ? "Deactivating..." : "Deactivate"}

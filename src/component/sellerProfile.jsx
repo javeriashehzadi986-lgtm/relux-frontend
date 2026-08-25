@@ -188,12 +188,20 @@ function SellerProfileSection() {
   const visibleReviews = showAllReviews ? reviews : reviews.slice(0, 2);
   const averageRating = Number(stats?.average || 0);
   const reviewCount = Number(stats?.count || 0);
+  const hasPassword =
+    user?.authProvider === "google"
+      ? user?.hasPassword === true
+      : Boolean(user?.hasPassword);
 
   const handleAccountDeactivate = async () => {
     setDeactivateError("");
     setDeactivating(true);
     try {
-      await deactivateAccount({ password: deactivatePassword });
+      if (hasPassword) {
+        await deactivateAccount({ password: deactivatePassword });
+      } else {
+        await deactivateAccount({ confirm: true });
+      }
       setShowDeactivateConfirm(false);
       setDeactivatePassword("");
       navigate("/login", { replace: true });
@@ -208,7 +216,11 @@ function SellerProfileSection() {
     setDeleteError("");
     setDeleting(true);
     try {
-      await deactivateAccount({ password: deletePassword });
+      if (hasPassword) {
+        await deactivateAccount({ password: deletePassword });
+      } else {
+        await deactivateAccount({ confirm: true });
+      }
       setShowDeleteConfirm(false);
       setDeletePassword("");
       navigate("/login", { replace: true });
@@ -233,8 +245,15 @@ function SellerProfileSection() {
     }
     setChangingPassword(true);
     try {
-      await changePassword({ currentPassword, newPassword });
-      setPasswordSuccess("Password updated. A confirmation email was sent.");
+      const payload = hasPassword
+        ? { currentPassword, newPassword }
+        : { newPassword };
+      await changePassword(payload);
+      setPasswordSuccess(
+        hasPassword
+          ? "Password updated. A confirmation email was sent."
+          : "Password set. You can now also log in with email and password.",
+      );
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
@@ -452,7 +471,7 @@ function SellerProfileSection() {
                     }}
                   >
                     <Lock size={20} strokeWidth={1.75} />
-                    <span>Change Password</span>
+                    <span>{hasPassword ? "Change Password" : "Set Password"}</span>
                   </button>
                 </div>
                 {passwordSuccess ? (
@@ -463,26 +482,35 @@ function SellerProfileSection() {
                 {showPasswordForm ? (
                   <form className="seller-profile-password-form profile-password-form" onSubmit={handleChangePassword}>
                     <FieldGroup className="profile-password-fields">
+                      {hasPassword ? (
+                        <Field className="profile-password-field">
+                          <div className="profile-password-header">
+                            <FieldLabel htmlFor="seller-current-password">
+                              Current Password
+                            </FieldLabel>
+                            <Link to="/forgot-password" className="profile-forgot-link">
+                              Forgot Password?
+                            </Link>
+                          </div>
+                          <Input
+                            id="seller-current-password"
+                            type="password"
+                            value={currentPassword}
+                            onChange={(e) => setCurrentPassword(e.target.value)}
+                            required
+                            autoComplete="current-password"
+                          />
+                        </Field>
+                      ) : (
+                        <p className="profile-password-hint">
+                          You signed in with Google. Set a Relux Hub password to also log in
+                          with email, or to confirm sensitive actions.
+                        </p>
+                      )}
                       <Field className="profile-password-field">
-                        <div className="profile-password-header">
-                          <FieldLabel htmlFor="seller-current-password">
-                            Current Password
-                          </FieldLabel>
-                          <Link to="/forgot-password" className="profile-forgot-link">
-                            Forgot Password?
-                          </Link>
-                        </div>
-                        <Input
-                          id="seller-current-password"
-                          type="password"
-                          value={currentPassword}
-                          onChange={(e) => setCurrentPassword(e.target.value)}
-                          required
-                          autoComplete="current-password"
-                        />
-                      </Field>
-                      <Field className="profile-password-field">
-                        <FieldLabel htmlFor="seller-new-password">New Password</FieldLabel>
+                        <FieldLabel htmlFor="seller-new-password">
+                          {hasPassword ? "New Password" : "Password"}
+                        </FieldLabel>
                         <Input
                           id="seller-new-password"
                           type="password"
@@ -495,7 +523,7 @@ function SellerProfileSection() {
                       </Field>
                       <Field className="profile-password-field">
                         <FieldLabel htmlFor="seller-confirm-password">
-                          Confirm New Password
+                          Confirm Password
                         </FieldLabel>
                         <Input
                           id="seller-confirm-password"
@@ -517,10 +545,17 @@ function SellerProfileSection() {
                       <Button
                         type="submit"
                         disabled={
-                          changingPassword || !currentPassword || !newPassword || !confirmPassword
+                          changingPassword ||
+                          !newPassword ||
+                          !confirmPassword ||
+                          (hasPassword && !currentPassword)
                         }
                       >
-                        {changingPassword ? "Updating..." : "Update Password"}
+                        {changingPassword
+                          ? "Saving..."
+                          : hasPassword
+                            ? "Update Password"
+                            : "Set Password"}
                       </Button>
                       <Button
                         type="button"
@@ -759,31 +794,34 @@ function SellerProfileSection() {
                 Deactivate account?
               </CardTitle>
               <CardDescription className="profile-logout-modal-description">
-                Your seller account will be deactivated and your active listings will be
-                hidden. Enter your password to confirm.
+                {hasPassword
+                  ? "Your seller account will be deactivated and your active listings will be hidden. Enter your password to confirm."
+                  : "Your seller account will be deactivated and your active listings will be hidden. Confirm below — no Relux password needed for Google accounts."}
               </CardDescription>
             </CardHeader>
             <CardContent className="profile-logout-modal-body">
-              <Field className="profile-delete-password-field profile-password-field">
-                <div className="profile-password-header">
-                  <FieldLabel htmlFor="seller-deactivate-password">Current Password</FieldLabel>
-                  <Link
-                    to="/forgot-password"
-                    className="profile-forgot-link"
-                    onClick={() => setShowDeactivateConfirm(false)}
-                  >
-                    Forgot Password?
-                  </Link>
-                </div>
-                <Input
-                  id="seller-deactivate-password"
-                  type="password"
-                  value={deactivatePassword}
-                  onChange={(event) => setDeactivatePassword(event.target.value)}
-                  autoComplete="current-password"
-                  required
-                />
-              </Field>
+              {hasPassword ? (
+                <Field className="profile-delete-password-field profile-password-field">
+                  <div className="profile-password-header">
+                    <FieldLabel htmlFor="seller-deactivate-password">Current Password</FieldLabel>
+                    <Link
+                      to="/forgot-password"
+                      className="profile-forgot-link"
+                      onClick={() => setShowDeactivateConfirm(false)}
+                    >
+                      Forgot Password?
+                    </Link>
+                  </div>
+                  <Input
+                    id="seller-deactivate-password"
+                    type="password"
+                    value={deactivatePassword}
+                    onChange={(event) => setDeactivatePassword(event.target.value)}
+                    autoComplete="current-password"
+                    required
+                  />
+                </Field>
+              ) : null}
               {deactivateError ? (
                 <p className="profile-delete-error" role="alert">
                   {deactivateError}
@@ -802,7 +840,7 @@ function SellerProfileSection() {
               <Button
                 type="button"
                 className="profile-logout-confirm-btn"
-                disabled={deactivating || !deactivatePassword}
+                disabled={deactivating || (hasPassword && !deactivatePassword)}
                 onClick={handleAccountDeactivate}
               >
                 {deactivating ? "Deactivating..." : "Deactivate"}
@@ -832,31 +870,34 @@ function SellerProfileSection() {
                 Delete account permanently?
               </CardTitle>
               <CardDescription className="profile-logout-modal-description">
-                This action cannot be undone. Your seller account and active listings will
-                be removed. Enter your password to confirm.
+                {hasPassword
+                  ? "This action cannot be undone. Your seller account and active listings will be removed. Enter your password to confirm."
+                  : "This action cannot be undone. Confirm below to delete — no Relux password needed for Google accounts."}
               </CardDescription>
             </CardHeader>
             <CardContent className="profile-logout-modal-body">
-              <Field className="profile-delete-password-field profile-password-field">
-                <div className="profile-password-header">
-                  <FieldLabel htmlFor="seller-delete-password">Current Password</FieldLabel>
-                  <Link
-                    to="/forgot-password"
-                    className="profile-forgot-link"
-                    onClick={() => setShowDeleteConfirm(false)}
-                  >
-                    Forgot Password?
-                  </Link>
-                </div>
-                <Input
-                  id="seller-delete-password"
-                  type="password"
-                  value={deletePassword}
-                  onChange={(event) => setDeletePassword(event.target.value)}
-                  autoComplete="current-password"
-                  required
-                />
-              </Field>
+              {hasPassword ? (
+                <Field className="profile-delete-password-field profile-password-field">
+                  <div className="profile-password-header">
+                    <FieldLabel htmlFor="seller-delete-password">Current Password</FieldLabel>
+                    <Link
+                      to="/forgot-password"
+                      className="profile-forgot-link"
+                      onClick={() => setShowDeleteConfirm(false)}
+                    >
+                      Forgot Password?
+                    </Link>
+                  </div>
+                  <Input
+                    id="seller-delete-password"
+                    type="password"
+                    value={deletePassword}
+                    onChange={(event) => setDeletePassword(event.target.value)}
+                    autoComplete="current-password"
+                    required
+                  />
+                </Field>
+              ) : null}
               {deleteError ? (
                 <p className="profile-delete-error" role="alert">
                   {deleteError}
@@ -875,7 +916,7 @@ function SellerProfileSection() {
               <Button
                 type="button"
                 className="seller-profile-delete-confirm-btn"
-                disabled={deleting || !deletePassword}
+                disabled={deleting || (hasPassword && !deletePassword)}
                 onClick={handleAccountDelete}
               >
                 {deleting ? "Deleting..." : "Delete Account"}
