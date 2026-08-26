@@ -373,6 +373,16 @@ export const api = {
       method: "DELETE",
     }),
 
+  // Payments (Stripe)
+  createSaleCheckout: (body) =>
+    request("/payments/checkout/sale", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+
+  getPaymentSession: (sessionId) =>
+    request(`/payments/session/${encodeURIComponent(sessionId)}`),
+
   // Seller Orders
   getMySellerOrders: () =>
     request("/seller/orders/me"),
