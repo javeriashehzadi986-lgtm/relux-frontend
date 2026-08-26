@@ -29,6 +29,43 @@ const clothingTypes = [
 const sizeOptions = LISTING_SIZE_OPTIONS;
 const conditionOptions = LISTING_CONDITION_OPTIONS;
 
+const DEFAULT_AUCTION_END_TIME = "23:59";
+
+function splitAuctionEnd(value) {
+  if (!value) {
+    return { date: "", time: DEFAULT_AUCTION_END_TIME };
+  }
+
+  const raw = String(value).trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+    return { date: raw, time: DEFAULT_AUCTION_END_TIME };
+  }
+
+  const parsed = new Date(raw);
+  if (Number.isNaN(parsed.getTime())) {
+    return { date: "", time: DEFAULT_AUCTION_END_TIME };
+  }
+
+  const year = parsed.getFullYear();
+  const month = String(parsed.getMonth() + 1).padStart(2, "0");
+  const day = String(parsed.getDate()).padStart(2, "0");
+  const hours = String(parsed.getHours()).padStart(2, "0");
+  const minutes = String(parsed.getMinutes()).padStart(2, "0");
+
+  return {
+    date: `${year}-${month}-${day}`,
+    time: `${hours}:${minutes}`,
+  };
+}
+
+function combineAuctionEnd(date, time) {
+  if (!date) return "";
+  const clock = time || DEFAULT_AUCTION_END_TIME;
+  const local = new Date(`${date}T${clock}:00`);
+  if (Number.isNaN(local.getTime())) return date;
+  return local.toISOString();
+}
+
 const previewThumbs = [
   "https://lh3.googleusercontent.com/aida-public/AB6AXuAXxVIrbVCOCT82XNvkqWO0eEgioxMP5KllgqBRslb6p1K2vZG5_Al5fJ0WjpScR-NAIyW3SXOHm6WGzF2eEqHapcIqCMrJwzRgYJXTEXMBrf35OmZKCR64XYu0iC9vTZgRPFYwJXTh9_A_X_X4PEDUrmB3IYHftxGQ1MkknW6Cai6kwDxcX_3U9A-h9r2rNMbLE-VXd6Lj_biOHW-L3auwAj9iHsAJkA4Li7yl_SjiYQaQPEoRsFtv5fnSoUFkGjXP0Uq6bEpoQpqM",
   "https://lh3.googleusercontent.com/aida-public/AB6AXuAyf7vT5X2qY1XQN5M1ak9f1CLumy3HmE8vDUuKH1ZSPpQLqVL9CNIJi-ndKu3t34y1Aw7g6iDgmbzUB3E_6Q9aa4YEPgFMrBL24mpKEY1Og6AbAM45Wpb_aq9ii8m5e_B-vNnXMSPtW5OJZteQHiZRmc4UZIfeyCrsfPUjxD4tEVAuclonIO9ZrCepv-wCojgEjvGPYR3mElVemXHkJsg9tCwNYjJbL4volagWC56IXovbeXRvk03DwSeFzm08tNkWrKEO7mULoXIk",
@@ -106,6 +143,7 @@ const SellerAddListing = () => {
   const [startingBid, setStartingBid] = useState("");
   const [minBid, setMinBid] = useState("");
   const [auctionEndDate, setAuctionEndDate] = useState("");
+  const [auctionEndTime, setAuctionEndTime] = useState(DEFAULT_AUCTION_END_TIME);
   const [rentPrice, setRentPrice] = useState("");
   const [itemPrice, setItemPrice] = useState("");
   const [previewImages, setPreviewImages] = useState(previewThumbs);
@@ -154,7 +192,9 @@ const SellerAddListing = () => {
           setSalePrice(listing.salePrice || "");
           setStartingBid(listing.startingBid || "");
           setMinBid(listing.minBid || "");
-          setAuctionEndDate(listing.auctionEndDate || "");
+          const auctionEnd = splitAuctionEnd(listing.auctionEndDate || "");
+          setAuctionEndDate(auctionEnd.date);
+          setAuctionEndTime(auctionEnd.time);
         }
 
         if (listing.listingSize) {
@@ -241,6 +281,18 @@ const SellerAddListing = () => {
       const mainImage =
         preparedGallery[0] || (await prepareImageSource(previewHeroImage));
 
+      let resolvedAuctionEndDate = auctionEndDate;
+      if (listingType === "sale") {
+        if (!auctionEndDate || !auctionEndTime) {
+          throw new Error("Auction end date and time are required");
+        }
+        resolvedAuctionEndDate = combineAuctionEnd(auctionEndDate, auctionEndTime);
+        const endAt = new Date(resolvedAuctionEndDate);
+        if (Number.isNaN(endAt.getTime()) || endAt.getTime() <= Date.now()) {
+          throw new Error("Auction end must be a future date and time");
+        }
+      }
+
       const payload = {
         title: title.trim() || previewTitle,
         brand: brand.trim(),
@@ -254,7 +306,7 @@ const SellerAddListing = () => {
         salePrice,
         startingBid,
         minBid,
-        auctionEndDate,
+        auctionEndDate: resolvedAuctionEndDate,
         rentPrice,
         itemPrice,
         mainImage,
@@ -546,17 +598,33 @@ const SellerAddListing = () => {
                           required
                         />
                       </Field>
-                      <Field className="add-listing-field">
-                        <FieldLabel htmlFor="auction-end">Auction End Date</FieldLabel>
-                        <Input
-                          id="auction-end"
-                          type="date"
-                          className="add-listing-input"
-                          value={auctionEndDate}
-                          onChange={(e) => setAuctionEndDate(e.target.value)}
-                          required
-                        />
-                      </Field>
+                      <div className="add-listing-auction-end-row">
+                        <Field className="add-listing-field">
+                          <FieldLabel htmlFor="auction-end-date">Auction End Date</FieldLabel>
+                          <Input
+                            id="auction-end-date"
+                            type="date"
+                            className="add-listing-input"
+                            value={auctionEndDate}
+                            onChange={(e) => setAuctionEndDate(e.target.value)}
+                            required
+                          />
+                        </Field>
+                        <Field className="add-listing-field">
+                          <FieldLabel htmlFor="auction-end-time">Auction End Time</FieldLabel>
+                          <Input
+                            id="auction-end-time"
+                            type="time"
+                            className="add-listing-input"
+                            value={auctionEndTime}
+                            onChange={(e) => setAuctionEndTime(e.target.value)}
+                            required
+                          />
+                        </Field>
+                      </div>
+                      <p className="add-listing-field-hint">
+                        Bidding closes on this date at the selected time (your local time).
+                      </p>
                     </div>
                   </FieldGroup>
                 ) : (

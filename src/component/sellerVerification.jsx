@@ -121,6 +121,42 @@ function SellerVerification() {
   const [submitting, setSubmitting] = useState(false);
   const [cnicFrontError, setCnicFrontError] = useState("");
   const [cnicBackError, setCnicBackError] = useState("");
+  const [stripeConnecting, setStripeConnecting] = useState(false);
+  const [stripeConnected, setStripeConnected] = useState(false);
+  const [stripeError, setStripeError] = useState("");
+
+  useEffect(() => {
+    if (user?.role !== "seller") return undefined;
+    let cancelled = false;
+    api
+      .getSellerStripeStatus()
+      .then((data) => {
+        if (!cancelled) setStripeConnected(Boolean(data.stripeConnected));
+      })
+      .catch(() => {
+        if (!cancelled) setStripeConnected(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.role]);
+
+  const handleConnectStripe = async () => {
+    setStripeError("");
+    setStripeConnecting(true);
+    try {
+      const data = await api.createSellerStripeConnect();
+      if (data.url) {
+        window.location.href = data.url;
+        return;
+      }
+      setStripeError("Stripe Connect URL was not returned.");
+    } catch (err) {
+      setStripeError(err.message || "Could not start Stripe Connect");
+    } finally {
+      setStripeConnecting(false);
+    }
+  };
 
   useEffect(() => {
     if (loading) return;
@@ -532,13 +568,29 @@ function SellerVerification() {
                   <h2 className="seller-card-title">Stripe Account Setup</h2>
                 </div>
                 <p className="seller-stripe-desc">
-                  A connected Stripe account is required to receive payments
-                  from sales and rentals.
+                  {stripeConnected
+                    ? "Your Stripe Connect account is linked."
+                    : "Connect Stripe after you become a seller to enable payouts for sales and rentals."}
                 </p>
+                {stripeError ? (
+                  <p className="seller-stripe-desc" role="alert" style={{ color: "#b42318" }}>
+                    {stripeError}
+                  </p>
+                ) : null}
               </div>
-              <Button type="button" variant="outline" className="seller-stripe-btn">
+              <Button
+                type="button"
+                variant="outline"
+                className="seller-stripe-btn"
+                onClick={handleConnectStripe}
+                disabled={stripeConnecting || user?.role !== "seller"}
+              >
                 <Wallet size={18} strokeWidth={1.75} />
-                Connect Stripe Account
+                {stripeConnecting
+                  ? "Opening Stripe…"
+                  : stripeConnected
+                    ? "Manage Stripe"
+                    : "Connect Stripe Account"}
               </Button>
             </div>
           </Card>

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Calendar,
   CheckCircle2,
@@ -29,84 +29,43 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import api from "@/services/api";
 import "./adminPayments.css";
 
-const PAYMENT_STATS = {
-  totalTransactions: 1240,
-  transactionTrend: "+12% this month",
-  totalRevenue: "$45.2k",
-  revenueProgress: 75,
-  rentalPayments: "$12.8k",
-  rentalShare: "28% of total",
-  resalePayments: "$32.4k",
-  resaleShare: "72% of total",
+const PAGE_SIZE = 10;
+
+const EMPTY_STATS = {
+  totalTransactions: 0,
+  transactionTrend: "No payments yet",
+  totalRevenue: "PKR 0",
+  revenueProgress: 0,
+  rentalPayments: "PKR 0",
+  rentalShare: "0% of paid",
+  resalePayments: "PKR 0",
+  resaleShare: "0% of paid",
 };
 
-const PAYMENTS = [
-  {
-    id: "TR-8291",
-    buyerName: "Elena Rose",
-    buyerEmail: "elena.rose@example.com",
-    buyerAvatar:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBxD4xqrhCoC8k9yxI9R1VGhD0owOYxNGvBZVxbM1svkf6At3fvASFkGJCq1JX9qi1GQjyhs7JsS4i6ocd6z886u4qgiVB527GaNqi9Bl5PfRGfElZfRi9AbAkMzI2Toov_G-HoVFpf5KyT8k3cPwM4ontB2xvKXU5NYhGIsdx0MErCT3IoI3r7c_RqTybR2WGvyDT7s4A4foxlfbZcNtRtSINvDIVCMBRZGsmztnPRg84kbK6JMbpz229yKe_Ua0gc7PBKT_OOqnk",
-    sellerName: "Mark Davies",
-    sellerEmail: "mark.d@relux.com",
-    sellerAvatar:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuA82IX0cSnBEOANFeRPukGRRipwwnSCK_6ACBUm97dvFgSV-LrAgAsxc8H7fFbgBw4MRBlBDBvUo7TthaoGMuepE9aaM5DOPHu6ApnpNcAWiXkooh0xDRBcJ_vQgkah0qsRb77D7UMhs5QuUKytMN6Ky1nOxjX_rWB-QqaHhVfxxYZIVFRFgsQ-maOe3mdhYx9qykZnpmkQUa3mvWCBKJ1fY97hdj4s9pJxEEMGM8eUGNur9A_n_H5livJjM1s9gE6ViL5je-wWbJA",
-    item: "Silk Midi Skirt",
-    itemId: "ITEM-4421",
-    itemImage:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCbuROd5qOwXq14nrKCfFudQVFzmggWDDGZoKCJ_VQEuxx22vblsz77NAGmJHDKNLUU3LpzQqSJ-69PZsg8pb3GckFbMU0nAI9QRMGn5ztXN7MoRpmtqQMgze9eAnIfQZJI2rnu_Ng1RHLY-xTvaxCytJjDRmWXryIvyeEJH0R5p4gPEdFPLW9GIHBHTLKifZu5hBJe0LHjb5cJxtcJXq06VAeufSCs7y-o_EVDWzPNBRem3_-ynwcnSKTZVU2nTWJAYgifE_Y8IeQ",
-    type: "resale",
-    amount: "$85.00",
-    date: "Oct 24, 2023",
-    transactionDate: "Oct 24, 2023 - 14:32 PM",
-    status: "paid",
-    stripeStatus: "Succeeded",
-  },
-  {
-    id: "TR-9012",
-    buyerName: "Julian Chen",
-    buyerEmail: "julian.chen@example.com",
-    buyerAvatar:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBMpRK98ctOeml1IGBL8uWTs9wtmthDzx5dLcH-nhxpJoxD1i1h-r216fduPp1Znw-2RnLtfPHy8CJWBNZEeEBi17_M9k2viKf0sFUjZCMXU2od7QdT5dSunVdjkGnSg-elEh5_T8lkSpGoav-ajL1WJqrXll4ofxbf5lGbNyGIwur1gPT28xJk2ZYvEcpLxjYy-kMOccQ_Mm-1vZyYek55qE2vivAoMK0SyGQTWjITyaoa-AVXj38HZA8MOSTZNo_QR-_iY8LSJUo",
-    sellerName: "Sarah Blake",
-    sellerEmail: "sarah.blake@relux.com",
-    sellerAvatar:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDx9JY36vH0Ri-EiUevYEF3oCNNSDHxOOsqItDOmbrrxpI9yxvE2AGDG4AbP8rN7FbvkuMXsnaNZx16-RHZ3NWtlbXVOaiDwS7n4KoCYNOPsHQ_ugkpGy_U3cbwRXyB2S2FB3gSvslwVftY6yc1l1pHfWEfHQvQTkQx75_3o2gF_S8naUqi3t04dpzRS2y6kYys2RWI7r2Z0s9PMjSIRNwcwPB_7lt4SvoqSZcw8J-pSv_kcJQPq4wjP_XIrIq-85rSuZRQ6q0QIaU",
-    item: "Wool Trench Coat",
-    itemId: "ITEM-3310",
-    itemImage:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCbuROd5qOwXq14nrKCfFudQVFzmggWDDGZoKCJ_VQEuxx22vblsz77NAGmJHDKNLUU3LpzQqSJ-69PZsg8pb3GckFbMU0nAI9QRMGn5ztXN7MoRpmtqQMgze9eAnIfQZJI2rnu_Ng1RHLY-xTvaxCytJjDRmWXryIvyeEJH0R5p4gPEdFPLW9GIHBHTLKifZu5hBJe0LHjb5cJxtcJXq06VAeufSCs7y-o_EVDWzPNBRem3_-ynwcnSKTZVU2nTWJAYgifE_Y8IeQ",
-    type: "rental",
-    amount: "$120.00",
-    date: "Oct 23, 2023",
-    transactionDate: "Oct 23, 2023 - 11:18 AM",
-    status: "paid",
-    stripeStatus: "Succeeded",
-  },
-  {
-    id: "TR-7742",
-    buyerName: "Amara Okafor",
-    buyerEmail: "amara.okafor@example.com",
-    buyerAvatar:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBopqQV3ENLAmT_ehi4AeFzR0wJKnpGwdzUOCAJBeHSNTLIywQDyb6U69saxcTn9a3xs3r08qwTHgXKSOOHT5Xy8aRCH4eePVKpSSG4fi723S5XUwVznfoZL0MyklF7EVxwG9Fq17YJZNgKwC1HCkU8QkDRfHYmsTtdu90_3B_G9vM1r8-V11nT4rUwQ6fmM1amCllVvxsaUiVoSkpPObOitA8GqEnmZ9fgXOH3QAhLOrgQ6GW0HpOxIVhDmuabF7kcNRHc1mTvC8Y",
-    sellerName: "Tom Wilson",
-    sellerEmail: "tom.wilson@relux.com",
-    sellerAvatar:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBnov52Yi_0IRpeMu6ArpERqmZxwSVbC7qoI5Sg7-oWGxYtx7-Qm8eppm0vK2VBPtbxN1oBgomncJ2NuiflZpKNFQZyWc3NLtBbULacq9HdS2YujqcBuj5aOB6ramThleHlkUcFeseUZ9bpoZ6GBAQIj9A9slqHMLmM4vnNWJD3HBDjL45WivJmrGsi6gYax3zxi7DyxbIKeOAoqCr-aV1kiczs6BpBZCFuHqNq8q_A66cHQ15P_YgQrGguf-qDVQfW4pWlSwCq3o4",
-    item: "Linen Trousers",
-    itemId: "ITEM-2188",
-    itemImage:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCbuROd5qOwXq14nrKCfFudQVFzmggWDDGZoKCJ_VQEuxx22vblsz77NAGmJHDKNLUU3LpzQqSJ-69PZsg8pb3GckFbMU0nAI9QRMGn5ztXN7MoRpmtqQMgze9eAnIfQZJI2rnu_Ng1RHLY-xTvaxCytJjDRmWXryIvyeEJH0R5p4gPEdFPLW9GIHBHTLKifZu5hBJe0LHjb5cJxtcJXq06VAeufSCs7y-o_EVDWzPNBRem3_-ynwcnSKTZVU2nTWJAYgifE_Y8IeQ",
-    type: "resale",
-    amount: "$45.00",
-    date: "Oct 22, 2023",
-    transactionDate: "Oct 22, 2023 - 09:05 AM",
-    status: "refunded",
-    stripeStatus: "Refunded",
-  },
-];
+function initials(name = "") {
+  const parts = String(name).trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return "?";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+}
+
+function PersonCell({ name, avatar }) {
+  return (
+    <div className="admin-payments-person">
+      {avatar ? (
+        <img src={avatar} alt="" />
+      ) : (
+        <span className="admin-payments-avatar-fallback" aria-hidden="true">
+          {initials(name)}
+        </span>
+      )}
+      <span>{name}</span>
+    </div>
+  );
+}
 
 function TypeBadge({ type }) {
   return (
@@ -117,11 +76,31 @@ function TypeBadge({ type }) {
 }
 
 function StatusBadge({ status }) {
+  const label =
+    status === "paid"
+      ? "Paid"
+      : status === "refunded"
+        ? "Refunded"
+        : status === "pending"
+          ? "Pending"
+          : status === "failed"
+            ? "Failed"
+            : "Unpaid";
   return (
-    <Badge variant="outline" className={`admin-payments-status admin-payments-status--${status}`}>
-      {status === "paid" ? "Paid" : "Refunded"}
+    <Badge
+      variant="outline"
+      className={`admin-payments-status admin-payments-status--${status === "unpaid"}`}
+    >
+      {label}
     </Badge>
   );
+}
+
+function stripeDashboardUrl(payment) {
+  if (payment.stripePaymentIntentId) {
+    return `https://dashboard.stripe.com/test/payments/${payment.stripePaymentIntentId}`;
+  }
+  return "https://dashboard.stripe.com/test/payments";
 }
 
 const AdminPayments = () => {
@@ -129,87 +108,178 @@ const AdminPayments = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedId, setSelectedId] = useState(null);
   const [page, setPage] = useState(1);
+  const [payments, setPayments] = useState([]);
+  const [stats, setStats] = useState(EMPTY_STATS);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setError("");
+
+    api
+      .getAdminPayments()
+      .then((data) => {
+        if (cancelled) return;
+        setPayments(Array.isArray(data.payments) ? data.payments : []);
+        setStats(data.stats ? { ...EMPTY_STATS, ...data.stats } : EMPTY_STATS);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setPayments([]);
+        setStats(EMPTY_STATS);
+        setError(err.message || "Could not load payments");
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const filteredPayments = useMemo(() => {
-    return PAYMENTS.filter((payment) => {
+    return payments.filter((payment) => {
       if (typeFilter !== "all" && payment.type !== typeFilter) return false;
       if (statusFilter !== "all" && payment.status !== statusFilter) return false;
       return true;
     });
+  }, [payments, typeFilter, statusFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredPayments.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const pageStart = (currentPage - 1) * PAGE_SIZE;
+  const pagePayments = filteredPayments.slice(pageStart, pageStart + PAGE_SIZE);
+
+  useEffect(() => {
+    setPage(1);
   }, [typeFilter, statusFilter]);
 
   const selectedPayment =
-    PAYMENTS.find((payment) => payment.id === selectedId) ?? null;
+    payments.find((payment) => payment.id === selectedId) ?? null;
 
-  const openDetails = (paymentId) => {
-    setSelectedId(paymentId);
+  const openDetails = (paymentId) => setSelectedId(paymentId);
+  const closeDetails = () => setSelectedId(null);
+
+  const exportCsv = () => {
+    const rows = [
+      [
+        "Transaction ID",
+        "Buyer",
+        "Buyer Email",
+        "Seller",
+        "Seller Email",
+        "Item",
+        "Type",
+        "Amount",
+        "Status",
+        "Stripe Status",
+        "Date",
+      ],
+      ...filteredPayments.map((p) => [
+        p.id,
+        p.buyerName,
+        p.buyerEmail,
+        p.sellerName,
+        p.sellerEmail,
+        p.item,
+        p.type,
+        p.amount,
+        p.status,
+        p.stripeStatus,
+        p.transactionDate,
+      ]),
+    ];
+    const csv = rows
+      .map((row) =>
+        row.map((cell) => `"${String(cell ?? "").replace(/"/g, '""')}"`).join(","),
+      )
+      .join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "relux-payments.csv";
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
-  const closeDetails = () => {
-    setSelectedId(null);
-  };
+  const pageNumbers = Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+    if (totalPages <= 5) return i + 1;
+    const start = Math.max(1, Math.min(currentPage - 2, totalPages - 4));
+    return start + i;
+  });
 
   return (
     <div className="admin-payments-page">
       <div className="admin-payments-header">
         <h1>Payments</h1>
-        <p>View and monitor all payments processed through Stripe.</p>
+        <p>Live Relux payments from Stripe checkout and order records.</p>
       </div>
+
+      {error ? (
+        <p className="admin-payments-error" role="alert">
+          {error}
+        </p>
+      ) : null}
 
       <div className="admin-payments-metrics">
         <Card className="admin-payments-metric-card">
-          <CardContent className="admin-payments-metric-content">          <div>
-            <p>Total Transactions</p>
-            <h2>{PAYMENT_STATS.totalTransactions.toLocaleString()}</h2>
-            <span className="admin-payments-trend">
-              <TrendingUp size={14} aria-hidden="true" />
-              {PAYMENT_STATS.transactionTrend}
-            </span>
-          </div>
-          <div className="admin-payments-metric-icon">
-            <Wallet size={22} aria-hidden="true" />
-          </div>
-          </CardContent>
-        </Card>
-
-        <Card className="admin-payments-metric-card">
           <CardContent className="admin-payments-metric-content">
-          <div>
-            <p>Total Revenue</p>
-            <h2>{PAYMENT_STATS.totalRevenue}</h2>
-            <div className="admin-payments-progress">
-              <span style={{ width: `${PAYMENT_STATS.revenueProgress}%` }} />
+            <div>
+              <p>Total Transactions</p>
+              <h2>{Number(stats.totalTransactions || 0).toLocaleString()}</h2>
+              <span className="admin-payments-trend">
+                <TrendingUp size={14} aria-hidden="true" />
+                {stats.transactionTrend}
+              </span>
             </div>
-          </div>
-          <div className="admin-payments-metric-icon">
-            <Wallet size={22} aria-hidden="true" />
-          </div>
+            <div className="admin-payments-metric-icon">
+              <Wallet size={22} aria-hidden="true" />
+            </div>
           </CardContent>
         </Card>
 
         <Card className="admin-payments-metric-card">
           <CardContent className="admin-payments-metric-content">
-          <div>
-            <p>Rental Payments</p>
-            <h2>{PAYMENT_STATS.rentalPayments}</h2>
-            <span className="admin-payments-meta">{PAYMENT_STATS.rentalShare}</span>
-          </div>
-          <div className="admin-payments-metric-icon">
-            <Calendar size={22} aria-hidden="true" />
-          </div>
+            <div>
+              <p>Total Revenue</p>
+              <h2>{stats.totalRevenue}</h2>
+              <div className="admin-payments-progress">
+                <span style={{ width: `${stats.revenueProgress || 0}%` }} />
+              </div>
+            </div>
+            <div className="admin-payments-metric-icon">
+              <Wallet size={22} aria-hidden="true" />
+            </div>
           </CardContent>
         </Card>
 
         <Card className="admin-payments-metric-card">
           <CardContent className="admin-payments-metric-content">
-          <div>
-            <p>Resale Payments</p>
-            <h2>{PAYMENT_STATS.resalePayments}</h2>
-            <span className="admin-payments-meta">{PAYMENT_STATS.resaleShare}</span>
-          </div>
-          <div className="admin-payments-metric-icon">
-            <ShoppingBag size={22} aria-hidden="true" />
-          </div>
+            <div>
+              <p>Rental Payments</p>
+              <h2>{stats.rentalPayments}</h2>
+              <span className="admin-payments-meta">{stats.rentalShare}</span>
+            </div>
+            <div className="admin-payments-metric-icon">
+              <Calendar size={22} aria-hidden="true" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="admin-payments-metric-card">
+          <CardContent className="admin-payments-metric-content">
+            <div>
+              <p>Resale Payments</p>
+              <h2>{stats.resalePayments}</h2>
+              <span className="admin-payments-meta">{stats.resaleShare}</span>
+            </div>
+            <div className="admin-payments-metric-icon">
+              <ShoppingBag size={22} aria-hidden="true" />
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -234,86 +304,117 @@ const AdminPayments = () => {
               <SelectContent>
                 <SelectItem value="all">Status</SelectItem>
                 <SelectItem value="paid">Paid</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
                 <SelectItem value="refunded">Refunded</SelectItem>
+                <SelectItem value="failed">Failed</SelectItem>
+                <SelectItem value="unpaid">Unpaid</SelectItem>
               </SelectContent>
             </Select>
           </div>
-          <Button type="button" className="admin-payments-export-btn">
+          <Button
+            type="button"
+            className="admin-payments-export-btn"
+            onClick={exportCsv}
+            disabled={!filteredPayments.length}
+          >
             <Download size={18} aria-hidden="true" />
             Export CSV
           </Button>
         </div>
 
         <div className="admin-payments-table-wrap">
-          <Table className="admin-payments-table">
-            <TableHeader>
-              <TableRow>
-                <TableHead>Transaction ID</TableHead>
-                <TableHead>Buyer</TableHead>
-                <TableHead>Seller</TableHead>
-                <TableHead>Clothing Item</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredPayments.map((payment) => (
-                <TableRow
-                  key={payment.id}
-                  className={
-                    selectedId === payment.id ? "admin-payments-row--selected" : ""
-                  }
-                  onClick={() => openDetails(payment.id)}
-                >
-                  <TableCell className="admin-payments-id">#{payment.id}</TableCell>
-                  <TableCell>
-                    <div className="admin-payments-person">
-                      <img src={payment.buyerAvatar} alt="" />
-                      <span>{payment.buyerName}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="admin-payments-person">
-                      <img src={payment.sellerAvatar} alt="" />
-                      <span>{payment.sellerName}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="admin-payments-item">{payment.item}</TableCell>
-                  <TableCell>
-                    <TypeBadge type={payment.type} />
-                  </TableCell>
-                  <TableCell className="admin-payments-amount">{payment.amount}</TableCell>
-                  <TableCell className="admin-payments-date">{payment.date}</TableCell>
-                  <TableCell className="admin-payments-status-cell">
-                    <StatusBadge status={payment.status} />
-                  </TableCell>
+          {loading ? (
+            <p className="admin-payments-empty">Loading payments…</p>
+          ) : pagePayments.length === 0 ? (
+            <p className="admin-payments-empty">
+              No payments yet. Completed Stripe checkouts will appear here.
+            </p>
+          ) : (
+            <Table className="admin-payments-table">
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Transaction ID</TableHead>
+                  <TableHead>Buyer</TableHead>
+                  <TableHead>Seller</TableHead>
+                  <TableHead>Clothing Item</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Status</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {pagePayments.map((payment) => (
+                  <TableRow
+                    key={payment.mongoId || payment.id}
+                    className={
+                      selectedId === payment.id ? "admin-payments-row--selected" : ""
+                    }
+                    onClick={() => openDetails(payment.id)}
+                  >
+                    <TableCell className="admin-payments-id">#{payment.id}</TableCell>
+                    <TableCell>
+                      <PersonCell name={payment.buyerName} avatar={payment.buyerAvatar} />
+                    </TableCell>
+                    <TableCell>
+                      <PersonCell name={payment.sellerName} avatar={payment.sellerAvatar} />
+                    </TableCell>
+                    <TableCell className="admin-payments-item">{payment.item}</TableCell>
+                    <TableCell>
+                      <TypeBadge type={payment.type} />
+                    </TableCell>
+                    <TableCell className="admin-payments-amount">{payment.amount}</TableCell>
+                    <TableCell className="admin-payments-date">{payment.date}</TableCell>
+                    <TableCell className="admin-payments-status-cell">
+                      <StatusBadge status={payment.status} />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </div>
 
         <div className="admin-payments-pagination">
-          <p>Showing 1 to 10 of {PAYMENT_STATS.totalTransactions.toLocaleString()} entries</p>
+          <p>
+            {filteredPayments.length === 0
+              ? "Showing 0 entries"
+              : `Showing ${pageStart + 1} to ${Math.min(
+                  pageStart + PAGE_SIZE,
+                  filteredPayments.length,
+                )} of ${filteredPayments.length} entries`}
+          </p>
           <div className="admin-payments-pagination-controls">
-            <Button type="button" variant="outline" size="icon" aria-label="Previous page" disabled={page === 1}>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              aria-label="Previous page"
+              disabled={currentPage === 1}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+            >
               <ChevronLeft size={18} />
             </Button>
-            {[1, 2, 3].map((pageNumber) => (
+            {pageNumbers.map((pageNumber) => (
               <Button
                 key={pageNumber}
                 type="button"
-                variant={page === pageNumber ? "default" : "outline"}
+                variant={currentPage === pageNumber ? "default" : "outline"}
                 size="icon"
-                className={page === pageNumber ? "is-active" : ""}
+                className={currentPage === pageNumber ? "is-active" : ""}
                 onClick={() => setPage(pageNumber)}
               >
                 {pageNumber}
               </Button>
             ))}
-            <Button type="button" variant="outline" size="icon" aria-label="Next page">
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              aria-label="Next page"
+              disabled={currentPage >= totalPages}
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            >
               <ChevronRight size={18} />
             </Button>
           </div>
@@ -344,10 +445,16 @@ const AdminPayments = () => {
               <section>
                 <h3>Buyer Information</h3>
                 <div className="admin-payments-drawer-person">
-                  <img src={selectedPayment.buyerAvatar} alt="" />
+                  {selectedPayment.buyerAvatar ? (
+                    <img src={selectedPayment.buyerAvatar} alt="" />
+                  ) : (
+                    <span className="admin-payments-avatar-fallback" aria-hidden="true">
+                      {initials(selectedPayment.buyerName)}
+                    </span>
+                  )}
                   <div>
                     <p>{selectedPayment.buyerName}</p>
-                    <span>{selectedPayment.buyerEmail}</span>
+                    <span>{selectedPayment.buyerEmail || "—"}</span>
                   </div>
                 </div>
               </section>
@@ -355,10 +462,16 @@ const AdminPayments = () => {
               <section>
                 <h3>Seller Information</h3>
                 <div className="admin-payments-drawer-person">
-                  <img src={selectedPayment.sellerAvatar} alt="" />
+                  {selectedPayment.sellerAvatar ? (
+                    <img src={selectedPayment.sellerAvatar} alt="" />
+                  ) : (
+                    <span className="admin-payments-avatar-fallback" aria-hidden="true">
+                      {initials(selectedPayment.sellerName)}
+                    </span>
+                  )}
                   <div>
                     <p>{selectedPayment.sellerName}</p>
-                    <span>{selectedPayment.sellerEmail}</span>
+                    <span>{selectedPayment.sellerEmail || "—"}</span>
                   </div>
                 </div>
               </section>
@@ -366,7 +479,11 @@ const AdminPayments = () => {
               <section>
                 <h3>Clothing Details</h3>
                 <div className="admin-payments-item-card">
-                  <img src={selectedPayment.itemImage} alt={selectedPayment.item} />
+                  {selectedPayment.itemImage ? (
+                    <img src={selectedPayment.itemImage} alt={selectedPayment.item} />
+                  ) : (
+                    <div className="admin-payments-item-placeholder" aria-hidden="true" />
+                  )}
                   <div>
                     <p>{selectedPayment.item}</p>
                     <span>Item ID: #{selectedPayment.itemId}</span>
@@ -390,12 +507,18 @@ const AdminPayments = () => {
               </section>
 
               <p className="admin-payments-drawer-date">
-                Transaction Date: {selectedPayment.transactionDate}
+                Transaction Date: {selectedPayment.transactionDate || "—"}
               </p>
 
-              <Button type="button" className="admin-payments-stripe-btn">
-                <ExternalLink size={18} aria-hidden="true" />
-                View Stripe Details
+              <Button type="button" className="admin-payments-stripe-btn" asChild>
+                <a
+                  href={stripeDashboardUrl(selectedPayment)}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <ExternalLink size={18} aria-hidden="true" />
+                  View Stripe Details
+                </a>
               </Button>
             </div>
           </Card>

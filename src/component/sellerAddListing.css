@@ -518,6 +518,18 @@
   border-radius: 0.75rem;
 }
 
+.add-listing-auction-end-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .add-listing-auction-end-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
 .add-listing-bidding-note {
   grid-column: 1 / -1;
   margin: 0;
