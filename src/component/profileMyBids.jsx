@@ -22,11 +22,24 @@ const FILTER_TABS = [
   { id: "all", label: "All Bids" },
   { id: "active", label: "Active" },
   { id: "winning", label: "Winning" },
+  { id: "won", label: "Won" },
   { id: "outbid", label: "Outbid" },
   { id: "expired", label: "Expired" },
 ];
 
-const BIDS_PER_PAGE = 2;
+const BIDS_PER_PAGE = 6;
+
+const matchesBidFilter = (bid, filter) => {
+  if (filter === "all") return true;
+  if (filter === "active") {
+    return bid.status === "winning" || bid.status === "outbid";
+  }
+  if (filter === "winning") {
+    // Live highest bidder + completed wins
+    return bid.status === "winning" || bid.status === "won";
+  }
+  return bid.status === filter;
+};
 
 const ProfileMyBids = () => {
   const { bids, loading, error, refresh } = useMyBids();
@@ -36,11 +49,7 @@ const ProfileMyBids = () => {
 
   const filteredBids = useMemo(() => {
     return bids.filter((bid) => {
-      const matchesFilter =
-        activeFilter === "all" ||
-        bid.status === activeFilter ||
-        (activeFilter === "active" &&
-          (bid.status === "winning" || bid.status === "outbid"));
+      const matchesFilter = matchesBidFilter(bid, activeFilter);
       const matchesSearch =
         bid.title.toLowerCase().includes(searchQuery.trim().toLowerCase()) ||
         bid.seller.toLowerCase().includes(searchQuery.trim().toLowerCase());
@@ -70,9 +79,9 @@ const ProfileMyBids = () => {
       <header className="profile-bids-header">
         <div className="profile-bids-header-top">
           <div>
-            <h1 className="profile-bids-title">My Active Bids</h1>
+            <h1 className="profile-bids-title">My Bids</h1>
             <p className="profile-bids-subtitle">
-              Manage your ongoing auctions for luxury Pakistani couture.
+              Track active auctions, winning bids, and completed wins.
             </p>
           </div>
 
@@ -210,7 +219,9 @@ const ProfileMyBids = () => {
                     <p className="profile-bid-stat-label">Current Highest</p>
                     <p
                       className={`profile-bid-stat-value profile-bid-stat-value--${
-                        bid.status === "winning" ? "primary" : "default"
+                        bid.status === "winning" || bid.status === "won"
+                          ? "primary"
+                          : "default"
                       }`}
                     >
                       {bid.currentHighest}
@@ -283,7 +294,7 @@ const ProfileMyBids = () => {
 
       <footer className="profile-bids-footer">
         <p className="profile-bids-footer-count">
-          Showing {filteredBids.length} of {bids.length} active bids
+          Showing {filteredBids.length} of {bids.length} bids
         </p>
         <div className="profile-bids-pagination">
           <Button

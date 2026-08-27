@@ -380,6 +380,9 @@ export const api = {
       body: JSON.stringify(body),
     }),
 
+  getSaleCheckoutListing: (productId) =>
+    request(`/payments/checkout/sale-listing/${encodeURIComponent(productId)}`),
+
   createRentalCheckout: (body) =>
     request("/payments/checkout/rental", {
       method: "POST",

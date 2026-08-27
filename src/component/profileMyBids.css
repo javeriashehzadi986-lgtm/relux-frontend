@@ -196,9 +196,19 @@
   color: #e3fff6;
 }
 
+.profile-bid-badge--won {
+  background: #1a7f4b;
+  color: #e8fff3;
+}
+
 .profile-bid-badge--outbid {
   background: #a83836;
   color: #fff7f6;
+}
+
+.profile-bid-badge--expired {
+  background: #6b7280;
+  color: #f3f4f6;
 }
 
 .profile-bid-content {
