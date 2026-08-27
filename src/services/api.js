@@ -357,6 +357,8 @@ export const api = {
   getMyBuyerOrders: () =>
     request("/buyer/orders/me"),
 
+  getBuyerOrder: (id) => request(`/buyer/orders/${id}`),
+
   createRentalRequest: (body) =>
     request("/buyer/orders/rental", {
       method: "POST",

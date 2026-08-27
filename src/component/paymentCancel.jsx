@@ -19,10 +19,13 @@ const PaymentCancel = () => {
             <Link to={`/dress/${productId}/checkout`}>Return to checkout</Link>
           </Button>
         ) : null}
-        <Button asChild variant={productId ? "outline" : "default"}>
-          <Link to="/profile?section=orders">
-            {orderId ? "Back to my orders" : "My orders"}
-          </Link>
+        {orderId ? (
+          <Button asChild variant={productId ? "outline" : "default"}>
+            <Link to={`/orders/${orderId}/checkout`}>Return to rental checkout</Link>
+          </Button>
+        ) : null}
+        <Button asChild variant="outline">
+          <Link to="/profile?section=orders">My orders</Link>
         </Button>
       </div>
     </div>
