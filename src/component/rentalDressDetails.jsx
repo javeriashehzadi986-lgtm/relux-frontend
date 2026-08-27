@@ -258,9 +258,9 @@ const RentalDressDetails = ({ dress }) => {
             </div>
 
             <p className="rental-details-deposit-note">
-              The security deposit is paid upfront when you request a rental. After the dress is
-              returned and inspected, rental charges are deducted from the deposit and the remaining
-              balance is refunded to you via your original payment method or wallet.
+              The security deposit is charged via Stripe after the seller approves your
+              request. After the dress is returned and inspected, rental charges are
+              deducted from the deposit and the remaining balance is refunded.
             </p>
           </div>
 

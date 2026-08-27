@@ -140,12 +140,83 @@ function SellerProfileSection() {
   );
   const [saveError, setSaveError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [stripeConnected, setStripeConnected] = useState(false);
+  const [stripeConnecting, setStripeConnecting] = useState(false);
+  const [stripeMessage, setStripeMessage] = useState("");
+  const [searchParams] = useSearchParams();
   const {
     reviews,
     stats,
     loading: reviewsLoading,
     error: reviewsError,
   } = useSellerReviews(user?.id);
+
+  useEffect(() => {
+    let cancelled = false;
+    api
+      .getSellerStripeStatus()
+      .then((data) => {
+        if (!cancelled) {
+          setStripeConnected(Boolean(data.stripeConnected));
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setStripeConnected(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    const stripeFlag = searchParams.get("stripe");
+    if (stripeFlag !== "return" && stripeFlag !== "refresh") return undefined;
+
+    let cancelled = false;
+    setStripeMessage(
+      stripeFlag === "refresh"
+        ? "Stripe onboarding was interrupted. You can continue below."
+        : "Checking Stripe Connect status…",
+    );
+
+    api
+      .getSellerStripeStatus()
+      .then((data) => {
+        if (cancelled) return;
+        setStripeConnected(Boolean(data.stripeConnected));
+        setStripeMessage(
+          data.stripeConnected
+            ? "Stripe Connect is linked to your seller account."
+            : "Finish Stripe onboarding to enable payouts.",
+        );
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setStripeMessage(err.message || "Could not refresh Stripe status");
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [searchParams]);
+
+  const handleConnectStripe = async () => {
+    setStripeConnecting(true);
+    setStripeMessage("");
+    try {
+      const data = await api.createSellerStripeConnect();
+      if (data.url) {
+        window.location.href = data.url;
+        return;
+      }
+      setStripeMessage("Stripe Connect URL was not returned.");
+    } catch (err) {
+      setStripeMessage(err.message || "Could not start Stripe Connect");
+    } finally {
+      setStripeConnecting(false);
+    }
+  };
 
   useEffect(() => {
     if (!isEditing) {
@@ -640,34 +711,56 @@ function SellerProfileSection() {
                 <CardTitle className="seller-profile-section-title">
                   Stripe Payments
                 </CardTitle>
-                <div className="seller-profile-connected">
-                  <CheckCircle2 size={16} fill="currentColor" strokeWidth={0} />
-                  <span>Connected</span>
+                <div
+                  className={
+                    stripeConnected
+                      ? "seller-profile-connected"
+                      : "seller-profile-connected seller-profile-connected--muted"
+                  }
+                >
+                  {stripeConnected ? (
+                    <>
+                      <CheckCircle2 size={16} fill="currentColor" strokeWidth={0} />
+                      <span>Connected</span>
+                    </>
+                  ) : (
+                    <span>Not connected</span>
+                  )}
                 </div>
               </CardHeader>
               <CardContent className="seller-profile-section-content">
                 <div className="seller-profile-payout-box">
                   <div className="seller-profile-payout-row">
-                    <span className="seller-profile-payout-label">Last Payout</span>
-                    <span className="seller-profile-payout-amount">$120.00</span>
+                    <span className="seller-profile-payout-label">Buyer checkout</span>
+                    <span className="seller-profile-payout-amount">Stripe</span>
                   </div>
                   <div className="seller-profile-payout-row">
-                    <span className="seller-profile-payout-date">Oct 20, 2023</span>
-                    <span className="seller-profile-payout-status">Completed</span>
+                    <span className="seller-profile-payout-date">Seller payouts</span>
+                    <span className="seller-profile-payout-status">
+                      {stripeConnected ? "Connect linked" : "Connect required"}
+                    </span>
                   </div>
                 </div>
                 <p className="seller-profile-stripe-note">
-                  &ldquo;Payments are securely processed via Stripe and sent to your bank
-                  account.&rdquo;
+                  Buyers pay Relux Hub at checkout. Connect your Stripe Express account so
+                  payouts can be enabled for your seller profile.
                 </p>
+                {stripeMessage ? (
+                  <p className="seller-profile-stripe-note" role="status">
+                    {stripeMessage}
+                  </p>
+                ) : null}
                 <Button
                   type="button"
                   className="seller-profile-primary-btn seller-profile-primary-btn--full"
-                  asChild
+                  onClick={handleConnectStripe}
+                  disabled={stripeConnecting}
                 >
-                  <Link to="/sellerProfile#seller-profile-stripe">
-                    Manage Stripe Account
-                  </Link>
+                  {stripeConnecting
+                    ? "Opening Stripe…"
+                    : stripeConnected
+                      ? "Manage Stripe Account"
+                      : "Connect Stripe Account"}
                 </Button>
               </CardContent>
             </Card>

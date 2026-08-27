@@ -283,6 +283,11 @@
   color: #61613e;
 }
 
+.profile-order-status--awaiting-payment {
+  background: #fff4df;
+  color: #8a5a00;
+}
+
 .profile-order-status-dot {
   width: 0.375rem;
   height: 0.375rem;

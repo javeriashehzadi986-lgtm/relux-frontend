@@ -373,6 +373,29 @@ export const api = {
       method: "DELETE",
     }),
 
+  // Payments (Stripe)
+  createSaleCheckout: (body) =>
+    request("/payments/checkout/sale", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+
+  createRentalCheckout: (body) =>
+    request("/payments/checkout/rental", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+
+  getPaymentSession: (sessionId) =>
+    request(`/payments/session/${encodeURIComponent(sessionId)}`),
+
+  createSellerStripeConnect: () =>
+    request("/seller/stripe/connect", {
+      method: "POST",
+    }),
+
+  getSellerStripeStatus: () => request("/seller/stripe/status"),
+
   // Seller Orders
   getMySellerOrders: () =>
     request("/seller/orders/me"),
@@ -454,6 +477,7 @@ export const api = {
   // Admin Orders
   getAdminRentalOrders: () => request("/admin/orders/rental"),
   getAdminResaleOrders: () => request("/admin/orders/resale"),
+  getAdminPayments: () => request("/admin/payments"),
   updateAdminOrderStatus: (id, body) =>
     request(`/admin/orders/${id}/status`, {
       method: "PATCH",

@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { hydrateBuyerOrder } from "@/data/dressCatalog";
 import { useBuyerOrders } from "@/hooks/useBuyerOrders";
+import api from "@/services/api";
 import "./profileMyOrders.css";
 
 const FILTER_TABS = [
@@ -65,7 +66,11 @@ const matchesFilter = (order, filter) => {
   if (filter === "rentals") return order.type === "rental";
   if (filter === "delivered") return order.status === "delivered";
   if (filter === "in-progress") {
-    return order.status === "processing" || order.status === "rental-active";
+    return (
+      order.status === "processing" ||
+      order.status === "rental-active" ||
+      order.status === "awaiting-payment"
+    );
   }
   return true;
 };
@@ -77,6 +82,7 @@ const ProfileMyOrders = () => {
   const { orders, loading, error, cancelOrder, removeOrder } = useBuyerOrders();
   const [cancelTarget, setCancelTarget] = useState(null);
   const [actionError, setActionError] = useState("");
+  const [payingOrderId, setPayingOrderId] = useState("");
 
   const filteredOrders = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -102,6 +108,24 @@ const ProfileMyOrders = () => {
         await removeOrder(order.id);
       } catch (err) {
         setActionError(err.message || "Failed to remove order");
+      }
+      return;
+    }
+
+    if (action.id === "pay") {
+      setActionError("");
+      setPayingOrderId(order.id);
+      try {
+        const data = await api.createRentalCheckout({ orderId: order.id });
+        if (data.url) {
+          window.location.href = data.url;
+          return;
+        }
+        setActionError("Stripe checkout URL was not returned.");
+      } catch (err) {
+        setActionError(err.message || "Could not start Stripe checkout");
+      } finally {
+        setPayingOrderId("");
       }
       return;
     }
@@ -274,10 +298,13 @@ const ProfileMyOrders = () => {
                           type="button"
                           variant="ghost"
                           className={actionClass}
+                          disabled={action.id === "pay" && payingOrderId === order.id}
                           onClick={() => handleOrderAction(action, order)}
                         >
                           {ActionIcon && <ActionIcon size={16} aria-hidden="true" />}
-                          {action.label}
+                          {action.id === "pay" && payingOrderId === order.id
+                            ? "Redirecting…"
+                            : action.label}
                         </Button>
                       );
                     })}

@@ -374,6 +374,10 @@ export const hydrateBuyerOrder = (order) => {
   const dress = lookupListingDress(order.dressId);
   const rentalTotal =
     order.rentalDays && dress?.dailyRate ? dress.dailyRate * order.rentalDays : null;
+  const amountFromApi =
+    typeof order.amountPkr === "number" && order.amountPkr > 0
+      ? formatRs(order.amountPkr)
+      : null;
 
   return {
     ...order,
@@ -382,9 +386,10 @@ export const hydrateBuyerOrder = (order) => {
     image: dress?.mainImage ?? dress?.image ?? "",
     listingType: dress?.listingType ?? (order.type === "rental" ? "rent" : "resale"),
     amount:
-      order.type === "rental"
+      amountFromApi ||
+      (order.type === "rental"
         ? formatRs(rentalTotal ?? dress?.securityDeposit ?? (dress?.dailyRate ?? 0) * 3)
-        : dress?.priceFormatted ?? "—",
+        : dress?.priceFormatted ?? "—"),
     variant:
       order.variant ??
       `Size: ${order.size ?? "M"}${dress?.brand ? ` • ${dress.brand}` : ""}`,

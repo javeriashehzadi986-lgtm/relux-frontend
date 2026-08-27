@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
+import { Link, Navigate, useParams } from "react-router-dom";
 import { BadgeCheck, ShieldCheck, Truck, Verified } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getDressConditionLabel, isMongoListingId, mapApiListingToDress } from "@/data/dressCatalog";
+import { useAuth } from "@/context/AuthContext";
 import api from "@/services/api";
 import "./finalizePurchase.css";
 
@@ -22,10 +23,31 @@ const getEstimatedDelivery = () => {
 
 const FinalizePurchase = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
+  const { user } = useAuth();
   const [dress, setDress] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
+  const [paying, setPaying] = useState(false);
+  const [payError, setPayError] = useState("");
+
+  const [form, setForm] = useState({
+    fullName: "",
+    phone: "",
+    email: "",
+    address: "",
+    city: "Lahore",
+    specialInstructions: "",
+  });
+
+  useEffect(() => {
+    if (!user) return;
+    setForm((current) => ({
+      ...current,
+      fullName: current.fullName || user.name || "",
+      email: current.email || user.email || "",
+      phone: current.phone || user.phone || "",
+    }));
+  }, [user]);
 
   useEffect(() => {
     if (!isMongoListingId(id)) {
@@ -63,15 +85,6 @@ const FinalizePurchase = () => {
     };
   }, [id]);
 
-  const [form, setForm] = useState({
-    fullName: "Ayesha Khan",
-    phone: "+92 300 1234567",
-    email: "ayesha@example.com",
-    address: "Gulberg III, Lahore",
-    city: "Lahore",
-    specialInstructions: "",
-  });
-
   if (loading) {
     return (
       <div className="finalize-purchase-page">
@@ -103,11 +116,49 @@ const FinalizePurchase = () => {
 
   const updateField = (field) => (event) => {
     setForm((current) => ({ ...current, [field]: event.target.value }));
+    setPayError("");
   };
 
-  const handleConfirm = (event) => {
+  const validateForm = () => {
+    if (!form.fullName.trim()) return "Full name is required";
+    if (!form.phone.trim()) return "Phone number is required";
+    if (!form.email.trim()) return "Email is required";
+    if (!form.address.trim()) return "Delivery address is required";
+    if (!form.city.trim()) return "City is required";
+    return "";
+  };
+
+  const handlePayWithStripe = async (event) => {
     event.preventDefault();
-    navigate("/profile?section=orders");
+    const validationError = validateForm();
+    if (validationError) {
+      setPayError(validationError);
+      return;
+    }
+
+    setPaying(true);
+    setPayError("");
+    try {
+      const data = await api.createSaleCheckout({
+        productId: id,
+        fullName: form.fullName.trim(),
+        phone: form.phone.trim(),
+        email: form.email.trim(),
+        address: form.address.trim(),
+        city: form.city.trim(),
+        specialInstructions: form.specialInstructions.trim(),
+      });
+
+      if (data.url) {
+        window.location.href = data.url;
+        return;
+      }
+      setPayError("Stripe checkout URL was not returned.");
+      setPaying(false);
+    } catch (err) {
+      setPayError(err.message || "Could not start Stripe checkout.");
+      setPaying(false);
+    }
   };
 
   return (
@@ -115,8 +166,8 @@ const FinalizePurchase = () => {
       <header className="finalize-purchase-header">
         <h1>Finalize Purchase</h1>
         <p>
-          Complete your order for this curated heritage piece. Your luxury find is
-          just a step away from being delivered to your doorstep.
+          Complete your order for this curated heritage piece. Secure payment is handled by
+          Stripe.
         </p>
       </header>
 
@@ -128,7 +179,7 @@ const FinalizePurchase = () => {
               <h2>Shipping Information</h2>
             </div>
 
-            <form className="finalize-purchase-form" onSubmit={handleConfirm}>
+            <form className="finalize-purchase-form" onSubmit={handlePayWithStripe}>
               <div className="finalize-purchase-field finalize-purchase-field--full">
                 <label htmlFor="checkout-full-name">Full Name</label>
                 <input
@@ -138,6 +189,7 @@ const FinalizePurchase = () => {
                   placeholder="e.g. Ayesha Khan"
                   value={form.fullName}
                   onChange={updateField("fullName")}
+                  required
                 />
               </div>
 
@@ -150,6 +202,7 @@ const FinalizePurchase = () => {
                   placeholder="+92 300 0000000"
                   value={form.phone}
                   onChange={updateField("phone")}
+                  required
                 />
               </div>
 
@@ -162,6 +215,7 @@ const FinalizePurchase = () => {
                   placeholder="ayesha@example.com"
                   value={form.email}
                   onChange={updateField("email")}
+                  required
                 />
               </div>
 
@@ -174,6 +228,7 @@ const FinalizePurchase = () => {
                   placeholder="Street, Apartment, Landmark"
                   value={form.address}
                   onChange={updateField("address")}
+                  required
                 />
               </div>
 
@@ -272,18 +327,26 @@ const FinalizePurchase = () => {
               </div>
             </div>
 
+            {payError ? (
+              <p style={{ color: "#b42318", fontSize: "0.9rem", marginBottom: "0.75rem" }}>
+                {payError}
+              </p>
+            ) : null}
+
             <Button
               type="button"
               className="finalize-purchase-confirm-btn"
-              onClick={handleConfirm}
+              onClick={handlePayWithStripe}
+              disabled={paying}
             >
-              Confirm Purchase
+              {paying ? "Redirecting to Stripe…" : "Pay with Stripe"}
             </Button>
 
             <p className="finalize-purchase-legal">
-              By clicking Confirm Purchase, you agree to Relux Hub&apos;s{" "}
+              By paying, you agree to Relux Hub&apos;s{" "}
               <Link to="/terms">Terms of Service</Link> and Resell Authenticity
-              Policies.
+              Policies. Amounts are shown in PKR; Stripe charges in your account
+              currency (converted for test/demo).
             </p>
           </div>
         </aside>

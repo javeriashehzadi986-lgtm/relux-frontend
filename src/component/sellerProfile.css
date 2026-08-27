@@ -292,6 +292,10 @@
   font-weight: 600;
 }
 
+.seller-profile-connected--muted {
+  color: #5f6b66;
+}
+
 .seller-profile-payout-box {
   padding: 1rem;
   margin-bottom: 1rem;

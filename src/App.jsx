@@ -11,6 +11,8 @@ import KidsFashion from "./component/kidsFashion";
 import FemaleFashion, { CategoryFashion } from "./component/femaleFashion";
 import DressDetails from "./component/dressDetails";
 import FinalizePurchase from "./component/finalizePurchase";
+import PaymentSuccess from "./component/paymentSuccess";
+import PaymentCancel from "./component/paymentCancel";
 import Messages from "./component/messages";
 import Categories from "./component/categories";
 import BecomeASeller from "./component/becomeASeller";
@@ -113,7 +115,27 @@ function App() {
           <Route path="/kidsFashion" element={<KidsFashion />} />
           <Route path="/femaleFashion" element={<FemaleFashion />} />
           <Route path="/dress/:id" element={<DressDetails />} />
-          <Route path="/dress/:id/checkout" element={<FinalizePurchase />} />
+          <Route path="/dress/:id/checkout" element={
+            <ProtectedRoute roles={["buyer"]}>
+              <FinalizePurchase />
+            </ProtectedRoute>
+          } />
+          <Route
+            path="/payment/success"
+            element={
+              <ProtectedRoute roles={["buyer"]}>
+                <PaymentSuccess />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/payment/cancel"
+            element={
+              <ProtectedRoute roles={["buyer"]}>
+                <PaymentCancel />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/messages"
             element={
