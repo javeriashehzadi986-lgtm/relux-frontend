@@ -42,7 +42,11 @@ const Home = () => {
   const requireLogin = useRequireLogin();
   const { isSaved, toggle: toggleWishlist } = useWishlist();
   const { products: featuredRentals, loading, error, refresh } = useFeaturedRentals(6);
-  const categories = usePublicMainCategories();
+  const {
+    mains: categories,
+    loading: categoriesLoading,
+    error: categoriesError,
+  } = usePublicMainCategories();
 
   const toggleFavorite = (product) => {
     if (!requireLogin()) return;
@@ -76,6 +80,19 @@ const Home = () => {
           <h2>Curated Categories</h2>
           <p>Finest selections for every occasion</p>
         </div>
+        {categoriesLoading && (
+          <p className="home-catalog-status" role="status">
+            Loading categories...
+          </p>
+        )}
+        {categoriesError && (
+          <p className="home-catalog-status home-catalog-status--error" role="alert">
+            {categoriesError}
+          </p>
+        )}
+        {!categoriesLoading && !categoriesError && categories.length === 0 && (
+          <p className="home-catalog-status">No categories are available yet.</p>
+        )}
         <div className="home-categories-grid">
           {categories.map((category) => (
             <Link
@@ -85,13 +102,11 @@ const Home = () => {
             >
               <Card className="home-category-shadcn-card">
                 <div className="home-category-image">
-                  <img
-                    alt={category.title}
-                    src={
-                      category.image ||
-                      "https://lh3.googleusercontent.com/aida-public/AB6AXuB2L3I-cDT-SAbb8wlj0WN8JPJXqWgxnBrT6R8CYt3vZVetG4pVDlkvqJ2PNhFiU7E11IELJBlheSge3StWoTNBYefLoyfUgO8yw55_kmCpweSfyKaC5MxJPkKd68Y89J3EZ7Jb0bjDFQceN16v11DAQjLcYRKuddl9fbDmtp3ri5Cu60PdrAFq5T5z0o0vORXYCAhrnoDWYXMqyvdhEcTgtjibPxGYBAbwGzrguaqVBNAWHZhKfAU2j2Ez7tt4lRQDSKEMRKxcAe4"
-                    }
-                  />
+                  {category.image ? (
+                    <img alt={category.title} src={category.image} />
+                  ) : (
+                    <div className="home-category-image-placeholder" aria-hidden="true" />
+                  )}
                 </div>
                 <CardContent className="home-category-card-content">
                   <CardTitle className="home-category-title">

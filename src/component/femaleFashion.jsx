@@ -23,8 +23,6 @@ import {
 import { useWishlist } from "@/hooks/useWishlist";
 
 const SIZES = LISTING_SIZE_OPTIONS;
-const PRICE_MIN = 5000;
-const PRICE_MAX = 150000;
 
 /** Shared fashion browse for any admin-managed main category slug. */
 export function FashionBrowse({ categorySlug = "female" }) {
@@ -38,7 +36,6 @@ export function FashionBrowse({ categorySlug = "female" }) {
       : "all",
   );
   const [selectedSize, setSelectedSize] = useState("");
-  const [priceMax, setPriceMax] = useState(PRICE_MAX);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("newest");
   const [currentPage, setCurrentPage] = useState(1);
@@ -46,7 +43,7 @@ export function FashionBrowse({ categorySlug = "female" }) {
   const { isSaved, toggle: toggleWishlist } = useWishlist();
   const { products, loading, error, refresh } = usePublicListings(categorySlug);
   const styleFilters = usePublicStyleFilters(categorySlug);
-  const mains = usePublicMainCategories();
+  const { mains } = usePublicMainCategories();
   const categoryMeta = mains.find((item) => item.slug === categorySlug);
   const pageTitle = categoryMeta?.title || `${categorySlug} Fashion`;
 
@@ -68,7 +65,6 @@ export function FashionBrowse({ categorySlug = "female" }) {
         listingType,
         style: selectedStyle,
         size: selectedSize,
-        priceMax,
         search: searchQuery,
         sortBy,
       }),
@@ -77,7 +73,6 @@ export function FashionBrowse({ categorySlug = "female" }) {
       listingType,
       selectedStyle,
       selectedSize,
-      priceMax,
       searchQuery,
       sortBy,
     ],
@@ -91,7 +86,6 @@ export function FashionBrowse({ categorySlug = "female" }) {
     setSelectedStyle("");
     setSelectedSize("");
     setListingType("all");
-    setPriceMax(PRICE_MAX);
     setSearchQuery("");
     setActiveTags([]);
   };
@@ -185,28 +179,6 @@ export function FashionBrowse({ categorySlug = "female" }) {
                 >
                   Resale
                 </Button>
-              </div>
-            </div>
-
-            <div className="female-filter-block">
-              <p className="female-filter-label">Price Range</p>
-              <input
-                type="range"
-                min={PRICE_MIN}
-                max={PRICE_MAX}
-                step="1000"
-                value={priceMax}
-                className="female-range-input"
-                aria-label="Price range"
-                onChange={(event) => setPriceMax(Number(event.target.value))}
-              />
-              <div className="female-range-labels">
-                <span>₨ {PRICE_MIN.toLocaleString("en-PK")}</span>
-                <span>
-                  {priceMax >= PRICE_MAX
-                    ? `₨ ${PRICE_MAX.toLocaleString("en-PK")}+`
-                    : `₨ ${priceMax.toLocaleString("en-PK")}`}
-                </span>
               </div>
             </div>
 

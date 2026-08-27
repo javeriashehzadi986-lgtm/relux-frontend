@@ -146,14 +146,14 @@ const SellerAddListing = () => {
   const [auctionEndTime, setAuctionEndTime] = useState(DEFAULT_AUCTION_END_TIME);
   const [rentPrice, setRentPrice] = useState("");
   const [itemPrice, setItemPrice] = useState("");
-  const [previewImages, setPreviewImages] = useState(previewThumbs);
-  const [previewHeroImage, setPreviewHeroImage] = useState(previewHero);
+  const [previewImages, setPreviewImages] = useState([]);
+  const [previewHeroImage, setPreviewHeroImage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const listingImagesRef = useRef(null);
   const addThumbRef = useRef(null);
 
-  const mainOptions = usePublicMainCategories();
+  const { mains: mainOptions } = usePublicMainCategories();
   const selectedMain = mainOptions.find((item) => item.name === mainCategory);
   const styleOptions = usePublicStyleFilters(selectedMain?.slug || "");
 
@@ -238,17 +238,17 @@ const SellerAddListing = () => {
 
   const securityDeposit = itemPrice;
 
-  const previewTitle = title.trim() || "Silk Midi Dress";
+  const previewTitle = title.trim() || "Listing title";
   const sellerDisplayName = user?.name?.trim() || "Seller";
   const sellerInitials = getSellerInitials(sellerDisplayName);
   const previewPrice =
     listingType === "sale"
       ? salePrice
         ? `Rs. ${Number(salePrice).toLocaleString("en-PK")}`
-        : "$450"
+        : "Set sale price"
       : rentPrice
-        ? `$${rentPrice} / day`
-        : "$45 / day";
+        ? `Rs. ${Number(rentPrice).toLocaleString("en-PK")} / day`
+        : "Set rent price";
 
   const handleListingImagesChange = (event) => {
     const files = Array.from(event.target.files ?? []);
@@ -263,7 +263,7 @@ const SellerAddListing = () => {
   const handleRemoveThumb = (index) => {
     setPreviewImages((current) => {
       const next = current.filter((_, thumbIndex) => thumbIndex !== index);
-      setPreviewHeroImage(next[0] ?? previewHero);
+      setPreviewHeroImage(next[0] ?? "");
       return next;
     });
   };
@@ -279,7 +279,8 @@ const SellerAddListing = () => {
     try {
       const preparedGallery = await prepareImageList(previewImages);
       const mainImage =
-        preparedGallery[0] || (await prepareImageSource(previewHeroImage));
+        preparedGallery[0] ||
+        (previewHeroImage ? await prepareImageSource(previewHeroImage) : "");
 
       let resolvedAuctionEndDate = auctionEndDate;
       if (listingType === "sale") {
@@ -294,7 +295,7 @@ const SellerAddListing = () => {
       }
 
       const payload = {
-        title: title.trim() || previewTitle,
+        title: title.trim(),
         brand: brand.trim(),
         description: description.trim(),
         listingType,
@@ -690,7 +691,11 @@ const SellerAddListing = () => {
             <p className="add-listing-preview-label">Live Preview</p>
             <Card className="add-listing-preview-card">
               <div className="add-listing-preview-image-wrap">
-                <img src={previewHeroImage} alt={previewTitle} />
+                {previewHeroImage ? (
+                  <img src={previewHeroImage} alt={previewTitle} />
+                ) : (
+                  <div className="add-listing-preview-image-empty">Upload images to preview</div>
+                )}
                 <span className="add-listing-preview-badge add-listing-preview-badge--condition">
                   {condition}
                 </span>

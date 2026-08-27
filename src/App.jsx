@@ -11,6 +11,7 @@ import KidsFashion from "./component/kidsFashion";
 import FemaleFashion, { CategoryFashion } from "./component/femaleFashion";
 import DressDetails from "./component/dressDetails";
 import FinalizePurchase from "./component/finalizePurchase";
+import FinalizeRentalCheckout from "./component/finalizeRentalCheckout";
 import PaymentSuccess from "./component/paymentSuccess";
 import PaymentCancel from "./component/paymentCancel";
 import Messages from "./component/messages";
@@ -118,6 +119,11 @@ function App() {
           <Route path="/dress/:id/checkout" element={
             <ProtectedRoute roles={["buyer"]}>
               <FinalizePurchase />
+            </ProtectedRoute>
+          } />
+          <Route path="/orders/:orderId/checkout" element={
+            <ProtectedRoute roles={["buyer"]}>
+              <FinalizeRentalCheckout />
             </ProtectedRoute>
           } />
           <Route
