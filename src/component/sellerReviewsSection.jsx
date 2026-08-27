@@ -74,8 +74,7 @@ export function SellerReviewsSection({
 
   const sellerName =
     sellerInfo?.name ?? dress.sellerName ?? dress.seller ?? dress.brand;
-  const sellerMemberSince =
-    sellerInfo?.memberSince ?? dress.sellerMemberSince ?? "2022";
+  const sellerMemberSince = sellerInfo?.memberSince ?? dress.sellerMemberSince ?? null;
 
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewRating, setReviewRating] = useState(0);
@@ -144,8 +143,12 @@ export function SellerReviewsSection({
                   ({stats.count} Review{stats.count === 1 ? "" : "s"})
                 </span>
               </span>
-              <span aria-hidden="true">•</span>
-              <span>Member since {sellerMemberSince}</span>
+              {sellerMemberSince ? (
+                <>
+                  <span aria-hidden="true">•</span>
+                  <span>Member since {sellerMemberSince}</span>
+                </>
+              ) : null}
             </div>
           </div>
         </div>

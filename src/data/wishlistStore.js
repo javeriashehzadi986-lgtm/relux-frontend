@@ -48,7 +48,7 @@ export function productToWishlistItem(product, addedAt = Date.now()) {
     title: product.title,
     listingType,
     price,
-    badge: product.badge ?? (listingType === "rent" ? "Pristine" : "Pre-owned"),
+    badge: product.badge ?? "Pre-owned",
     badgeVariant:
       product.badgeVariant ?? (listingType === "rent" ? "primary" : "secondary"),
     image: product.image ?? product.mainImage,
@@ -136,7 +136,7 @@ export function resolveWishlistPayload(productOrId) {
       listingType,
       price: typeof price === "number" ? String(price) : price,
       badge:
-        productOrId.badge ?? (listingType === "rent" ? "Pristine" : "Pre-owned"),
+        productOrId.badge ?? "Pre-owned",
       badgeVariant:
         productOrId.badgeVariant ??
         (listingType === "rent" ? "primary" : "secondary"),

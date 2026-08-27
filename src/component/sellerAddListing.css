@@ -597,6 +597,19 @@
   transition: transform 0.5s;
 }
 
+.add-listing-preview-image-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 24px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #787b7a;
+  background: #f5f0eb;
+}
+
 .add-listing-preview-card:hover .add-listing-preview-image-wrap img {
   transform: scale(1.05);
 }

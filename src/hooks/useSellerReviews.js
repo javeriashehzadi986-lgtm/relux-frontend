@@ -1,13 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import api from "@/services/api";
 import { isMongoListingId, normalizeMongoId } from "@/data/dressCatalog";
-import {
-  addSellerReport,
-  addSellerReview,
-  getSellerKey,
-  getSellerRatingStats,
-  getSellerReviews as getLocalSellerReviews,
-} from "@/data/sellerReviewsStore";
 
 export function isMongoSellerId(id) {
   return /^[a-f0-9]{24}$/i.test(String(id ?? ""));
@@ -18,21 +11,11 @@ export function useSellerReviews(dressOrSellerId) {
     typeof dressOrSellerId === "string" || typeof dressOrSellerId === "number"
       ? normalizeMongoId(dressOrSellerId)
       : normalizeMongoId(dressOrSellerId?.sellerId);
-  const sellerKey =
-    typeof dressOrSellerId === "object" && dressOrSellerId
-      ? getSellerKey(dressOrSellerId)
-      : getSellerKey({ sellerId });
   const dress = typeof dressOrSellerId === "object" ? dressOrSellerId : null;
   const usesApi = Boolean(sellerId);
 
-  const [reviews, setReviews] = useState(() =>
-    usesApi ? [] : getLocalSellerReviews(sellerKey),
-  );
-  const [stats, setStats] = useState(() =>
-    usesApi
-      ? { average: 0, count: 0 }
-      : getSellerRatingStats(getLocalSellerReviews(sellerKey)),
-  );
+  const [reviews, setReviews] = useState([]);
+  const [stats, setStats] = useState({ average: 0, count: 0 });
   const [sellerInfo, setSellerInfo] = useState(null);
   const [loading, setLoading] = useState(usesApi);
   const [error, setError] = useState("");
@@ -40,9 +23,8 @@ export function useSellerReviews(dressOrSellerId) {
 
   const load = useCallback(async () => {
     if (!usesApi) {
-      const localReviews = getLocalSellerReviews(sellerKey);
-      setReviews(localReviews);
-      setStats(getSellerRatingStats(localReviews));
+      setReviews([]);
+      setStats({ average: 0, count: 0 });
       setSellerInfo(null);
       setError("");
       setLoading(false);
@@ -65,7 +47,7 @@ export function useSellerReviews(dressOrSellerId) {
     } finally {
       setLoading(false);
     }
-  }, [sellerId, sellerKey, usesApi]);
+  }, [sellerId, usesApi]);
 
   useEffect(() => {
     load();
@@ -74,28 +56,7 @@ export function useSellerReviews(dressOrSellerId) {
   const submitReview = useCallback(
     async ({ rating, quote, author, reportReason = "", reportDetails = "" }) => {
       if (!usesApi) {
-        addSellerReview(sellerKey, { rating, quote, author });
-
-        if (reportReason || reportDetails.trim()) {
-          addSellerReport({
-            sellerKey,
-            dressId: dress?.id,
-            reason: reportReason || "other",
-            details: reportDetails.trim() || "No additional details provided.",
-            author,
-          });
-        }
-
-        const localReviews = getLocalSellerReviews(sellerKey);
-        setReviews(localReviews);
-        setStats(getSellerRatingStats(localReviews));
-
-        return {
-          message:
-            reportReason || reportDetails.trim()
-              ? "Thank you! Your review and report have been submitted to our team."
-              : "Thank you! Your review has been submitted.",
-        };
+        throw new Error("Reviews are only available for live seller listings.");
       }
 
       setSubmitting(true);
@@ -129,7 +90,7 @@ export function useSellerReviews(dressOrSellerId) {
         setSubmitting(false);
       }
     },
-    [dress?.id, sellerId, sellerKey, usesApi, load],
+    [dress?.id, sellerId, usesApi, load],
   );
 
   return {

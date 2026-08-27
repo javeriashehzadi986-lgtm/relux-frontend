@@ -46,7 +46,7 @@ const resolveDressConditionLabel = (dress, listingType = dress.listingType) => {
   if (dress.listingCondition) return dress.listingCondition;
   const label = dress.conditionStatus ?? dress.condition;
   if (label) return normalizeListingCondition(label);
-  return listingType === "rent" ? "Pristine" : "Like New";
+  return "Like New";
 };
 
 export const getDressConditionLabel = (dress) =>
@@ -92,7 +92,7 @@ const enrichResaleDress = (dress) => {
     listingType: "resale",
     gallery,
     mainImage: gallery[0] ?? mainImage,
-    rating: dress.rating ?? 5.0,
+    rating: dress.rating ?? null,
     salePrice,
     salePriceFormatted: dress.salePriceFormatted ?? formatRs(salePrice),
     startingBid,
@@ -225,7 +225,7 @@ export const mapApiListingToDress = (listing) => {
     image: listing.mainImage,
     gallery: listing.gallery?.length ? listing.gallery : listing.mainImage ? [listing.mainImage] : [],
     listingSize: listing.listingSize || "M",
-    listingCondition: listing.listingCondition || (isRent ? "Pristine" : "Like New"),
+    listingCondition: listing.listingCondition || "Like New",
     style: listing.style,
     styles: listing.style ? [listing.style] : [],
     clothingType: listing.clothingType,
@@ -289,10 +289,6 @@ export const toProductCardViewFromDress = (dress) => {
 };
 
 const deriveBadge = (dress) => {
-  if (dress.listingType === "rent") {
-    return { badge: "Pristine", badgeVariant: "primary" };
-  }
-
   const condition = dress.listingCondition ?? dress.conditionStatus ?? dress.condition ?? "";
   if (/brand new|never worn/i.test(condition)) {
     return { badge: "Brand New", badgeVariant: "primary" };

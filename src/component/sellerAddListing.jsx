@@ -29,14 +29,6 @@ const clothingTypes = [
 const sizeOptions = LISTING_SIZE_OPTIONS;
 const conditionOptions = LISTING_CONDITION_OPTIONS;
 
-const previewThumbs = [
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuAXxVIrbVCOCT82XNvkqWO0eEgioxMP5KllgqBRslb6p1K2vZG5_Al5fJ0WjpScR-NAIyW3SXOHm6WGzF2eEqHapcIqCMrJwzRgYJXTEXMBrf35OmZKCR64XYu0iC9vTZgRPFYwJXTh9_A_X_X4PEDUrmB3IYHftxGQ1MkknW6Cai6kwDxcX_3U9A-h9r2rNMbLE-VXd6Lj_biOHW-L3auwAj9iHsAJkA4Li7yl_SjiYQaQPEoRsFtv5fnSoUFkGjXP0Uq6bEpoQpqM",
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuAyf7vT5X2qY1XQN5M1ak9f1CLumy3HmE8vDUuKH1ZSPpQLqVL9CNIJi-ndKu3t34y1Aw7g6iDgmbzUB3E_6Q9aa4YEPgFMrBL24mpKEY1Og6AbAM45Wpb_aq9ii8m5e_B-vNnXMSPtW5OJZteQHiZRmc4UZIfeyCrsfPUjxD4tEVAuclonIO9ZrCepv-wCojgEjvGPYR3mElVemXHkJsg9tCwNYjJbL4volagWC56IXovbeXRvk03DwSeFzm08tNkWrKEO7mULoXIk",
-];
-
-const previewHero =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuDlwhyF6SS6jajGCbROAAXC1Renqpw5TnYlrL6dFzceDZ_2kRwE9dNAibtUk6ZrRLJRn3XFwdfRfvnrZopuYbS_9CrCzgW27ZehzyZtZYbySZTlQ3TLxkhqozYHhZ4TJW8uwKxaR4guh0AMevUrs9qnhRc8Q6NqCoe6iEgZMqzcDQLfrzj6uZeAeNi951t7Es2AQ7B0kNgQZNpo6EjbVArqNB8M4HL1Np63Vf1XWcoN4XbyPD0V3keWBU9VirgS5BQ9FPRaaHI6mObD";
-
 function getSellerInitials(name = "") {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return "S";
@@ -108,14 +100,14 @@ const SellerAddListing = () => {
   const [auctionEndDate, setAuctionEndDate] = useState("");
   const [rentPrice, setRentPrice] = useState("");
   const [itemPrice, setItemPrice] = useState("");
-  const [previewImages, setPreviewImages] = useState(previewThumbs);
-  const [previewHeroImage, setPreviewHeroImage] = useState(previewHero);
+  const [previewImages, setPreviewImages] = useState([]);
+  const [previewHeroImage, setPreviewHeroImage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const listingImagesRef = useRef(null);
   const addThumbRef = useRef(null);
 
-  const mainOptions = usePublicMainCategories();
+  const { mains: mainOptions } = usePublicMainCategories();
   const selectedMain = mainOptions.find((item) => item.name === mainCategory);
   const styleOptions = usePublicStyleFilters(selectedMain?.slug || "");
 
@@ -198,17 +190,17 @@ const SellerAddListing = () => {
 
   const securityDeposit = itemPrice;
 
-  const previewTitle = title.trim() || "Silk Midi Dress";
+  const previewTitle = title.trim() || "Listing title";
   const sellerDisplayName = user?.name?.trim() || "Seller";
   const sellerInitials = getSellerInitials(sellerDisplayName);
   const previewPrice =
     listingType === "sale"
       ? salePrice
         ? `Rs. ${Number(salePrice).toLocaleString("en-PK")}`
-        : "$450"
+        : "Set sale price"
       : rentPrice
-        ? `$${rentPrice} / day`
-        : "$45 / day";
+        ? `Rs. ${Number(rentPrice).toLocaleString("en-PK")} / day`
+        : "Set rent price";
 
   const handleListingImagesChange = (event) => {
     const files = Array.from(event.target.files ?? []);
@@ -223,7 +215,7 @@ const SellerAddListing = () => {
   const handleRemoveThumb = (index) => {
     setPreviewImages((current) => {
       const next = current.filter((_, thumbIndex) => thumbIndex !== index);
-      setPreviewHeroImage(next[0] ?? previewHero);
+      setPreviewHeroImage(next[0] ?? "");
       return next;
     });
   };
@@ -239,10 +231,11 @@ const SellerAddListing = () => {
     try {
       const preparedGallery = await prepareImageList(previewImages);
       const mainImage =
-        preparedGallery[0] || (await prepareImageSource(previewHeroImage));
+        preparedGallery[0] ||
+        (previewHeroImage ? await prepareImageSource(previewHeroImage) : "");
 
       const payload = {
-        title: title.trim() || previewTitle,
+        title: title.trim(),
         brand: brand.trim(),
         description: description.trim(),
         listingType,
@@ -622,7 +615,11 @@ const SellerAddListing = () => {
             <p className="add-listing-preview-label">Live Preview</p>
             <Card className="add-listing-preview-card">
               <div className="add-listing-preview-image-wrap">
-                <img src={previewHeroImage} alt={previewTitle} />
+                {previewHeroImage ? (
+                  <img src={previewHeroImage} alt={previewTitle} />
+                ) : (
+                  <div className="add-listing-preview-image-empty">Upload images to preview</div>
+                )}
                 <span className="add-listing-preview-badge add-listing-preview-badge--condition">
                   {condition}
                 </span>
