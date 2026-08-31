@@ -139,6 +139,14 @@
   color: #404944;
 }
 
+.orders-requests-escrow {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #5b3f8a;
+}
+
 .orders-requests-status {
   flex-shrink: 0;
   padding: 0.25rem 0.5rem;
@@ -154,9 +162,25 @@
   background: #e5e2dc;
 }
 
-.orders-requests-status--approved {
+.orders-requests-status--approved,
+.orders-requests-status--processing {
   color: #0a4938;
   background: rgba(127, 184, 161, 0.35);
+}
+
+.orders-requests-status--shipped {
+  color: #1e4f7a;
+  background: rgba(96, 165, 250, 0.28);
+}
+
+.orders-requests-status--delivered {
+  color: #5b3f8a;
+  background: rgba(167, 139, 250, 0.28);
+}
+
+.orders-requests-status--returned {
+  color: #8a5b16;
+  background: rgba(251, 191, 36, 0.28);
 }
 
 .orders-requests-status--completed {

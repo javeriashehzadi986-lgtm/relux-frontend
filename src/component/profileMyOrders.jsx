@@ -7,6 +7,7 @@ import {
   Clock,
   History,
   Search,
+  ShieldCheck,
   ShoppingBag,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -71,7 +72,10 @@ const matchesFilter = (order, filter) => {
     return (
       order.status === "processing" ||
       order.status === "rental-active" ||
-      order.status === "awaiting-payment"
+      order.status === "awaiting-payment" ||
+      order.status === "shipped" ||
+      order.status === "paid" ||
+      order.status === "returned"
     );
   }
   return true;
@@ -81,7 +85,8 @@ const ProfileMyOrders = () => {
   const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const { orders, loading, error, cancelOrder, removeOrder } = useBuyerOrders();
+  const { orders, loading, error, cancelOrder, removeOrder, confirmReceived, markReturned } =
+    useBuyerOrders();
   const [cancelTarget, setCancelTarget] = useState(null);
   const [actionError, setActionError] = useState("");
 
@@ -115,6 +120,30 @@ const ProfileMyOrders = () => {
 
     if (action.id === "pay" || action.id === "checkout") {
       navigate(getOrderActionRoute("checkout", order));
+      return;
+    }
+
+    if (action.id === "confirm-received") {
+      setActionError("");
+      try {
+        await confirmReceived(order.id);
+      } catch (err) {
+        setActionError(err.message || "Failed to confirm receipt");
+      }
+      return;
+    }
+
+    if (action.id === "mark-returned") {
+      if (action.disabled) {
+        setActionError(action.disabledReason || "Return is not available yet");
+        return;
+      }
+      setActionError("");
+      try {
+        await markReturned(order.id);
+      } catch (err) {
+        setActionError(err.message || "Failed to mark return");
+      }
       return;
     }
 
@@ -233,6 +262,14 @@ const ProfileMyOrders = () => {
                             </div>
                           );
                         })}
+                        {order.type === "rental" && order.escrowLabel ? (
+                          <div className="profile-order-detail">
+                            <ShieldCheck size={18} aria-hidden="true" />
+                            <span className="profile-order-detail-text--highlight">
+                              {order.escrowLabel}
+                            </span>
+                          </div>
+                        ) : null}
                       </div>
                     </div>
 
@@ -285,7 +322,9 @@ const ProfileMyOrders = () => {
                           key={action.id}
                           type="button"
                           variant="ghost"
-                          className={actionClass}
+                          className={`${actionClass}${action.disabled ? " profile-order-action--disabled" : ""}`}
+                          disabled={Boolean(action.disabled)}
+                          title={action.disabled ? action.disabledReason : undefined}
                           onClick={() => handleOrderAction(action, order)}
                         >
                           {ActionIcon && <ActionIcon size={16} aria-hidden="true" />}

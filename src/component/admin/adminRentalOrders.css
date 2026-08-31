@@ -407,9 +407,20 @@
   font-weight: 700;
 }
 
-.admin-rental-status-badge--ongoing {
+.admin-rental-status-badge--ongoing,
+.admin-rental-status-badge--processing {
   background: rgba(203, 235, 207, 0.4);
   color: var(--admin-on-secondary-fixed-variant);
+}
+
+.admin-rental-status-badge--shipped {
+  background: rgba(147, 197, 253, 0.35);
+  color: #1e4f7a;
+}
+
+.admin-rental-status-badge--delivered {
+  background: rgba(196, 181, 253, 0.35);
+  color: #5b3f8a;
 }
 
 .admin-rental-status-badge--returned {

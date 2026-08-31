@@ -194,30 +194,30 @@ const MessagesContent = () => {
     if (!activeId) return;
 
     try {
-      switch (action) {
-        case "markRead":
+    switch (action) {
+      case "markRead":
           if (activeId) {
             await markConversationRead(activeId);
             await refreshActive();
           }
-          setActionNotice("Conversation marked as read.");
-          break;
+        setActionNotice("Conversation marked as read.");
+        break;
         case "viewListing":
           if (listingId) {
             navigate(isSeller ? "/sellerProfile?section=listings" : `/dress/${listingId}`);
-          }
-          break;
-        case "toggleMute":
+        }
+        break;
+      case "toggleMute":
           await toggleMute();
           setActionNotice(
             muted ? "Notifications unmuted." : "Notifications muted for this chat.",
           );
-          break;
-        case "clearHistory":
+        break;
+      case "clearHistory":
           await clearHistory();
-          setActionNotice("Chat history cleared.");
-          break;
-        case "report":
+        setActionNotice("Chat history cleared.");
+        break;
+      case "report":
           await api.createReport({
             issueType: "Other",
             subject: `Report conversation with ${partnerName ?? "user"}`,
@@ -232,13 +232,13 @@ const MessagesContent = () => {
               .join("\n"),
           });
           setActionNotice("Report submitted. Our support team will review this conversation.");
-          break;
-        case "block":
+        break;
+      case "block":
           await blockConversation();
           setActionNotice(`${partnerName ?? "User"} has been blocked.`);
-          break;
-        default:
-          break;
+        break;
+      default:
+        break;
       }
     } catch (err) {
       setActionNotice(err.message || "Action failed.");
@@ -255,10 +255,10 @@ const MessagesContent = () => {
     setAttachError("");
     try {
       await sendMessage(trimmed, image);
-      setMessage("");
-      if (textareaRef.current) {
-        textareaRef.current.style.height = "auto";
-      }
+    setMessage("");
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+    }
     } catch (err) {
       setActionNotice(err.message || "Failed to send message.");
     } finally {
@@ -298,9 +298,9 @@ const MessagesContent = () => {
 
       const caption = message.trim() || "Shared an image";
       await sendMessage(caption, String(dataUrl));
-      setMessage("");
-      if (textareaRef.current) {
-        textareaRef.current.style.height = "auto";
+    setMessage("");
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
       }
     } catch (err) {
       setActionNotice(err.message || "Failed to send image.");
@@ -412,39 +412,39 @@ const MessagesContent = () => {
                 const image = isSeller ? conversation.listingImage : conversation.dressImage;
 
                 return (
-                  <button
-                    key={conversation.id}
-                    type="button"
-                    className={`seller-chat-conversation ${
+                <button
+                  key={conversation.id}
+                  type="button"
+                  className={`seller-chat-conversation ${
                       conversation.id === activeId ? "seller-chat-conversation--active" : ""
-                    }`}
+                  }`}
                     onClick={() => selectConversation(conversation.id)}
-                  >
-                    <div className="seller-chat-conversation-body">
-                      <div className="seller-chat-conversation-top">
+                >
+                  <div className="seller-chat-conversation-body">
+                    <div className="seller-chat-conversation-top">
                         <h3>{name}</h3>
-                        <span
-                          className={`seller-chat-conversation-time ${
-                            conversation.id !== activeId
-                              ? "seller-chat-conversation-time--muted"
-                              : ""
-                          }`}
-                        >
-                          {conversation.timeLabel}
-                        </span>
-                      </div>
+                      <span
+                        className={`seller-chat-conversation-time ${
+                          conversation.id !== activeId
+                            ? "seller-chat-conversation-time--muted"
+                            : ""
+                        }`}
+                      >
+                        {conversation.timeLabel}
+                      </span>
+                    </div>
                       <p className="seller-chat-conversation-preview">{conversation.preview}</p>
-                      <div className="seller-chat-conversation-dress">
+                    <div className="seller-chat-conversation-dress">
                         <img src={image} alt="" />
                         <span>{title}</span>
-                      </div>
                     </div>
-                    {conversation.unread ? (
+                  </div>
+                  {conversation.unread ? (
                       <span className="seller-chat-unread" aria-label={`${conversation.unread} unread`}>
-                        {conversation.unread}
-                      </span>
-                    ) : null}
-                  </button>
+                      {conversation.unread}
+                    </span>
+                  ) : null}
+                </button>
                 );
               })
             ) : (
@@ -484,16 +484,16 @@ const MessagesContent = () => {
           ) : (
             <>
               {!isDesktop && conversationId ? (
-                <button
-                  type="button"
-                  className="seller-chat-back-mobile"
-                  onClick={() => navigate("/messages")}
-                >
-                  <span className="material-symbols-outlined" aria-hidden="true">
-                    arrow_back
-                  </span>
-                  All chats
-                </button>
+              <button
+                type="button"
+                className="seller-chat-back-mobile"
+                onClick={() => navigate("/messages")}
+              >
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  arrow_back
+                </span>
+                All chats
+              </button>
               ) : null}
 
               <header className="seller-chat-header">
@@ -518,19 +518,19 @@ const MessagesContent = () => {
                     <span className="seller-chat-discussing-title">{listingTitle}</span>
                   </div>
                   {listingId ? (
-                    <Link
+                  <Link
                       to={
                         isSeller
                           ? "/sellerProfile?section=listings"
                           : `/dress/${listingId}`
                       }
-                      className="seller-chat-view-dress-btn"
-                    >
-                      <span className="material-symbols-outlined" aria-hidden="true">
+                    className="seller-chat-view-dress-btn"
+                  >
+                    <span className="material-symbols-outlined" aria-hidden="true">
                         {isSeller ? "inventory_2" : "visibility"}
-                      </span>
+                    </span>
                       {isSeller ? "My Listing" : "View Dress"}
-                    </Link>
+                  </Link>
                   ) : null}
                   <div className="seller-chat-more-wrap" ref={menuRef}>
                     <button
@@ -609,7 +609,7 @@ const MessagesContent = () => {
                         {item.image ? (
                           <div className="seller-chat-message-image">
                             <img src={item.image} alt="Attachment" />
-                          </div>
+                        </div>
                         ) : null}
                         <span className="seller-chat-message-time">
                           {item.time}

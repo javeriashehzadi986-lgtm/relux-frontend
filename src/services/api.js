@@ -375,6 +375,16 @@ export const api = {
       method: "DELETE",
     }),
 
+  confirmBuyerOrderReceived: (id) =>
+    request(`/buyer/orders/${id}/confirm-received`, {
+      method: "PATCH",
+    }),
+
+  markBuyerOrderReturned: (id) =>
+    request(`/buyer/orders/${id}/mark-returned`, {
+      method: "PATCH",
+    }),
+
   // Payments (Stripe)
   createSaleCheckout: (body) =>
     request("/payments/checkout/sale", {
@@ -414,6 +424,16 @@ export const api = {
 
   completeSellerOrder: (id) =>
     request(`/seller/orders/${id}/complete`, {
+      method: "PATCH",
+    }),
+
+  shipSellerOrder: (id) =>
+    request(`/seller/orders/${id}/ship`, {
+      method: "PATCH",
+    }),
+
+  confirmSellerOrderReturn: (id) =>
+    request(`/seller/orders/${id}/confirm-return`, {
       method: "PATCH",
     }),
 

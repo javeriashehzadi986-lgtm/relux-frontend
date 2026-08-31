@@ -322,9 +322,25 @@
   color: #2e7d32;
 }
 
+.admin-resale-status-badge--processing,
 .admin-resale-status-badge--pending {
   background: #fff3e0;
   color: #e65100;
+}
+
+.admin-resale-status-badge--shipped {
+  background: rgba(147, 197, 253, 0.35);
+  color: #1e4f7a;
+}
+
+.admin-resale-status-badge--delivered {
+  background: rgba(196, 181, 253, 0.35);
+  color: #5b3f8a;
+}
+
+.admin-resale-status-badge--returned {
+  background: rgba(251, 191, 36, 0.28);
+  color: #8a5b16;
 }
 
 .admin-resale-status-badge--cancelled {

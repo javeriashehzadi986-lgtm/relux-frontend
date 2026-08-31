@@ -34,84 +34,140 @@ function DateIcon({ type }) {
   return <Calendar size={16} strokeWidth={1.75} />;
 }
 
-function OrderActions({ order, onApprove, onReject, onComplete }) {
-  if (order.actions === "approve-reject") {
+function OrderActions({ order, onAction }) {
+  const actions = Array.isArray(order.actions) ? order.actions : [];
+  const detailAction = actions.find((action) => action.id === "details");
+  const interactiveActions = actions.filter((action) => action.id !== "details");
+
+  const hasApproveReject =
+    interactiveActions.some((action) => action.id === "approve") &&
+    interactiveActions.some((action) => action.id === "reject");
+
+  if (hasApproveReject) {
+    const rejectAction = interactiveActions.find((action) => action.id === "reject");
+    const approveAction = interactiveActions.find((action) => action.id === "approve");
+    const otherActions = interactiveActions.filter(
+      (action) => action.id !== "approve" && action.id !== "reject",
+    );
+
     return (
-      <div className="orders-requests-actions orders-requests-actions--split">
-        <Button
-          type="button"
-          variant="outline"
-          className="orders-requests-btn-outline"
-          onClick={() => onReject(order.id)}
-        >
-          Reject
-        </Button>
-        <Button
-          type="button"
-          className="orders-requests-btn-primary"
-          onClick={() => onApprove(order.id)}
-        >
-          Approve
-        </Button>
-      </div>
+      <>
+        <div className="orders-requests-actions orders-requests-actions--split">
+          <Button
+            type="button"
+            variant="outline"
+            className="orders-requests-btn-outline"
+            onClick={() => onAction(rejectAction.id, order.id)}
+          >
+            {rejectAction.label}
+          </Button>
+          <Button
+            type="button"
+            className="orders-requests-btn-primary"
+            onClick={() => onAction(approveAction.id, order.id)}
+          >
+            {approveAction.label}
+          </Button>
+        </div>
+        {otherActions.map((action) => (
+          <Button
+            key={action.id}
+            type="button"
+            className="orders-requests-btn-primary orders-requests-btn-full"
+            onClick={() => onAction(action.id, order.id)}
+          >
+            {action.label}
+          </Button>
+        ))}
+        {detailAction?.link ? (
+          <Button
+            type="button"
+            variant="outline"
+            className="orders-requests-btn-muted orders-requests-btn-full"
+            asChild
+          >
+            <Link to={`/dress/${order.dressId}`}>{detailAction.label}</Link>
+          </Button>
+        ) : null}
+      </>
     );
   }
 
-  if (order.actions === "complete") {
+  if (interactiveActions.length === 1 && !detailAction) {
+    const action = interactiveActions[0];
     return (
       <Button
         type="button"
         className="orders-requests-btn-primary orders-requests-btn-full"
-        onClick={() => onComplete(order.id)}
+        onClick={() => onAction(action.id, order.id)}
       >
-        Mark as Completed
+        {action.label}
       </Button>
     );
   }
 
   return (
-    <Button
-      type="button"
-      variant="outline"
-      className="orders-requests-btn-muted orders-requests-btn-full"
-      asChild
-    >
-      <Link to={`/dress/${order.dressId}`}>View Details</Link>
-    </Button>
+    <>
+      {interactiveActions.map((action) => (
+        <Button
+          key={action.id}
+          type="button"
+          className={
+            action.variant === "outline"
+              ? "orders-requests-btn-outline orders-requests-btn-full"
+              : "orders-requests-btn-primary orders-requests-btn-full"
+          }
+          onClick={() => onAction(action.id, order.id)}
+        >
+          {action.label}
+        </Button>
+      ))}
+      {detailAction?.link ? (
+        <Button
+          type="button"
+          variant="outline"
+          className="orders-requests-btn-muted orders-requests-btn-full"
+          asChild
+        >
+          <Link to={`/dress/${order.dressId}`}>{detailAction.label}</Link>
+        </Button>
+      ) : null}
+    </>
   );
 }
 
 export function SellerOrdersRequestsContent() {
-  const { orders, loading, error, approveOrder, rejectOrder, completeOrder } =
-    useSellerOrders();
+  const {
+    orders,
+    loading,
+    error,
+    approveOrder,
+    rejectOrder,
+    completeOrder,
+    shipOrder,
+    confirmReturnOrder,
+  } = useSellerOrders();
   const [activeFilter, setActiveFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [actionError, setActionError] = useState("");
 
-  const handleApprove = async (orderId) => {
+  const handleOrderAction = async (actionId, orderId) => {
     setActionError("");
-    try {
-      await approveOrder(orderId);
-    } catch (err) {
-      setActionError(err.message || "Failed to approve");
-    }
-  };
+    const handlers = {
+      approve: approveOrder,
+      reject: rejectOrder,
+      ship: shipOrder,
+      "confirm-return": confirmReturnOrder,
+      complete: completeOrder,
+    };
 
-  const handleReject = async (orderId) => {
-    setActionError("");
-    try {
-      await rejectOrder(orderId);
-    } catch (err) {
-      setActionError(err.message || "Failed to reject");
-    }
-  };
+    const handler = handlers[actionId];
+    if (!handler) return;
 
-  const handleComplete = async (orderId) => {
-    setActionError("");
     try {
-      await completeOrder(orderId);
+      await handler(orderId);
     } catch (err) {
-      setActionError(err.message || "Failed to complete");
+      setActionError(err.message || "Action failed");
     }
   };
 
@@ -136,7 +192,11 @@ export function SellerOrdersRequestsContent() {
         case "Pending":
           return order.status === "Pending";
         case "Completed":
-          return order.status === "Completed";
+          return (
+            order.status === "Completed" ||
+            order.status === "Delivered" ||
+            order.status === "Rental Completed"
+          );
         default:
           return true;
       }
@@ -244,12 +304,15 @@ export function SellerOrdersRequestsContent() {
                       <span className="orders-requests-order-type">
                         {order.orderType}
                       </span>
+                      {order.escrowLabel ? (
+                        <span className="orders-requests-escrow">{order.escrowLabel}</span>
+                      ) : null}
                     </div>
                   </div>
                   <span
-                    className={`orders-requests-status orders-requests-status--${order.statusVariant}`}
+                    className={`orders-requests-status orders-requests-status--${order.statusVariant || "approved"}`}
                   >
-                    {order.status}
+                    {order.fulfillmentLabel || order.status}
                   </span>
                 </div>
 
@@ -271,12 +334,7 @@ export function SellerOrdersRequestsContent() {
                   </div>
                 </div>
 
-                <OrderActions
-                  order={order}
-                  onApprove={handleApprove}
-                  onReject={handleReject}
-                  onComplete={handleComplete}
-                />
+                <OrderActions order={order} onAction={handleOrderAction} />
               </CardContent>
             </Card>
           ))

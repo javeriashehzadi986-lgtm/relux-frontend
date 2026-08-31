@@ -381,9 +381,9 @@ export const hydrateBuyerOrder = (order) => {
 
   return {
     ...order,
-    title: dress?.title ?? "Listed item",
-    brand: dress?.brand ?? "",
-    image: dress?.mainImage ?? dress?.image ?? "",
+    title: dress?.title ?? order.productTitle ?? "Listed item",
+    brand: dress?.brand ?? order.productBrand ?? "",
+    image: dress?.mainImage ?? dress?.image ?? order.productImage ?? "",
     listingType: dress?.listingType ?? (order.type === "rental" ? "rent" : "resale"),
     amount:
       amountFromApi ||
@@ -401,9 +401,9 @@ export const hydrateSellerOrder = (order) => {
 
   return {
     ...order,
-    itemTitle: dress?.title ?? "Listed item",
-    itemImage: dress?.mainImage ?? dress?.image ?? "",
-    brand: dress?.brand ?? "",
+    itemTitle: dress?.title ?? order.productTitle ?? "Listed item",
+    itemImage: dress?.mainImage ?? dress?.image ?? order.productImage ?? "",
+    brand: dress?.brand ?? order.productBrand ?? "",
   };
 };
 

@@ -68,7 +68,11 @@ const DressDetails = () => {
       .catch((err) => {
         if (!cancelled) {
           setDress(null);
-          setLoadError(err.message || "Could not load this listing.");
+          setLoadError(
+            err.message?.includes("Listing not found")
+              ? "This listing is not publicly available. Sign in with the buyer or seller account linked to this order to view it."
+              : err.message || "Could not load this listing.",
+          );
         }
       })
       .finally(() => {

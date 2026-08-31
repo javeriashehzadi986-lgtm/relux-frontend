@@ -6,8 +6,10 @@ const ADMIN_AVATAR =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuB318p0ASk7p2tO95wsx8Jq0kaTgr3MOqb-ncub0SBhW1z4zMezEl2iqzlSDl1uPBuRWmHuLJdKS-l9PzeXhdMoZQSXiE3LrnD1VXmSveP9246LG8c7dAtd0IHfhfnNyoUdKCFZEOB-44LwwYKFarIHtdYFkHzMEqzkNOLwDVsx_oycj8gcYVv7zrZ9yYECLZwgWj7s8DCPXVuCQfrbLRP3BpapO4VjS2m977VU4TsSUKb-YAsMshc-lrMpAapx3k_nq2FO-FGV9-4";
 
 const STATUS_LABELS = {
-  ongoing: "Ongoing",
-  returned: "Returned",
+  ongoing: "Processing",
+  shipped: "Shipped",
+  delivered: "Received by Buyer",
+  returned: "Returned by Buyer",
   overdue: "Overdue",
   cancelled: "Cancelled",
 };
@@ -37,8 +39,6 @@ const AdminRentalOrders = () => {
   });
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
-  const [actionError, setActionError] = useState("");
-  const [actionLoading, setActionLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [rentalTypeFilter, setRentalTypeFilter] = useState("all");
@@ -88,7 +88,10 @@ const AdminRentalOrders = () => {
       const matchesStatus =
         statusFilter === "all" ||
         (statusFilter === "active" &&
-          (order.status === "ongoing" || order.status === "overdue")) ||
+          (order.status === "ongoing" ||
+            order.status === "overdue" ||
+            order.status === "shipped" ||
+            order.status === "delivered")) ||
         (statusFilter === "completed" && order.status === "returned") ||
         (statusFilter === "cancelled" && order.status === "cancelled") ||
         order.status === statusFilter;
@@ -125,53 +128,6 @@ const AdminRentalOrders = () => {
     setSearchQuery("");
   };
 
-  const handleComplete = async () => {
-    if (!selectedOrder) return;
-    setActionLoading(true);
-    setActionError("");
-    try {
-      const data = await api.updateAdminOrderStatus(selectedOrder.mongoId || selectedOrder.id, {
-        status: "completed",
-      });
-      setOrders((current) =>
-        current.map((order) =>
-          order.id === selectedOrder.id ? data.order : order,
-        ),
-      );
-      await loadOrders();
-    } catch (error) {
-      setActionError(error.message || "Failed to complete order");
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  const handleCancel = async () => {
-    if (!selectedOrder) return;
-    setActionLoading(true);
-    setActionError("");
-    try {
-      const data = await api.updateAdminOrderStatus(selectedOrder.mongoId || selectedOrder.id, {
-        status: "cancelled",
-      });
-      setOrders((current) =>
-        current.map((order) =>
-          order.id === selectedOrder.id ? data.order : order,
-        ),
-      );
-      await loadOrders();
-    } catch (error) {
-      setActionError(error.message || "Failed to cancel order");
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  const isClosed =
-    selectedOrder?.dbStatus === "completed" ||
-    selectedOrder?.dbStatus === "cancelled" ||
-    selectedOrder?.dbStatus === "rejected";
-
   return (
     <div className="admin-rental-page">
       <header className="admin-rental-header">
@@ -207,9 +163,9 @@ const AdminRentalOrders = () => {
           <p>View and manage all clothing rental bookings on Relux Hub.</p>
         </div>
 
-        {(loadError || actionError) && (
+        {loadError && (
           <p className="admin-rental-error" role="alert">
-            {loadError || actionError}
+            {loadError}
           </p>
         )}
 
@@ -298,14 +254,16 @@ const AdminRentalOrders = () => {
                   <th>Seller</th>
                   <th>Rental Dates</th>
                   <th>Amount</th>
-                  <th>Status</th>
+                  <th>Order Status</th>
+                  <th>Escrow</th>
+                  <th>Product</th>
                   <th aria-hidden="true" />
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={8} className="admin-rental-empty">
+                    <td colSpan={10} className="admin-rental-empty">
                       Loading rental orders...
                     </td>
                   </tr>
@@ -348,11 +306,13 @@ const AdminRentalOrders = () => {
                       <td className="admin-rental-amount">{order.amount}</td>
                       <td>
                         <span
-                          className={`admin-rental-status-badge admin-rental-status-badge--${order.status}`}
+                          className={`admin-rental-status-badge admin-rental-status-badge--${order.fulfillmentStatus || order.status}`}
                         >
-                          {STATUS_LABELS[order.status] || order.status}
+                          {order.statusLabel || order.fulfillmentLabel || STATUS_LABELS[order.status] || order.status}
                         </span>
                       </td>
+                      <td className="admin-rental-escrow">{order.escrowLabel || "—"}</td>
+                      <td className="admin-rental-product-status">{order.productStatus || "—"}</td>
                       <td>
                         <span className="material-symbols-outlined" aria-hidden="true">
                           chevron_right
@@ -362,7 +322,7 @@ const AdminRentalOrders = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={8} className="admin-rental-empty">
+                    <td colSpan={10} className="admin-rental-empty">
                       {orders.length === 0
                         ? "No rental orders yet."
                         : "No rentals match your filters."}
@@ -491,28 +451,29 @@ const AdminRentalOrders = () => {
                   </span>
                 </div>
                 <div className="admin-rental-status-row">
+                  <span>Order Status</span>
+                  <span className={`admin-rental-status-badge admin-rental-status-badge--${selectedOrder.fulfillmentStatus || selectedOrder.status}`}>
+                    {selectedOrder.statusLabel || selectedOrder.fulfillmentLabel || "—"}
+                  </span>
+                </div>
+                <div className="admin-rental-status-row">
                   <span>Return Status</span>
                   <span className="admin-rental-return-badge">{selectedOrder.returnStatus}</span>
                 </div>
-              </div>
-
-              <div className="admin-rental-panel-actions">
-                <button
-                  type="button"
-                  className="admin-rental-btn-primary"
-                  onClick={handleComplete}
-                  disabled={actionLoading || isClosed}
-                >
-                  {actionLoading ? "Saving..." : "Mark as Completed"}
-                </button>
-                <button
-                  type="button"
-                  className="admin-rental-btn-danger"
-                  onClick={handleCancel}
-                  disabled={actionLoading || isClosed}
-                >
-                  Cancel Order
-                </button>
+                <div className="admin-rental-status-row">
+                  <span>Escrow</span>
+                  <span>{selectedOrder.escrowLabel || "—"}</span>
+                </div>
+                {selectedOrder.refundAmountPkr > 0 ? (
+                  <div className="admin-rental-status-row">
+                    <span>Refund Amount</span>
+                    <span>PKR {selectedOrder.refundAmountPkr.toLocaleString("en-PK")}</span>
+                  </div>
+                ) : null}
+                <div className="admin-rental-status-row">
+                  <span>Product Status</span>
+                  <span>{selectedOrder.productStatus || "—"}</span>
+                </div>
               </div>
             </div>
           </aside>

@@ -359,10 +359,11 @@ const FinalizeRentalCheckout = () => {
             <div className="finalize-purchase-delivery-note">
               <CalendarDays size={18} aria-hidden="true" />
               <div>
-                <strong>Rental approved</strong>
+                <strong>Rental approved — escrow payment</strong>
                 <p>
-                  Pay the security deposit to activate your rental. The deposit is refunded
-                  after the item is returned in good condition.
+                  Pay the full dress deposit now. Funds are held in escrow on Relux Hub
+                  until the seller confirms your return. Rental charges are deducted and
+                  the remaining balance is refunded to you.
                 </p>
               </div>
             </div>

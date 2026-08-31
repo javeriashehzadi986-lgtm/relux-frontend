@@ -8,14 +8,12 @@ const ADMIN_AVATAR =
 
 const STATUS_LABELS = {
   completed: "Completed",
-  pending: "Pending",
-  cancelled: "Cancelled",
-};
-
-const DELIVERY_LABELS = {
+  processing: "Processing",
   shipped: "Shipped",
   delivered: "Delivered",
-  processing: "Processing",
+  returned: "Returned",
+  cancelled: "Cancelled",
+  pending: "Awaiting Payment",
 };
 
 const PAGE_SIZE = 10;
@@ -98,7 +96,11 @@ const AdminResaleOrders = () => {
         order.title.toLowerCase().includes(query) ||
         order.buyer.toLowerCase().includes(query) ||
         order.seller.toLowerCase().includes(query);
-      const matchesStatus = statusFilter === "all" || order.status === statusFilter;
+      const matchesStatus =
+        statusFilter === "all" ||
+        (statusFilter === "pending" &&
+          !["completed", "cancelled"].includes(order.status)) ||
+        order.status === statusFilter;
       const matchesPayment =
         paymentFilter === "all" || order.paymentStatus === paymentFilter;
 
@@ -264,7 +266,9 @@ const AdminResaleOrders = () => {
             </span>
             <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
               <option value="all">Order Status: All</option>
-              <option value="pending">Pending</option>
+              <option value="pending">In Progress</option>
+              <option value="shipped">Shipped</option>
+              <option value="delivered">Delivered</option>
               <option value="completed">Completed</option>
               <option value="cancelled">Cancelled</option>
             </select>
@@ -301,13 +305,14 @@ const AdminResaleOrders = () => {
                   <th>Seller</th>
                   <th>Price</th>
                   <th>Date</th>
-                  <th>Status</th>
+                  <th>Order Status</th>
+                  <th>Product</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={7} className="admin-resale-empty">
+                    <td colSpan={8} className="admin-resale-empty">
                       Loading resale orders...
                     </td>
                   </tr>
@@ -359,16 +364,17 @@ const AdminResaleOrders = () => {
                       <td className="admin-resale-date">{formatDate(order.date)}</td>
                       <td>
                         <span
-                          className={`admin-resale-status-badge admin-resale-status-badge--${order.status}`}
+                          className={`admin-resale-status-badge admin-resale-status-badge--${order.fulfillmentStatus || order.status}`}
                         >
-                          {STATUS_LABELS[order.status] || order.status}
+                          {order.statusLabel || order.fulfillmentLabel || STATUS_LABELS[order.status] || order.status}
                         </span>
                       </td>
+                      <td className="admin-resale-product-status">{order.productStatus || "—"}</td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={7} className="admin-resale-empty">
+                    <td colSpan={8} className="admin-resale-empty">
                       {orders.length === 0
                         ? "No resale orders yet. Sale checkout will create them."
                         : "No orders match your filters."}
@@ -470,12 +476,11 @@ const AdminResaleOrders = () => {
                   <strong>{selectedOrder.winningBid}</strong>
                 </div>
                 <div className="admin-resale-detail-row">
-                  <span>Delivery Status</span>
+                  <span>Order Status</span>
                   <span
-                    className={`admin-resale-mini-badge admin-resale-mini-badge--${selectedOrder.deliveryStatus}`}
+                    className={`admin-resale-mini-badge admin-resale-mini-badge--${selectedOrder.fulfillmentStatus || selectedOrder.deliveryStatus}`}
                   >
-                    {DELIVERY_LABELS[selectedOrder.deliveryStatus] ||
-                      selectedOrder.deliveryStatus}
+                    {selectedOrder.statusLabel || selectedOrder.fulfillmentLabel || "—"}
                   </span>
                 </div>
                 <div className="admin-resale-detail-row">
@@ -483,6 +488,10 @@ const AdminResaleOrders = () => {
                   <span className="admin-resale-mini-badge admin-resale-mini-badge--paid">
                     {selectedOrder.paymentStatus === "paid" ? "Paid" : "Refunded"}
                   </span>
+                </div>
+                <div className="admin-resale-detail-row">
+                  <span>Product Status</span>
+                  <strong>{selectedOrder.productStatus || "—"}</strong>
                 </div>
               </div>
 

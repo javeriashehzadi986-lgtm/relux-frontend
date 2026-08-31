@@ -372,6 +372,12 @@
   color: #e3fff6 !important;
 }
 
+.profile-order-action--disabled,
+.profile-order-action:disabled {
+  opacity: 0.45 !important;
+  cursor: not-allowed !important;
+}
+
 .profile-order-action--outline {
   border: 1px solid #31685d !important;
   color: #31685d !important;

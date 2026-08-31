@@ -34,6 +34,25 @@ export function useSellerOrders() {
     refreshOrders();
   }, [refreshOrders]);
 
+  useEffect(() => {
+    if (!isAuthenticated || user?.role !== "seller") return undefined;
+
+    const handleFocus = () => {
+      refreshOrders();
+    };
+
+    window.addEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") {
+        refreshOrders();
+      }
+    });
+
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, [isAuthenticated, refreshOrders, user?.role]);
+
   const approveOrder = useCallback(
     async (orderId) => {
       await api.approveSellerOrder(orderId);
@@ -58,6 +77,22 @@ export function useSellerOrders() {
     [refreshOrders],
   );
 
+  const shipOrder = useCallback(
+    async (orderId) => {
+      await api.shipSellerOrder(orderId);
+      await refreshOrders();
+    },
+    [refreshOrders],
+  );
+
+  const confirmReturnOrder = useCallback(
+    async (orderId) => {
+      await api.confirmSellerOrderReturn(orderId);
+      await refreshOrders();
+    },
+    [refreshOrders],
+  );
+
   return {
     orders,
     loading,
@@ -66,5 +101,7 @@ export function useSellerOrders() {
     approveOrder,
     rejectOrder,
     completeOrder,
+    shipOrder,
+    confirmReturnOrder,
   };
 }

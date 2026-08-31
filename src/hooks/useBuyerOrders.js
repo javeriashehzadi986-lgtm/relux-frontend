@@ -34,6 +34,25 @@ export function useBuyerOrders() {
     refreshOrders();
   }, [refreshOrders]);
 
+  useEffect(() => {
+    if (!isAuthenticated || user?.role !== "buyer") return undefined;
+
+    const refreshOnFocus = () => {
+      refreshOrders();
+    };
+
+    window.addEventListener("focus", refreshOnFocus);
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") {
+        refreshOrders();
+      }
+    });
+
+    return () => {
+      window.removeEventListener("focus", refreshOnFocus);
+    };
+  }, [isAuthenticated, refreshOrders, user?.role]);
+
   const requestRental = useCallback(
     async ({ dressId, size, rentStart, rentEnd, rentalDays, sellerId, customerName }) => {
       if (!dressId) {
@@ -76,6 +95,22 @@ export function useBuyerOrders() {
     [refreshOrders],
   );
 
+  const confirmReceived = useCallback(
+    async (orderId) => {
+      await api.confirmBuyerOrderReceived(orderId);
+      await refreshOrders();
+    },
+    [refreshOrders],
+  );
+
+  const markReturned = useCallback(
+    async (orderId) => {
+      await api.markBuyerOrderReturned(orderId);
+      await refreshOrders();
+    },
+    [refreshOrders],
+  );
+
   return {
     orders,
     loading,
@@ -84,5 +119,7 @@ export function useBuyerOrders() {
     requestRental,
     cancelOrder,
     removeOrder,
+    confirmReceived,
+    markReturned,
   };
 }
