@@ -271,6 +271,19 @@
   color: #31685d;
 }
 
+.finalize-purchase-breakdown-note {
+  margin: 0.85rem 0 0;
+  padding-top: 0.75rem;
+  border-top: 1px dashed rgba(49, 104, 93, 0.25);
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: #5f6f68;
+}
+
+.finalize-purchase-breakdown-note strong {
+  color: #1f3f37;
+}
+
 .finalize-purchase-checkout-card {
   background: #f3f4f3;
   border-radius: 1.5rem;
