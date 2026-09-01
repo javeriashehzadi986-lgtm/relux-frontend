@@ -111,6 +111,30 @@ export function useBuyerOrders() {
     [refreshOrders],
   );
 
+  const acceptSettlement = useCallback(
+    async (orderId) => {
+      await api.acceptOrderSettlement(orderId);
+      await refreshOrders();
+    },
+    [refreshOrders],
+  );
+
+  const disputeSettlement = useCallback(
+    async (orderId, body) => {
+      await api.disputeOrderSettlement(orderId, body);
+      await refreshOrders();
+    },
+    [refreshOrders],
+  );
+
+  const disputeSaleDelivery = useCallback(
+    async (orderId, body) => {
+      await api.disputeSaleDelivery(orderId, body);
+      await refreshOrders();
+    },
+    [refreshOrders],
+  );
+
   return {
     orders,
     loading,
@@ -121,5 +145,8 @@ export function useBuyerOrders() {
     removeOrder,
     confirmReceived,
     markReturned,
+    acceptSettlement,
+    disputeSettlement,
+    disputeSaleDelivery,
   };
 }

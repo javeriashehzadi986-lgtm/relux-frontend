@@ -15,6 +15,7 @@ import {
   Send,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { getSellerSignupState } from "@/utils/authRedirect";
 import api from "@/services/api";
 import "./sellerVerification.css";
 
@@ -111,7 +112,7 @@ function FileUploadZone({ id, label, file, onFileChange, error }) {
 function SellerVerification() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, loading, isAuthenticated, isSeller, isAdmin, applyAsSeller, submitSellerVerification, logout } =
+  const { user, loading, isAuthenticated, isSeller, isAdmin, submitSellerVerification, logout } =
     useAuth();
   const isUpdateMode = location.state?.updateDocuments === true;
 
@@ -172,15 +173,23 @@ function SellerVerification() {
       return;
     }
 
-    if (!loading && isAuthenticated && user?.role === "seller") {
+    if (!isAuthenticated) {
+      navigate("/signup", { state: getSellerSignupState(), replace: true });
+      return;
+    }
+
+    if (isAdmin) {
+      return;
+    }
+
+    if (user?.role === "seller") {
       if (user.status === "active") {
         navigate("/sellerProfile", { replace: true });
       } else if (user.status === "pending") {
         navigate("/seller-pending", { replace: true });
       }
-      return;
     }
-  }, [loading, isUpdateMode, isAuthenticated, isSeller, user, navigate]);
+  }, [loading, isUpdateMode, isAuthenticated, isSeller, isAdmin, user, navigate]);
 
   const validateFiles = () => {
     let valid = true;
@@ -259,28 +268,8 @@ function SellerVerification() {
           cnicFront: cnicFrontData,
           cnicBack: cnicBackData,
         });
-      } else if (!isAuthenticated) {
-        const name = formData.get("fullName")?.toString().trim() ?? "";
-        const email = formData.get("email")?.toString().trim() ?? "";
-        const password = formData.get("password")?.toString() ?? "";
-
-        if (!name || !email || !password) {
-          setSubmitError("Name, email, and password are required");
-          setSubmitting(false);
-          return;
-        }
-
-        await applyAsSeller({
-          name,
-          email,
-          password,
-          phone,
-          city,
-          cnicFront: cnicFrontData,
-          cnicBack: cnicBackData,
-        });
       } else {
-        setSubmitError("You are already registered as a seller");
+        setSubmitError("You must create an account and log in before applying as a seller.");
         setSubmitting(false);
         return;
       }
@@ -293,7 +282,7 @@ function SellerVerification() {
     }
   };
 
-  if (loading || (isUpdateMode && !isSeller)) {
+  if (loading || (isUpdateMode && !isSeller) || !isAuthenticated) {
     return (
       <div className="seller-verification-page">
         <main className="seller-main">
@@ -327,10 +316,10 @@ function SellerVerification() {
                 type="button"
                 onClick={() => {
                   logout();
-                  navigate("/login", { replace: true });
+                  navigate("/signup", { state: getSellerSignupState(), replace: true });
                 }}
               >
-                Log out &amp; Apply as Seller
+                Log out
               </Button>
             </div>
           </div>
@@ -445,29 +434,10 @@ function SellerVerification() {
           ) : isLoggedInBuyer ? (
             <div className="seller-auth-notice seller-auth-notice--buyer">
               <p>
-                You are logged in as buyer <strong>{user.email}</strong>. Only phone, city,
-                and CNIC are needed to upgrade your account to seller.
-              </p>
-              <p>
-                Want to create a <strong>brand new</strong> seller account instead?{" "}
-                <button
-                  type="button"
-                  className="seller-auth-notice-link"
-                  onClick={() => {
-                    logout();
-                    navigate("/login", { replace: true });
-                  }}
-                >
-                  Log out first
-                </button>{" "}
-                to see the full registration form.
+                You are logged in as buyer <strong>{user.email}</strong>. Complete phone, city,
+                and CNIC below to apply as a seller.
               </p>
             </div>
-          ) : !isAuthenticated ? (
-            <p className="seller-desc seller-desc--highlight">
-              New seller? Fill in all fields below to create your account and submit
-              verification in one step.
-            </p>
           ) : null}
         </div>
 
@@ -480,51 +450,6 @@ function SellerVerification() {
               <h2 className="seller-card-title">Personal Information</h2>
             </div>
             <div className="seller-form-grid">
-              {!isLoggedInBuyer && !isLoggedInRejectedSeller ? (
-                <>
-                  <div className="seller-field">
-                    <Label htmlFor="fullName" className="seller-field-label">
-                      Full Name
-                    </Label>
-                    <Input
-                      id="fullName"
-                      name="fullName"
-                      type="text"
-                      placeholder="e.g. Sarah Jenkins"
-                      className="seller-input"
-                      required
-                    />
-                  </div>
-                  <div className="seller-field">
-                    <Label htmlFor="email" className="seller-field-label">
-                      Email Address
-                    </Label>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      placeholder="Enter email"
-                      className="seller-input"
-                      required
-                    />
-                  </div>
-                  <div className="seller-field">
-                    <Label htmlFor="password" className="seller-field-label">
-                      Password
-                    </Label>
-                    <Input
-                      id="password"
-                      name="password"
-                      type="password"
-                      placeholder="Create a password"
-                      className="seller-input"
-                      autoComplete="new-password"
-                      minLength={6}
-                      required
-                    />
-                  </div>
-                </>
-              ) : null}
               <div className="seller-field">
                 <Label htmlFor="phone" className="seller-field-label">
                   Phone Number
@@ -628,11 +553,6 @@ function SellerVerification() {
               By submitting, you agree to Relux Hub&apos;s{" "}
               <Link to="/terms">Seller Terms &amp; Conditions</Link>.
             </p>
-            {!isAuthenticated ? (
-              <p className="seller-terms-note">
-                Already have an account? <Link to="/login">Login</Link> first, then apply as seller.
-              </p>
-            ) : null}
           </div>
         </form>
       </main>

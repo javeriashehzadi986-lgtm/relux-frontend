@@ -522,3 +522,17 @@
     margin-left: 0;
   }
 }
+
+.profile-order-settlement-box {
+  margin-top: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background: #f4f7f6;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.profile-order-settlement-note {
+  margin-top: 0.35rem;
+  color: #5d605f;
+}

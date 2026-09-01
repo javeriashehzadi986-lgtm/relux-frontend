@@ -356,3 +356,14 @@
   white-space: nowrap;
   border: 0;
 }
+
+.orders-requests-settlement-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.orders-requests-settlement-hint {
+  font-size: 0.8125rem;
+  color: #5d605f;
+  line-height: 1.5;
+}

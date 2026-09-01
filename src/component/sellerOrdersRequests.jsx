@@ -6,6 +6,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Field } from "@/components/ui/field";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import {
   Card,
   CardContent,
   CardDescription,
@@ -74,7 +83,8 @@ function OrderActions({ order, onAction }) {
             key={action.id}
             type="button"
             className="orders-requests-btn-primary orders-requests-btn-full"
-            onClick={() => onAction(action.id, order.id)}
+            disabled={Boolean(action.disabled)}
+          onClick={() => !action.disabled && onAction(action.id, order.id)}
           >
             {action.label}
           </Button>
@@ -117,7 +127,8 @@ function OrderActions({ order, onAction }) {
               ? "orders-requests-btn-outline orders-requests-btn-full"
               : "orders-requests-btn-primary orders-requests-btn-full"
           }
-          onClick={() => onAction(action.id, order.id)}
+          disabled={Boolean(action.disabled)}
+          onClick={() => !action.disabled && onAction(action.id, order.id)}
         >
           {action.label}
         </Button>
@@ -145,19 +156,31 @@ export function SellerOrdersRequestsContent() {
     rejectOrder,
     completeOrder,
     shipOrder,
-    confirmReturnOrder,
+    proposeSettlement,
   } = useSellerOrders();
   const [activeFilter, setActiveFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [actionError, setActionError] = useState("");
+  const [settlementTarget, setSettlementTarget] = useState(null);
+  const [damageDeduction, setDamageDeduction] = useState("");
+  const [settlementNote, setSettlementNote] = useState("");
+  const [submittingSettlement, setSubmittingSettlement] = useState(false);
 
   const handleOrderAction = async (actionId, orderId) => {
     setActionError("");
+
+    if (actionId === "propose-settlement") {
+      const order = orders.find((item) => item.id === orderId);
+      setSettlementTarget(order || { id: orderId });
+      setDamageDeduction("");
+      setSettlementNote("");
+      return;
+    }
+
     const handlers = {
       approve: approveOrder,
       reject: rejectOrder,
       ship: shipOrder,
-      "confirm-return": confirmReturnOrder,
       complete: completeOrder,
     };
 
@@ -168,6 +191,23 @@ export function SellerOrdersRequestsContent() {
       await handler(orderId);
     } catch (err) {
       setActionError(err.message || "Action failed");
+    }
+  };
+
+  const submitSettlementProposal = async () => {
+    if (!settlementTarget?.id) return;
+    setSubmittingSettlement(true);
+    setActionError("");
+    try {
+      await proposeSettlement(settlementTarget.id, {
+        damageDeductionPkr: Number(damageDeduction) || 0,
+        settlementNote: settlementNote.trim(),
+      });
+      setSettlementTarget(null);
+    } catch (err) {
+      setActionError(err.message || "Failed to propose settlement");
+    } finally {
+      setSubmittingSettlement(false);
     }
   };
 
@@ -353,6 +393,67 @@ export function SellerOrdersRequestsContent() {
           </Card>
         )}
       </section>
+
+      <Dialog
+        open={Boolean(settlementTarget)}
+        onOpenChange={(open) => !open && setSettlementTarget(null)}
+      >
+        <DialogContent className="orders-requests-settlement-dialog">
+          <DialogHeader>
+            <DialogTitle>Propose Escrow Settlement</DialogTitle>
+            <DialogDescription>
+              After inspecting the returned dress, propose how much rent and damage (if any)
+              should be deducted from the buyer&apos;s deposit. The buyer must accept before
+              funds are released.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="orders-requests-settlement-form">
+            <Field>
+              <Label htmlFor="damage-deduction">Damage deduction (PKR)</Label>
+              <Input
+                id="damage-deduction"
+                type="number"
+                min="0"
+                placeholder="0"
+                value={damageDeduction}
+                onChange={(e) => setDamageDeduction(e.target.value)}
+              />
+            </Field>
+            <Field>
+              <Label htmlFor="settlement-note">Note to buyer (optional)</Label>
+              <Textarea
+                id="settlement-note"
+                rows={3}
+                placeholder="Explain any damage or charges..."
+                value={settlementNote}
+                onChange={(e) => setSettlementNote(e.target.value)}
+              />
+            </Field>
+            <p className="orders-requests-settlement-hint">
+              Rental charge is calculated automatically from the booked days. Total deductions
+              cannot exceed the security deposit.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setSettlementTarget(null)}
+              disabled={submittingSettlement}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              className="orders-requests-btn-primary"
+              onClick={submitSettlementProposal}
+              disabled={submittingSettlement}
+            >
+              {submittingSettlement ? "Sending..." : "Send to Buyer"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

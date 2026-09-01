@@ -191,8 +191,9 @@ const Signup = () => {
             <CardHeader className="signup-card-header">
               <CardTitle className="signup-title">Create Your Account</CardTitle>
               <CardDescription className="signup-description">
-                Create a buyer account to rent or shop. To sell, use Become a Seller
-                after signup and complete verification.
+                {location.state?.intent === "seller"
+                  ? "Create your Relux Hub account first. After signup you will continue to seller verification (CNIC upload)."
+                  : "Create a buyer account to rent or shop. To sell, register here first, then apply from Become a Seller."}
               </CardDescription>
             </CardHeader>
 

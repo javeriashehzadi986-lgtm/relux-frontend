@@ -447,6 +447,22 @@ const AdminRentalOrders = () => {
                   <span>Escrow</span>
                   <span>{selectedOrder.escrowLabel || "—"}</span>
                 </div>
+                <div className="admin-rental-status-row">
+                  <span>Settlement</span>
+                  <span>{selectedOrder.escrowSettlementStatus || "none"}</span>
+                </div>
+                {selectedOrder.damageDeductionPkr > 0 ? (
+                  <div className="admin-rental-status-row">
+                    <span>Damage Deduction</span>
+                    <span>PKR {selectedOrder.damageDeductionPkr.toLocaleString("en-PK")}</span>
+                  </div>
+                ) : null}
+                {selectedOrder.sellerPayoutPkr > 0 ? (
+                  <div className="admin-rental-status-row">
+                    <span>Seller Payout</span>
+                    <span>PKR {selectedOrder.sellerPayoutPkr.toLocaleString("en-PK")}</span>
+                  </div>
+                ) : null}
                 {selectedOrder.refundAmountPkr > 0 ? (
                   <div className="admin-rental-status-row">
                     <span>Refund Amount</span>

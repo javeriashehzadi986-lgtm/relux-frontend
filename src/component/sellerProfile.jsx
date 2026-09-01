@@ -742,8 +742,9 @@ function SellerProfileSection() {
                   </div>
                 </div>
                 <p className="seller-profile-stripe-note">
-                  Buyers pay Relux Hub at checkout. Connect your Stripe Express account so
-                  payouts can be enabled for your seller profile.
+                  Buyers pay Relux Hub at checkout. Link Stripe Connect so when escrow
+                  releases after delivery or rental settlement, your payout is transferred
+                  to your bank account automatically.
                 </p>
                 {stripeMessage ? (
                   <p className="seller-profile-stripe-note" role="status">

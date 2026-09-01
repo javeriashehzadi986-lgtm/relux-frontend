@@ -1,5 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
+import {
+  getSellerApplicationPath,
+  getSellerSignupState,
+} from "@/utils/authRedirect";
 import {
   UserPlus,
   HelpCircle,
@@ -97,6 +102,10 @@ const journeySteps = [
 ];
 
 const BecomeASeller = () => {
+  const { isAuthenticated, loading } = useAuth();
+  const sellerApplyPath = getSellerApplicationPath(isAuthenticated && !loading);
+  const sellerApplyState = isAuthenticated ? undefined : getSellerSignupState();
+
   return (
     <div className="seller-page">
       <section className="seller-hero-section">
@@ -126,6 +135,8 @@ const BecomeASeller = () => {
               <ul className="seller-sidebar-links">
                 {sidebarLinks.map((link) => {
                   const Icon = link.icon;
+                  const to = link.id === "become" ? sellerApplyPath : link.to;
+                  const state = link.id === "become" ? sellerApplyState : undefined;
                   return (
                     <li key={link.id}>
                       <Button
@@ -135,7 +146,7 @@ const BecomeASeller = () => {
                           link.active ? "is-active" : ""
                         }`}
                       >
-                        <Link to={link.to}>
+                        <Link to={to} state={state}>
                           <Icon size={20} />
                           {link.label}
                         </Link>
@@ -175,7 +186,9 @@ const BecomeASeller = () => {
                   with professional care.
                 </CardDescription>
                 <Button type="button" size="lg" className="seller-apply-btn" asChild>
-                  <Link to="/sellerVerification">Apply as Seller</Link>
+                  <Link to={sellerApplyPath} state={sellerApplyState}>
+                    Apply as Seller
+                  </Link>
                 </Button>
               </div>
               <div className="seller-intro-image-wrap">

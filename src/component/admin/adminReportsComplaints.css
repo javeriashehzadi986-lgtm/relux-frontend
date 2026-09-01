@@ -724,3 +724,29 @@
     min-width: 0;
   }
 }
+
+.admin-reports-escrow-section {
+  margin-top: 1rem;
+}
+
+.admin-reports-escrow-card {
+  display: grid;
+  gap: 0.5rem;
+  padding: 1rem;
+  border-radius: 10px;
+  background: #f8faf9;
+  border: 1px solid #e5ebe8;
+}
+
+.admin-reports-escrow-form {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.admin-reports-escrow-form label {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}

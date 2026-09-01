@@ -154,13 +154,7 @@ export const api = {
       body: JSON.stringify(body),
     }),
 
-  // Seller Verification
-  applyAsSeller: (body) =>
-    request("/seller/verification/apply", {
-      method: "POST",
-      body: JSON.stringify(body),
-    }),
-
+  // Seller Verification (logged-in buyers upgrade to seller)
   submitSellerVerification: (body) =>
     request("/seller/verification", {
       method: "POST",
@@ -435,9 +429,49 @@ export const api = {
       method: "PATCH",
     }),
 
-  confirmSellerOrderReturn: (id) =>
-    request(`/seller/orders/${id}/confirm-return`, {
-      method: "PATCH",
+  confirmSellerOrderReturn: (id, body) =>
+    request(`/seller/orders/${id}/settlement/propose`, {
+      method: "POST",
+      body: JSON.stringify(body || {}),
+    }),
+
+  proposeSellerSettlement: (id, body) =>
+    request(`/seller/orders/${id}/settlement/propose`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+
+  getOrderSettlement: (id) => request(`/buyer/orders/${id}/settlement`),
+
+  acceptOrderSettlement: (id) =>
+    request(`/buyer/orders/${id}/settlement/accept`, {
+      method: "POST",
+    }),
+
+  disputeOrderSettlement: (id, body) =>
+    request(`/buyer/orders/${id}/settlement/dispute`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+
+  disputeSaleDelivery: (id, body) =>
+    request(`/buyer/orders/${id}/sale-escrow/dispute`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+
+  getAdminOrderSettlement: (id) => request(`/admin/orders/${id}/settlement`),
+
+  resolveAdminOrderSettlement: (id, body) =>
+    request(`/admin/orders/${id}/settlement/resolve`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+
+  resolveAdminSaleEscrow: (id, body) =>
+    request(`/admin/orders/${id}/sale-escrow/resolve`, {
+      method: "POST",
+      body: JSON.stringify(body),
     }),
 
   // Reports

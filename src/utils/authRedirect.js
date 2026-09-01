@@ -14,6 +14,16 @@ export function getPostAuthPath(user, returnTo) {
   return "/profile";
 }
 
+/** Where "Apply as Seller" should send the user */
+export function getSellerApplicationPath(isAuthenticated) {
+  return isAuthenticated ? "/sellerVerification" : "/signup";
+}
+
+/** Navigation state when sending guests to signup before seller application */
+export function getSellerSignupState() {
+  return { from: "/sellerVerification", intent: "seller" };
+}
+
 export const NAVBAR_AUTH_LABEL = "Sign up";
 
 export function getNavbarButtonConfig(user, { isAuthenticated, loading } = {}) {

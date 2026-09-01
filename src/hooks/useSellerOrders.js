@@ -85,9 +85,9 @@ export function useSellerOrders() {
     [refreshOrders],
   );
 
-  const confirmReturnOrder = useCallback(
-    async (orderId) => {
-      await api.confirmSellerOrderReturn(orderId);
+  const proposeSettlement = useCallback(
+    async (orderId, body = {}) => {
+      await api.proposeSellerSettlement(orderId, body);
       await refreshOrders();
     },
     [refreshOrders],
@@ -102,6 +102,6 @@ export function useSellerOrders() {
     rejectOrder,
     completeOrder,
     shipOrder,
-    confirmReturnOrder,
+    proposeSettlement,
   };
 }

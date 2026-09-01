@@ -165,6 +165,14 @@ const AdminSupportCenter = () => {
   const [replyText, setReplyText] = useState("");
   const [activeModal, setActiveModal] = useState(null);
   const [page, setPage] = useState(1);
+  const [orderSettlement, setOrderSettlement] = useState(null);
+  const [orderSettlementType, setOrderSettlementType] = useState("rental");
+  const [adminRentalCharge, setAdminRentalCharge] = useState("");
+  const [adminDamageCharge, setAdminDamageCharge] = useState("");
+  const [adminSellerPayout, setAdminSellerPayout] = useState("");
+  const [adminBuyerRefund, setAdminBuyerRefund] = useState("");
+  const [settlementLoading, setSettlementLoading] = useState(false);
+  const [releasingEscrow, setReleasingEscrow] = useState(false);
 
   const loadReports = useCallback(async () => {
     setLoading(true);
@@ -229,6 +237,73 @@ const AdminSupportCenter = () => {
   useEffect(() => {
     setReplyText(selectedReport?.adminReply || "");
   }, [selectedReport?.mongoId]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadSettlement() {
+      if (!selectedReport?.orderId) {
+        setOrderSettlement(null);
+        return;
+      }
+
+      setSettlementLoading(true);
+      try {
+        const data = await api.getAdminOrderSettlement(selectedReport.orderId);
+        if (!cancelled) {
+          setOrderSettlement(data.settlement ?? null);
+          setOrderSettlementType(data.orderType || data.settlement?.orderType || "rental");
+          setAdminRentalCharge(String(data.settlement?.rentalChargePkr ?? ""));
+          setAdminDamageCharge(String(data.settlement?.damageDeductionPkr ?? ""));
+          setAdminSellerPayout(String(data.settlement?.sellerPayoutPkr ?? data.settlement?.itemAmountPkr ?? ""));
+          setAdminBuyerRefund(String(data.settlement?.refundAmountPkr ?? "0"));
+        }
+      } catch {
+        if (!cancelled) setOrderSettlement(null);
+      } finally {
+        if (!cancelled) setSettlementLoading(false);
+      }
+    }
+
+    loadSettlement();
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedReport?.orderId, selectedReport?.mongoId]);
+
+  const handleReleaseEscrow = async () => {
+    if (!selectedReport?.orderId || !orderSettlement) return;
+    setReleasingEscrow(true);
+    setActionError("");
+    try {
+      if (orderSettlementType === "sale") {
+        await api.resolveAdminSaleEscrow(selectedReport.orderId, {
+          sellerPayoutPkr: Number(adminSellerPayout) || 0,
+          refundAmountPkr: Number(adminBuyerRefund) || 0,
+          decision: replyText.trim(),
+          adminSettlementNote: replyText.trim(),
+        });
+      } else {
+        await api.resolveAdminOrderSettlement(selectedReport.orderId, {
+          rentalChargePkr: Number(adminRentalCharge) || 0,
+          damageDeductionPkr: Number(adminDamageCharge) || 0,
+          decision: replyText.trim(),
+          adminSettlementNote: replyText.trim(),
+        });
+      }
+      await loadReports();
+      const data = await api.getAdminOrderSettlement(selectedReport.orderId);
+      setOrderSettlement(data.settlement ?? null);
+      setOrderSettlementType(data.orderType || data.settlement?.orderType || "rental");
+    } catch (error) {
+      setActionError(error.message || "Failed to release escrow");
+    } finally {
+      setReleasingEscrow(false);
+    }
+  };
+
+  const formatPkr = (amount) =>
+    `PKR ${Math.round(Number(amount) || 0).toLocaleString("en-PK")}`;
 
   const modalConfig = activeModal ? MODAL_CONFIG[activeModal] : null;
   const ModalIcon = modalConfig?.icon;
@@ -594,6 +669,128 @@ const AdminSupportCenter = () => {
                       <img key={index} src={photo} alt={`Evidence ${index + 1}`} />
                     ))}
                   </div>
+                </section>
+              )}
+
+              {selectedReport.orderId && (
+                <section className="admin-reports-escrow-section">
+                  <h3>Escrow Settlement</h3>
+                  {settlementLoading ? (
+                    <p>Loading settlement details...</p>
+                  ) : orderSettlement ? (
+                    <div className="admin-reports-escrow-card">
+                      {orderSettlementType === "sale" ? (
+                        <>
+                          <p>
+                            <strong>Total paid:</strong>{" "}
+                            {formatPkr(orderSettlement.totalPaidPkr)}
+                          </p>
+                          <p>
+                            <strong>Status:</strong>{" "}
+                            {orderSettlement.escrowSettlementStatus || "none"}
+                          </p>
+                          <p>
+                            <strong>Item amount:</strong>{" "}
+                            {formatPkr(orderSettlement.itemAmountPkr)}
+                          </p>
+                          {orderSettlement.saleEscrowAutoReleaseAt ? (
+                            <p>
+                              <strong>Auto-release at:</strong>{" "}
+                              {new Date(orderSettlement.saleEscrowAutoReleaseAt).toLocaleString()}
+                            </p>
+                          ) : null}
+                        </>
+                      ) : (
+                        <>
+                          <p>
+                            <strong>Deposit:</strong> {formatPkr(orderSettlement.depositPkr)}
+                          </p>
+                          <p>
+                            <strong>Status:</strong>{" "}
+                            {orderSettlement.escrowSettlementStatus || "none"}
+                          </p>
+                          <p>
+                            <strong>Seller proposed rent:</strong>{" "}
+                            {formatPkr(orderSettlement.rentalChargePkr)}
+                          </p>
+                          <p>
+                            <strong>Seller proposed damage:</strong>{" "}
+                            {formatPkr(orderSettlement.damageDeductionPkr)}
+                          </p>
+                        </>
+                      )}
+                      <p>
+                        <strong>Buyer refund (proposed):</strong>{" "}
+                        {formatPkr(orderSettlement.refundAmountPkr)}
+                      </p>
+                      <p>
+                        <strong>Seller payout (proposed):</strong>{" "}
+                        {formatPkr(orderSettlement.sellerPayoutPkr)}
+                      </p>
+                      {orderSettlement.disputeReason ? (
+                        <blockquote className="admin-reports-description">
+                          Buyer dispute: {orderSettlement.disputeReason}
+                        </blockquote>
+                      ) : null}
+                      {orderSettlement.escrowSettlementStatus === "disputed" && (
+                        <div className="admin-reports-escrow-form">
+                          {orderSettlementType === "sale" ? (
+                            <>
+                              <label>
+                                Seller payout (PKR)
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  value={adminSellerPayout}
+                                  onChange={(e) => setAdminSellerPayout(e.target.value)}
+                                />
+                              </label>
+                              <label>
+                                Buyer refund (PKR)
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  value={adminBuyerRefund}
+                                  onChange={(e) => setAdminBuyerRefund(e.target.value)}
+                                />
+                              </label>
+                            </>
+                          ) : (
+                            <>
+                              <label>
+                                Final rent charge (PKR)
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  value={adminRentalCharge}
+                                  onChange={(e) => setAdminRentalCharge(e.target.value)}
+                                />
+                              </label>
+                              <label>
+                                Final damage deduction (PKR)
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  value={adminDamageCharge}
+                                  onChange={(e) => setAdminDamageCharge(e.target.value)}
+                                />
+                              </label>
+                            </>
+                          )}
+                          <Button
+                            type="button"
+                            className="admin-reports-action-btn admin-reports-action-btn--primary"
+                            onClick={handleReleaseEscrow}
+                            disabled={releasingEscrow || isClosed}
+                          >
+                            {releasingEscrow ? "Releasing..." : "Release Escrow & Resolve"}
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <p>No escrow settlement linked to this order.</p>
+                  )}
                 </section>
               )}
 

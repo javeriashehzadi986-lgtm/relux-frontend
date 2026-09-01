@@ -111,15 +111,6 @@ export function AuthProvider({ children }) {
     setUser(null);
   }, []);
 
-  const applyAsSeller = useCallback(async (payload) => {
-    const data = await api.applyAsSeller(payload);
-    api.setToken(data.token);
-    api.setStoredUser(data.user);
-    setUser(data.user);
-    await syncLocalWishlistToServer(api).catch(() => {});
-    return data;
-  }, []);
-
   const submitSellerVerification = useCallback(async (payload) => {
     const data = await api.submitSellerVerification(payload);
     api.setToken(data.token);
@@ -152,11 +143,10 @@ export function AuthProvider({ children }) {
       updateEmail,
       changePassword,
       deactivateAccount,
-      applyAsSeller,
       submitSellerVerification,
       logout,
     }),
-    [user, loading, login, loginWithGoogle, loginWithToken, register, refreshUser, updateProfile, updateEmail, changePassword, deactivateAccount, applyAsSeller, submitSellerVerification, logout],
+    [user, loading, login, loginWithGoogle, loginWithToken, register, refreshUser, updateProfile, updateEmail, changePassword, deactivateAccount, submitSellerVerification, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

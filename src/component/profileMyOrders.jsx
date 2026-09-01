@@ -12,6 +12,16 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { hydrateBuyerOrder } from "@/data/dressCatalog";
 import { useBuyerOrders } from "@/hooks/useBuyerOrders";
@@ -85,9 +95,13 @@ const ProfileMyOrders = () => {
   const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const { orders, loading, error, cancelOrder, removeOrder, confirmReceived, markReturned } =
+  const { orders, loading, error, cancelOrder, removeOrder, confirmReceived, markReturned, acceptSettlement, disputeSettlement, disputeSaleDelivery } =
     useBuyerOrders();
   const [cancelTarget, setCancelTarget] = useState(null);
+  const [disputeTarget, setDisputeTarget] = useState(null);
+  const [disputeKind, setDisputeKind] = useState("settlement");
+  const [disputeReason, setDisputeReason] = useState("");
+  const [submittingDispute, setSubmittingDispute] = useState(false);
   const [actionError, setActionError] = useState("");
 
   const filteredOrders = useMemo(() => {
@@ -147,6 +161,30 @@ const ProfileMyOrders = () => {
       return;
     }
 
+    if (action.id === "accept-settlement") {
+      setActionError("");
+      try {
+        await acceptSettlement(order.id);
+      } catch (err) {
+        setActionError(err.message || "Failed to accept settlement");
+      }
+      return;
+    }
+
+    if (action.id === "dispute-settlement") {
+      setDisputeKind("settlement");
+      setDisputeTarget(order);
+      setDisputeReason("");
+      return;
+    }
+
+    if (action.id === "dispute-delivery") {
+      setDisputeKind("delivery");
+      setDisputeTarget(order);
+      setDisputeReason("");
+      return;
+    }
+
     const route = action.link ? getOrderActionRoute(action.id, order) : null;
     if (route) navigate(route);
   };
@@ -161,6 +199,35 @@ const ProfileMyOrders = () => {
     }
     setCancelTarget(null);
   };
+
+  const submitDispute = async () => {
+    if (!disputeTarget?.id) return;
+    if (!disputeReason.trim()) {
+      setActionError(
+        disputeKind === "delivery"
+          ? "Please describe the delivery issue"
+          : "Please explain why you are disputing this settlement",
+      );
+      return;
+    }
+    setSubmittingDispute(true);
+    setActionError("");
+    try {
+      if (disputeKind === "delivery") {
+        await disputeSaleDelivery(disputeTarget.id, { disputeReason: disputeReason.trim() });
+      } else {
+        await disputeSettlement(disputeTarget.id, { disputeReason: disputeReason.trim() });
+      }
+      setDisputeTarget(null);
+    } catch (err) {
+      setActionError(err.message || "Failed to submit dispute");
+    } finally {
+      setSubmittingDispute(false);
+    }
+  };
+
+  const formatPkr = (amount) =>
+    `PKR ${Math.round(Number(amount) || 0).toLocaleString("en-PK")}`;
 
   return (
     <section className="profile-orders">
@@ -262,12 +329,27 @@ const ProfileMyOrders = () => {
                             </div>
                           );
                         })}
-                        {order.type === "rental" && order.escrowLabel ? (
+                        {(order.type === "rental" || order.type === "purchase") && order.escrowLabel ? (
                           <div className="profile-order-detail">
                             <ShieldCheck size={18} aria-hidden="true" />
                             <span className="profile-order-detail-text--highlight">
                               {order.escrowLabel}
                             </span>
+                          </div>
+                        ) : null}
+                        {order.escrowSettlementStatus === "proposed" ? (
+                          <div className="profile-order-settlement-box">
+                            <p>
+                              <strong>Settlement proposed:</strong> Rent{" "}
+                              {formatPkr(order.rentalChargePkr)}, damage{" "}
+                              {formatPkr(order.damageDeductionPkr)}, your refund{" "}
+                              {formatPkr(order.refundAmountPkr)}
+                            </p>
+                            {order.settlementNote ? (
+                              <p className="profile-order-settlement-note">
+                                Seller note: {order.settlementNote}
+                              </p>
+                            ) : null}
                           </div>
                         ) : null}
                       </div>
@@ -398,6 +480,39 @@ const ProfileMyOrders = () => {
           </Card>
         </div>
       )}
+
+      <Dialog open={Boolean(disputeTarget)} onOpenChange={(open) => !open && setDisputeTarget(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {disputeKind === "delivery" ? "Report Delivery Issue" : "Dispute Settlement"}
+            </DialogTitle>
+            <DialogDescription>
+              {disputeKind === "delivery"
+                ? "Tell admin what went wrong (not received, wrong item, not as pictured, etc.). Payment stays in escrow until admin resolves it."
+                : "Explain why you disagree with the seller's proposed split. An admin will review and set the final escrow amounts."}
+            </DialogDescription>
+          </DialogHeader>
+          <Textarea
+            rows={4}
+            placeholder={
+              disputeKind === "delivery"
+                ? "Describe the delivery problem..."
+                : "Describe the issue with the proposed rent or damage charges..."
+            }
+            value={disputeReason}
+            onChange={(e) => setDisputeReason(e.target.value)}
+          />
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setDisputeTarget(null)}>
+              Cancel
+            </Button>
+            <Button type="button" onClick={submitDispute} disabled={submittingDispute}>
+              {submittingDispute ? "Submitting..." : "Submit Dispute"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 };
