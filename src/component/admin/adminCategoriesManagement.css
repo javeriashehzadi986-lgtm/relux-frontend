@@ -683,7 +683,6 @@
   flex: 1;
 }
 
-.admin-categories-menu-btn,
 .admin-categories-refresh {
   border: 1px solid var(--admin-outline-variant);
   background: var(--admin-white);

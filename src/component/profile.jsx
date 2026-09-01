@@ -164,7 +164,7 @@ const Profile = ({ section: sectionProp }) => {
   const handleLogoutConfirm = () => {
     setShowLogoutConfirm(false);
     logout();
-    navigate("/login");
+    navigate("/login", { replace: true });
   };
 
   const hasPassword =

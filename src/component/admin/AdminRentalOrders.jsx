@@ -1,10 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import api from "@/services/api";
 import "./adminRentalOrders.css";
-
-const ADMIN_AVATAR =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuB318p0ASk7p2tO95wsx8Jq0kaTgr3MOqb-ncub0SBhW1z4zMezEl2iqzlSDl1uPBuRWmHuLJdKS-l9PzeXhdMoZQSXiE3LrnD1VXmSveP9246LG8c7dAtd0IHfhfnNyoUdKCFZEOB-44LwwYKFarIHtdYFkHzMEqzkNOLwDVsx_oycj8gcYVv7zrZ9yYECLZwgWj7s8DCPXVuCQfrbLRP3BpapO4VjS2m977VU4TsSUKb-YAsMshc-lrMpAapx3k_nq2FO-FGV9-4";
-
 const STATUS_LABELS = {
   ongoing: "Processing",
   shipped: "Shipped",
@@ -141,19 +137,6 @@ const AdminRentalOrders = () => {
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
           />
-        </div>
-        <div className="admin-rental-header-actions">
-          <button type="button" className="admin-rental-icon-btn" aria-label="Notifications">
-            <span className="material-symbols-outlined">notifications</span>
-          </button>
-          <div className="admin-rental-header-divider" aria-hidden="true" />
-          <div className="admin-rental-admin-profile">
-            <div className="admin-rental-admin-meta">
-              <p>Admin</p>
-              <span>Relux Hub</span>
-            </div>
-            <img src={ADMIN_AVATAR} alt="Admin" />
-          </div>
         </div>
       </header>
 

@@ -1,7 +1,7 @@
 export function getPostAuthPath(user, returnTo) {
   if (returnTo) return returnTo;
 
-  if (!user) return "/signup";
+  if (!user) return "/login";
 
   if (user.role === "admin") return "/admin/profile";
 

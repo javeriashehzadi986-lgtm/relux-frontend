@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import api from "@/services/api";
-import { toggleAdminSidebar } from "@/utils/adminSidebar";
 import "./adminContactMessages.css";
 
 const STATUS_LABELS = {
@@ -115,14 +114,6 @@ const AdminContactMessages = () => {
     <div className="admin-contact-page">
       <header className="admin-contact-header">
         <div className="admin-contact-header-left">
-          <button
-            type="button"
-            className="admin-contact-menu-btn"
-            aria-label="Open menu"
-            onClick={toggleAdminSidebar}
-          >
-            <span className="material-symbols-outlined">menu</span>
-          </button>
           <div>
             <h1>Contact Messages</h1>
             <p>Messages submitted from the website Contact Us form.</p>

@@ -31,7 +31,7 @@ export default function SellerPending() {
     const checkStatus = async () => {
       const freshUser = await refreshUser();
       if (!freshUser) {
-        navigate("/signup", { replace: true });
+        navigate("/login", { replace: true });
         return;
       }
       if (freshUser.role !== "seller") {
@@ -161,7 +161,14 @@ export default function SellerPending() {
             <Button type="button" variant="default" asChild>
               <Link to="/home">Back to Home</Link>
             </Button>
-            <Button type="button" variant="outline" onClick={logout}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                logout();
+                navigate("/login", { replace: true });
+              }}
+            >
               Log out
             </Button>
           </div>

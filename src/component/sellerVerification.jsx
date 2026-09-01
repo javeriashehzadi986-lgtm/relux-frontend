@@ -327,7 +327,7 @@ function SellerVerification() {
                 type="button"
                 onClick={() => {
                   logout();
-                  navigate("/sellerVerification", { replace: true });
+                  navigate("/login", { replace: true });
                 }}
               >
                 Log out &amp; Apply as Seller
@@ -455,7 +455,7 @@ function SellerVerification() {
                   className="seller-auth-notice-link"
                   onClick={() => {
                     logout();
-                    window.location.reload();
+                    navigate("/login", { replace: true });
                   }}
                 >
                   Log out first

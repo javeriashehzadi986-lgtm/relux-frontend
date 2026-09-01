@@ -66,14 +66,6 @@ function combineAuctionEnd(date, time) {
   return local.toISOString();
 }
 
-const previewThumbs = [
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuAXxVIrbVCOCT82XNvkqWO0eEgioxMP5KllgqBRslb6p1K2vZG5_Al5fJ0WjpScR-NAIyW3SXOHm6WGzF2eEqHapcIqCMrJwzRgYJXTEXMBrf35OmZKCR64XYu0iC9vTZgRPFYwJXTh9_A_X_X4PEDUrmB3IYHftxGQ1MkknW6Cai6kwDxcX_3U9A-h9r2rNMbLE-VXd6Lj_biOHW-L3auwAj9iHsAJkA4Li7yl_SjiYQaQPEoRsFtv5fnSoUFkGjXP0Uq6bEpoQpqM",
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuAyf7vT5X2qY1XQN5M1ak9f1CLumy3HmE8vDUuKH1ZSPpQLqVL9CNIJi-ndKu3t34y1Aw7g6iDgmbzUB3E_6Q9aa4YEPgFMrBL24mpKEY1Og6AbAM45Wpb_aq9ii8m5e_B-vNnXMSPtW5OJZteQHiZRmc4UZIfeyCrsfPUjxD4tEVAuclonIO9ZrCepv-wCojgEjvGPYR3mElVemXHkJsg9tCwNYjJbL4volagWC56IXovbeXRvk03DwSeFzm08tNkWrKEO7mULoXIk",
-];
-
-const previewHero =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuDlwhyF6SS6jajGCbROAAXC1Renqpw5TnYlrL6dFzceDZ_2kRwE9dNAibtUk6ZrRLJRn3XFwdfRfvnrZopuYbS_9CrCzgW27ZehzyZtZYbySZTlQ3TLxkhqozYHhZ4TJW8uwKxaR4guh0AMevUrs9qnhRc8Q6NqCoe6iEgZMqzcDQLfrzj6uZeAeNi951t7Es2AQ7B0kNgQZNpo6EjbVArqNB8M4HL1Np63Vf1XWcoN4XbyPD0V3keWBU9VirgS5BQ9FPRaaHI6mObD";
-
 function getSellerInitials(name = "") {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return "S";

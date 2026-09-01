@@ -2,7 +2,7 @@ import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { getPostAuthPath } from "@/utils/authRedirect";
 
-export default function ProtectedRoute({ children, roles, redirectTo = "/signup" }) {
+export default function ProtectedRoute({ children, roles, redirectTo = "/login" }) {
   const { user, loading } = useAuth();
   const location = useLocation();
 

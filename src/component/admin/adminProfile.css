@@ -360,48 +360,6 @@
   background: var(--admin-surface-container-high) !important;
 }
 
-.admin-profile-2fa-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-top: 1.5rem;
-  padding: 1.5rem;
-  border-radius: 0.75rem;
-  background: rgba(152, 201, 163, 0.2);
-}
-
-.admin-profile-2fa-copy {
-  display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-}
-
-.admin-profile-2fa-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.5rem;
-  border-radius: 9999px;
-  background: var(--admin-white);
-  color: var(--admin-primary);
-}
-
-.admin-profile-2fa-copy p {
-  margin: 0;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--admin-on-surface);
-}
-
-.admin-profile-2fa-copy span {
-  display: block;
-  margin-top: 0.25rem;
-  font-size: 0.75rem;
-  line-height: 1.5;
-  color: var(--admin-on-surface-variant);
-}
-
 .admin-profile-notification-list {
   display: flex;
   flex-direction: column;
@@ -558,20 +516,6 @@
   background: var(--admin-surface-container-high) !important;
 }
 
-.admin-profile-deactivate-btn {
-  flex: 1;
-  min-height: 2.5rem !important;
-  border-radius: 0.5rem !important;
-  background: var(--admin-error) !important;
-  color: #ffffff !important;
-  font-weight: 600 !important;
-  box-shadow: none !important;
-}
-
-.admin-profile-deactivate-btn:hover {
-  filter: brightness(0.92);
-}
-
 @media (min-width: 1024px) {
   .admin-profile-grid {
     grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
@@ -596,15 +540,7 @@
     width: auto;
   }
 
-  .admin-profile-logout-btn,
-  .admin-profile-deactivate-btn {
+  .admin-profile-logout-btn {
     flex: none;
-  }
-}
-
-@media (max-width: 767px) {
-  .admin-profile-2fa-row {
-    flex-direction: column;
-    align-items: flex-start;
   }
 }

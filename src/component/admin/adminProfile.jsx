@@ -5,8 +5,6 @@ import {
   LogOut,
   Shield,
   ShieldCheck,
-  Smartphone,
-  UserX,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,7 +24,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/context/AuthContext";
 import "./adminProfile.css";
 import "../profile.css";
@@ -81,7 +78,6 @@ const AdminProfile = () => {
     updateProfile,
     updateEmail,
     changePassword,
-    deactivateAccount,
   } = useAuth();
 
   const profile = useMemo(() => userToProfile(user), [user]);
@@ -90,13 +86,7 @@ const AdminProfile = () => {
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState("");
   const [saving, setSaving] = useState(false);
-  const [settingsError, setSettingsError] = useState("");
-  const [settingsSaving, setSettingsSaving] = useState(false);
-
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
-
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  const [showDeactivateConfirm, setShowDeactivateConfirm] = useState(false);
   const [showEmailDialog, setShowEmailDialog] = useState(false);
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [emailDraft, setEmailDraft] = useState("");
@@ -108,9 +98,6 @@ const AdminProfile = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [passwordSaving, setPasswordSaving] = useState(false);
-  const [deactivatePassword, setDeactivatePassword] = useState("");
-  const [deactivateError, setDeactivateError] = useState("");
-  const [deactivating, setDeactivating] = useState(false);
 
   const initials = useMemo(() => getInitials(user?.name ?? ""), [user?.name]);
   const hasPassword =
@@ -127,11 +114,6 @@ const AdminProfile = () => {
       setDraft(profile);
     }
   }, [profile, isEditing]);
-
-  useEffect(() => {
-    if (!user) return;
-    setTwoFactorEnabled(Boolean(user.twoFactorEnabled));
-  }, [user]);
 
   const handleEditProfile = () => {
     setDraft(profile);
@@ -171,28 +153,6 @@ const AdminProfile = () => {
 
   const updateDraft = (field) => (event) => {
     setDraft((current) => ({ ...current, [field]: event.target.value }));
-  };
-
-  const saveAccountSettings = async (payload) => {
-    setSettingsError("");
-    setSettingsSaving(true);
-    try {
-      await updateProfile(payload);
-    } catch (error) {
-      setSettingsError(error.message || "Could not save settings");
-      throw error;
-    } finally {
-      setSettingsSaving(false);
-    }
-  };
-
-  const handleTwoFactorChange = async (checked) => {
-    setTwoFactorEnabled(checked);
-    try {
-      await saveAccountSettings({ twoFactorEnabled: checked });
-    } catch {
-      setTwoFactorEnabled(!checked);
-    }
   };
 
   const handleEmailSubmit = async (event) => {
@@ -248,25 +208,6 @@ const AdminProfile = () => {
     navigate("/login", { replace: true });
   };
 
-  const handleDeactivateConfirm = async () => {
-    setDeactivateError("");
-    setDeactivating(true);
-    try {
-      if (hasPassword) {
-        await deactivateAccount({ password: deactivatePassword });
-      } else {
-        await deactivateAccount({ confirm: true });
-      }
-      setShowDeactivateConfirm(false);
-      setDeactivatePassword("");
-      navigate("/login", { replace: true });
-    } catch (error) {
-      setDeactivateError(error.message || "Could not deactivate account");
-    } finally {
-      setDeactivating(false);
-    }
-  };
-
   if (!user) {
     return (
       <div className="admin-profile-page">
@@ -281,12 +222,6 @@ const AdminProfile = () => {
         <h1>Admin Profile &amp; Settings</h1>
         <p>Manage your profile and account security.</p>
       </div>
-
-      {settingsError ? (
-        <p className="admin-profile-message admin-profile-message--error" role="alert">
-          {settingsError}
-        </p>
-      ) : null}
 
       <div className="admin-profile-grid">
         <div className="admin-profile-column">
@@ -471,25 +406,6 @@ const AdminProfile = () => {
                   </Button>
                 </div>
               </div>
-
-              <div className="admin-profile-2fa-row">
-                <div className="admin-profile-2fa-copy">
-                  <span className="admin-profile-2fa-icon">
-                    <Smartphone size={20} />
-                  </span>
-                  <div>
-                    <p>Two-Factor Authentication (2FA)</p>
-                    <span>Add an extra layer of security to your account.</span>
-                  </div>
-                </div>
-                <Switch
-                  id="admin-2fa"
-                  checked={twoFactorEnabled}
-                  onCheckedChange={handleTwoFactorChange}
-                  disabled={settingsSaving}
-                  aria-label="Two-factor authentication"
-                />
-              </div>
             </CardContent>
           </Card>
 
@@ -497,7 +413,7 @@ const AdminProfile = () => {
             <CardContent className="admin-profile-danger-content">
               <div className="admin-profile-danger-copy">
                 <h3>Account Management</h3>
-                <p>Log out of your session or permanently deactivate your account.</p>
+                <p>Log out of your admin session when you are finished.</p>
               </div>
               <div className="admin-profile-danger-actions">
                 <Button
@@ -508,18 +424,6 @@ const AdminProfile = () => {
                 >
                   <LogOut size={18} />
                   Logout
-                </Button>
-                <Button
-                  type="button"
-                  className="admin-profile-deactivate-btn"
-                  onClick={() => {
-                    setDeactivatePassword("");
-                    setDeactivateError("");
-                    setShowDeactivateConfirm(true);
-                  }}
-                >
-                  <UserX size={18} />
-                  Deactivate
                 </Button>
               </div>
             </CardContent>
@@ -675,60 +579,6 @@ const AdminProfile = () => {
             </Button>
             <Button type="button" className="profile-logout-confirm-btn" onClick={handleLogoutConfirm}>
               Log Out
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={showDeactivateConfirm} onOpenChange={setShowDeactivateConfirm}>
-        <DialogContent className="profile-logout-modal" showCloseButton={false}>
-          <DialogHeader className="profile-logout-modal-header">
-            <DialogTitle id="admin-deactivate-title" className="profile-logout-modal-title">
-              Deactivate account?
-            </DialogTitle>
-            <DialogDescription className="profile-logout-modal-description">
-              {hasPassword
-                ? "This will suspend your admin account. Enter your password to confirm."
-                : "This will suspend your admin account. Confirm below — no Relux password needed for Google accounts."}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="admin-profile-dialog-fields">
-            {hasPassword ? (
-              <>
-                <label className="admin-profile-form-label" htmlFor="admin-deactivate-password">
-                  Current Password
-                </label>
-                <Input
-                  id="admin-deactivate-password"
-                  type="password"
-                  value={deactivatePassword}
-                  onChange={(event) => setDeactivatePassword(event.target.value)}
-                  required
-                />
-              </>
-            ) : null}
-            {deactivateError ? (
-              <p className="admin-profile-message admin-profile-message--error" role="alert">
-                {deactivateError}
-              </p>
-            ) : null}
-          </div>
-          <DialogFooter className="profile-logout-modal-actions">
-            <Button
-              type="button"
-              variant="ghost"
-              className="profile-logout-cancel-btn"
-              onClick={() => setShowDeactivateConfirm(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              className="profile-delete-confirm-btn"
-              disabled={deactivating || (hasPassword && !deactivatePassword)}
-              onClick={handleDeactivateConfirm}
-            >
-              {deactivating ? "Deactivating..." : "Deactivate"}
             </Button>
           </DialogFooter>
         </DialogContent>

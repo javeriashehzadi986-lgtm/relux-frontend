@@ -1051,7 +1051,7 @@ const SellerProfile = () => {
   const handleLogoutConfirm = () => {
     setShowLogoutConfirm(false);
     logout();
-    navigate("/login");
+    navigate("/login", { replace: true });
   };
 
   const renderSidebarNav = (className = "") => (

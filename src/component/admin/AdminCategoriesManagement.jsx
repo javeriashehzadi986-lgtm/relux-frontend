@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import api from "@/services/api";
-import { toggleAdminSidebar } from "@/utils/adminSidebar";
 import "./adminCategoriesManagement.css";
 
 const CATEGORY_ICONS = [
@@ -264,14 +263,6 @@ const AdminCategoriesManagement = () => {
     <div className="admin-categories-page">
       <header className="admin-categories-header">
         <div className="admin-categories-header-left">
-          <button
-            type="button"
-            className="admin-categories-menu-btn"
-            aria-label="Open menu"
-            onClick={toggleAdminSidebar}
-          >
-            <span className="material-symbols-outlined">menu</span>
-          </button>
           <div className="admin-categories-header-search-wrap">
             <span className="material-symbols-outlined" aria-hidden="true">
               search

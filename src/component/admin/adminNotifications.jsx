@@ -29,7 +29,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { toggleAdminSidebar } from "@/utils/adminSidebar";
 import "./adminNotifications.css";
 
 const DEFAULT_COUNTS = { all: 0, buyers: 0, sellers: 0 };
@@ -119,14 +118,6 @@ const AdminNotifications = () => {
     <div className="admin-notifications-page">
       <section className="admin-notifications-header">
         <div className="admin-notifications-header-left">
-          <button
-            type="button"
-            className="admin-notifications-menu-btn"
-            aria-label="Open menu"
-            onClick={toggleAdminSidebar}
-          >
-            <span className="material-symbols-outlined">menu</span>
-          </button>
           <div>
             <h1>Notifications</h1>
             <p>Create and send announcements to users on Relux Hub.</p>

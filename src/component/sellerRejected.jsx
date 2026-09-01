@@ -16,7 +16,7 @@ export default function SellerRejected() {
   useEffect(() => {
     if (loading) return;
     if (!user) {
-      navigate("/signup", { replace: true });
+      navigate("/login", { replace: true });
       return;
     }
     if (user.role !== "seller") {

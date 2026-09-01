@@ -3,9 +3,6 @@ import api from "@/services/api";
 import { toggleAdminSidebar } from "@/utils/adminSidebar";
 import "./adminResaleOrders.css";
 
-const ADMIN_AVATAR =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuAURk_bun2HOkUySQS4zop9iVJL40MAu1viYY4ZLdAO4wuRnkZJUKf2XtI4sOKaE0qfCEKiLXqGL91LPXRNJr7RVS5GXk5RvS2huL9JS-A4GJX0Vw5tleaN9oADaohoyP72PI6bfIrYoV-BNI0z-JYwxy9zOn9H48GpTMbNtd9B7O2NseZuKmNz4chzxWrbhQN4Pmp3c1EZQSYBgTHwK1pFpl5slb4Y68y_MOx9t_IqLAIXQmzSuS4EUJv5pLU5O_rPZ8nzA4lGcNk";
-
 const STATUS_LABELS = {
   completed: "Completed",
   processing: "Processing",
@@ -203,9 +200,6 @@ const AdminResaleOrders = () => {
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
             />
-          </div>
-          <div className="admin-resale-avatar">
-            <img src={ADMIN_AVATAR} alt="Admin profile" />
           </div>
         </div>
       </header>
