@@ -241,9 +241,18 @@ function SellerVerification() {
     const formData = new FormData(event.currentTarget);
     const phone = formData.get("phone")?.toString().trim() ?? "";
     const city = formData.get("city")?.toString().trim() ?? "";
+    const returnContactName = formData.get("returnContactName")?.toString().trim() ?? "";
+    const returnPhone = formData.get("returnPhone")?.toString().trim() ?? "";
+    const returnCity = formData.get("returnCity")?.toString().trim() ?? "";
+    const returnAddress = formData.get("returnAddress")?.toString().trim() ?? "";
 
     if (!phone || !city) {
       setSubmitError("Phone and city are required");
+      return;
+    }
+
+    if (!returnContactName || !returnPhone || !returnCity || !returnAddress) {
+      setSubmitError("Return contact name, phone, city, and address are required");
       return;
     }
 
@@ -258,6 +267,10 @@ function SellerVerification() {
         await submitSellerVerification({
           phone,
           city,
+          returnContactName,
+          returnPhone,
+          returnCity,
+          returnAddress,
           cnicFront: cnicFrontData,
           cnicBack: cnicBackData,
         });
@@ -265,6 +278,10 @@ function SellerVerification() {
         await submitSellerVerification({
           phone,
           city,
+          returnContactName,
+          returnPhone,
+          returnCity,
+          returnAddress,
           cnicFront: cnicFrontData,
           cnicBack: cnicBackData,
         });
@@ -435,7 +452,7 @@ function SellerVerification() {
             <div className="seller-auth-notice seller-auth-notice--buyer">
               <p>
                 You are logged in as buyer <strong>{user.email}</strong>. Complete phone, city,
-                and CNIC below to apply as a seller.
+                return address, and CNIC below to apply as a seller.
               </p>
             </div>
           ) : null}
@@ -475,6 +492,77 @@ function SellerVerification() {
                   placeholder="Enter your city"
                   className="seller-input"
                   defaultValue={user?.city ?? ""}
+                  required
+                />
+              </div>
+            </div>
+          </Card>
+
+          <Card className="seller-card">
+            <div className="seller-card-heading">
+              <span className="seller-card-icon">
+                <User size={22} strokeWidth={1.75} />
+              </span>
+              <h2 className="seller-card-title">Return Address (for renters)</h2>
+            </div>
+            <p className="seller-stripe-desc">
+              Renters will use this name, phone, and address to ship dresses back to you after the
+              rental period.
+            </p>
+            <div className="seller-form-grid">
+              <div className="seller-field seller-field--full">
+                <Label htmlFor="returnContactName" className="seller-field-label">
+                  Contact Name
+                </Label>
+                <Input
+                  id="returnContactName"
+                  name="returnContactName"
+                  type="text"
+                  placeholder="Name shown to renters for returns"
+                  className="seller-input"
+                  defaultValue={user?.returnContactName ?? user?.name ?? ""}
+                  required
+                />
+              </div>
+              <div className="seller-field">
+                <Label htmlFor="returnPhone" className="seller-field-label">
+                  Return Phone
+                </Label>
+                <Input
+                  id="returnPhone"
+                  name="returnPhone"
+                  type="tel"
+                  placeholder="Phone for return shipments"
+                  className="seller-input"
+                  defaultValue={user?.returnPhone ?? user?.phone ?? ""}
+                  required
+                />
+              </div>
+              <div className="seller-field">
+                <Label htmlFor="returnCity" className="seller-field-label">
+                  Return City
+                </Label>
+                <Input
+                  id="returnCity"
+                  name="returnCity"
+                  type="text"
+                  placeholder="City for returns"
+                  className="seller-input"
+                  defaultValue={user?.returnCity ?? user?.city ?? ""}
+                  required
+                />
+              </div>
+              <div className="seller-field seller-field--full">
+                <Label htmlFor="returnAddress" className="seller-field-label">
+                  Return Address
+                </Label>
+                <Input
+                  id="returnAddress"
+                  name="returnAddress"
+                  type="text"
+                  placeholder="Full address where renters should send items back"
+                  className="seller-input"
+                  defaultValue={user?.returnAddress ?? ""}
                   required
                 />
               </div>

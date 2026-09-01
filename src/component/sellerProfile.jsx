@@ -70,6 +70,10 @@ const defaultProfile = {
   phone: "",
   city: "",
   address: "",
+  returnContactName: "",
+  returnPhone: "",
+  returnCity: "",
+  returnAddress: "",
 };
 
 function userToProfile(user) {
@@ -79,6 +83,10 @@ function userToProfile(user) {
     phone: user?.phone ?? "",
     city: user?.city ?? "",
     address: user?.address ?? "",
+    returnContactName: user?.returnContactName ?? user?.name ?? "",
+    returnPhone: user?.returnPhone ?? user?.phone ?? "",
+    returnCity: user?.returnCity ?? user?.city ?? "",
+    returnAddress: user?.returnAddress ?? "",
   };
 }
 
@@ -361,6 +369,30 @@ function SellerProfileSection() {
     },
   ];
 
+  const returnViewFields = [
+    {
+      id: "returnContactName",
+      label: "Contact Name",
+      value: formatFieldValue(profile.returnContactName),
+    },
+    {
+      id: "returnPhone",
+      label: "Return Phone",
+      value: formatFieldValue(profile.returnPhone),
+    },
+    {
+      id: "returnCity",
+      label: "Return City",
+      value: formatFieldValue(profile.returnCity),
+    },
+    {
+      id: "returnAddress",
+      label: "Return Address",
+      value: formatFieldValue(profile.returnAddress),
+      fullWidth: true,
+    },
+  ];
+
   const handleEditClick = () => {
     setDraft(profile);
     setIsEditing(true);
@@ -380,6 +412,10 @@ function SellerProfileSection() {
         phone: draft.phone.trim(),
         city: draft.city.trim(),
         address: draft.address.trim(),
+        returnContactName: draft.returnContactName.trim(),
+        returnPhone: draft.returnPhone.trim(),
+        returnCity: draft.returnCity.trim(),
+        returnAddress: draft.returnAddress.trim(),
       });
       setDraft(userToProfile(updatedUser));
       setIsEditing(false);
@@ -397,7 +433,7 @@ function SellerProfileSection() {
             <div className="seller-profile-hero-copy seller-profile-edit-heading">
               <h1 className="seller-dashboard-page-title">My Profile</h1>
               <p className="seller-profile-subtitle">
-                Update your personal details and delivery information.
+                Update your personal details and return contact for renters.
               </p>
             </div>
 
@@ -456,6 +492,55 @@ function SellerProfileSection() {
                     id="edit-address"
                     value={draft.address}
                     onChange={handleDraftChange("address")}
+                    className="seller-dashboard-input"
+                  />
+                </Field>
+              </FieldGroup>
+
+              <div className="seller-profile-return-heading">
+                <h3 className="seller-profile-account-settings-label">
+                  Return address (for renters)
+                </h3>
+                <p className="seller-profile-subtitle">
+                  Renters use these details to ship the dress back to you after the rental period.
+                </p>
+              </div>
+
+              <FieldGroup className="seller-dashboard-form-grid seller-profile-edit-grid">
+                <Field className="seller-dashboard-field">
+                  <FieldLabel htmlFor="edit-returnContactName">Contact Name</FieldLabel>
+                  <Input
+                    id="edit-returnContactName"
+                    value={draft.returnContactName}
+                    onChange={handleDraftChange("returnContactName")}
+                    className="seller-dashboard-input"
+                  />
+                </Field>
+                <Field className="seller-dashboard-field">
+                  <FieldLabel htmlFor="edit-returnPhone">Return Phone</FieldLabel>
+                  <Input
+                    id="edit-returnPhone"
+                    type="tel"
+                    value={draft.returnPhone}
+                    onChange={handleDraftChange("returnPhone")}
+                    className="seller-dashboard-input"
+                  />
+                </Field>
+                <Field className="seller-dashboard-field">
+                  <FieldLabel htmlFor="edit-returnCity">Return City</FieldLabel>
+                  <Input
+                    id="edit-returnCity"
+                    value={draft.returnCity}
+                    onChange={handleDraftChange("returnCity")}
+                    className="seller-dashboard-input"
+                  />
+                </Field>
+                <Field className="seller-dashboard-field seller-dashboard-field--full">
+                  <FieldLabel htmlFor="edit-returnAddress">Return Address</FieldLabel>
+                  <Input
+                    id="edit-returnAddress"
+                    value={draft.returnAddress}
+                    onChange={handleDraftChange("returnAddress")}
                     className="seller-dashboard-input"
                   />
                 </Field>
@@ -523,6 +608,30 @@ function SellerProfileSection() {
                     <p className="seller-profile-detail-value">{field.value}</p>
                   </div>
                 ))}
+              </div>
+
+              <Separator className="seller-profile-top-divider" />
+
+              <div className="seller-profile-return-section">
+                <h3 className="seller-profile-account-settings-label">
+                  Return address (for renters)
+                </h3>
+                <p className="seller-profile-subtitle">
+                  Shown to renters in My Orders so they can return items to you.
+                </p>
+                <div className="seller-dashboard-form-grid seller-profile-details-grid">
+                  {returnViewFields.map((field) => (
+                    <div
+                      key={field.id}
+                      className={`seller-dashboard-field seller-profile-detail-field ${
+                        field.fullWidth ? "seller-dashboard-field--full" : ""
+                      }`}
+                    >
+                      <span className="seller-profile-detail-label">{field.label}</span>
+                      <p className="seller-profile-detail-value">{field.value}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <Separator className="seller-profile-top-divider" />

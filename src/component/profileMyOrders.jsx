@@ -6,9 +6,12 @@ import {
   ChevronRight,
   Clock,
   History,
+  MapPin,
+  Phone,
   Search,
   ShieldCheck,
   ShoppingBag,
+  User,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -351,6 +354,45 @@ const ProfileMyOrders = () => {
                               </p>
                             ) : null}
                           </div>
+                        ) : null}
+                        {order.type === "rental" &&
+                        (order.status === "rental-active" || order.status === "returned") ? (
+                          order.sellerReturnContact ? (
+                            <div className="profile-order-return-box">
+                              <p className="profile-order-return-title">
+                                <MapPin size={16} aria-hidden="true" />
+                                Return to seller
+                              </p>
+                              <p className="profile-order-return-line">
+                                <User size={14} aria-hidden="true" />
+                                {order.sellerReturnContact.name}
+                              </p>
+                              <p className="profile-order-return-line">
+                                <Phone size={14} aria-hidden="true" />
+                                {order.sellerReturnContact.phone}
+                              </p>
+                              <p className="profile-order-return-line">
+                                {order.sellerReturnContact.address},{" "}
+                                {order.sellerReturnContact.city}
+                              </p>
+                              {order.sellerReturnContact.email ? (
+                                <p className="profile-order-return-line profile-order-return-email">
+                                  {order.sellerReturnContact.email}
+                                </p>
+                              ) : null}
+                              <p className="profile-order-return-note">
+                                Ship or drop off the item to this address before marking it as
+                                returned.
+                              </p>
+                            </div>
+                          ) : (
+                            <div className="profile-order-return-box profile-order-return-box--missing">
+                              <p className="profile-order-return-note">
+                                Return contact is not available for this order. Message the seller
+                                or contact support for return instructions.
+                              </p>
+                            </div>
+                          )
                         ) : null}
                       </div>
                     </div>

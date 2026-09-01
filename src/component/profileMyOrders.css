@@ -536,3 +536,45 @@
   margin-top: 0.35rem;
   color: #5d605f;
 }
+
+.profile-order-return-box {
+  margin-top: 0.75rem;
+  padding: 0.875rem 1rem;
+  border-radius: 8px;
+  background: #faf6f0;
+  border: 1px solid #e8dfd2;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.profile-order-return-box--missing {
+  background: #f8f4f4;
+  border-color: #eadede;
+}
+
+.profile-order-return-title {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 0.5rem;
+  font-weight: 600;
+  color: #4a3728;
+}
+
+.profile-order-return-line {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.25rem 0;
+  color: #3d403f;
+}
+
+.profile-order-return-email {
+  color: #5d605f;
+}
+
+.profile-order-return-note {
+  margin: 0.5rem 0 0;
+  color: #5d605f;
+  font-size: 0.8125rem;
+}
