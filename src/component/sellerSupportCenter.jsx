@@ -276,11 +276,6 @@ const SellerSupportCenter = ({ variant = "buyer" }) => {
                   <FieldLabel htmlFor="support-order">
                     Link Product &amp; Seller (select order)
                   </FieldLabel>
-                  <p className="support-center-field-hint">
-                    Apni order list se woh order choose karo jiski product / seller
-                    pe problem hai. Is se report us product aur seller se link ho
-                    jayegi — admin phir seller se contact kar sakega.
-                  </p>
                   <select
                     id="support-order"
                     className="support-center-select"

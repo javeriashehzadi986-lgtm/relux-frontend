@@ -624,23 +624,6 @@ const AdminSupportCenter = () => {
             </div>
 
             <div className="admin-reports-detail-actions">
-              {!selectedReport.isDispute && !isClosed && (
-                <p className="admin-reports-action-hint">
-                  <strong>Ask Seller</strong> tab dikhega jab buyer ne request mein{" "}
-                  <em>Related Order</em> select ki ho (Order / Rental / Return).
-                  Purani reports bina order ke dispute nahi banti.
-                </p>
-              )}
-
-              {selectedReport.isDispute &&
-                selectedReport.disputeStage === "awaiting_seller" &&
-                !isClosed && (
-                  <p className="admin-reports-action-hint admin-reports-action-hint--waiting">
-                    Seller se jawab manga ja chuka hai. Seller Support Center mein
-                    respond karega — phir yahan unka jawab dikhega.
-                  </p>
-                )}
-
               <Button
                 type="button"
                 className="admin-reports-action-btn admin-reports-action-btn--primary"

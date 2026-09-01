@@ -216,7 +216,10 @@ const AdminPayments = () => {
     <div className="admin-payments-page">
       <div className="admin-payments-header">
         <h1>Payments</h1>
-        <p>Live Relux payments from Stripe checkout and order records.</p>
+        <p>
+          Paid, pending Stripe checkout, refunds, and failed attempts. Unpaid orders are
+          under Resale Orders or Rental Orders.
+        </p>
       </div>
 
       {error ? (
@@ -304,10 +307,9 @@ const AdminPayments = () => {
               <SelectContent>
                 <SelectItem value="all">Status</SelectItem>
                 <SelectItem value="paid">Paid</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="pending">Pending checkout</SelectItem>
                 <SelectItem value="refunded">Refunded</SelectItem>
                 <SelectItem value="failed">Failed</SelectItem>
-                <SelectItem value="unpaid">Unpaid</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -327,7 +329,8 @@ const AdminPayments = () => {
             <p className="admin-payments-empty">Loading payments…</p>
           ) : pagePayments.length === 0 ? (
             <p className="admin-payments-empty">
-              No payments yet. Completed Stripe checkouts will appear here.
+              No payment transactions yet. Paid checkouts will appear here; open orders
+              stay under Resale or Rental Orders.
             </p>
           ) : (
             <Table className="admin-payments-table">

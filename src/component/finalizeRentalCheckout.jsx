@@ -11,7 +11,30 @@ import { useAuth } from "@/context/AuthContext";
 import api from "@/services/api";
 import "./finalizePurchase.css";
 
-const CITIES = ["Lahore", "Karachi", "Islamabad", "Faisalabad"];
+const CITIES = [
+  "Lahore",
+  "Karachi",
+  "Islamabad",
+  "Rawalpindi",
+  "Faisalabad",
+  "Multan",
+  "Peshawar",
+  "Quetta",
+  "Sialkot",
+  "Gujranwala",
+  "Hyderabad",
+  "Sukkur",
+  "Bahawalpur",
+  "Sargodha",
+  "Abbottabad",
+  "Mardan",
+  "Gujrat",
+  "Sahiwal",
+  "Okara",
+  "Sheikhupura",
+];
+
+const OTHER_CITY = "__other__";
 
 const formatPkr = (amount) => `PKR ${Math.round(amount).toLocaleString("en-PK")}`;
 
@@ -41,18 +64,41 @@ const FinalizeRentalCheckout = () => {
     phone: "",
     email: "",
     address: "",
-    city: "Lahore",
+    city: "",
+    customCity: "",
     specialInstructions: "",
   });
+  const [cityChoice, setCityChoice] = useState("");
 
   useEffect(() => {
     if (!user) return;
-    setForm((current) => ({
-      ...current,
-      fullName: current.fullName || user.name || "",
-      email: current.email || user.email || "",
-      phone: current.phone || user.phone || "",
-    }));
+    setForm((current) => {
+      const next = {
+        ...current,
+        fullName: current.fullName || user.name || "",
+        email: current.email || user.email || "",
+        phone: current.phone || user.phone || "",
+      };
+
+      const userCity = String(user.city || "").trim();
+      if (!current.city && userCity) {
+        if (CITIES.includes(userCity)) {
+          next.city = userCity;
+        } else {
+          next.city = userCity;
+          next.customCity = userCity;
+        }
+      }
+      return next;
+    });
+
+    const userCity = String(user.city || "").trim();
+    if (userCity) {
+      setCityChoice((current) => {
+        if (current) return current;
+        return CITIES.includes(userCity) ? userCity : OTHER_CITY;
+      });
+    }
   }, [user]);
 
   useEffect(() => {
@@ -148,9 +194,32 @@ const FinalizeRentalCheckout = () => {
   const summaryImage = dress.image ?? dress.mainImage ?? dress.gallery?.[0];
   const conditionLabel = getDressConditionLabel(dress);
 
+  const resolvedCity =
+    cityChoice === OTHER_CITY
+      ? form.customCity.trim()
+      : (cityChoice || form.city).trim();
+
   const updateField = (field) => (event) => {
     setForm((current) => ({ ...current, [field]: event.target.value }));
     setPayError("");
+  };
+
+  const handleCityChoice = (event) => {
+    const value = event.target.value;
+    setCityChoice(value);
+    setPayError("");
+    if (value === OTHER_CITY) {
+      setForm((current) => ({
+        ...current,
+        city: current.customCity.trim() || "",
+      }));
+      return;
+    }
+    setForm((current) => ({
+      ...current,
+      city: value,
+      customCity: "",
+    }));
   };
 
   const validateForm = () => {
@@ -158,7 +227,11 @@ const FinalizeRentalCheckout = () => {
     if (!form.phone.trim()) return "Phone number is required";
     if (!form.email.trim()) return "Email is required";
     if (!form.address.trim()) return "Delivery address is required";
-    if (!form.city.trim()) return "City is required";
+    if (!resolvedCity) {
+      return cityChoice === OTHER_CITY
+        ? "Please type your city"
+        : "City is required";
+    }
     return "";
   };
 
@@ -179,7 +252,7 @@ const FinalizeRentalCheckout = () => {
         phone: form.phone.trim(),
         email: form.email.trim(),
         address: form.address.trim(),
-        city: form.city.trim(),
+        city: resolvedCity,
         specialInstructions: form.specialInstructions.trim(),
       });
 
@@ -275,16 +348,36 @@ const FinalizeRentalCheckout = () => {
                 <select
                   id="rental-checkout-city"
                   className="finalize-purchase-select"
-                  value={form.city}
-                  onChange={updateField("city")}
+                  value={cityChoice}
+                  onChange={handleCityChoice}
+                  required
                 >
+                  <option value="" disabled>
+                    Select city
+                  </option>
                   {CITIES.map((city) => (
                     <option key={city} value={city}>
                       {city}
                     </option>
                   ))}
+                  <option value={OTHER_CITY}>Other — type your city</option>
                 </select>
               </div>
+
+              {cityChoice === OTHER_CITY ? (
+                <div className="finalize-purchase-field">
+                  <label htmlFor="rental-checkout-custom-city">Your City</label>
+                  <input
+                    id="rental-checkout-custom-city"
+                    className="finalize-purchase-input"
+                    type="text"
+                    placeholder="e.g. Jhelum, Mingora, Gwadar"
+                    value={form.customCity}
+                    onChange={updateField("customCity")}
+                    required
+                  />
+                </div>
+              ) : null}
 
               <div className="finalize-purchase-field finalize-purchase-field--full">
                 <label htmlFor="rental-checkout-notes">Special Instructions</label>

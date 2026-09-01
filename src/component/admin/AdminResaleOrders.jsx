@@ -13,6 +13,26 @@ const STATUS_LABELS = {
   pending: "Awaiting Payment",
 };
 
+const PAYMENT_LABELS = {
+  paid: "Paid",
+  pending: "Pending",
+  unpaid: "Unpaid",
+  failed: "Failed",
+  refunded: "Refunded",
+};
+
+function paymentLabel(status) {
+  return PAYMENT_LABELS[status] || status || "—";
+}
+
+function paymentBadgeClass(status) {
+  if (status === "paid") return "paid";
+  if (status === "refunded") return "refunded";
+  if (status === "failed") return "failed";
+  if (status === "pending") return "pending";
+  return "unpaid";
+}
+
 const PAGE_SIZE = 10;
 
 function formatDate(iso) {
@@ -247,7 +267,7 @@ const AdminResaleOrders = () => {
               <span className="material-symbols-outlined">hourglass_empty</span>
             </div>
             <div>
-              <p className="admin-resale-stat-label">Pending Orders</p>
+              <p className="admin-resale-stat-label">In Progress</p>
               <p className="admin-resale-stat-value">{stats.pendingOrders}</p>
             </div>
           </article>
@@ -277,6 +297,9 @@ const AdminResaleOrders = () => {
             >
               <option value="all">Payment: All</option>
               <option value="paid">Paid</option>
+              <option value="pending">Pending</option>
+              <option value="unpaid">Unpaid</option>
+              <option value="failed">Failed</option>
               <option value="refunded">Refunded</option>
             </select>
           </label>
@@ -297,16 +320,17 @@ const AdminResaleOrders = () => {
                   <th>Clothing</th>
                   <th>Buyer</th>
                   <th>Seller</th>
-                  <th>Price</th>
+                  <th>Amount Paid</th>
                   <th>Date</th>
                   <th>Order Status</th>
+                  <th>Payment</th>
                   <th>Product</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={8} className="admin-resale-empty">
+                    <td colSpan={9} className="admin-resale-empty">
                       Loading resale orders...
                     </td>
                   </tr>
@@ -354,7 +378,7 @@ const AdminResaleOrders = () => {
                           <span>{order.seller}</span>
                         </div>
                       </td>
-                      <td className="admin-resale-winning-bid">{order.winningBid}</td>
+                      <td className="admin-resale-winning-bid">{order.totalPaid || order.winningBid}</td>
                       <td className="admin-resale-date">{formatDate(order.date)}</td>
                       <td>
                         <span
@@ -363,12 +387,19 @@ const AdminResaleOrders = () => {
                           {order.statusLabel || order.fulfillmentLabel || STATUS_LABELS[order.status] || order.status}
                         </span>
                       </td>
+                      <td>
+                        <span
+                          className={`admin-resale-mini-badge admin-resale-mini-badge--${paymentBadgeClass(order.paymentStatus)}`}
+                        >
+                          {paymentLabel(order.paymentStatus)}
+                        </span>
+                      </td>
                       <td className="admin-resale-product-status">{order.productStatus || "—"}</td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={8} className="admin-resale-empty">
+                    <td colSpan={9} className="admin-resale-empty">
                       {orders.length === 0
                         ? "No resale orders yet. Sale checkout will create them."
                         : "No orders match your filters."}
@@ -466,8 +497,18 @@ const AdminResaleOrders = () => {
 
               <div className="admin-resale-detail-rows">
                 <div className="admin-resale-detail-row">
-                  <span>Order Amount</span>
+                  <span>Winning Bid</span>
                   <strong>{selectedOrder.winningBid}</strong>
+                </div>
+                {selectedOrder.deliveryCharges && selectedOrder.deliveryCharges !== "—" ? (
+                  <div className="admin-resale-detail-row">
+                    <span>Delivery</span>
+                    <strong>{selectedOrder.deliveryCharges}</strong>
+                  </div>
+                ) : null}
+                <div className="admin-resale-detail-row">
+                  <span>Total Paid</span>
+                  <strong>{selectedOrder.totalPaid || selectedOrder.winningBid}</strong>
                 </div>
                 <div className="admin-resale-detail-row">
                   <span>Order Status</span>
@@ -479,10 +520,34 @@ const AdminResaleOrders = () => {
                 </div>
                 <div className="admin-resale-detail-row">
                   <span>Payment Status</span>
-                  <span className="admin-resale-mini-badge admin-resale-mini-badge--paid">
-                    {selectedOrder.paymentStatus === "paid" ? "Paid" : "Refunded"}
+                  <span
+                    className={`admin-resale-mini-badge admin-resale-mini-badge--${paymentBadgeClass(selectedOrder.paymentStatus)}`}
+                  >
+                    {paymentLabel(selectedOrder.paymentStatus)}
                   </span>
                 </div>
+                {selectedOrder.paidAt ? (
+                  <div className="admin-resale-detail-row">
+                    <span>Paid At</span>
+                    <strong>{formatDate(selectedOrder.paidAt)}</strong>
+                  </div>
+                ) : null}
+                {selectedOrder.stripeSessionId ? (
+                  <div className="admin-resale-detail-row">
+                    <span>Stripe Session</span>
+                    <strong className="admin-resale-stripe-id">
+                      {selectedOrder.stripeSessionId}
+                    </strong>
+                  </div>
+                ) : null}
+                {selectedOrder.stripePaymentIntentId ? (
+                  <div className="admin-resale-detail-row">
+                    <span>Stripe Payment</span>
+                    <strong className="admin-resale-stripe-id">
+                      {selectedOrder.stripePaymentIntentId}
+                    </strong>
+                  </div>
+                ) : null}
                 <div className="admin-resale-detail-row">
                   <span>Product Status</span>
                   <strong>{selectedOrder.productStatus || "—"}</strong>
