@@ -47,10 +47,10 @@
 .profile-wishlist-title {
   margin: 0;
   font-family: "Newsreader", serif;
-  font-size: clamp(2.5rem, 5vw, 3rem);
-  font-weight: 400;
+  font-size: clamp(1.875rem, 4vw, 2.5rem);
+  font-weight: 500;
   letter-spacing: -0.02em;
-  line-height: 1.1;
+  line-height: 1.2;
   color: #303333;
 }
 
@@ -463,5 +463,54 @@
 
   .profile-wishlist-grid {
     grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 767px) {
+  .profile-wishlist-search-bar {
+    margin: -0.5rem -1rem 0;
+    padding: 1rem 1rem 0.75rem;
+  }
+
+  .profile-wishlist-hero {
+    margin-bottom: 2rem;
+    padding-top: 1rem;
+  }
+
+  .profile-wishlist-subtitle {
+    font-size: 1rem;
+  }
+
+  .profile-wishlist-controls {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .profile-wishlist-tabs-wrap {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .profile-wishlist-sort {
+    width: 100%;
+    text-align: center;
+  }
+
+  .profile-wishlist-grid {
+    gap: 2rem 1rem;
+    margin-bottom: 3rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-wishlist-search-bar {
+    margin: -0.25rem -0.875rem 0;
+    padding: 0.75rem 0.875rem;
+  }
+
+  .profile-wishlist-tab {
+    padding: 0.5rem 1rem !important;
+    font-size: 0.8125rem !important;
   }
 }

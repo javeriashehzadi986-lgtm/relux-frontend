@@ -402,3 +402,51 @@
     grid-template-columns: repeat(4, 1fr);
   }
 }
+
+@media (max-width: 767px) {
+  .seller-page {
+    padding: 0 1rem 3rem;
+  }
+
+  .seller-hero {
+    height: min(320px, 55vw);
+    border-radius: 0.5rem;
+  }
+
+  .seller-hero-overlay {
+    padding: 1.5rem;
+  }
+
+  .seller-hero-overlay h1 {
+    font-size: clamp(1.5rem, 6vw, 2rem);
+  }
+
+  .seller-intro-content {
+    flex-direction: column;
+    padding: 1.5rem;
+  }
+
+  .seller-requirements-grid,
+  .seller-journey-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .seller-focus-image-wrap {
+    height: 14rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .seller-page {
+    padding: 0 0.75rem 2.5rem;
+  }
+
+  .seller-hero-section {
+    padding-top: 1rem;
+  }
+
+  .seller-hero-overlay {
+    padding: 1rem;
+  }
+}

@@ -3,6 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import api from "@/services/api";
+import "./paymentStatus.css";
 
 const PaymentSuccess = () => {
   const [searchParams] = useSearchParams();
@@ -38,39 +39,43 @@ const PaymentSuccess = () => {
   }, [sessionId]);
 
   return (
-    <div style={{ maxWidth: 520, margin: "4rem auto", padding: "0 1.25rem", textAlign: "center" }}>
+    <div className="payment-status-page">
       {status === "loading" && (
         <>
-          <Loader2 size={40} style={{ margin: "0 auto 1rem", animation: "spin 1s linear infinite" }} />
-          <h1 style={{ fontSize: "1.5rem", marginBottom: "0.5rem" }}>Confirming payment…</h1>
-          <p>Please wait while we verify your Stripe checkout.</p>
+          <Loader2 size={40} className="payment-status-icon payment-status-icon--spin" />
+          <h1 className="payment-status-title">Confirming payment…</h1>
+          <p className="payment-status-text">Please wait while we verify your Stripe checkout.</p>
         </>
       )}
 
       {(status === "paid" || status === "pending") && (
         <>
-          <CheckCircle2 size={48} style={{ margin: "0 auto 1rem", color: "#1a7f4b" }} />
-          <h1 style={{ fontSize: "1.5rem", marginBottom: "0.5rem" }}>
+          <CheckCircle2 size={48} className="payment-status-icon payment-status-icon--success" />
+          <h1 className="payment-status-title">
             {status === "paid" ? "Payment successful" : "Payment received"}
           </h1>
-          <p style={{ marginBottom: "1.5rem" }}>
+          <p className="payment-status-text">
             {orderId
               ? `Order ${orderId} is confirmed. You can track it in your profile.`
               : "Your purchase is confirmed. You can track it in your profile."}
           </p>
-          <Button asChild>
-            <Link to="/profile?section=orders">View my orders</Link>
-          </Button>
+          <div className="payment-status-actions">
+            <Button asChild>
+              <Link to="/profile?section=orders">View my orders</Link>
+            </Button>
+          </div>
         </>
       )}
 
       {status === "error" && (
         <>
-          <h1 style={{ fontSize: "1.5rem", marginBottom: "0.5rem" }}>Could not confirm</h1>
-          <p style={{ marginBottom: "1.5rem" }}>{error}</p>
-          <Button asChild variant="outline">
-            <Link to="/profile?section=orders">Go to orders</Link>
-          </Button>
+          <h1 className="payment-status-title">Could not confirm</h1>
+          <p className="payment-status-text">{error}</p>
+          <div className="payment-status-actions">
+            <Button asChild variant="outline">
+              <Link to="/profile?section=orders">Go to orders</Link>
+            </Button>
+          </div>
         </>
       )}
     </div>

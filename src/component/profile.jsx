@@ -29,6 +29,7 @@ import ProfileMyBids from "./profileMyBids";
 import ProfileMyOrders from "./profileMyOrders";
 import ProfileWishlist from "./profileWishlist";
 import ProfileSupportCenter from "./profileSupportCenter";
+import DashboardMobileNav from "./DashboardMobileNav";
 import { useAuth } from "@/context/AuthContext";
 
 const SIDEBAR_ITEMS = [
@@ -37,6 +38,13 @@ const SIDEBAR_ITEMS = [
   { id: "support", label: "Support Center", icon: HelpCircle },
   { id: "profile", label: "My Profile", icon: User },
 ];
+
+function getMobileNavTitle(activeSection) {
+  const match = SIDEBAR_ITEMS.find((item) => item.id === activeSection);
+  if (match) return match.label;
+  if (activeSection === "wishlist") return "My Wishlist";
+  return "Dashboard";
+}
 
 function userToProfile(user) {
   return {
@@ -439,6 +447,15 @@ const Profile = ({ section: sectionProp }) => {
                   <Lock size={18} aria-hidden="true" />
                   {hasPassword ? "Change Password" : "Set Password"}
                 </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="profile-settings-btn profile-settings-btn--logout"
+                  onClick={() => setShowLogoutConfirm(true)}
+                >
+                  <LogOut size={18} aria-hidden="true" />
+                  Logout
+                </Button>
               </div>
 
               {passwordSuccess ? (
@@ -613,10 +630,15 @@ const Profile = ({ section: sectionProp }) => {
         </div>
       </aside>
 
-      <div className="profile-mobile-nav">
-        <h2 className="profile-sidebar-heading">Dashboard</h2>
-        {renderSidebarNav("profile-sidebar-nav--mobile")}
-      </div>
+      <DashboardMobileNav
+        title={getMobileNavTitle(activeSection)}
+        items={SIDEBAR_ITEMS}
+        activeSection={activeSection}
+        onSectionChange={handleSectionChange}
+        getIconFill={(item, isActive) =>
+          item.id === "profile" && isActive ? "currentColor" : "none"
+        }
+      />
 
       <main
         className={`profile-main ${

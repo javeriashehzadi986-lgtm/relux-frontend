@@ -137,21 +137,57 @@
 .profile-mobile-nav {
   display: block;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   padding: 1rem 1rem 0;
-  overflow-x: auto;
 }
 
-.profile-sidebar-nav--mobile {
+.profile-mobile-nav-scroll {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  touch-action: pan-x;
+  cursor: grab;
+  padding-bottom: 0.35rem;
+  margin: 0 -0.25rem;
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+}
+
+.profile-mobile-nav-scroll:active {
+  cursor: grabbing;
+}
+
+.profile-mobile-nav-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.profile-sidebar-nav.profile-sidebar-nav--mobile {
+  display: inline-flex;
+  flex: none;
   flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
   gap: 0.5rem;
-  min-width: max-content;
-  padding-bottom: 0.25rem;
+  width: max-content;
+  min-width: min(100%, max-content);
+  padding-bottom: 0.15rem;
+  overflow: visible;
 }
 
 .profile-sidebar-nav--mobile .profile-sidebar-link {
+  flex-shrink: 0;
   width: auto;
   white-space: nowrap;
   padding: 0.625rem 1rem !important;
+  touch-action: pan-x;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .profile-main {
@@ -166,13 +202,30 @@
   padding-top: 0;
 }
 
-body.dashboard-sidebar-closed .profile-sidebar,
-body.dashboard-sidebar-closed .profile-mobile-nav {
-  display: none !important;
+@media (max-width: 1023px) {
+  body.dashboard-sidebar-closed .profile-sidebar,
+  body.dashboard-sidebar-closed .profile-mobile-nav {
+    display: none !important;
+  }
+
+  /* Mobile tab bar must stay visible — hamburger should not hide it */
+  body.dashboard-sidebar-closed .profile-mobile-nav {
+    display: block !important;
+  }
+
+  body.dashboard-sidebar-closed .profile-main {
+    margin-left: 0 !important;
+  }
 }
 
-body.dashboard-sidebar-closed .profile-main {
-  margin-left: 0 !important;
+@media (min-width: 1024px) {
+  body.dashboard-sidebar-closed .profile-sidebar {
+    display: flex !important;
+  }
+
+  body.dashboard-sidebar-closed .profile-main {
+    margin-left: 18rem !important;
+  }
 }
 
 .profile-card {
@@ -370,6 +423,21 @@ body.dashboard-sidebar-closed .profile-main {
   border: 1px solid #e1e3e2 !important;
   box-shadow: none !important;
   text-decoration: none;
+}
+
+.profile-settings-btn:hover {
+  background: #f3f4f3 !important;
+  color: #303333 !important;
+}
+
+.profile-settings-btn--logout {
+  color: #ba1a1a !important;
+  border-color: rgba(186, 26, 26, 0.15) !important;
+}
+
+.profile-settings-btn--logout:hover {
+  background: rgba(186, 26, 26, 0.06) !important;
+  color: #93000a !important;
 }
 
 .profile-password-form {
@@ -639,18 +707,130 @@ body.dashboard-sidebar-closed .profile-main {
   color: #e3fff6 !important;
 }
 
+@media (max-width: 1023px) {
+  .profile-page {
+    flex-direction: column;
+    min-height: calc(100vh - 4.75rem);
+    min-width: 0;
+    --dashboard-mobile-nav-offset: 4.25rem;
+  }
+
+  .profile-mobile-nav {
+    position: sticky;
+    top: 4.75rem;
+    z-index: 35;
+    flex-shrink: 0;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    margin: 0;
+    padding: 0.75rem 1rem 0.875rem;
+    background: rgba(250, 249, 248, 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(225, 227, 226, 0.8);
+  }
+
+  .profile-mobile-nav .profile-sidebar-heading {
+    font-size: 1.125rem;
+    line-height: 1.35;
+    margin-bottom: 0.625rem;
+    padding: 0;
+  }
+
+  .profile-mobile-nav-title {
+    font-weight: 600;
+    color: #31685d;
+  }
+
+  .profile-sidebar-nav--mobile .profile-sidebar-link {
+    line-height: 1.35 !important;
+    min-height: 2.375rem;
+  }
+
+  .profile-orders-search-bar,
+  .profile-wishlist-search-bar,
+  .profile-bids-header {
+    top: calc(4.75rem + var(--dashboard-mobile-nav-offset, 0px));
+  }
+
+  .profile-orders-breadcrumb {
+    display: none;
+  }
+
+  /* Buyer list pages only — seller section headers stay full (title + description) */
+  .profile-orders-title,
+  .profile-bids-title,
+  .profile-wishlist-title {
+    display: none;
+  }
+
+  .profile-orders-hero,
+  .profile-wishlist-hero {
+    margin-bottom: 1.25rem;
+    padding-top: 0.5rem;
+  }
+
+  .profile-bids-header {
+    margin-top: 0;
+  }
+
+  .seller-dashboard-heading {
+    margin-bottom: 1rem;
+  }
+
+  .profile-main,
+  .profile-main--wide {
+    min-width: 0;
+    overflow: visible;
+  }
+
+  .profile-main--wide {
+    padding-top: 0.75rem;
+  }
+}
+
 @media (max-width: 480px) {
+  .profile-page {
+    min-height: calc(100vh - 4.5rem);
+    --dashboard-mobile-nav-offset: 3.75rem;
+  }
+
+  .profile-orders-search-bar,
+  .profile-wishlist-search-bar,
+  .profile-bids-header {
+    top: calc(4.5rem + var(--dashboard-mobile-nav-offset, 0px));
+  }
+
   .profile-main,
   .profile-main--wide {
     padding: 1rem 0.875rem 2rem;
   }
 
   .profile-mobile-nav {
-    padding: 0.75rem 0.875rem 0;
+    top: 4.5rem;
+    padding: 0.625rem 0.875rem;
+  }
+
+  .profile-sidebar-nav--mobile .profile-sidebar-link {
+    padding: 0.5rem 0.875rem !important;
+    font-size: 0.8125rem !important;
   }
 
   .profile-card {
     border-radius: 0.75rem;
+  }
+
+  .profile-card-header {
+    padding: 1.25rem 1.25rem 0;
+  }
+
+  .profile-card-content {
+    padding: 1.25rem;
+  }
+
+  .profile-card-title {
+    font-size: 1.5rem;
   }
 
   .profile-form-actions {
@@ -658,6 +838,21 @@ body.dashboard-sidebar-closed .profile-main {
   }
 
   .profile-form-actions button {
+    width: 100%;
+  }
+
+  .profile-password-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .profile-logout-modal-actions {
+    flex-direction: column;
+  }
+
+  .profile-logout-cancel-btn,
+  .profile-logout-confirm-btn {
     width: 100%;
   }
 }

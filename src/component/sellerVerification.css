@@ -532,3 +532,46 @@
   min-height: auto !important;
   font-weight: 600 !important;
 }
+
+@media (max-width: 767px) {
+  .seller-main {
+    padding: 24px 16px 96px;
+  }
+
+  .seller-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .seller-field--full {
+    grid-column: 1 / -1;
+  }
+
+  .seller-card {
+    padding: 20px !important;
+  }
+
+  .seller-stripe-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .seller-upload-zone {
+    padding: 1.5rem 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .seller-main {
+    padding: 20px 12px 80px;
+  }
+
+  .seller-title {
+    font-size: 1.75rem;
+  }
+
+  .seller-verification-page .seller-submit-btn {
+    padding: 1rem 1.5rem !important;
+    font-size: 15px !important;
+  }
+}

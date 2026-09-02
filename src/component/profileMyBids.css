@@ -27,9 +27,10 @@
 .profile-bids-title {
   margin: 0;
   font-family: "Newsreader", serif;
-  font-size: clamp(2rem, 4vw, 2.5rem);
-  font-weight: 600;
+  font-size: clamp(1.875rem, 4vw, 2.5rem);
+  font-weight: 500;
   letter-spacing: -0.02em;
+  line-height: 1.2;
   color: #303333;
 }
 
@@ -537,6 +538,64 @@
   .profile-bids-header {
     margin: -3rem -3rem 2.5rem;
     padding: 2rem 3rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .profile-bids-header {
+    margin: -1rem -1rem 1.5rem;
+    padding: 1.25rem 1rem;
+  }
+
+  .profile-bids-tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 0.25rem;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .profile-bid-card {
+    flex-direction: column;
+  }
+
+  .profile-bid-image-wrap {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 5;
+  }
+
+  .profile-bid-stats {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .profile-bid-stat--bordered {
+    border-left: none;
+    padding-left: 0;
+    border-top: 1px solid rgba(176, 178, 177, 0.2);
+    padding-top: 0.75rem;
+  }
+
+  .profile-bids-pagination {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-bids-subtitle {
+    font-size: 1rem;
+  }
+
+  .profile-bid-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .profile-bid-actions .profile-bid-primary-btn,
+  .profile-bid-actions .profile-bid-secondary-btn,
+  .profile-bid-actions .profile-bid-mail-btn {
+    width: 100%;
   }
 }
 

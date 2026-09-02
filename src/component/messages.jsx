@@ -525,11 +525,14 @@ const MessagesContent = () => {
                           : `/dress/${listingId}`
                       }
                     className="seller-chat-view-dress-btn"
+                    aria-label={isSeller ? "View my listing" : "View dress listing"}
                   >
                     <span className="material-symbols-outlined" aria-hidden="true">
                         {isSeller ? "inventory_2" : "visibility"}
                     </span>
+                    <span className="seller-chat-view-dress-label">
                       {isSeller ? "My Listing" : "View Dress"}
+                    </span>
                   </Link>
                   ) : null}
                   <div className="seller-chat-more-wrap" ref={menuRef}>

@@ -775,3 +775,63 @@
   line-height: 1.6;
   color: #404944;
 }
+
+@media (max-width: 767px) {
+  .add-listing-page {
+    padding: 0 1rem 2rem;
+  }
+
+  .add-listing-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .add-listing-layout {
+    gap: 1.5rem;
+  }
+
+  .add-listing-main {
+    gap: 1.5rem;
+  }
+
+  .add-listing-section-header {
+    padding: 1.25rem 1.25rem 0 !important;
+  }
+
+  .add-listing-section-content {
+    padding: 0.875rem 1.25rem 1.25rem !important;
+  }
+
+  .add-listing-chips {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .add-listing-page {
+    padding: 0 0.875rem 1.5rem;
+  }
+
+  .add-listing-title {
+    font-size: 1.75rem;
+  }
+
+  .add-listing-subtitle {
+    font-size: 0.9375rem;
+  }
+
+  .add-listing-section-header {
+    padding: 1rem 1rem 0 !important;
+  }
+
+  .add-listing-section-content {
+    padding: 0.75rem 1rem 1rem !important;
+  }
+
+  .add-listing-section-title {
+    font-size: 1.25rem !important;
+  }
+
+  .add-listing-thumb-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

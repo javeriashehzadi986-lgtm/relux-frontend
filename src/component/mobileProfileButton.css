@@ -1,0 +1,54 @@
+.mobile-profile-btn {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .mobile-profile-btn {
+    position: fixed;
+    left: 1rem;
+    bottom: 1rem;
+    bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+    z-index: 45;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1rem 0.625rem 0.75rem;
+    border-radius: 9999px;
+    background: #31685d;
+    color: #e3fff6;
+    font-family: "Newsreader", serif;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    box-shadow:
+      0 4px 16px rgba(49, 104, 93, 0.28),
+      0 2px 6px rgba(48, 51, 51, 0.08);
+    transition:
+      background 0.2s ease,
+      transform 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+
+  .mobile-profile-btn:hover {
+    background: #235c51;
+    color: #e3fff6;
+    transform: translateY(-1px);
+    box-shadow:
+      0 6px 20px rgba(49, 104, 93, 0.32),
+      0 2px 8px rgba(48, 51, 51, 0.1);
+  }
+
+  .mobile-profile-btn:active {
+    transform: translateY(0);
+  }
+
+  .mobile-profile-btn__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 9999px;
+    background: rgba(227, 255, 246, 0.16);
+  }
+}

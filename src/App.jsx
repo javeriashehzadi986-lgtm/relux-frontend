@@ -50,6 +50,7 @@ import AdminCategoriesManagement from "./component/admin/AdminCategoriesManageme
 import ProtectedRoute from "./routes/ProtectedRoute";
 import SellerRoute from "./routes/SellerRoute";
 import WishlistRoute from "./routes/WishlistRoute";
+import MobileProfileButton from "./component/mobileProfileButton";
 
 const DressChatRedirect = () => {
   const { id } = useParams();
@@ -84,6 +85,8 @@ function App() {
   const isMessagesPage = location.pathname.startsWith("/messages");
 
   const isAdminPage = location.pathname.startsWith("/admin");
+
+  const showMobileProfileButton = !isAuthPage && !isAdminPage && !isMessagesPage;
 
   const mainClass = [
     "main-content",
@@ -294,6 +297,8 @@ function App() {
       </main>
 
       {!isMessagesPage && !isAdminPage && <Footer />}
+
+      {showMobileProfileButton ? <MobileProfileButton /> : null}
     </div>
   );
 }

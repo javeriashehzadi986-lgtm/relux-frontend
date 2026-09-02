@@ -64,9 +64,10 @@
 .profile-orders-title {
   margin: 0;
   font-family: "Newsreader", serif;
-  font-size: clamp(2.5rem, 5vw, 3rem);
+  font-size: clamp(1.875rem, 4vw, 2.5rem);
   font-weight: 500;
   letter-spacing: -0.02em;
+  line-height: 1.2;
   color: #303333;
 }
 
@@ -518,8 +519,78 @@
 }
 
 @media (max-width: 767px) {
+  .profile-orders-search-bar {
+    margin: -0.5rem -1rem 0;
+    padding: 1rem 1rem 0.75rem;
+  }
+
+  .profile-orders-hero {
+    margin-bottom: 1.5rem;
+    padding-top: 1rem;
+  }
+
+  .profile-orders-tabs-wrap {
+    width: 100%;
+  }
+
+  .profile-order-card-inner {
+    gap: 1.25rem;
+    padding: 1rem !important;
+  }
+
+  .profile-order-image-wrap {
+    height: 14rem;
+  }
+
+  .profile-order-details {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .profile-order-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+  }
+
+  .profile-order-action {
+    width: 100%;
+    justify-content: center !important;
+  }
+
   .profile-order-action--end {
     margin-left: 0;
+  }
+
+  .profile-orders-empty {
+    padding: 4rem 1rem;
+  }
+
+  .profile-orders-empty-title {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-orders-search-bar {
+    margin: -0.25rem -0.875rem 0;
+    padding: 0.75rem 0.875rem;
+  }
+
+  .profile-orders-tab {
+    padding: 0.5rem 1rem !important;
+    font-size: 0.6875rem !important;
+  }
+
+  .profile-order-title {
+    font-size: 1.25rem;
+  }
+
+  .profile-order-amount {
+    font-size: 1.25rem;
   }
 }
 

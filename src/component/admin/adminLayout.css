@@ -214,6 +214,70 @@ body.admin-sidebar-closed .admin-main {
   body:not(.admin-sidebar-closed) .admin-sidebar {
     transform: translateX(0);
   }
+
+  /* Page headers duplicate the mobile bar title and menu */
+  .admin-resale-menu-btn,
+  .admin-users-menu-btn,
+  .admin-products-menu-btn,
+  .admin-verify-menu-btn,
+  .admin-notifications-menu-btn,
+  .admin-contact-menu-btn {
+    display: none !important;
+  }
+
+  .admin-resale-header-titles h1,
+  .admin-users-header-titles h1,
+  .admin-products-header-titles h1,
+  .admin-verify-header-titles h1,
+  .admin-payments-header > h1,
+  .admin-reviews-header > h1,
+  .admin-notifications-header h1,
+  .admin-contact-header h1,
+  .admin-rental-intro > h2,
+  .admin-categories-intro h2,
+  .admin-profile-page-header h1,
+  .admin-reports-header h1 {
+    display: none;
+  }
+
+  .admin-resale-header,
+  .admin-users-header,
+  .admin-products-header,
+  .admin-verify-header {
+    position: static;
+    height: auto;
+    min-height: 0;
+    padding: 0.75rem 1rem;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .admin-resale-header-left,
+  .admin-users-header-left,
+  .admin-products-header-left,
+  .admin-verify-header-left {
+    flex: 1 1 100%;
+  }
+
+  .admin-resale-header-right,
+  .admin-users-header-right,
+  .admin-products-header-right,
+  .admin-verify-header-right {
+    flex: 1 1 100%;
+  }
+
+  .admin-resale-header-search,
+  .admin-users-header-search,
+  .admin-products-header-search,
+  .admin-verify-header-search,
+  .admin-rental-header-search {
+    display: flex;
+    width: 100%;
+  }
+
+  .admin-rental-header {
+    position: static;
+  }
 }
 
 @media (min-width: 1024px) {

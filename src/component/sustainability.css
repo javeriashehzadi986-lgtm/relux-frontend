@@ -422,3 +422,83 @@
     padding-bottom: 64px;
   }
 }
+
+@media (max-width: 768px) {
+  .sustainability-container {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .sustainability-header {
+    padding: 16px;
+  }
+
+  .sustainability-hero {
+    padding: 24px 0 48px;
+  }
+
+  .sustainability-hero-title {
+    font-size: clamp(1.75rem, 7vw, 2.5rem);
+    line-height: 1.15;
+  }
+
+  .sustainability-hero-text {
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  .sustainability-hero-buttons {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .sustainability-hero-buttons .sustainability-btn {
+    width: 100%;
+  }
+
+  .sustainability-section-title,
+  .sustainability-commitment-inner h2,
+  .sustainability-cta-inner h2 {
+    font-size: clamp(1.5rem, 5vw, 2rem);
+    line-height: 1.25;
+  }
+
+  .sustainability-pillars-title {
+    font-size: clamp(1.75rem, 6vw, 2.25rem);
+    line-height: 1.2;
+  }
+
+  .sustainability-philosophy,
+  .sustainability-pillars,
+  .sustainability-commitment,
+  .sustainability-cta {
+    padding: 48px 16px;
+  }
+
+  .sustainability-pillar-card {
+    padding: 24px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .sustainability-hero-image-wrap {
+    min-height: 220px;
+    border-radius: 16px;
+  }
+
+  .sustainability-body-text,
+  .sustainability-cta-desc,
+  .sustainability-commitment-desc {
+    font-size: 1rem;
+    line-height: 1.65;
+  }
+
+  .sustainability-btn {
+    padding: 12px 24px !important;
+    font-size: 12px !important;
+  }
+
+  .sustainability-commitment-list {
+    width: 100%;
+  }
+}

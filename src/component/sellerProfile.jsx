@@ -38,6 +38,7 @@ import "./sellerProfile.css";
 import "./sellerMyListings.css";
 import "./sellerOrdersRequests.css";
 import "./sellerSupportCenter.css";
+import DashboardMobileNav from "./DashboardMobileNav";
 
 const SIDEBAR_ITEMS = [
   { id: "listings", label: "My Listings", icon: ClipboardList },
@@ -45,6 +46,11 @@ const SIDEBAR_ITEMS = [
   { id: "support", label: "Support Center", icon: HelpCircle },
   { id: "profile", label: "My Profile", icon: User },
 ];
+
+function getMobileNavTitle(activeSection) {
+  const match = SIDEBAR_ITEMS.find((item) => item.id === activeSection);
+  return match?.label ?? "Dashboard";
+}
 
 const SECTION_IDS = SIDEBAR_ITEMS.map((item) => item.id);
 const WIDE_SECTIONS = ["listings", "orders", "support"];
@@ -121,7 +127,7 @@ function formatFieldValue(value) {
   return text || "—";
 }
 
-function SellerProfileSection() {
+function SellerProfileSection({ onLogoutClick }) {
   const navigate = useNavigate();
   const { user, updateProfile, deactivateAccount, changePassword } = useAuth();
   const profile = useMemo(() => userToProfile(user), [user]);
@@ -759,6 +765,14 @@ function SellerProfileSection() {
                     <Shield size={20} strokeWidth={1.75} />
                     <span>Privacy Settings</span>
                   </Link>
+                  <button
+                    type="button"
+                    className="seller-profile-account-settings-row seller-profile-account-settings-row--logout"
+                    onClick={onLogoutClick}
+                  >
+                    <LogOut size={20} strokeWidth={1.75} />
+                    <span>Logout</span>
+                  </button>
                 </div>
               </div>
             </section>
@@ -1218,7 +1232,9 @@ const SellerProfile = () => {
     }
 
     if (activeSection === "profile") {
-      return <SellerProfileSection />;
+      return (
+        <SellerProfileSection onLogoutClick={() => setShowLogoutConfirm(true)} />
+      );
     }
 
     return null;
@@ -1251,10 +1267,15 @@ const SellerProfile = () => {
         </div>
       </aside>
 
-      <div className="profile-mobile-nav">
-        <h2 className="profile-sidebar-heading">Dashboard</h2>
-        {renderSidebarNav("profile-sidebar-nav--mobile")}
-      </div>
+      <DashboardMobileNav
+        title={getMobileNavTitle(activeSection)}
+        items={SIDEBAR_ITEMS}
+        activeSection={activeSection}
+        onSectionChange={handleSectionChange}
+        getIconFill={(item, isActive) =>
+          item.id === "profile" && isActive ? "currentColor" : "none"
+        }
+      />
 
       <main
         className={`profile-main ${

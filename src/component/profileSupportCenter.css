@@ -11,9 +11,10 @@
 .profile-support-center-title {
   margin: 0 0 0.5rem;
   font-family: "Newsreader", serif;
-  font-size: clamp(2rem, 4vw, 2.5rem);
-  font-weight: 600;
+  font-size: clamp(1.875rem, 4vw, 2.5rem);
+  font-weight: 500;
   letter-spacing: -0.02em;
+  line-height: 1.2;
   color: #303333;
 }
 
@@ -30,5 +31,9 @@
 
   .profile-support-center-header {
     margin-bottom: 1.5rem;
+  }
+
+  .profile-support-center-subtitle {
+    font-size: 0.9375rem;
   }
 }

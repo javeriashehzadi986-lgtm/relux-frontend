@@ -242,6 +242,7 @@
 
 .seller-dashboard-heading {
   margin-bottom: 1.75rem;
+  overflow: visible;
 }
 
 .seller-dashboard-heading--with-action {
@@ -256,16 +257,17 @@
 .seller-dashboard-page-title {
   margin: 0 0 0.35rem;
   font-family: "Newsreader", serif;
-  font-size: clamp(2rem, 4vw, 2.5rem);
+  font-size: clamp(1.875rem, 4vw, 2.5rem);
   font-weight: 500 !important;
-  line-height: 1.2 !important;
+  line-height: 1.35 !important;
   color: #1c1917 !important;
 }
 
 .seller-dashboard-heading p,
 .seller-dashboard-heading [data-slot="card-description"] {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
   color: #5d605f;
 }
 
@@ -555,7 +557,55 @@
   }
 }
 
+@media (max-width: 1023px) {
+  .seller-dashboard-heading--with-action .seller-dashboard-page-title {
+    font-size: 1.5rem !important;
+  }
+
+  .seller-profile-hero-copy .seller-dashboard-page-title {
+    font-size: 1.5rem !important;
+    line-height: 1.35 !important;
+  }
+
+  .seller-profile-subtitle {
+    line-height: 1.55;
+  }
+}
+
 @media (max-width: 767px) {
+  .seller-dashboard-page {
+    padding: 0 0 2rem;
+  }
+
+  .seller-dashboard-panel {
+    padding: 1.25rem 1rem;
+    border-radius: 0.75rem;
+  }
+
+  .seller-dashboard-heading--with-action {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .seller-dashboard-heading--with-action .seller-dashboard-page-title {
+    font-size: 1.75rem !important;
+  }
+
+  .seller-dashboard-quick-links {
+    flex-direction: column;
+  }
+
+  .seller-dashboard-quick-links a,
+  .seller-dashboard-page .seller-dashboard-quick-btn {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .seller-dashboard-logout-dialog-footer {
+    grid-template-columns: 1fr;
+  }
+
   .seller-dashboard-sidebar.is-open {
     position: fixed;
     top: 0;

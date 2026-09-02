@@ -20,7 +20,7 @@ body,
 .main-content {
   flex: 1;
   padding-top: 5.5rem;
-  padding-bottom: 100px;
+  padding-bottom: 0;
 }
 
 .main-content--full-page {
@@ -69,10 +69,21 @@ body,
   flex: 1;
 }
 
+@media (max-width: 900px) {
+  .main-content {
+    padding-bottom: 5rem;
+  }
+}
+
 @media (max-width: 768px) {
   .main-content {
     padding-top: 4.75rem;
     padding-bottom: 5rem;
+  }
+
+  .main-content--messages {
+    padding-top: 4.75rem;
+    padding-bottom: 0;
   }
 }
 
@@ -80,5 +91,9 @@ body,
   .main-content {
     padding-top: 4.5rem;
     padding-bottom: 4.5rem;
+  }
+
+  .main-content--messages {
+    padding-top: 4.5rem;
   }
 }

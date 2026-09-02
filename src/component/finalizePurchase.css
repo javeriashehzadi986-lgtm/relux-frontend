@@ -413,3 +413,45 @@
     top: 8rem;
   }
 }
+
+@media (max-width: 767px) {
+  .finalize-purchase-page {
+    padding: 2rem 1rem 3rem;
+  }
+
+  .finalize-purchase-header {
+    margin-bottom: 2rem;
+  }
+
+  .finalize-purchase-header h1 {
+    font-size: clamp(1.75rem, 6vw, 2.25rem);
+  }
+
+  .finalize-purchase-header p {
+    font-size: 1rem;
+  }
+
+  .finalize-purchase-panel {
+    padding: 1.25rem;
+  }
+
+  .finalize-purchase-layout {
+    gap: 2rem;
+  }
+
+  .finalize-purchase-summary-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .finalize-purchase-page {
+    padding: 1.5rem 0.75rem 2.5rem;
+  }
+
+  .finalize-purchase-form {
+    gap: 1rem;
+  }
+}

@@ -286,4 +286,33 @@
   .admin-contact-layout {
     grid-template-columns: 1fr;
   }
+
+  .admin-contact-detail {
+    min-height: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-contact-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-contact-list {
+    max-height: none;
+  }
+
+  .admin-contact-item {
+    padding: 0.875rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-contact-actions {
+    flex-direction: column;
+  }
+
+  .admin-contact-actions button {
+    width: 100%;
+  }
 }

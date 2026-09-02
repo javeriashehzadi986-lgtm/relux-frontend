@@ -510,6 +510,13 @@
   .home-seller-image {
     height: 280px;
   }
+
+  .home-seller-content,
+  .home-seller-image {
+    min-width: 0;
+    flex: 1 1 100%;
+    width: 100%;
+  }
 }
 
 @media (max-width: 480px) {
@@ -528,5 +535,13 @@
 
   .home-category-image {
     height: 280px;
+  }
+
+  .home-seller-content {
+    padding: 24px 16px;
+  }
+
+  .home-seller-image {
+    height: 220px;
   }
 }

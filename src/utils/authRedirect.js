@@ -26,6 +26,20 @@ export function getSellerSignupState() {
 
 export const NAVBAR_AUTH_LABEL = "Sign up";
 
+export function getNavbarButtonLabel(user) {
+  if (!user) return NAVBAR_AUTH_LABEL;
+
+  if (user.role === "admin") return "Admin";
+
+  if (user.role === "seller") {
+    if (user.status === "pending") return "Pending Approval";
+    if (user.status === "rejected") return "Application Rejected";
+    return "Seller Dashboard";
+  }
+
+  return "My Profile";
+}
+
 export function getNavbarButtonConfig(user, { isAuthenticated, loading } = {}) {
   if (loading || !isAuthenticated || !user) {
     return {
@@ -36,7 +50,7 @@ export function getNavbarButtonConfig(user, { isAuthenticated, loading } = {}) {
   }
 
   return {
-    label: NAVBAR_AUTH_LABEL,
+    label: getNavbarButtonLabel(user),
     path: getPostAuthPath(user),
     isGuest: false,
   };
