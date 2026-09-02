@@ -68,3 +68,17 @@ body,
   padding-bottom: 0;
   flex: 1;
 }
+
+@media (max-width: 768px) {
+  .main-content {
+    padding-top: 4.75rem;
+    padding-bottom: 5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    padding-top: 4.5rem;
+    padding-bottom: 4.5rem;
+  }
+}

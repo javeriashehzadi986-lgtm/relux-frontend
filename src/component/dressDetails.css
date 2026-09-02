@@ -658,6 +658,10 @@
 }
 
 @media (max-width: 767px) {
+  .dress-details-page {
+    padding: 1.5rem 1rem 4rem;
+  }
+
   .dress-details-history-table th,
   .dress-details-history-table td {
     padding: 1rem;
@@ -665,6 +669,12 @@
 
   .dress-details-bidder-cell {
     flex-wrap: wrap;
+  }
+
+  .dress-details-history-table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 }
 

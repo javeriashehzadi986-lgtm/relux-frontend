@@ -79,6 +79,42 @@ async function request(path, options = {}) {
   return data;
 }
 
+async function uploadRequest(path, file) {
+  if (!file) {
+    throw new Error("Image file is required");
+  }
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const headers = {};
+  const token = getToken();
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  let response;
+  try {
+    response = await fetch(`${API_BASE}${path}`, {
+      method: "POST",
+      headers,
+      body: formData,
+    });
+  } catch {
+    throw new Error(
+      "Cannot reach the backend server. Open relux-backend folder and run: npm start",
+    );
+  }
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data.message || "Image upload failed");
+  }
+
+  return data;
+}
+
 export const api = {
   // Authentication
   getToken,
@@ -170,6 +206,10 @@ export const api = {
   getSellerVerification: () =>
     request("/seller/verification/me"),
 
+  uploadListingImage: (file) => uploadRequest("/upload/listing", file),
+  uploadVerificationImage: (file) => uploadRequest("/upload/verification", file),
+  uploadSupportImage: (file) => uploadRequest("/upload/support", file),
+
   getAdminSellerApplications: () =>
     request("/admin/seller-verifications"),
 
@@ -201,6 +241,17 @@ export const api = {
     request(`/seller/listings/${id}`, {
       method: "PUT",
       body: JSON.stringify(body),
+    }),
+
+  deleteListing: (id) =>
+    request(`/seller/listings/${id}`, {
+      method: "DELETE",
+    }),
+
+  updateListingAvailability: (id, isAvailable) =>
+    request(`/seller/listings/${id}/availability`, {
+      method: "PATCH",
+      body: JSON.stringify({ isAvailable }),
     }),
 
   getMyListings: () =>

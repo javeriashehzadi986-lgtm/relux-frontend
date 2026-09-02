@@ -112,3 +112,13 @@
     height: 360px;
   }
 }
+
+@media (max-width: 480px) {
+  .categories-page {
+    padding: 32px 12px;
+  }
+
+  .categories-card-image {
+    height: 280px;
+  }
+}

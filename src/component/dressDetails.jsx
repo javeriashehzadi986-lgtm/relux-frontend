@@ -9,6 +9,7 @@ import api from "@/services/api";
 import { useRequireLogin } from "@/hooks/useRequireLogin";
 import { useAuctionSocket } from "@/hooks/useAuctionSocket";
 import { useWishlist } from "@/hooks/useWishlist";
+import { getListingAvailability } from "@/utils/productAvailability";
 import RentalDressDetails from "./rentalDressDetails";
 import { DressDetailsBreadcrumb } from "./dressDetailsBreadcrumb";
 import { DressFitConditionSection } from "./dressFitCondition";
@@ -223,6 +224,8 @@ const DressDetails = () => {
     return <RentalDressDetails dress={dress} />;
   }
 
+  const availability = dress.availability ?? getListingAvailability(dress);
+  const canBid = availability.canPurchase && !dress.auctionEnded;
   const gallery = dress.gallery ?? [dress.mainImage];
 
   return (
@@ -235,11 +238,11 @@ const DressDetails = () => {
             <img alt={dress.title} src={gallery[activeImage]} />
             <span className="dress-details-condition-badge">{dress.listingCondition}</span>
             <span
-              className={`dress-details-live-badge ${
+              className={`dress-details-live-badge dress-details-live-badge--${availability.key} ${
                 hasWonAuction ? "dress-details-live-badge--won" : ""
               }`}
             >
-              {hasWonAuction ? "Auction Won" : "Live Auction"}
+              {hasWonAuction ? "Auction Won" : availability.key === "sold" ? "Sold" : availability.label}
             </span>
           </div>
           <div className="dress-details-thumbs">
@@ -362,6 +365,21 @@ const DressDetails = () => {
                     </span>
                   </div>
                 </div>
+              </>
+            ) : !canBid ? (
+              <>
+                <p className="dress-details-competing">
+                  This item is {availability.label.toLowerCase()} and is not accepting new bids.
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="dress-details-chat-btn"
+                  onClick={handleChatWithSeller}
+                >
+                  <MessageCircle size={18} aria-hidden="true" />
+                  Chat with Seller
+                </Button>
               </>
             ) : dress.auctionEnded ? (
               <>

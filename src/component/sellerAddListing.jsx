@@ -14,7 +14,7 @@ import {
 } from "@/data/listingSpecs";
 import api from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
-import { prepareImageList, prepareImageSource } from "@/utils/imageUpload";
+import { prepareImageList } from "@/utils/imageUpload";
 import "./sellerAddListing.css";
 import { usePublicMainCategories, usePublicStyleFilters } from "@/hooks/usePublicStyleFilters";
 
@@ -144,6 +144,7 @@ const SellerAddListing = () => {
   const [submitError, setSubmitError] = useState("");
   const listingImagesRef = useRef(null);
   const addThumbRef = useRef(null);
+  const listingFileMapRef = useRef(new Map());
 
   const { mains: mainOptions } = usePublicMainCategories();
   const selectedMain = mainOptions.find((item) => item.name === mainCategory);
@@ -246,14 +247,23 @@ const SellerAddListing = () => {
     const files = Array.from(event.target.files ?? []);
     if (files.length === 0) return;
 
-    const urls = files.map((file) => URL.createObjectURL(file));
-    setPreviewImages((current) => [...current, ...urls]);
-    setPreviewHeroImage(urls[0]);
+    const entries = files.map((file) => {
+      const url = URL.createObjectURL(file);
+      listingFileMapRef.current.set(url, file);
+      return url;
+    });
+    setPreviewImages((current) => [...current, ...entries]);
+    setPreviewHeroImage((current) => current || entries[0]);
     event.target.value = "";
   };
 
   const handleRemoveThumb = (index) => {
     setPreviewImages((current) => {
+      const removed = current[index];
+      if (removed?.startsWith("blob:")) {
+        listingFileMapRef.current.delete(removed);
+        URL.revokeObjectURL(removed);
+      }
       const next = current.filter((_, thumbIndex) => thumbIndex !== index);
       setPreviewHeroImage(next[0] ?? "");
       return next;
@@ -269,10 +279,11 @@ const SellerAddListing = () => {
     setSubmitting(true);
 
     try {
-      const preparedGallery = await prepareImageList(previewImages);
-      const mainImage =
-        preparedGallery[0] ||
-        (previewHeroImage ? await prepareImageSource(previewHeroImage) : "");
+      const preparedGallery = await prepareImageList(
+        previewImages,
+        listingFileMapRef.current,
+      );
+      const mainImage = preparedGallery[0] || "";
 
       let resolvedAuctionEndDate = auctionEndDate;
       if (listingType === "sale") {

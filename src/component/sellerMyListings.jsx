@@ -8,6 +8,7 @@ import {
   Eye,
   AlertCircle,
   Clock,
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +24,7 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import api from "@/services/api";
+import { getListingAvailability } from "@/utils/productAvailability";
 import "./sellerMyListings.css";
 
 const filterChips = ["All", "Active", "Pending", "Rejected", "Rent", "Auctions"];
@@ -63,6 +65,8 @@ function mapApiListing(listing) {
     statusVariant = "active";
   }
 
+  const availability = getListingAvailability(listing);
+
   return {
     id: listing.id,
     title: listing.title,
@@ -78,16 +82,25 @@ function mapApiListing(listing) {
     verificationStatus: listing.verificationStatus,
     listingStatus: listing.status,
     listingType: listing.listingType,
+    isAvailable: listing.isAvailable !== false,
+    availabilityKey: availability.key,
+    availabilityLabel: availability.label,
+    canToggleAvailability:
+      listing.verificationStatus === "approved" &&
+      listing.status === "active" &&
+      listing.status !== "sold" &&
+      listing.status !== "rented",
     adminNote: listing.adminNote || "",
   };
 }
 
-function ListingActionsMenu({ item, isOpen, onToggle, onClose }) {
+function canManageListing(item) {
+  return item.listingStatus !== "sold" && item.listingStatus !== "rented";
+}
+
+function ListingActionsMenu({ item, isOpen, onToggle, onClose, onDelete, deleting }) {
   const menuRef = useRef(null);
-  const canEdit =
-    item.verificationStatus === "pending" ||
-    item.verificationStatus === "rejected" ||
-    item.statusVariant === "active";
+  const canManage = canManageListing(item);
 
   useEffect(() => {
     if (!isOpen) return undefined;
@@ -139,7 +152,7 @@ function ListingActionsMenu({ item, isOpen, onToggle, onClose }) {
               View Details
             </Link>
           </li>
-          {canEdit ? (
+          {canManage ? (
             <li role="none">
               <Link
                 to="/addListing"
@@ -152,6 +165,26 @@ function ListingActionsMenu({ item, isOpen, onToggle, onClose }) {
                 {item.verificationStatus === "rejected" ? "Edit & Resubmit" : "Edit Listing"}
               </Link>
             </li>
+          ) : null}
+          {canManage ? (
+            <>
+              <li className="my-listing-menu-divider" role="separator" />
+              <li role="none">
+                <button
+                  type="button"
+                  className="my-listing-menu-item my-listing-menu-item--danger"
+                  role="menuitem"
+                  disabled={deleting}
+                  onClick={() => {
+                    onClose();
+                    onDelete(item);
+                  }}
+                >
+                  <Trash2 size={16} />
+                  {deleting ? "Deleting..." : "Delete Listing"}
+                </button>
+              </li>
+            </>
           ) : null}
         </ul>
       )}
@@ -166,6 +199,9 @@ export function SellerMyListingsContent() {
   const [activeFilter, setActiveFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [openMenuId, setOpenMenuId] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
+  const [togglingId, setTogglingId] = useState(null);
+  const [actionError, setActionError] = useState("");
 
   const loadListings = useCallback(async () => {
     setLoadError("");
@@ -200,6 +236,42 @@ export function SellerMyListingsContent() {
     window.addEventListener("focus", handleFocus);
     return () => window.removeEventListener("focus", handleFocus);
   }, [loadListings]);
+
+  const handleDeleteListing = async (item) => {
+    const confirmed = window.confirm(
+      `Delete "${item.title}"? This removes the listing from Relux Hub.`,
+    );
+    if (!confirmed) return;
+
+    setActionError("");
+    setDeletingId(item.id);
+    try {
+      await api.deleteListing(item.id);
+      setListings((current) => current.filter((listing) => listing.id !== item.id));
+      setOpenMenuId(null);
+    } catch (error) {
+      setActionError(error.message || "Could not delete listing");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const handleToggleAvailability = async (item) => {
+    setActionError("");
+    setTogglingId(item.id);
+    try {
+      const nextAvailable = !item.isAvailable;
+      const data = await api.updateListingAvailability(item.id, nextAvailable);
+      const mapped = mapApiListing(data.listing);
+      setListings((current) =>
+        current.map((listing) => (listing.id === item.id ? mapped : listing)),
+      );
+    } catch (error) {
+      setActionError(error.message || "Could not update availability");
+    } finally {
+      setTogglingId(null);
+    }
+  };
 
   const summaryCards = useMemo(() => {
     const active = listings.filter(
@@ -260,6 +332,12 @@ export function SellerMyListingsContent() {
       {loadError ? (
         <p className="my-listing-load-error" role="alert">
           {loadError}
+        </p>
+      ) : null}
+
+      {actionError ? (
+        <p className="my-listing-load-error" role="alert">
+          {actionError}
         </p>
       ) : null}
 
@@ -364,6 +442,8 @@ export function SellerMyListingsContent() {
                           )
                         }
                         onClose={() => setOpenMenuId(null)}
+                        onDelete={handleDeleteListing}
+                        deleting={deletingId === item.id}
                       />
                     </CardAction>
                     <div className="my-listing-card-meta">
@@ -376,6 +456,11 @@ export function SellerMyListingsContent() {
                       >
                         {item.type}
                       </Button>
+                      <span
+                        className={`my-listing-availability my-listing-availability--${item.availabilityKey}`}
+                      >
+                        {item.availabilityLabel}
+                      </span>
                       <CardDescription className="my-listing-size">
                         • {item.size}
                       </CardDescription>
@@ -429,10 +514,34 @@ export function SellerMyListingsContent() {
                       >
                         {item.status}
                       </Button>
+                      {canManageListing(item) ? (
+                        <Button asChild variant="outline" size="sm" className="my-listing-view-btn">
+                          <Link to="/addListing" state={{ editListingId: item.id }}>
+                            <Pencil size={14} />
+                            Edit
+                          </Link>
+                        </Button>
+                      ) : null}
+                      {item.canToggleAvailability ? (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="my-listing-view-btn"
+                          disabled={togglingId === item.id}
+                          onClick={() => handleToggleAvailability(item)}
+                        >
+                          {togglingId === item.id
+                            ? "Saving..."
+                            : item.isAvailable
+                              ? "Mark Unavailable"
+                              : "Mark Available"}
+                        </Button>
+                      ) : null}
                       <Button asChild variant="outline" size="sm" className="my-listing-view-btn">
                         <Link to={`/dress/${item.id}`}>
                           <Eye size={14} />
-                          View Details
+                          View
                         </Link>
                       </Button>
                     </div>

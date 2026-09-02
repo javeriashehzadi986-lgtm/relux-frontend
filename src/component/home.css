@@ -511,3 +511,22 @@
     height: 280px;
   }
 }
+
+@media (max-width: 480px) {
+  .home-container {
+    padding: 0 12px;
+  }
+
+  .home-hero-overlay {
+    padding: 24px 16px;
+  }
+
+  .home-section-alt {
+    padding: 48px 12px;
+    margin: 0 -12px;
+  }
+
+  .home-category-image {
+    height: 280px;
+  }
+}

@@ -17,6 +17,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useBuyerOrders } from "@/hooks/useBuyerOrders";
 import { useRequireLogin } from "@/hooks/useRequireLogin";
 import { useWishlist } from "@/hooks/useWishlist";
+import { getListingAvailability } from "@/utils/productAvailability";
 import { DressDetailsBreadcrumb } from "./dressDetailsBreadcrumb";
 import { DressFitConditionSection } from "./dressFitCondition";
 import { SellerReviewsSection } from "./sellerReviewsSection";
@@ -55,6 +56,7 @@ const RentalDressDetails = ({ dress }) => {
   const favorited = isSaved(dress.id);
   const [requestError, setRequestError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
 
   const pendingRequest = useMemo(
     () =>
@@ -81,7 +83,8 @@ const RentalDressDetails = ({ dress }) => {
   const totalPaidToday = securityDeposit;
   const estimatedRefund = Math.max(0, securityDeposit - rentalCharges);
 
-  const [showCancelModal, setShowCancelModal] = useState(false);
+  const availability = dress.availability ?? getListingAvailability(dress);
+  const canRent = availability.canPurchase;
 
   const handleRentRequest = async () => {
     const returnPath = `/dress/${dress.id}`;
@@ -150,7 +153,11 @@ const RentalDressDetails = ({ dress }) => {
           <div className="rental-details-main-image">
             <img alt={dress.title} src={gallery[activeImage]} />
             <span className="rental-details-condition-badge">{dress.listingCondition}</span>
-            <span className="rental-details-rent-badge">Available for Rent</span>
+            <span
+              className={`rental-details-rent-badge rental-details-rent-badge--${availability.key}`}
+            >
+              {availability.label}
+            </span>
           </div>
           <div className="rental-details-thumbs">
             {gallery.map((image, index) => (
@@ -283,6 +290,21 @@ const RentalDressDetails = ({ dress }) => {
                   onClick={() => setShowCancelModal(true)}
                 >
                   Cancel Request
+                </Button>
+              </>
+            ) : !canRent ? (
+              <>
+                <p className="rental-details-pending-note">
+                  This dress is {availability.label.toLowerCase()} right now.
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="dress-details-chat-btn"
+                  onClick={handleChatWithSeller}
+                >
+                  <MessageCircle size={18} aria-hidden="true" />
+                  Chat with Seller
                 </Button>
               </>
             ) : (

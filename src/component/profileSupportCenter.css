@@ -22,3 +22,13 @@
   font-size: 1rem;
   color: #5d605f;
 }
+
+@media (max-width: 768px) {
+  .profile-support-center {
+    padding: 0;
+  }
+
+  .profile-support-center-header {
+    margin-bottom: 1.5rem;
+  }
+}

@@ -569,3 +569,22 @@
   align-items: center;
   gap: 0.75rem;
 }
+
+@media (max-width: 480px) {
+  .female-page {
+    padding: 1.25rem 1rem 3rem;
+  }
+
+  .female-products-grid {
+    gap: 2rem 1rem;
+  }
+
+  .female-sidebar-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .female-pagination {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}

@@ -82,3 +82,10 @@
 .dress-fit-condition-chip.is-readonly:not(.is-active) {
   opacity: 0.45;
 }
+
+@media (max-width: 480px) {
+  .dress-fit-condition-label-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

@@ -638,3 +638,26 @@ body.dashboard-sidebar-closed .profile-main {
   background: #31685d !important;
   color: #e3fff6 !important;
 }
+
+@media (max-width: 480px) {
+  .profile-main,
+  .profile-main--wide {
+    padding: 1rem 0.875rem 2rem;
+  }
+
+  .profile-mobile-nav {
+    padding: 0.75rem 0.875rem 0;
+  }
+
+  .profile-card {
+    border-radius: 0.75rem;
+  }
+
+  .profile-form-actions {
+    flex-direction: column;
+  }
+
+  .profile-form-actions button {
+    width: 100%;
+  }
+}

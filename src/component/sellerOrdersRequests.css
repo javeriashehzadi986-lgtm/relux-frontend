@@ -367,3 +367,43 @@
   color: #5d605f;
   line-height: 1.5;
 }
+
+@media (max-width: 768px) {
+  .orders-requests-item-title {
+    font-size: 1rem !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .orders-requests-card-top {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .orders-requests-status {
+    align-self: flex-start;
+  }
+
+  .orders-requests-item-row {
+    flex-direction: column;
+  }
+
+  .orders-requests-item-image {
+    width: 100%;
+    height: 10rem;
+  }
+
+  .orders-requests-actions,
+  .orders-requests-actions--split {
+    display: flex;
+    flex-direction: column;
+    grid-template-columns: none;
+  }
+
+  .orders-requests-actions .orders-requests-btn-primary,
+  .orders-requests-actions .orders-requests-btn-outline,
+  .orders-requests-actions .orders-requests-btn-muted,
+  .orders-requests-actions a {
+    width: 100%;
+  }
+}

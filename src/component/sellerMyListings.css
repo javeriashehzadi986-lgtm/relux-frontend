@@ -533,3 +533,82 @@
 .my-listing-card-title a:hover {
   text-decoration: underline;
 }
+
+.my-listing-availability {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.my-listing-availability--available {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.my-listing-availability--unavailable,
+.my-listing-availability--pending,
+.my-listing-availability--rejected {
+  background: #f5f5f5;
+  color: #616161;
+}
+
+.my-listing-availability--sold,
+.my-listing-availability--rented {
+  background: #fff3e0;
+  color: #ef6c00;
+}
+
+@media (max-width: 768px) {
+  .my-listing-add-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .my-listing-card-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .my-listing-card-bottom-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 640px) {
+  .my-listing-card-content {
+    flex-direction: column;
+  }
+
+  .my-listing-card-image {
+    width: 100%;
+    height: 11rem;
+  }
+
+  .my-listing-summary-card-btn .my-listing-summary-card {
+    width: 7.5rem;
+  }
+
+  .my-listing-menu {
+    right: auto;
+    left: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .my-listing-card-top {
+    grid-template-columns: 1fr auto;
+  }
+
+  .my-listing-card-title {
+    font-size: 1rem !important;
+  }
+
+  .my-listing-review-banner {
+    flex-direction: column;
+  }
+}

@@ -17,6 +17,7 @@ import {
   resetDashboardSidebar,
   setDashboardSidebarOpen,
   syncDashboardSidebarToBody,
+  toggleDashboardSidebar,
 } from "@/utils/dashboardSidebar";
 
 const Navbar = () => {
@@ -53,6 +54,11 @@ const Navbar = () => {
   };
 
   const handleMenuClick = () => {
+    if (onDashboard && isAuthenticated) {
+      toggleDashboardSidebar();
+      return;
+    }
+
     if (isGuest) {
       goToSignup(location.pathname);
       return;
@@ -60,6 +66,13 @@ const Navbar = () => {
 
     navigate(getPostAuthPath(user));
   };
+
+  const menuLabel =
+    onDashboard && isAuthenticated
+      ? "Toggle dashboard menu"
+      : isGuest
+        ? "Sign up to continue"
+        : "Go to dashboard";
 
   return (
     <nav className="navbar">
@@ -70,7 +83,7 @@ const Navbar = () => {
             variant="icon"
             size="icon"
             className="navbar-menu-btn"
-            aria-label="Sign up to continue"
+            aria-label={menuLabel}
             onClick={handleMenuClick}
           >
             <Menu size={22} />

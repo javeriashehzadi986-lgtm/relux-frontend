@@ -17,21 +17,13 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import api from "@/services/api";
+import { uploadSupportImage } from "@/utils/imageUpload";
 import "./sellerSupportCenter.css";
 
 const SELLER_ISSUE_TYPES = ["Listing", "Order", "Payment", "Other"];
 const BUYER_ISSUE_TYPES = ["Order", "Rental", "Payment", "Return", "Other"];
 const BUYER_ORDER_ISSUE_TYPES = new Set(["Order", "Rental", "Return"]);
 const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
-
-function readFileAsDataUrl(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
 
 function formatOrderOption(order) {
   const shortId = String(order.id || "").slice(-6).toUpperCase();
@@ -167,7 +159,7 @@ const SellerSupportCenter = ({ variant = "buyer" }) => {
         if (imageFile.size > MAX_IMAGE_BYTES) {
           throw new Error("Image must be under 4MB");
         }
-        images.push(await readFileAsDataUrl(imageFile));
+        images.push(await uploadSupportImage(imageFile));
       }
 
       const payload = {

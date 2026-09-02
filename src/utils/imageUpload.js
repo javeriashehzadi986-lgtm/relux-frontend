@@ -1,3 +1,7 @@
+import api from "@/services/api";
+
+const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
+
 function readFileAsDataUrl(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -7,7 +11,13 @@ function readFileAsDataUrl(file) {
   });
 }
 
-const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
+async function dataUrlToFile(dataUrl, fileName = "image.jpg") {
+  const response = await fetch(dataUrl);
+  const blob = await response.blob();
+  return new File([blob], fileName, {
+    type: blob.type || "image/jpeg",
+  });
+}
 
 export async function prepareImageForUpload(file) {
   if (!file) {
@@ -19,7 +29,7 @@ export async function prepareImageForUpload(file) {
   }
 
   if (file.size <= MAX_IMAGE_BYTES) {
-    return readFileAsDataUrl(file);
+    return file;
   }
 
   const originalDataUrl = await readFileAsDataUrl(file);
@@ -50,26 +60,66 @@ export async function prepareImageForUpload(file) {
     throw new Error("Image is too large even after compression. Try a smaller photo.");
   }
 
-  return compressed;
+  return dataUrlToFile(compressed, file.name || "listing-image.jpg");
 }
 
-export async function prepareImageSource(src) {
+export async function uploadListingImage(file) {
+  const prepared = await prepareImageForUpload(file);
+  const data = await api.uploadListingImage(prepared);
+  return data.url;
+}
+
+export async function uploadVerificationImage(file) {
+  const prepared = await prepareImageForUpload(file);
+  const data = await api.uploadVerificationImage(prepared);
+  return data.url;
+}
+
+export async function uploadSupportImage(file) {
+  const prepared = await prepareImageForUpload(file);
+  const data = await api.uploadSupportImage(prepared);
+  return data.url;
+}
+
+function isStoredImageUrl(src) {
+  return (
+    typeof src === "string" &&
+    (src.startsWith("https://") ||
+      src.startsWith("http://") ||
+      src.startsWith("data:"))
+  );
+}
+
+export async function resolveListingImageSource(src, fileMap) {
   if (!src) return "";
-  if (src.startsWith("data:") || src.startsWith("http://") || src.startsWith("https://")) {
+  if (src.startsWith("https://") || src.startsWith("http://")) {
+    return src;
+  }
+  if (src.startsWith("data:")) {
     return src;
   }
   if (src.startsWith("blob:")) {
-    const response = await fetch(src);
-    const blob = await response.blob();
-    const file = new File([blob], "listing-image.jpg", {
-      type: blob.type || "image/jpeg",
-    });
-    return prepareImageForUpload(file);
+    const file = fileMap?.get(src);
+    if (!file) {
+      throw new Error("Could not read one of the selected images. Please re-add it.");
+    }
+    return uploadListingImage(file);
   }
   return src;
 }
 
-export async function prepareImageList(images) {
-  const prepared = await Promise.all(images.map((src) => prepareImageSource(src)));
+export async function prepareImageList(images, fileMap) {
+  const prepared = await Promise.all(
+    images.map((src) => resolveListingImageSource(src, fileMap)),
+  );
   return prepared.filter(Boolean);
+}
+
+/** @deprecated Use uploadListingImage — kept for any legacy callers */
+export async function prepareImageSource(src, fileMap) {
+  return resolveListingImageSource(src, fileMap);
+}
+
+export async function prepareImageListLegacy(images) {
+  return prepareImageList(images, new Map());
 }

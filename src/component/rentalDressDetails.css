@@ -889,6 +889,25 @@
   color: #5d605f;
 }
 
+@media (max-width: 767px) {
+  .rental-details-page {
+    padding: 1.5rem 1rem 4rem;
+  }
+
+  .rental-details-hero {
+    gap: 2rem;
+    margin-bottom: 3rem;
+  }
+
+  .rental-details-cancel-modal-actions {
+    flex-direction: column;
+  }
+
+  .rental-details-cancel-modal-actions button {
+    width: 100%;
+  }
+}
+
 @media (min-width: 768px) {
   .rental-details-page {
     padding: 2rem 2.5rem 5rem;

@@ -4,6 +4,7 @@ import {
   normalizeListingSize,
 } from "./listingSpecs";
 import { getPublicListingById } from "./catalogStore";
+import { getListingAvailability } from "@/utils/productAvailability";
 
 const parsePrice = (value) => {
   if (typeof value === "number") return value;
@@ -202,6 +203,7 @@ export function normalizeMongoId(value) {
 }
 
 export const mapApiListingToDress = (listing) => {
+  const availability = getListingAvailability(listing);
   const id = String(listing.id);
   const isRent = listing.listingType === "rent";
   const categoryPath = CATEGORY_PATH_BY_MAIN[listing.mainCategory] ?? listing.categoryPath ?? "";
@@ -215,6 +217,11 @@ export const mapApiListingToDress = (listing) => {
   const dress = {
     id,
     sellerId: normalizeMongoId(listing.sellerId),
+    status: listing.status,
+    isAvailable: listing.isAvailable !== false,
+    availability,
+    availabilityLabel: availability.label,
+    canPurchase: availability.canPurchase,
     title: listing.title,
     brand: listing.brand || "Relux Seller",
     seller: listing.seller ?? listing.sellerName ?? "Relux Seller",
