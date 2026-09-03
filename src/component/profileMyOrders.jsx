@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   CalendarCheck,
@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   ShoppingBag,
   User,
+  Truck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,7 +27,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
-import { hydrateBuyerOrder } from "@/data/dressCatalog";
+import { hydrateBuyerOrder, getBuyerOrderLogistics } from "@/data/dressCatalog";
 import { useBuyerOrders } from "@/hooks/useBuyerOrders";
 import "./profileMyOrders.css";
 
@@ -71,24 +72,43 @@ const getOrderActions = (order) => {
   return order.actions ?? [];
 };
 
+const getOrderStatusKey = (order) => {
+  if (order.status === "cancelled") return "cancelled";
+
+  const fs = order.fulfillmentStatus;
+  if (fs === "shipped") return "shipped";
+  if (fs === "returned") return "returned";
+  if (fs === "delivered") {
+    return order.type === "rental" ? "rental-active" : "delivered";
+  }
+
+  return order.status || "processing";
+};
+
 const getOrderStatusLabel = (order) => {
   if (order.status === "cancelled") return "Cancelled";
-  return order.statusLabel;
+  return order.fulfillmentLabel || order.statusLabel || "Processing";
 };
 
 const matchesFilter = (order, filter) => {
+  const statusKey = getOrderStatusKey(order);
+
   if (filter === "all") return true;
   if (filter === "purchases") return order.type === "purchase";
   if (filter === "rentals") return order.type === "rental";
-  if (filter === "delivered") return order.status === "delivered";
+  if (filter === "delivered") {
+    return statusKey === "delivered" || order.fulfillmentStatus === "delivered";
+  }
   if (filter === "in-progress") {
     return (
-      order.status === "processing" ||
-      order.status === "rental-active" ||
-      order.status === "awaiting-payment" ||
-      order.status === "shipped" ||
-      order.status === "paid" ||
-      order.status === "returned"
+      statusKey === "processing" ||
+      statusKey === "rental-active" ||
+      statusKey === "awaiting-payment" ||
+      statusKey === "shipped" ||
+      statusKey === "paid" ||
+      statusKey === "returned" ||
+      order.fulfillmentStatus === "shipped" ||
+      order.fulfillmentStatus === "processing"
     );
   }
   return true;
@@ -98,7 +118,7 @@ const ProfileMyOrders = () => {
   const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const { orders, loading, error, cancelOrder, removeOrder, confirmReceived, markReturned, acceptSettlement, disputeSettlement, disputeSaleDelivery } =
+  const { orders, loading, error, refreshOrders, cancelOrder, removeOrder, confirmReceived, markReturned, acceptSettlement, disputeSettlement, disputeSaleDelivery } =
     useBuyerOrders();
   const [cancelTarget, setCancelTarget] = useState(null);
   const [disputeTarget, setDisputeTarget] = useState(null);
@@ -106,6 +126,26 @@ const ProfileMyOrders = () => {
   const [disputeReason, setDisputeReason] = useState("");
   const [submittingDispute, setSubmittingDispute] = useState(false);
   const [actionError, setActionError] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      if (document.visibilityState === "visible") {
+        refreshOrders({ silent: true });
+      }
+    }, 45000);
+
+    return () => window.clearInterval(interval);
+  }, [refreshOrders]);
+
+  const handleRefreshOrders = async () => {
+    setRefreshing(true);
+    try {
+      await refreshOrders({ silent: true });
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   const filteredOrders = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -263,7 +303,18 @@ const ProfileMyOrders = () => {
             <ChevronRight size={12} aria-hidden="true" />
             <span className="profile-orders-breadcrumb-current">My Orders</span>
           </nav>
-          <h1 className="profile-orders-title">My Orders</h1>
+          <div className="profile-orders-title-row">
+            <h1 className="profile-orders-title">My Orders</h1>
+            <Button
+              type="button"
+              variant="outline"
+              className="profile-orders-refresh-btn"
+              onClick={handleRefreshOrders}
+              disabled={loading || refreshing}
+            >
+              {refreshing ? "Refreshing..." : "Refresh Orders"}
+            </Button>
+          </div>
         </div>
 
         <div className="profile-orders-tabs-wrap">
@@ -289,7 +340,11 @@ const ProfileMyOrders = () => {
             <p className="profile-orders-empty-text">Loading your orders...</p>
           </div>
         ) : filteredOrders.length > 0 ? (
-          filteredOrders.map((order) => (
+          filteredOrders.map((order) => {
+            const statusKey = getOrderStatusKey(order);
+            const logistics = getBuyerOrderLogistics(order);
+
+            return (
             <Card key={order.id} className="profile-order-card">
               <CardContent className="profile-order-card-inner">
                 <div className="profile-order-image-wrap">
@@ -332,7 +387,17 @@ const ProfileMyOrders = () => {
                             </div>
                           );
                         })}
-                        {(order.type === "rental" || order.type === "purchase") && order.escrowLabel ? (
+                        {(order.type === "rental" || order.type === "purchase") && order.paymentLabel ? (
+                          <div className="profile-order-detail">
+                            <ShieldCheck size={18} aria-hidden="true" />
+                            <span className="profile-order-detail-text--highlight">
+                              Payment: {order.paymentLabel}
+                            </span>
+                          </div>
+                        ) : null}
+                        {(order.type === "rental" || order.type === "purchase") &&
+                        order.escrowLabel &&
+                        order.escrowStatus !== "released" ? (
                           <div className="profile-order-detail">
                             <ShieldCheck size={18} aria-hidden="true" />
                             <span className="profile-order-detail-text--highlight">
@@ -394,6 +459,32 @@ const ProfileMyOrders = () => {
                             </div>
                           )
                         ) : null}
+                        {Array.isArray(logistics) &&
+                        logistics.length > 0 &&
+                        order.status !== "cancelled" ? (
+                          <div className="profile-order-tracking">
+                            <p className="profile-order-tracking-title">
+                              <Truck size={16} aria-hidden="true" />
+                              Shipping &amp; tracking
+                            </p>
+                            <ol className="profile-order-tracking-list">
+                              {logistics.map((step) => (
+                                <li
+                                  key={step.key || `${step.label}-${step.date}`}
+                                  className={`profile-order-tracking-step${
+                                    step.active ? " profile-order-tracking-step--active" : ""
+                                  }${step.completed ? " profile-order-tracking-step--completed" : ""}`}
+                                >
+                                  <span className="profile-order-tracking-dot" aria-hidden="true" />
+                                  <div>
+                                    <p className="profile-order-tracking-label">{step.label}</p>
+                                    <span className="profile-order-tracking-date">{step.date}</span>
+                                  </div>
+                                </li>
+                              ))}
+                            </ol>
+                          </div>
+                        ) : null}
                       </div>
                     </div>
 
@@ -401,16 +492,30 @@ const ProfileMyOrders = () => {
                       <p className="profile-order-amount-label">Total Amount</p>
                       <p className="profile-order-amount">{order.amount}</p>
                       <span
-                        className={`profile-order-status profile-order-status--${order.status}`}
+                        className={`profile-order-status profile-order-status--${statusKey}`}
                       >
-                        {order.status === "rental-active" && (
+                        {statusKey === "rental-active" && (
                           <span className="profile-order-status-dot" aria-hidden="true" />
                         )}
-                        {order.status === "delivered" && (
+                        {statusKey === "delivered" && (
                           <CheckCircle2 size={14} aria-hidden="true" />
+                        )}
+                        {statusKey === "shipped" && (
+                          <Truck size={14} aria-hidden="true" />
                         )}
                         {getOrderStatusLabel(order)}
                       </span>
+                      {order.paymentLabel ? (
+                        <p
+                          className={`profile-order-payment-line ${
+                            order.paymentStatus === "refunded"
+                              ? "profile-order-payment-line--refunded"
+                              : ""
+                          }`.trim()}
+                        >
+                          {order.paymentLabel}
+                        </p>
+                      ) : null}
                     </div>
                   </div>
 
@@ -460,7 +565,8 @@ const ProfileMyOrders = () => {
                 </div>
               </CardContent>
             </Card>
-          ))
+            );
+          })
         ) : (
           <div className="profile-orders-empty">
             <ShoppingBag
@@ -524,32 +630,54 @@ const ProfileMyOrders = () => {
       )}
 
       <Dialog open={Boolean(disputeTarget)} onOpenChange={(open) => !open && setDisputeTarget(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
+        <DialogContent className="profile-logout-modal profile-orders-dispute-dialog" showCloseButton={false}>
+          <DialogHeader className="profile-logout-modal-header">
+            <DialogTitle className="profile-logout-modal-title">
               {disputeKind === "delivery" ? "Report Delivery Issue" : "Dispute Settlement"}
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="profile-logout-modal-description">
               {disputeKind === "delivery"
                 ? "Tell admin what went wrong (not received, wrong item, not as pictured, etc.). Payment stays in escrow until admin resolves it."
                 : "Explain why you disagree with the seller's proposed split. An admin will review and set the final escrow amounts."}
             </DialogDescription>
           </DialogHeader>
-          <Textarea
-            rows={4}
-            placeholder={
-              disputeKind === "delivery"
-                ? "Describe the delivery problem..."
-                : "Describe the issue with the proposed rent or damage charges..."
-            }
-            value={disputeReason}
-            onChange={(e) => setDisputeReason(e.target.value)}
-          />
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setDisputeTarget(null)}>
+          <div className="profile-orders-dispute-body">
+            <Label htmlFor="profile-orders-dispute-reason" className="profile-orders-dispute-label">
+              {disputeKind === "delivery" ? "Delivery issue details" : "Dispute details"}
+            </Label>
+            <Textarea
+              id="profile-orders-dispute-reason"
+              className="profile-orders-dispute-textarea"
+              rows={4}
+              placeholder={
+                disputeKind === "delivery"
+                  ? "Describe the delivery problem..."
+                  : "Describe the issue with the proposed rent or damage charges..."
+              }
+              value={disputeReason}
+              onChange={(e) => setDisputeReason(e.target.value)}
+            />
+            {actionError ? (
+              <p className="profile-orders-dispute-error" role="alert">
+                {actionError}
+              </p>
+            ) : null}
+          </div>
+          <DialogFooter className="profile-logout-modal-actions">
+            <Button
+              type="button"
+              variant="ghost"
+              className="profile-logout-cancel-btn"
+              onClick={() => setDisputeTarget(null)}
+            >
               Cancel
             </Button>
-            <Button type="button" onClick={submitDispute} disabled={submittingDispute}>
+            <Button
+              type="button"
+              className="profile-logout-confirm-btn"
+              onClick={submitDispute}
+              disabled={submittingDispute}
+            >
               {submittingDispute ? "Submitting..." : "Submit Dispute"}
             </Button>
           </DialogFooter>

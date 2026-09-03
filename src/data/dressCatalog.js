@@ -377,6 +377,96 @@ export const applyAuctionApiData = (dress, auctionData) => {
   };
 };
 
+function formatOrderTrackingDate(date) {
+  if (!date) return "Pending";
+  const parsed = new Date(date);
+  if (Number.isNaN(parsed.getTime())) return "Pending";
+  return parsed.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+export function getBuyerOrderLogistics(order) {
+  if (Array.isArray(order.logistics) && order.logistics.length > 0) {
+    return order.logistics;
+  }
+
+  const fs = order.fulfillmentStatus || "processing";
+  const steps = [
+    {
+      key: "placed",
+      label: "Order placed",
+      date: formatOrderTrackingDate(order.createdAt),
+      completed: true,
+      active: false,
+    },
+  ];
+
+  if (order.status === "cancelled") {
+    steps.push({
+      key: "closed",
+      label: "Order cancelled",
+      date: formatOrderTrackingDate(order.updatedAt),
+      completed: true,
+      active: true,
+    });
+    return steps;
+  }
+
+  if (order.paymentStatus === "paid") {
+    steps.push({
+      key: "paid",
+      label: order.type === "purchase" ? "Payment confirmed" : "Security deposit paid",
+      date: formatOrderTrackingDate(order.paidAt),
+      completed: true,
+      active: fs === "processing",
+    });
+  }
+
+  if (fs === "processing" || fs === "shipped" || fs === "delivered" || fs === "returned" || order.shippedAt) {
+    const shippedDone = fs === "shipped" || fs === "delivered" || fs === "returned" || Boolean(order.shippedAt);
+    steps.push({
+      key: "shipped",
+      label: "Shipped to buyer",
+      date: formatOrderTrackingDate(order.shippedAt),
+      completed: shippedDone,
+      active: fs === "shipped",
+    });
+  }
+
+  if (fs === "delivered" || fs === "returned" || order.deliveryConfirmedAt) {
+    steps.push({
+      key: "delivered",
+      label: order.type === "rental" ? "Received by buyer" : "Delivered to buyer",
+      date: formatOrderTrackingDate(order.deliveryConfirmedAt),
+      completed: true,
+      active: fs === "delivered",
+    });
+  }
+
+  if (fs === "returned" || order.returnConfirmedAt) {
+    steps.push({
+      key: "returned",
+      label: "Returned by buyer",
+      date: formatOrderTrackingDate(order.returnConfirmedAt || order.updatedAt),
+      completed: fs === "returned",
+      active: fs === "returned",
+    });
+  }
+
+  if (!steps.some((step) => step.active)) {
+    const nextStep = [...steps].reverse().find((step) => !step.completed);
+    if (nextStep) nextStep.active = true;
+    else if (steps.length > 0) steps[steps.length - 1].active = true;
+  }
+
+  return steps;
+}
+
 export const hydrateBuyerOrder = (order) => {
   const dress = lookupListingDress(order.dressId);
   const rentalTotal =

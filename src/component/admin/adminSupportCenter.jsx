@@ -107,7 +107,57 @@ const MODAL_CONFIG = {
     confirmLabel: "Contact Seller",
     confirmClass: "admin-reports-modal-confirm--resolve",
   },
+  askBuyer: {
+    icon: Send,
+    iconClass: "admin-reports-modal-icon--resolve",
+    title: "Ask Buyer for Response?",
+    description:
+      "The buyer will see this message in their Support Center and can submit additional details.",
+    confirmLabel: "Contact Buyer",
+    confirmClass: "admin-reports-modal-confirm--resolve",
+  },
+  askBoth: {
+    icon: Send,
+    iconClass: "admin-reports-modal-icon--resolve",
+    title: "Contact Buyer & Seller?",
+    description:
+      "Both parties will be notified in Support Center. Escrow can be released after they both respond.",
+    confirmLabel: "Contact Both",
+    confirmClass: "admin-reports-modal-confirm--resolve",
+  },
 };
+
+function getDisputeStageLabel(stage) {
+  switch (stage) {
+    case "awaiting_seller":
+      return "Waiting for seller";
+    case "awaiting_buyer":
+      return "Waiting for buyer";
+    case "awaiting_both":
+      return "Waiting for buyer & seller";
+    case "seller_responded":
+      return "Seller responded";
+    case "buyer_responded":
+      return "Buyer responded";
+    case "both_responded":
+      return "Both responded — ready to release escrow";
+    case "resolved":
+      return "Resolved";
+    default:
+      return "New dispute";
+  }
+}
+
+function canContactDisputeParties(report) {
+  if (!report) return false;
+  if (report.isDispute) return true;
+  return Boolean(report.orderId && report.buyerId && report.sellerId);
+}
+
+function isMediationReady(report) {
+  if (!canContactDisputeParties(report)) return true;
+  return Boolean(report.mediationComplete);
+}
 
 function getInitials(name = "") {
   return (
@@ -239,6 +289,20 @@ const AdminSupportCenter = () => {
   }, [selectedReport?.mongoId]);
 
   useEffect(() => {
+    if (activeModal) return undefined;
+
+    document.body.style.pointerEvents = "";
+    document.body.removeAttribute("inert");
+    document.body.style.overflow = "";
+
+    return () => {
+      document.body.style.pointerEvents = "";
+      document.body.removeAttribute("inert");
+      document.body.style.overflow = "";
+    };
+  }, [activeModal]);
+
+  useEffect(() => {
     let cancelled = false;
 
     async function loadSettlement() {
@@ -308,6 +372,24 @@ const AdminSupportCenter = () => {
   const modalConfig = activeModal ? MODAL_CONFIG[activeModal] : null;
   const ModalIcon = modalConfig?.icon;
   const isClosed = selectedReport?.status === "resolved";
+  const escrowAlreadyReleased =
+    orderSettlement?.escrowStatus === "released" ||
+    orderSettlement?.escrowSettlementStatus === "admin_settled";
+  const canReleaseEscrow =
+    Boolean(orderSettlement) &&
+    orderSettlement.escrowSettlementStatus === "disputed" &&
+    !escrowAlreadyReleased &&
+    isMediationReady(selectedReport);
+  const mediationPending =
+    canContactDisputeParties(selectedReport) &&
+    selectedReport?.orderId &&
+    !isMediationReady(selectedReport) &&
+    !escrowAlreadyReleased;
+  const canContactParties = canContactDisputeParties(selectedReport);
+  const waitingForSeller =
+    Boolean(selectedReport?.adminMessageToSeller) && !selectedReport?.sellerResponse;
+  const waitingForBuyer =
+    Boolean(selectedReport?.adminMessageToBuyer) && !selectedReport?.buyerResponse;
 
   const patchReport = async (body) => {
     if (!selectedReport) return;
@@ -351,6 +433,27 @@ const AdminSupportCenter = () => {
         adminReply:
           "We have contacted the seller and are waiting for their response.",
       };
+    } else if (activeModal === "askBuyer") {
+      body = {
+        askBuyer: true,
+        messageToBuyer:
+          trimmedReply ||
+          "Please provide any additional details about this dispute so we can resolve it fairly.",
+        adminReply:
+          "We have contacted the buyer and are waiting for their response.",
+      };
+    } else if (activeModal === "askBoth") {
+      body = {
+        askBoth: true,
+        messageToSeller:
+          trimmedReply ||
+          "Please respond to this buyer complaint with your side of the story.",
+        messageToBuyer:
+          trimmedReply ||
+          "Please provide any additional details about this dispute so we can resolve it fairly.",
+        adminReply:
+          "We have contacted the buyer and seller and are waiting for their responses.",
+      };
     } else if (activeModal === "resolve") {
       body = {
         status: "resolved",
@@ -376,7 +479,7 @@ const AdminSupportCenter = () => {
       await patchReport(body);
       setActiveModal(null);
     } catch {
-      setActiveModal(null);
+      /* keep modal open so admin can retry; error shown in banner */
     }
   };
 
@@ -404,7 +507,7 @@ const AdminSupportCenter = () => {
             <SelectTrigger className="admin-reports-filter-select" aria-label="Filter by user role">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="admin-reports-select-content" position="popper">
               {ROLE_OPTIONS.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}
@@ -417,7 +520,7 @@ const AdminSupportCenter = () => {
             <SelectTrigger className="admin-reports-filter-select" aria-label="Filter by issue type">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="admin-reports-select-content" position="popper">
               {ISSUE_TYPE_OPTIONS.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}
@@ -430,7 +533,7 @@ const AdminSupportCenter = () => {
             <SelectTrigger className="admin-reports-filter-select" aria-label="Filter by status">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="admin-reports-select-content" position="popper">
               {STATUS_OPTIONS.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}
@@ -565,6 +668,19 @@ const AdminSupportCenter = () => {
             </div>
 
             <div className="admin-reports-detail-body">
+              {isClosed && (
+                <p className="admin-reports-closed-banner" role="status">
+                  This request is resolved. Select an open request to send messages or take
+                  action.
+                </p>
+              )}
+
+              {actionLoading && (
+                <p className="admin-reports-action-banner" role="status">
+                  Saving your changes...
+                </p>
+              )}
+
               <section>
                 <h3>Reporter</h3>
                 <div className="admin-reports-reporter-card">
@@ -602,14 +718,7 @@ const AdminSupportCenter = () => {
                         </span>
                       )}
                       <span className="admin-reports-stage">
-                        Stage:{" "}
-                        {selectedReport.disputeStage === "awaiting_seller"
-                          ? "Waiting for seller"
-                          : selectedReport.disputeStage === "seller_responded"
-                            ? "Seller responded — ready to decide"
-                            : selectedReport.disputeStage === "resolved"
-                              ? "Resolved"
-                              : "New dispute"}
+                        Stage: {getDisputeStageLabel(selectedReport.disputeStage)}
                       </span>
                     </div>
                   </div>
@@ -639,6 +748,24 @@ const AdminSupportCenter = () => {
                   &ldquo;{selectedReport.description}&rdquo;
                 </blockquote>
               </section>
+
+              {selectedReport.adminMessageToBuyer && (
+                <section>
+                  <h3>Message sent to Buyer</h3>
+                  <blockquote className="admin-reports-description">
+                    &ldquo;{selectedReport.adminMessageToBuyer}&rdquo;
+                  </blockquote>
+                </section>
+              )}
+
+              {selectedReport.buyerResponse && (
+                <section>
+                  <h3>Buyer Response</h3>
+                  <blockquote className="admin-reports-description admin-reports-description--buyer">
+                    &ldquo;{selectedReport.buyerResponse}&rdquo;
+                  </blockquote>
+                </section>
+              )}
 
               {selectedReport.adminMessageToSeller && (
                 <section>
@@ -732,7 +859,13 @@ const AdminSupportCenter = () => {
                           Buyer dispute: {orderSettlement.disputeReason}
                         </blockquote>
                       ) : null}
-                      {orderSettlement.escrowSettlementStatus === "disputed" && (
+                      {mediationPending ? (
+                        <p className="admin-reports-mediation-note">
+                          Use &ldquo;Contact Both Parties&rdquo; and wait for buyer and seller to
+                          respond in Support Center before releasing escrow.
+                        </p>
+                      ) : null}
+                      {canReleaseEscrow ? (
                         <div className="admin-reports-escrow-form">
                           {orderSettlementType === "sale" ? (
                             <>
@@ -781,12 +914,17 @@ const AdminSupportCenter = () => {
                             type="button"
                             className="admin-reports-action-btn admin-reports-action-btn--primary"
                             onClick={handleReleaseEscrow}
-                            disabled={releasingEscrow || isClosed}
+                            disabled={releasingEscrow}
                           >
                             {releasingEscrow ? "Releasing..." : "Release Escrow & Resolve"}
                           </Button>
                         </div>
-                      )}
+                      ) : escrowAlreadyReleased ? (
+                        <p className="admin-reports-escrow-released-note">
+                          Escrow has been released for this order. Buyer refund and seller payout
+                          notifications were sent.
+                        </p>
+                      ) : null}
                     </div>
                   ) : (
                     <p>No escrow settlement linked to this order.</p>
@@ -797,14 +935,14 @@ const AdminSupportCenter = () => {
               <section className="admin-reports-reply-section">
                 <h3>
                   {selectedReport.isDispute
-                    ? "Message to seller / Final decision"
+                    ? "Message to buyer / seller / Final decision"
                     : "Admin Reply"}
                 </h3>
                 <Textarea
                   className="admin-reports-reply-input"
                   placeholder={
                     selectedReport.isDispute
-                      ? "Write what to ask the seller, or your final decision for both parties..."
+                      ? "Write what to ask the buyer or seller, or your final decision for both parties..."
                       : "Type your reply for the user..."
                   }
                   value={replyText}
@@ -814,27 +952,62 @@ const AdminSupportCenter = () => {
                 />
                 <p className="admin-reports-reply-hint">
                   {selectedReport.isDispute
-                    ? "Use “Ask Seller” to send this text to the seller. Use “Resolve” to publish the final decision to both sides."
+                    ? "Use “Contact Both Parties” to message buyer and seller. Escrow unlocks after both respond."
                     : "This reply appears under View in the user’s Support Center."}
                 </p>
               </section>
             </div>
 
             <div className="admin-reports-detail-actions">
+              {!canContactParties && !isClosed ? (
+                <p className="admin-reports-action-hint">
+                  Contact buttons need a linked order dispute with both buyer and seller. Ask the
+                  user to re-submit with an order selected, or use Resolve for general requests.
+                </p>
+              ) : null}
+
+              {(waitingForSeller || waitingForBuyer) && !isClosed ? (
+                <p className="admin-reports-action-hint admin-reports-action-hint--waiting">
+                  {waitingForSeller && waitingForBuyer
+                    ? "Waiting for buyer and seller to respond in Support Center. You can send a follow-up message anytime."
+                    : waitingForSeller
+                      ? "Waiting for seller response. You can send a follow-up message anytime."
+                      : "Waiting for buyer response. You can send a follow-up message anytime."}
+                </p>
+              ) : null}
+
               <Button
                 type="button"
                 className="admin-reports-action-btn admin-reports-action-btn--primary"
-                onClick={() => setActiveModal("askSeller")}
-                disabled={
-                  actionLoading ||
-                  isClosed ||
-                  !selectedReport.isDispute ||
-                  selectedReport.disputeStage === "awaiting_seller"
-                }
+                onClick={() => setActiveModal("askBoth")}
+                disabled={actionLoading || isClosed || !canContactParties}
               >
                 <Send size={16} aria-hidden="true" />
-                Ask Seller for Response
+                Contact Both Parties
               </Button>
+
+              <div className="admin-reports-action-row">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="admin-reports-action-btn"
+                  onClick={() => setActiveModal("askSeller")}
+                  disabled={actionLoading || isClosed || !canContactParties}
+                >
+                  <Send size={16} aria-hidden="true" />
+                  Ask Seller
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="admin-reports-action-btn"
+                  onClick={() => setActiveModal("askBuyer")}
+                  disabled={actionLoading || isClosed || !canContactParties}
+                >
+                  <Send size={16} aria-hidden="true" />
+                  Ask Buyer
+                </Button>
+              </div>
 
               <Button
                 type="button"
@@ -873,20 +1046,32 @@ const AdminSupportCenter = () => {
         )}
       </div>
 
-      <Dialog open={Boolean(activeModal)} onOpenChange={(open) => !open && setActiveModal(null)}>
-        {modalConfig && ModalIcon && (
-          <DialogContent className="admin-reports-modal" showCloseButton={false}>
+      <Dialog
+        open={Boolean(activeModal)}
+        onOpenChange={(open) => {
+          if (!open) setActiveModal(null);
+        }}
+      >
+        {activeModal && modalConfig && ModalIcon ? (
+          <DialogContent
+            className="admin-reports-modal"
+            overlayClassName="admin-reports-modal-overlay"
+            showCloseButton={false}
+          >
             <div className={`admin-reports-modal-icon ${modalConfig.iconClass}`}>
               <ModalIcon size={32} aria-hidden="true" />
             </div>
             <DialogHeader className="admin-reports-modal-header">
-              <DialogTitle>{modalConfig.title}</DialogTitle>
-              <DialogDescription>{modalConfig.description}</DialogDescription>
+              <DialogTitle className="admin-reports-modal-title">{modalConfig.title}</DialogTitle>
+              <DialogDescription className="admin-reports-modal-description">
+                {modalConfig.description}
+              </DialogDescription>
             </DialogHeader>
             <DialogFooter className="admin-reports-modal-actions">
               <Button
                 type="button"
                 variant="outline"
+                className="admin-reports-modal-cancel-btn"
                 onClick={() => setActiveModal(null)}
                 disabled={actionLoading}
               >
@@ -894,7 +1079,7 @@ const AdminSupportCenter = () => {
               </Button>
               <Button
                 type="button"
-                className={modalConfig.confirmClass}
+                className={`admin-reports-modal-confirm-btn ${modalConfig.confirmClass}`}
                 onClick={handleConfirmModal}
                 disabled={actionLoading}
               >
@@ -902,7 +1087,7 @@ const AdminSupportCenter = () => {
               </Button>
             </DialogFooter>
           </DialogContent>
-        )}
+        ) : null}
       </Dialog>
     </div>
   );

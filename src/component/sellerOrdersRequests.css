@@ -147,6 +147,31 @@
   color: #5b3f8a;
 }
 
+.orders-requests-listing-status {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #5d605f;
+}
+
+.orders-requests-payment {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #31685d;
+}
+
+.orders-requests-payment--refunded {
+  color: #a83836;
+}
+
+.orders-requests-payment--unpaid,
+.orders-requests-payment--pending {
+  color: #787b7a;
+}
+
 .orders-requests-status {
   flex-shrink: 0;
   padding: 0.25rem 0.5rem;

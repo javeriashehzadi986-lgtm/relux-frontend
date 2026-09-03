@@ -541,6 +541,12 @@ export const api = {
       body: JSON.stringify(body),
     }),
 
+  submitBuyerDisputeResponse: (id, body) =>
+    request(`/reports/${id}/buyer-response`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+
   // Admin Reports
   getAdminReports: (params = {}) => {
     const query = new URLSearchParams();

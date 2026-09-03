@@ -9,14 +9,18 @@ export function useBuyerOrders() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const refreshOrders = useCallback(async () => {
+  const refreshOrders = useCallback(async (options = {}) => {
+    const silent = Boolean(options.silent);
+
     if (!isAuthenticated || user?.role !== "buyer") {
       setOrders([]);
-      setLoading(false);
+      if (!silent) setLoading(false);
       return;
     }
 
-    setLoading(true);
+    if (!silent) {
+      setLoading(true);
+    }
     setError("");
     try {
       await refreshPublicCatalog();
@@ -24,9 +28,13 @@ export function useBuyerOrders() {
       setOrders(data.orders ?? []);
     } catch (err) {
       setError(err.message || "Failed to load orders");
-      setOrders([]);
+      if (!silent) {
+        setOrders([]);
+      }
     } finally {
-      setLoading(false);
+      if (!silent) {
+        setLoading(false);
+      }
     }
   }, [isAuthenticated, user?.role]);
 

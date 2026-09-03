@@ -67,8 +67,6 @@ const AdminResaleOrders = () => {
   });
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
-  const [actionError, setActionError] = useState("");
-  const [actionLoading, setActionLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [paymentFilter, setPaymentFilter] = useState("all");
@@ -145,53 +143,6 @@ const AdminResaleOrders = () => {
 
   const closePanel = () => setPanelOpen(false);
 
-  const handleComplete = async () => {
-    if (!selectedOrder) return;
-    setActionLoading(true);
-    setActionError("");
-    try {
-      const data = await api.updateAdminOrderStatus(selectedOrder.mongoId || selectedOrder.id, {
-        status: "completed",
-      });
-      setOrders((current) =>
-        current.map((order) =>
-          order.id === selectedOrder.id ? data.order : order,
-        ),
-      );
-      await loadOrders();
-    } catch (error) {
-      setActionError(error.message || "Failed to complete order");
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  const handleCancel = async () => {
-    if (!selectedOrder) return;
-    setActionLoading(true);
-    setActionError("");
-    try {
-      const data = await api.updateAdminOrderStatus(selectedOrder.mongoId || selectedOrder.id, {
-        status: "cancelled",
-      });
-      setOrders((current) =>
-        current.map((order) =>
-          order.id === selectedOrder.id ? data.order : order,
-        ),
-      );
-      await loadOrders();
-    } catch (error) {
-      setActionError(error.message || "Failed to cancel order");
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  const isClosed =
-    selectedOrder?.dbStatus === "completed" ||
-    selectedOrder?.dbStatus === "cancelled" ||
-    selectedOrder?.dbStatus === "rejected";
-
   return (
     <div className="admin-resale-page">
       <header className="admin-resale-header">
@@ -225,9 +176,9 @@ const AdminResaleOrders = () => {
       </header>
 
       <div className="admin-resale-body">
-        {(loadError || actionError) && (
+        {loadError && (
           <p className="admin-resale-error" role="alert">
-            {loadError || actionError}
+            {loadError}
           </p>
         )}
 
@@ -571,31 +522,6 @@ const AdminResaleOrders = () => {
                   ))}
                 </div>
               </div>
-            </div>
-
-            <div className="admin-resale-panel-actions">
-              <button
-                type="button"
-                className="admin-resale-btn-complete"
-                onClick={handleComplete}
-                disabled={actionLoading || isClosed}
-              >
-                <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
-                  check_circle
-                </span>
-                {actionLoading ? "Saving..." : "Mark as Completed"}
-              </button>
-              <button
-                type="button"
-                className="admin-resale-btn-cancel"
-                onClick={handleCancel}
-                disabled={actionLoading || isClosed}
-              >
-                <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
-                  cancel
-                </span>
-                Cancel Order
-              </button>
             </div>
           </aside>
         </>

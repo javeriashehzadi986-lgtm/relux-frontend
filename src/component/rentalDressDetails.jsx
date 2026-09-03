@@ -24,22 +24,36 @@ import { SellerReviewsSection } from "./sellerReviewsSection";
 import "./dressDetails.css";
 import "./rentalDressDetails.css";
 
+const RENTAL_DAY_OPTIONS = [4, 8, 12];
+const DEFAULT_RENTAL_DAYS = RENTAL_DAY_OPTIONS[0];
+
 const toInputDate = (date) => date.toISOString().split("T")[0];
 
-const getDefaultDates = () => {
-  const start = new Date();
-  start.setDate(start.getDate() + 14);
-  const end = new Date(start);
-  end.setDate(end.getDate() + 2);
-  return { start: toInputDate(start), end: toInputDate(end) };
+const getEndDateFromStartAndDays = (start, days) => {
+  if (!start || !days) return "";
+  const startDate = new Date(`${start}T12:00:00`);
+  const endDate = new Date(startDate);
+  endDate.setDate(endDate.getDate() + days - 1);
+  return toInputDate(endDate);
 };
 
-const getRentalDays = (start, end) => {
-  if (!start || !end) return 3;
-  const startDate = new Date(`${start}T12:00:00`);
-  const endDate = new Date(`${end}T12:00:00`);
-  const diff = Math.round((endDate - startDate) / (1000 * 60 * 60 * 24));
-  return Math.max(1, diff + 1);
+const getDefaultDates = (rentalDays = DEFAULT_RENTAL_DAYS) => {
+  const start = new Date();
+  start.setDate(start.getDate() + 14);
+  return {
+    start: toInputDate(start),
+    end: getEndDateFromStartAndDays(toInputDate(start), rentalDays),
+  };
+};
+
+const formatDisplayDate = (isoDate) => {
+  if (!isoDate) return "—";
+  return new Date(`${isoDate}T12:00:00`).toLocaleDateString(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 };
 
 const RentalDressDetails = ({ dress }) => {
@@ -48,8 +62,10 @@ const RentalDressDetails = ({ dress }) => {
   const defaults = useMemo(() => getDefaultDates(), []);
   const [activeImage, setActiveImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState(dress.listingSize ?? "M");
+  const [selectedRentalDays, setSelectedRentalDays] = useState(DEFAULT_RENTAL_DAYS);
   const [rentStart, setRentStart] = useState(defaults.start);
   const [rentEnd, setRentEnd] = useState(defaults.end);
+  const minRentStart = useMemo(() => toInputDate(new Date()), []);
   const { isSaved, toggle: toggleWishlist } = useWishlist();
   const requireLogin = useRequireLogin();
   const { orders, requestRental, cancelOrder } = useBuyerOrders();
@@ -74,10 +90,21 @@ const RentalDressDetails = ({ dress }) => {
     if (pendingRequest.size) setSelectedSize(pendingRequest.size);
     if (pendingRequest.rentStart) setRentStart(pendingRequest.rentStart);
     if (pendingRequest.rentEnd) setRentEnd(pendingRequest.rentEnd);
+    if (pendingRequest.rentalDays) setSelectedRentalDays(pendingRequest.rentalDays);
   }, [pendingRequest]);
 
+  const handleRentStartChange = (value) => {
+    setRentStart(value);
+    setRentEnd(getEndDateFromStartAndDays(value, selectedRentalDays));
+  };
+
+  const handleRentalDaysChange = (days) => {
+    setSelectedRentalDays(days);
+    setRentEnd(getEndDateFromStartAndDays(rentStart, days));
+  };
+
   const gallery = dress.gallery ?? [dress.mainImage];
-  const rentalDays = getRentalDays(rentStart, rentEnd);
+  const rentalDays = selectedRentalDays;
   const rentalCharges = dress.dailyRate * rentalDays;
   const securityDeposit = dress.securityDeposit ?? dress.fullDressPrice;
   const totalPaidToday = securityDeposit;
@@ -226,18 +253,32 @@ const RentalDressDetails = ({ dress }) => {
                   id="rent-start"
                   type="date"
                   value={rentStart}
-                  onChange={(e) => setRentStart(e.target.value)}
+                  min={minRentStart}
+                  onChange={(e) => handleRentStartChange(e.target.value)}
                 />
               </div>
-              <div className="rental-details-date-field">
-                <label htmlFor="rent-end">Rent End</label>
-                <input
-                  id="rent-end"
-                  type="date"
-                  value={rentEnd}
-                  min={rentStart}
-                  onChange={(e) => setRentEnd(e.target.value)}
-                />
+              <div className="rental-details-date-field rental-details-date-field--computed">
+                <span className="rental-details-date-field-label">Rent End</span>
+                <p className="rental-details-date-value">{formatDisplayDate(rentEnd)}</p>
+              </div>
+            </div>
+
+            <div className="rental-details-days">
+              <p className="rental-details-days-label">How many days?</p>
+              <div className="rental-details-days-options" role="group" aria-label="Rental duration">
+                {RENTAL_DAY_OPTIONS.map((days) => (
+                  <button
+                    key={days}
+                    type="button"
+                    className={`rental-details-days-option ${
+                      selectedRentalDays === days ? "rental-details-days-option--active" : ""
+                    }`}
+                    aria-pressed={selectedRentalDays === days}
+                    onClick={() => handleRentalDaysChange(days)}
+                  >
+                    {days} days
+                  </button>
+                ))}
               </div>
             </div>
 

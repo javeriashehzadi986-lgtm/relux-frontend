@@ -347,6 +347,18 @@ export function SellerOrdersRequestsContent() {
                       {order.escrowLabel ? (
                         <span className="orders-requests-escrow">{order.escrowLabel}</span>
                       ) : null}
+                      {order.productAvailabilityLabel && order.statusVariant === "completed" ? (
+                        <span className="orders-requests-listing-status">
+                          Listing: {order.productAvailabilityLabel}
+                        </span>
+                      ) : null}
+                      {order.paymentLabel ? (
+                        <span
+                          className={`orders-requests-payment orders-requests-payment--${order.paymentStatus || "unpaid"}`}
+                        >
+                          Payment: {order.paymentLabel}
+                        </span>
+                      ) : null}
                     </div>
                   </div>
                   <span

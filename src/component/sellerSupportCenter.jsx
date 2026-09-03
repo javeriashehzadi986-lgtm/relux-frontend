@@ -45,7 +45,7 @@ const SELLER_FAQS = [
     id: "dispute",
     question: "What if a buyer opens a dispute?",
     answer:
-      "If admin asks for your response, it appears under My Requests. Open it, write your side of the story, and submit. Admin will then decide.",
+      "If admin asks for your response, it appears under My Requests. Open it, write your side, and submit. Admin will contact both parties before releasing escrow.",
   },
   {
     id: "stripe",
@@ -71,7 +71,7 @@ const BUYER_FAQS = [
     id: "damaged-item",
     question: "What should I do if I receive a damaged or incorrect item?",
     answer:
-      "Open Support Center, choose Order/Rental/Return, select the related order, and describe the issue. Admin will contact the seller and resolve the dispute.",
+      "Open Support Center, choose Order/Rental/Return, select the related order, and describe the issue. Admin will contact you and the seller; after both respond, escrow can be released.",
   },
 ];
 
@@ -94,6 +94,9 @@ const SellerSupportCenter = ({ variant = "buyer" }) => {
   const [sellerReplyDrafts, setSellerReplyDrafts] = useState({});
   const [sellerReplyLoadingId, setSellerReplyLoadingId] = useState("");
   const [sellerReplyError, setSellerReplyError] = useState("");
+  const [buyerReplyDrafts, setBuyerReplyDrafts] = useState({});
+  const [buyerReplyLoadingId, setBuyerReplyLoadingId] = useState("");
+  const [buyerReplyError, setBuyerReplyError] = useState("");
   const fileInputRef = useRef(null);
 
   const showOrderPicker =
@@ -223,6 +226,36 @@ const SellerSupportCenter = ({ variant = "buyer" }) => {
     }
   };
 
+  const handleBuyerResponse = async (request) => {
+    const draft = buyerReplyDrafts[request.mongoId]?.trim() || "";
+    if (!draft) {
+      setBuyerReplyError("Write your response before submitting.");
+      return;
+    }
+
+    setBuyerReplyLoadingId(request.mongoId);
+    setBuyerReplyError("");
+    try {
+      const data = await api.submitBuyerDisputeResponse(request.mongoId, {
+        response: draft,
+      });
+      setRequests((current) =>
+        current.map((item) =>
+          item.mongoId === request.mongoId ? data.report : item,
+        ),
+      );
+      setBuyerReplyDrafts((current) => {
+        const next = { ...current };
+        delete next[request.mongoId];
+        return next;
+      });
+    } catch (error) {
+      setBuyerReplyError(error.message || "Could not send your response");
+    } finally {
+      setBuyerReplyLoadingId("");
+    }
+  };
+
   return (
     <div className="support-center-page">
       <Card className="support-center-form-card">
@@ -235,7 +268,7 @@ const SellerSupportCenter = ({ variant = "buyer" }) => {
           {submitted && (
             <p className="support-center-success" role="status">
               {showOrderPicker
-                ? "Dispute submitted. Admin can now contact the seller."
+                ? "Dispute submitted. Admin will contact you and the seller before resolving escrow."
                 : "Your request has been submitted. We will respond within 24 hours."}
             </p>
           )}
@@ -400,6 +433,7 @@ const SellerSupportCenter = ({ variant = "buyer" }) => {
                           #{request.id}
                           {request.isDispute ? " · Dispute" : ""}
                           {request.needsSellerResponse ? " · Action needed" : ""}
+                          {request.needsBuyerResponse ? " · Action needed" : ""}
                         </p>
                         <h3 className="support-center-request-title">
                           {request.title}
@@ -436,6 +470,11 @@ const SellerSupportCenter = ({ variant = "buyer" }) => {
                               }
                               disabled={sellerReplyLoadingId === request.mongoId}
                             />
+                            {sellerReplyError && (
+                              <p className="support-center-error" role="alert">
+                                {sellerReplyError}
+                              </p>
+                            )}
                             <Button
                               type="button"
                               className="support-center-submit-btn"
@@ -443,6 +482,42 @@ const SellerSupportCenter = ({ variant = "buyer" }) => {
                               disabled={sellerReplyLoadingId === request.mongoId}
                             >
                               {sellerReplyLoadingId === request.mongoId
+                                ? "Sending..."
+                                : "Send Response to Admin"}
+                            </Button>
+                          </div>
+                        )}
+
+                        {request.needsBuyerResponse && (
+                          <div className="support-center-seller-reply">
+                            <p className="support-center-seller-reply-label">
+                              Admin asked for your response
+                            </p>
+                            <textarea
+                              rows={3}
+                              className="support-center-textarea"
+                              placeholder="Share any additional details about this dispute..."
+                              value={buyerReplyDrafts[request.mongoId] || ""}
+                              onChange={(e) =>
+                                setBuyerReplyDrafts((current) => ({
+                                  ...current,
+                                  [request.mongoId]: e.target.value,
+                                }))
+                              }
+                              disabled={buyerReplyLoadingId === request.mongoId}
+                            />
+                            {buyerReplyError && (
+                              <p className="support-center-error" role="alert">
+                                {buyerReplyError}
+                              </p>
+                            )}
+                            <Button
+                              type="button"
+                              className="support-center-submit-btn"
+                              onClick={() => handleBuyerResponse(request)}
+                              disabled={buyerReplyLoadingId === request.mongoId}
+                            >
+                              {buyerReplyLoadingId === request.mongoId
                                 ? "Sending..."
                                 : "Send Response to Admin"}
                             </Button>

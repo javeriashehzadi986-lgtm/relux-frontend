@@ -474,6 +474,27 @@ const AdminRentalOrders = () => {
                   <span>{selectedOrder.productStatus || "—"}</span>
                 </div>
               </div>
+
+              <div className="admin-rental-timeline">
+                <h4>Logistics Log</h4>
+                <div className="admin-rental-timeline-list">
+                  {(selectedOrder.logistics || []).map((entry) => (
+                    <div
+                      key={`${entry.key || entry.label}-${entry.date}`}
+                      className="admin-rental-timeline-item"
+                    >
+                      <span
+                        className={`admin-rental-timeline-dot${
+                          entry.active ? " admin-rental-timeline-dot--active" : ""
+                        }`.trim()}
+                        aria-hidden="true"
+                      />
+                      <p>{entry.label}</p>
+                      <span>{entry.date}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </aside>
         </>

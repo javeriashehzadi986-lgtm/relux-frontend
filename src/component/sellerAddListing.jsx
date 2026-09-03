@@ -738,14 +738,6 @@ const SellerAddListing = () => {
               {submitError ? (
                 <p className="add-listing-submit-error">{submitError}</p>
               ) : null}
-              <Button
-                type="button"
-                variant="outline"
-                className="add-listing-draft-btn"
-                onClick={goToListings}
-              >
-                Save Draft
-              </Button>
             </div>
 
             <Card className="add-listing-tip-card">

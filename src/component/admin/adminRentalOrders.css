@@ -806,3 +806,66 @@
   background: var(--admin-error-container);
   color: var(--admin-on-error-container);
 }
+
+.admin-rental-timeline {
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--admin-outline-variant);
+}
+
+.admin-rental-timeline h4 {
+  margin: 0 0 1rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--admin-on-surface-variant);
+}
+
+.admin-rental-timeline-list {
+  position: relative;
+  padding-left: 1.5rem;
+}
+
+.admin-rental-timeline-list::before {
+  content: "";
+  position: absolute;
+  top: 0.5rem;
+  bottom: 0.5rem;
+  left: 0.4375rem;
+  width: 2px;
+  background: var(--admin-outline-variant);
+}
+
+.admin-rental-timeline-item {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.admin-rental-timeline-item:last-child {
+  margin-bottom: 0;
+}
+
+.admin-rental-timeline-dot {
+  position: absolute;
+  left: -1.5rem;
+  top: 0.25rem;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 9999px;
+  background: var(--admin-outline);
+}
+
+.admin-rental-timeline-dot--active {
+  background: var(--admin-primary);
+}
+
+.admin-rental-timeline-item p {
+  margin: 0 0 0.25rem;
+  font-weight: 600;
+}
+
+.admin-rental-timeline-item span {
+  font-size: 0.8125rem;
+  color: var(--admin-on-surface-variant);
+}
