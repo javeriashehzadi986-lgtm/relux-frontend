@@ -583,6 +583,32 @@
   font-size: 1rem;
 }
 
+.seller-chat-safety-banner {
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.75rem 1.25rem;
+  background: #fff8e8;
+  border-bottom: 1px solid rgba(212, 167, 44, 0.35);
+  color: #5c4a1a;
+}
+
+.seller-chat-safety-banner .material-symbols-outlined {
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+  font-size: 1.125rem;
+  color: #8b6914;
+}
+
+.seller-chat-safety-banner p {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  font-weight: 500;
+}
+
 .seller-chat-messages {
   flex: 1;
   min-height: 0;
@@ -835,10 +861,10 @@
 .seller-chat-protection {
   margin: 0.625rem 0 0;
   text-align: center;
-  font-size: 0.625rem;
+  font-size: 0.6875rem;
   color: #787b7a;
-  opacity: 0.6;
-  line-height: 1.3;
+  opacity: 0.85;
+  line-height: 1.4;
 }
 
 .seller-chat-attach-error {
@@ -1038,6 +1064,14 @@
   .seller-chat-notice {
     margin: 0 0.75rem;
     font-size: 0.75rem;
+  }
+
+  .seller-chat-safety-banner {
+    padding: 0.65rem 0.875rem;
+  }
+
+  .seller-chat-safety-banner p {
+    font-size: 0.6875rem;
   }
 
   .seller-chat-menu {

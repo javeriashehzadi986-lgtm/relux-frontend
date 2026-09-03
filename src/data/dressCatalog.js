@@ -113,7 +113,7 @@ const enrichResaleDress = (dress) => {
     currentBidFormatted: dress.currentBidFormatted ?? formatRs(currentBid),
     minimumNextBidFormatted: dress.minimumNextBidFormatted ?? formatRs(minimumNextBid),
     priceFormatted: dress.priceFormatted ?? formatRs(price),
-    deliveryCharges: dress.deliveryCharges ?? 1500,
+    deliveryCharges: dress.deliveryCharges ?? 0,
     ...applyListingSpecs(dress),
   };
 };

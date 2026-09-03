@@ -70,7 +70,7 @@ const faqs = [
   {
     question: "How does the circular rental model work?",
     answer:
-      "Relux Hub allows you to rent designer pieces for 4, 8, or 12 days. Each item is professionally sanitized and inspected before and after every rental to ensure the highest quality. Simply choose your dates, enjoy the item, and return it using our pre-paid sustainable packaging.",
+      "Relux Hub allows you to rent designer pieces for the number of days you choose. Each item is professionally sanitized and inspected before and after every rental to ensure the highest quality. Simply choose your dates, enjoy the item, and return it using our pre-paid sustainable packaging.",
   },
   {
     question: "What if I accidentally damage a rental item?",

@@ -153,11 +153,10 @@ const FinalizePurchase = () => {
     return <Navigate to={`/dress/${id}`} replace />;
   }
 
-  const deliveryCharges = dress.deliveryCharges ?? 1500;
   const winningBid = dress.currentBid ?? dress.startingBid ?? dress.salePrice ?? dress.price;
   const originalRetail =
     dress.originalRetailPrice ?? dress.estimatedValue ?? dress.salePrice ?? dress.price;
-  const totalAmount = winningBid + deliveryCharges;
+  const totalAmount = winningBid;
   const summaryImage = dress.image ?? dress.mainImage ?? dress.gallery?.[0];
 
   const resolvedCity =
@@ -388,19 +387,14 @@ const FinalizePurchase = () => {
                   <span>Your winning bid</span>
                   <span>{formatPkr(winningBid)}</span>
                 </div>
-                <div className="finalize-purchase-summary-row">
-                  <span>Delivery charges (Pakistan)</span>
-                  <span>{formatPkr(deliveryCharges)}</span>
-                </div>
                 <div className="finalize-purchase-summary-total">
                   <span>Total to pay</span>
                   <span>{formatPkr(totalAmount)}</span>
                 </div>
               </div>
               <p className="finalize-purchase-breakdown-note">
-                You pay <strong>{formatPkr(winningBid)}</strong> for the item (your winning bid)
-                plus <strong>{formatPkr(deliveryCharges)}</strong> delivery.
-                Stripe will show both lines before you confirm.
+                You pay <strong>{formatPkr(winningBid)}</strong> for the item (your winning bid).
+                Stripe will show this amount before you confirm.
               </p>
             </div>
           </div>

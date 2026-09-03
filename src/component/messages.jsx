@@ -585,6 +585,17 @@ const MessagesContent = () => {
                 </div>
               ) : null}
 
+              <div className="seller-chat-safety-banner" role="note">
+                <span className="material-symbols-outlined" aria-hidden="true">
+                  gpp_maybe
+                </span>
+                <p>
+                  Keep deals and payments inside Relux Hub. If you contact each other
+                  outside this chat or complete a deal off the platform, Relux Hub is
+                  not responsible for any fraud, loss, or dispute.
+                </p>
+              </div>
+
               <div className="seller-chat-messages custom-scrollbar">
                 <div className="seller-chat-date-separator">
                   <span>{thread.dateLabel}</span>
@@ -678,9 +689,8 @@ const MessagesContent = () => {
                   </p>
                 ) : null}
                 <p className="seller-chat-protection">
-                  {isSeller
-                    ? "Keep all payments and agreements inside Relux Hub for your protection."
-                    : "All payments are secured by Relux Hub Concierge Protection."}
+                  Off-platform deals (WhatsApp, calls, outside payment) are at your own
+                  risk. Relux Hub is not liable for fraud or loss outside the system.
                 </p>
               </footer>
             </>

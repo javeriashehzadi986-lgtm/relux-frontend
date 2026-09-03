@@ -24,8 +24,9 @@ import { SellerReviewsSection } from "./sellerReviewsSection";
 import "./dressDetails.css";
 import "./rentalDressDetails.css";
 
-const RENTAL_DAY_OPTIONS = [4, 8, 12];
-const DEFAULT_RENTAL_DAYS = RENTAL_DAY_OPTIONS[0];
+const MIN_RENTAL_DAYS = 1;
+const MAX_RENTAL_DAYS = 60;
+const DEFAULT_RENTAL_DAYS = 4;
 
 const toInputDate = (date) => date.toISOString().split("T")[0];
 
@@ -35,6 +36,20 @@ const getEndDateFromStartAndDays = (start, days) => {
   const endDate = new Date(startDate);
   endDate.setDate(endDate.getDate() + days - 1);
   return toInputDate(endDate);
+};
+
+const getDaysFromDateRange = (start, end) => {
+  if (!start || !end) return DEFAULT_RENTAL_DAYS;
+  const startDate = new Date(`${start}T12:00:00`);
+  const endDate = new Date(`${end}T12:00:00`);
+  const diff = Math.round((endDate - startDate) / (1000 * 60 * 60 * 24));
+  return Math.max(MIN_RENTAL_DAYS, diff + 1);
+};
+
+const clampRentalDays = (value) => {
+  const parsed = Number.parseInt(String(value), 10);
+  if (!Number.isFinite(parsed)) return DEFAULT_RENTAL_DAYS;
+  return Math.min(MAX_RENTAL_DAYS, Math.max(MIN_RENTAL_DAYS, parsed));
 };
 
 const getDefaultDates = (rentalDays = DEFAULT_RENTAL_DAYS) => {
@@ -98,7 +113,20 @@ const RentalDressDetails = ({ dress }) => {
     setRentEnd(getEndDateFromStartAndDays(value, selectedRentalDays));
   };
 
-  const handleRentalDaysChange = (days) => {
+  const handleRentalDaysChange = (rawValue) => {
+    const days = clampRentalDays(rawValue);
+    setSelectedRentalDays(days);
+    setRentEnd(getEndDateFromStartAndDays(rentStart, days));
+  };
+
+  const handleRentEndChange = (value) => {
+    if (!value) return;
+    if (rentStart && value < rentStart) {
+      setRequestError("Rent end date must be on or after the start date.");
+      return;
+    }
+    setRequestError("");
+    const days = clampRentalDays(getDaysFromDateRange(rentStart, value));
     setSelectedRentalDays(days);
     setRentEnd(getEndDateFromStartAndDays(rentStart, days));
   };
@@ -127,12 +155,20 @@ const RentalDressDetails = ({ dress }) => {
     setRequestError("");
     setSubmitting(true);
     try {
+      const days = clampRentalDays(selectedRentalDays);
+      if (days !== selectedRentalDays) {
+        setSelectedRentalDays(days);
+        setRentEnd(getEndDateFromStartAndDays(rentStart, days));
+      }
+      if (!rentStart || !rentEnd) {
+        throw new Error("Please choose rent start and end dates");
+      }
       await requestRental({
         dressId: dress.id,
         size: selectedSize,
         rentStart,
-        rentEnd,
-        rentalDays,
+        rentEnd: getEndDateFromStartAndDays(rentStart, days),
+        rentalDays: days,
         sellerId: dress.sellerId,
         customerName: user.name,
       });
@@ -257,28 +293,37 @@ const RentalDressDetails = ({ dress }) => {
                   onChange={(e) => handleRentStartChange(e.target.value)}
                 />
               </div>
-              <div className="rental-details-date-field rental-details-date-field--computed">
-                <span className="rental-details-date-field-label">Rent End</span>
-                <p className="rental-details-date-value">{formatDisplayDate(rentEnd)}</p>
+              <div className="rental-details-date-field">
+                <label htmlFor="rent-end">Rent End</label>
+                <input
+                  id="rent-end"
+                  type="date"
+                  value={rentEnd}
+                  min={rentStart || minRentStart}
+                  onChange={(e) => handleRentEndChange(e.target.value)}
+                />
               </div>
             </div>
 
             <div className="rental-details-days">
-              <p className="rental-details-days-label">How many days?</p>
-              <div className="rental-details-days-options" role="group" aria-label="Rental duration">
-                {RENTAL_DAY_OPTIONS.map((days) => (
-                  <button
-                    key={days}
-                    type="button"
-                    className={`rental-details-days-option ${
-                      selectedRentalDays === days ? "rental-details-days-option--active" : ""
-                    }`}
-                    aria-pressed={selectedRentalDays === days}
-                    onClick={() => handleRentalDaysChange(days)}
-                  >
-                    {days} days
-                  </button>
-                ))}
+              <label className="rental-details-days-label" htmlFor="rental-days">
+                How many days?
+              </label>
+              <div className="rental-details-days-input-row">
+                <input
+                  id="rental-days"
+                  type="number"
+                  className="rental-details-days-input"
+                  min={MIN_RENTAL_DAYS}
+                  max={MAX_RENTAL_DAYS}
+                  step={1}
+                  value={selectedRentalDays}
+                  onChange={(e) => handleRentalDaysChange(e.target.value)}
+                />
+                <span className="rental-details-days-hint">
+                  Choose {MIN_RENTAL_DAYS}–{MAX_RENTAL_DAYS} days (ends{" "}
+                  {formatDisplayDate(rentEnd)})
+                </span>
               </div>
             </div>
 
