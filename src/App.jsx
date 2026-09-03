@@ -86,6 +86,14 @@ function App() {
 
   const isAdminPage = location.pathname.startsWith("/admin");
 
+  const isInfoPage = [
+    "/sustainability",
+    "/terms",
+    "/privacy",
+    "/contactUs",
+    "/help",
+  ].includes(location.pathname);
+
   const showMobileProfileButton = !isAuthPage && !isAdminPage && !isMessagesPage;
 
   const mainClass = [
@@ -100,9 +108,13 @@ function App() {
 
   return (
     <div
-      className={`app-container${
-        isMessagesPage ? " app-container--messages" : ""
-      }`}
+      className={[
+        "app-container",
+        isMessagesPage ? "app-container--messages" : "",
+        isInfoPage ? "app-container--info-page" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
     >
       {!hideNavbar && !isAdminPage && <Navbar />}
 

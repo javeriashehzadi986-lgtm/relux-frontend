@@ -220,11 +220,11 @@
 
 @media (min-width: 1024px) {
   body.dashboard-sidebar-closed .profile-sidebar {
-    display: flex !important;
+    display: none !important;
   }
 
   body.dashboard-sidebar-closed .profile-main {
-    margin-left: 18rem !important;
+    margin-left: 0 !important;
   }
 }
 

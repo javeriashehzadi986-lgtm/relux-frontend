@@ -110,7 +110,7 @@ const Login = () => {
         <div className="login-visual-copy">
           <h1>Welcome Back</h1>
           <p>
-            Rent your favorite dresses <strong>بسهولة</strong> and look stunning
+            Rent your favorite dresses with ease and look stunning
           </p>
         </div>
       </section>

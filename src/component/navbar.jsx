@@ -88,31 +88,28 @@ const Navbar = () => {
   };
 
   const handleMenuClick = () => {
+    // Mobile: open navbar pages (Home, Categories, About…)
+    if (window.matchMedia("(max-width: 900px)").matches) {
+      setMobileNavOpen((open) => !open);
+      return;
+    }
+
+    // Laptop/desktop dashboard: toggle sidebar
     if (onDashboard && isAuthenticated) {
-      if (!window.matchMedia("(min-width: 1024px)").matches) {
-        toggleDashboardSidebar();
-      }
-      return;
+      toggleDashboardSidebar();
     }
-
-    if (!window.matchMedia("(max-width: 900px)").matches) {
-      return;
-    }
-
-    setMobileNavOpen((open) => !open);
   };
 
-  const menuLabel =
-    onDashboard && isAuthenticated
-      ? "Toggle dashboard menu"
-      : mobileNavOpen
-        ? "Close menu"
-        : "Open menu";
-
-  const showMobileDrawer = !onDashboard || !isAuthenticated;
+  const menuLabel = mobileNavOpen
+    ? "Close menu"
+    : onDashboard && isAuthenticated
+      ? "Open menu"
+      : "Open menu";
 
   return (
-    <nav className="navbar">
+    <nav
+      className={`navbar${onDashboard && isAuthenticated ? " navbar--on-dashboard" : ""}`}
+    >
       <div className="navbar-inner">
         <div className="navbar-start">
           <Button
@@ -121,12 +118,12 @@ const Navbar = () => {
             size="icon"
             className={`navbar-menu-btn ${mobileNavOpen ? "navbar-menu-btn--active" : ""}`}
             aria-label={menuLabel}
-            aria-expanded={showMobileDrawer ? mobileNavOpen : undefined}
+            aria-expanded={mobileNavOpen}
             onClick={handleMenuClick}
           >
-            {showMobileDrawer && mobileNavOpen ? <X size={22} /> : <Menu size={22} />}
+            {mobileNavOpen ? <X size={22} /> : <Menu size={22} />}
           </Button>
-          <Link to="/home" className="logo">
+          <Link to="/home" className="logo" onClick={() => setMobileNavOpen(false)}>
             Relux Hub
           </Link>
         </div>
@@ -193,43 +190,39 @@ const Navbar = () => {
         </div>
       </div>
 
-      {showMobileDrawer ? (
-        <>
-          <button
-            type="button"
-            className={`navbar-mobile-overlay ${mobileNavOpen ? "navbar-mobile-overlay--open" : ""}`}
-            aria-label="Close menu"
-            onClick={() => setMobileNavOpen(false)}
-          />
-          <div
-            className={`navbar-mobile-drawer ${mobileNavOpen ? "navbar-mobile-drawer--open" : ""}`}
-            aria-hidden={!mobileNavOpen}
-          >
-            <ul className="navbar-mobile-links">
-              {NAV_ITEMS.map((item) => (
-                <li key={item.to}>
-                  <Link to={item.to} onClick={() => setMobileNavOpen(false)}>
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-            <Link
-              to={dashboardPath}
-              className="navbar-mobile-cta"
-              onClick={(event) => {
-                if (isGuest) {
-                  event.preventDefault();
-                  goToSignup(location.pathname);
-                }
-                setMobileNavOpen(false);
-              }}
-            >
-              {dashboardLabel}
-            </Link>
-          </div>
-        </>
-      ) : null}
+      <button
+        type="button"
+        className={`navbar-mobile-overlay ${mobileNavOpen ? "navbar-mobile-overlay--open" : ""}`}
+        aria-label="Close menu"
+        onClick={() => setMobileNavOpen(false)}
+      />
+      <div
+        className={`navbar-mobile-drawer ${mobileNavOpen ? "navbar-mobile-drawer--open" : ""}`}
+        aria-hidden={!mobileNavOpen}
+      >
+        <ul className="navbar-mobile-links">
+          {NAV_ITEMS.map((item) => (
+            <li key={item.to}>
+              <Link to={item.to} onClick={() => setMobileNavOpen(false)}>
+                {item.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+        <Link
+          to={dashboardPath}
+          className="navbar-mobile-cta"
+          onClick={(event) => {
+            if (isGuest) {
+              event.preventDefault();
+              goToSignup(location.pathname);
+            }
+            setMobileNavOpen(false);
+          }}
+        >
+          {dashboardLabel}
+        </Link>
+      </div>
     </nav>
   );
 };

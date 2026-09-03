@@ -71,14 +71,44 @@ body,
 
 @media (max-width: 900px) {
   .main-content {
-    padding-bottom: 5rem;
+    padding-bottom: 0;
+  }
+
+  /* Info/footer pages (Terms, Privacy, etc.): no empty gap above site footer */
+  .app-container--info-page {
+    background: #ffffff;
+  }
+
+  .app-container--info-page .main-content--full-page {
+    flex: 0 0 auto !important;
+    min-height: 0 !important;
+  }
+
+  .app-container--info-page .terms-page,
+  .app-container--info-page .privacy-page,
+  .app-container--info-page .help-page,
+  .app-container--info-page .contact-page,
+  .app-container--info-page .sustainability-page {
+    min-height: 0 !important;
+    height: auto !important;
+  }
+
+  .app-container--info-page .footer {
+    margin-top: 0;
   }
 }
 
 @media (max-width: 768px) {
   .main-content {
     padding-top: 4.75rem;
-    padding-bottom: 5rem;
+    padding-bottom: 0;
+  }
+
+  /* Login/signup + full pages: no navbar, so no top gap */
+  .main-content--auth,
+  .main-content--full-page,
+  .main-content--admin {
+    padding-top: 0;
   }
 
   .main-content--messages {
@@ -90,7 +120,13 @@ body,
 @media (max-width: 480px) {
   .main-content {
     padding-top: 4.5rem;
-    padding-bottom: 4.5rem;
+    padding-bottom: 0;
+  }
+
+  .main-content--auth,
+  .main-content--full-page,
+  .main-content--admin {
+    padding-top: 0;
   }
 
   .main-content--messages {

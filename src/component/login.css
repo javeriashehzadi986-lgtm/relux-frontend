@@ -284,17 +284,47 @@
     overflow-y: auto;
   }
 
+  /* Full-bleed image on mobile — cover, no letterbox bars */
+  .login-visual-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    object-position: center 20%;
+  }
+
   .login-visual {
-    height: 12rem;
+    height: min(42vh, 22rem);
+    min-height: 14rem;
+    max-height: none;
     flex-shrink: 0;
   }
 
+  .login-visual-gradient {
+    background: linear-gradient(
+      to top,
+      rgba(79, 58, 60, 0.55) 0%,
+      rgba(79, 58, 60, 0.15) 45%,
+      transparent 70%
+    );
+  }
+
   .login-visual-copy {
-    padding: 1.5rem;
+    padding: 1.25rem 1.25rem 1.5rem;
+    justify-content: flex-end;
+    max-width: none;
   }
 
   .login-visual-copy h1 {
     font-size: clamp(1.75rem, 7vw, 2.5rem);
+    margin-bottom: 0.5rem;
+  }
+
+  .login-visual-copy p {
+    font-size: 1rem;
+    line-height: 1.45;
   }
 
   .login-panel {

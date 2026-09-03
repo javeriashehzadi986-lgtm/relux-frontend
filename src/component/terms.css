@@ -52,6 +52,26 @@
   color: #235c51;
 }
 
+@media (max-width: 900px) {
+  .terms-page {
+    min-height: 0 !important;
+    /* Offset for fixed Relux Hub header (home/dashboard style) */
+    padding-top: 3.5rem;
+  }
+
+  .terms-brand-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    padding: 0.875rem 1rem;
+    padding-top: calc(0.875rem + env(safe-area-inset-top, 0px));
+    background-color: #ffffff;
+    box-shadow: 0 1px 0 #eae8e7;
+  }
+}
+
 /* Main page heading */
 .terms-page-title {
   font-size: 32px;

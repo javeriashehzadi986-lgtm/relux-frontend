@@ -6,27 +6,20 @@ function isDesktopDashboard() {
 }
 
 export function isDashboardSidebarOpen() {
-  if (isDesktopDashboard()) {
-    return true;
-  }
-
   const stored = sessionStorage.getItem(STORAGE_KEY);
   if (stored === "true") return true;
   if (stored === "false") return false;
+  // Default: open on desktop, open on mobile too (tabs stay either way)
   return true;
 }
 
 export function setDashboardSidebarOpen(isOpen) {
-  const effectiveOpen = isDesktopDashboard() ? true : isOpen;
-  sessionStorage.setItem(STORAGE_KEY, String(effectiveOpen));
-  document.body.classList.toggle("dashboard-sidebar-closed", !effectiveOpen);
+  sessionStorage.setItem(STORAGE_KEY, String(isOpen));
+  document.body.classList.toggle("dashboard-sidebar-closed", !isOpen);
   window.dispatchEvent(new Event(EVENT_NAME));
 }
 
 export function toggleDashboardSidebar() {
-  if (isDesktopDashboard()) {
-    return;
-  }
   setDashboardSidebarOpen(!isDashboardSidebarOpen());
 }
 
