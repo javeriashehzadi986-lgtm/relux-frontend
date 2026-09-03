@@ -409,6 +409,12 @@
   color: var(--admin-on-surface-variant);
 }
 
+.admin-verify-notes--warn {
+  background: #fff4e5;
+  color: #7a4b00;
+  border: 1px solid #f0d5a8;
+}
+
 .admin-verify-actions {
   display: flex;
   flex-wrap: wrap;

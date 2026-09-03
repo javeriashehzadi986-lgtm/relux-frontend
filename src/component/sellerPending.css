@@ -91,6 +91,44 @@
   color: #9a5b00;
 }
 
+.seller-pending-status-badge--stripe {
+  background: #e8f1ef;
+  color: #24574d;
+}
+
+.seller-pending-stripe-box {
+  margin: 0;
+  padding: 1rem 1.125rem;
+  border-radius: 10px;
+  background: #f3f8f6;
+  border: 1px solid #c5ddd6;
+  color: #4a4036;
+  line-height: 1.55;
+}
+
+.seller-pending-stripe-box--ok {
+  background: #eef7f3;
+  border-color: #b7d9cb;
+}
+
+.seller-pending-stripe-box .seller-pending-info-heading {
+  color: #24574d;
+}
+
+.seller-pending-stripe-box p {
+  margin: 0;
+}
+
+.seller-pending-stripe-error {
+  margin-top: 0.625rem !important;
+  color: #b42318;
+  font-size: 0.92rem;
+}
+
+.seller-pending-stripe-btn {
+  margin-top: 0.875rem;
+}
+
 .seller-pending-info-box {
   margin: 0;
   padding: 1rem 1.125rem;

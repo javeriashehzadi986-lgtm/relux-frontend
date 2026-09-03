@@ -21,10 +21,18 @@ import { uploadVerificationImage } from "@/utils/imageUpload";
 import "./sellerVerification.css";
 
 const verificationSteps = [
-  "Identity verification is mandatory before you can create your first listing.",
-  "Our team typically reviews and approves applications within 24 to 48 business hours.",
-  "You will receive an email and a push notification as soon as your account is approved.",
+  "Identity verification (CNIC) and Stripe Connect are both required before you can sell.",
+  "After you submit, you will finish Stripe payout setup with your bank and identity details.",
+  "Our team typically reviews applications within 24 to 48 business hours once Stripe is connected.",
 ];
+
+async function startStripeOnboarding(returnTo = "pending") {
+  const data = await api.createSellerStripeConnect({ returnTo });
+  if (!data.url) {
+    throw new Error("Stripe Connect URL was not returned.");
+  }
+  window.location.href = data.url;
+}
 
 function FileUploadZone({ id, label, file, onFileChange, error }) {
   return (
@@ -92,15 +100,9 @@ function SellerVerification() {
     setStripeError("");
     setStripeConnecting(true);
     try {
-      const data = await api.createSellerStripeConnect();
-      if (data.url) {
-        window.location.href = data.url;
-        return;
-      }
-      setStripeError("Stripe Connect URL was not returned.");
+      await startStripeOnboarding("pending");
     } catch (err) {
       setStripeError(err.message || "Could not start Stripe Connect");
-    } finally {
       setStripeConnecting(false);
     }
   };
@@ -237,7 +239,16 @@ function SellerVerification() {
         return;
       }
 
-      navigate("/seller-pending", { replace: true });
+      try {
+        await startStripeOnboarding("pending");
+        return;
+      } catch (stripeErr) {
+        setSubmitError(
+          stripeErr.message ||
+            "Documents were saved, but Stripe Connect could not be started. Continue from the pending page.",
+        );
+        navigate("/seller-pending", { replace: true });
+      }
     } catch (error) {
       setSubmitError(error.message || "Verification submission failed");
     } finally {
@@ -382,7 +393,7 @@ function SellerVerification() {
           <p className="seller-desc">
             {isLoggedInRejectedSeller
               ? "Update your details and CNIC documents below to submit a new seller application."
-              : "Complete your information below to start selling and renting clothes on Relux Hub. Join our community of conscious fashion enthusiasts."}
+              : "Complete your information, CNIC, and Stripe payout setup to start selling and renting clothes on Relux Hub."}
           </p>
           {isLoggedInRejectedSeller ? (
             <div className="seller-auth-notice seller-auth-notice--rejected">
@@ -398,7 +409,7 @@ function SellerVerification() {
             <div className="seller-auth-notice seller-auth-notice--buyer">
               <p>
                 You are logged in as buyer <strong>{user.email}</strong>. Complete phone, city,
-                return address, and CNIC below to apply as a seller.
+                return address, CNIC, and Stripe Connect below to apply as a seller.
               </p>
             </div>
           ) : null}
@@ -524,12 +535,12 @@ function SellerVerification() {
                   <span className="seller-card-icon">
                     <Wallet size={22} strokeWidth={1.75} />
                   </span>
-                  <h2 className="seller-card-title">Stripe Account Setup</h2>
+                  <h2 className="seller-card-title">Stripe Account Setup (Required)</h2>
                 </div>
                 <p className="seller-stripe-desc">
                   {stripeConnected
-                    ? "Your Stripe Connect account is linked."
-                    : "Connect Stripe after you become a seller to enable payouts for sales and rentals."}
+                    ? "Your Stripe Connect account is linked. You can manage it anytime."
+                    : "Stripe is required with your CNIC application. After you submit this form, you will enter bank and identity details on Stripe so you can receive payouts."}
                 </p>
                 {stripeError ? (
                   <p className="seller-stripe-desc" role="alert" style={{ color: "#b42318" }}>
@@ -537,20 +548,24 @@ function SellerVerification() {
                   </p>
                 ) : null}
               </div>
-              <Button
-                type="button"
-                variant="outline"
-                className="seller-stripe-btn"
-                onClick={handleConnectStripe}
-                disabled={stripeConnecting || user?.role !== "seller"}
-              >
-                <Wallet size={18} strokeWidth={1.75} />
-                {stripeConnecting
-                  ? "Opening Stripe…"
-                  : stripeConnected
-                    ? "Manage Stripe"
-                    : "Connect Stripe Account"}
-              </Button>
+              {user?.role === "seller" ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="seller-stripe-btn"
+                  onClick={handleConnectStripe}
+                  disabled={stripeConnecting}
+                >
+                  <Wallet size={18} strokeWidth={1.75} />
+                  {stripeConnecting
+                    ? "Opening Stripe…"
+                    : stripeConnected
+                      ? "Manage Stripe"
+                      : "Connect Stripe Account"}
+                </Button>
+              ) : (
+                <p className="seller-stripe-badge">Opens after submit</p>
+              )}
             </div>
           </Card>
 
@@ -580,7 +595,11 @@ function SellerVerification() {
               className="seller-submit-btn"
               disabled={submitting}
             >
-              {submitting ? "Submitting..." : isLoggedInRejectedSeller ? "Submit New Application" : "Submit Verification Request"}
+              {submitting
+                ? "Submitting..."
+                : isLoggedInRejectedSeller
+                  ? "Submit & Connect Stripe"
+                  : "Submit & Connect Stripe"}
               <Send size={18} strokeWidth={1.75} />
             </Button>
             <p className="seller-terms-note">

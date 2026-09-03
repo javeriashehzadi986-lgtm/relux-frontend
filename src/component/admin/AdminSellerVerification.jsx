@@ -326,14 +326,25 @@ const AdminSellerVerification = () => {
                     <strong>{formatAppliedDate(selectedApplication.appliedAt)}</strong>
                   </div>
                   <div className="admin-verify-detail-field">
-                    <span>Bank</span>
-                    <strong>{selectedApplication.bankName}</strong>
+                    <span>Stripe Connect</span>
+                    <strong>
+                      {selectedApplication.stripeConnected
+                        ? "Connected"
+                        : "Not connected"}
+                    </strong>
                   </div>
                   <div className="admin-verify-detail-field">
                     <span>Account Title</span>
                     <strong>{selectedApplication.accountTitle}</strong>
                   </div>
                 </div>
+
+                {!selectedApplication.stripeConnected ? (
+                  <p className="admin-verify-notes admin-verify-notes--warn">
+                    <strong>Stripe required:</strong> This seller has not finished Stripe Connect.
+                    Approve is blocked until they complete payout setup.
+                  </p>
+                ) : null}
 
                 <h3 className="admin-verify-docs-title">Identity Documents</h3>
                 <div className="admin-verify-docs-grid">
@@ -356,7 +367,12 @@ const AdminSellerVerification = () => {
                     type="button"
                     className="admin-verify-btn-approve"
                     onClick={handleApprove}
-                    disabled={actionLoading}
+                    disabled={actionLoading || !selectedApplication.stripeConnected}
+                    title={
+                      selectedApplication.stripeConnected
+                        ? undefined
+                        : "Seller must connect Stripe before approval"
+                    }
                   >
                     {actionLoading ? "Processing..." : "Approve Seller"}
                   </button>
@@ -403,7 +419,7 @@ const AdminSellerVerification = () => {
         description="The seller will see this message on their pending application page and can upload updated documents."
         confirmLabel="Send Request"
         reasonLabel="Information needed"
-        reasonPlaceholder="e.g. Please upload a clearer CNIC front image and add your bank account details."
+        reasonPlaceholder="e.g. Please upload a clearer CNIC front image and finish Stripe Connect."
         loading={actionLoading}
         error={infoError}
         reason={infoReason}

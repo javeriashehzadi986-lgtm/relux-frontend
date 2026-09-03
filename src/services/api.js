@@ -449,9 +449,10 @@ export const api = {
   getPaymentSession: (sessionId) =>
     request(`/payments/session/${encodeURIComponent(sessionId)}`),
 
-  createSellerStripeConnect: () =>
+  createSellerStripeConnect: (body = {}) =>
     request("/seller/stripe/connect", {
       method: "POST",
+      body: JSON.stringify(body),
     }),
 
   getSellerStripeStatus: () => request("/seller/stripe/status"),
