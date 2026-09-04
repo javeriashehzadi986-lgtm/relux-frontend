@@ -85,7 +85,7 @@ const MODAL_CONFIG = {
     iconClass: "admin-reports-modal-icon--resolve",
     title: "Resolve Dispute / Request?",
     description:
-      "Your decision will be shown to the buyer and (if linked) the seller in Support Center.",
+      "Your typed message will be shown to the buyer and (if linked) the seller. Write your own decision first.",
     confirmLabel: "Resolve",
     confirmClass: "admin-reports-modal-confirm--resolve",
   },
@@ -94,7 +94,7 @@ const MODAL_CONFIG = {
     iconClass: "admin-reports-modal-icon--reject",
     title: "Dismiss Request?",
     description:
-      "The request will be closed. The user will see your reply (or a default dismiss message).",
+      "The request will be closed. Your typed message will be shown to the user — write it in the reply box first.",
     confirmLabel: "Dismiss",
     confirmClass: "admin-reports-modal-confirm--reject",
   },
@@ -103,7 +103,7 @@ const MODAL_CONFIG = {
     iconClass: "admin-reports-modal-icon--resolve",
     title: "Ask Seller for Response?",
     description:
-      "The seller will see this dispute in their Support Center and can submit their side of the story.",
+      "Your typed message will be sent to the seller. Write exactly what you want them to see.",
     confirmLabel: "Contact Seller",
     confirmClass: "admin-reports-modal-confirm--resolve",
   },
@@ -112,7 +112,7 @@ const MODAL_CONFIG = {
     iconClass: "admin-reports-modal-icon--resolve",
     title: "Ask Buyer for Response?",
     description:
-      "The buyer will see this message in their Support Center and can submit additional details.",
+      "Your typed message will be sent to the buyer. Write exactly what you want them to see.",
     confirmLabel: "Contact Buyer",
     confirmClass: "admin-reports-modal-confirm--resolve",
   },
@@ -121,7 +121,7 @@ const MODAL_CONFIG = {
     iconClass: "admin-reports-modal-icon--resolve",
     title: "Contact Buyer & Seller?",
     description:
-      "Both parties will be notified in Support Center. Escrow can be released after they both respond.",
+      "Your typed message will be sent to both parties. Write exactly what you want them to see.",
     confirmLabel: "Contact Both",
     confirmClass: "admin-reports-modal-confirm--resolve",
   },
@@ -337,6 +337,13 @@ const AdminSupportCenter = () => {
 
   const handleReleaseEscrow = async () => {
     if (!selectedReport?.orderId || !orderSettlement) return;
+    const decision = replyText.trim();
+    if (!decision) {
+      setActionError(
+        "Write your own message/decision in the reply box before releasing escrow.",
+      );
+      return;
+    }
     setReleasingEscrow(true);
     setActionError("");
     try {
@@ -344,15 +351,15 @@ const AdminSupportCenter = () => {
         await api.resolveAdminSaleEscrow(selectedReport.orderId, {
           sellerPayoutPkr: Number(adminSellerPayout) || 0,
           refundAmountPkr: Number(adminBuyerRefund) || 0,
-          decision: replyText.trim(),
-          adminSettlementNote: replyText.trim(),
+          decision,
+          adminSettlementNote: decision,
         });
       } else {
         await api.resolveAdminOrderSettlement(selectedReport.orderId, {
           rentalChargePkr: Number(adminRentalCharge) || 0,
           damageDeductionPkr: Number(adminDamageCharge) || 0,
-          decision: replyText.trim(),
-          adminSettlementNote: replyText.trim(),
+          decision,
+          adminSettlementNote: decision,
         });
       }
       await loadReports();
@@ -387,9 +394,17 @@ const AdminSupportCenter = () => {
     !escrowAlreadyReleased;
   const canContactParties = canContactDisputeParties(selectedReport);
   const waitingForSeller =
-    Boolean(selectedReport?.adminMessageToSeller) && !selectedReport?.sellerResponse;
+    Boolean(selectedReport?.adminMessageToSeller) &&
+    !(
+      selectedReport?.sellerResponses?.length > 0 ||
+      selectedReport?.sellerResponse
+    );
   const waitingForBuyer =
-    Boolean(selectedReport?.adminMessageToBuyer) && !selectedReport?.buyerResponse;
+    Boolean(selectedReport?.adminMessageToBuyer) &&
+    !(
+      selectedReport?.buyerResponses?.length > 0 ||
+      selectedReport?.buyerResponse
+    );
 
   const patchReport = async (body) => {
     if (!selectedReport) return;
@@ -422,60 +437,50 @@ const AdminSupportCenter = () => {
     if (!selectedReport || !activeModal) return;
 
     const trimmedReply = replyText.trim();
+    if (!trimmedReply) {
+      setActionError(
+        "Write your own message in the reply box first. Automatic messages are disabled.",
+      );
+      return;
+    }
 
     let body;
     if (activeModal === "askSeller") {
       body = {
         askSeller: true,
-        messageToSeller:
-          trimmedReply ||
-          "Please respond to this buyer complaint with your side of the story.",
-        adminReply:
-          "We have contacted the seller and are waiting for their response.",
+        messageToSeller: trimmedReply,
+        adminReply: trimmedReply,
       };
     } else if (activeModal === "askBuyer") {
       body = {
         askBuyer: true,
-        messageToBuyer:
-          trimmedReply ||
-          "Please provide any additional details about this dispute so we can resolve it fairly.",
-        adminReply:
-          "We have contacted the buyer and are waiting for their response.",
+        messageToBuyer: trimmedReply,
+        adminReply: trimmedReply,
       };
     } else if (activeModal === "askBoth") {
       body = {
         askBoth: true,
-        messageToSeller:
-          trimmedReply ||
-          "Please respond to this buyer complaint with your side of the story.",
-        messageToBuyer:
-          trimmedReply ||
-          "Please provide any additional details about this dispute so we can resolve it fairly.",
-        adminReply:
-          "We have contacted the buyer and seller and are waiting for their responses.",
+        messageToSeller: trimmedReply,
+        messageToBuyer: trimmedReply,
+        adminReply: trimmedReply,
       };
     } else if (activeModal === "resolve") {
       body = {
         status: "resolved",
-        decision:
-          trimmedReply ||
-          "Your request has been reviewed and marked as resolved.",
-        adminReply:
-          trimmedReply ||
-          "Your request has been reviewed and marked as resolved.",
+        decision: trimmedReply,
+        adminReply: trimmedReply,
       };
     } else {
       body = {
         status: "resolved",
-        decision:
-          trimmedReply || "Your request was reviewed and dismissed.",
-        adminReply:
-          trimmedReply || "Your request was reviewed and dismissed.",
+        decision: trimmedReply,
+        adminReply: trimmedReply,
         adminNote: "Dismissed by admin",
       };
     }
 
     try {
+      setActionError("");
       await patchReport(body);
       setActiveModal(null);
     } catch {
@@ -758,12 +763,20 @@ const AdminSupportCenter = () => {
                 </section>
               )}
 
-              {selectedReport.buyerResponse && (
+              {(selectedReport.buyerResponses?.length > 0 || selectedReport.buyerResponse) && (
                 <section>
-                  <h3>Buyer Response</h3>
-                  <blockquote className="admin-reports-description admin-reports-description--buyer">
-                    &ldquo;{selectedReport.buyerResponse}&rdquo;
-                  </blockquote>
+                  <h3>Buyer Responses</h3>
+                  {(selectedReport.buyerResponses?.length
+                    ? selectedReport.buyerResponses
+                    : [{ text: selectedReport.buyerResponse }]
+                  ).map((entry, index) => (
+                    <blockquote
+                      key={`buyer-resp-${index}`}
+                      className="admin-reports-description admin-reports-description--buyer"
+                    >
+                      &ldquo;{entry.text}&rdquo;
+                    </blockquote>
+                  ))}
                 </section>
               )}
 
@@ -776,12 +789,20 @@ const AdminSupportCenter = () => {
                 </section>
               )}
 
-              {selectedReport.sellerResponse && (
+              {(selectedReport.sellerResponses?.length > 0 || selectedReport.sellerResponse) && (
                 <section>
-                  <h3>Seller Response</h3>
-                  <blockquote className="admin-reports-description admin-reports-description--seller">
-                    &ldquo;{selectedReport.sellerResponse}&rdquo;
-                  </blockquote>
+                  <h3>Seller Responses</h3>
+                  {(selectedReport.sellerResponses?.length
+                    ? selectedReport.sellerResponses
+                    : [{ text: selectedReport.sellerResponse }]
+                  ).map((entry, index) => (
+                    <blockquote
+                      key={`seller-resp-${index}`}
+                      className="admin-reports-description admin-reports-description--seller"
+                    >
+                      &ldquo;{entry.text}&rdquo;
+                    </blockquote>
+                  ))}
                 </section>
               )}
 
@@ -952,8 +973,8 @@ const AdminSupportCenter = () => {
                 />
                 <p className="admin-reports-reply-hint">
                   {selectedReport.isDispute
-                    ? "Use “Contact Both Parties” to message buyer and seller. Escrow unlocks after both respond."
-                    : "This reply appears under View in the user’s Support Center."}
+                    ? "Type your own message above, then use Contact / Resolve. No automatic text is sent."
+                    : "Type your own reply — this is what the user will see. No automatic text is sent."}
                 </p>
               </section>
             </div>

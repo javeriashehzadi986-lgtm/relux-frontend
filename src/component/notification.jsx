@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   CheckCheck,
@@ -19,6 +19,7 @@ import "./notification.css";
 const FILTERS = [
   { id: "all", label: "All" },
   { id: "unread", label: "Unread" },
+  { id: "bids", label: "Bids" },
   { id: "orders", label: "Orders" },
   { id: "payments", label: "Payments" },
 ];
@@ -59,7 +60,6 @@ function NotificationBody({ message, highlight }) {
 const Notification = () => {
   const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState("all");
-  const didAutoMarkRef = useRef(false);
   const {
     notifications,
     loading,
@@ -67,15 +67,6 @@ const Notification = () => {
     refresh,
     markAllAsRead,
   } = useNotifications(activeFilter);
-
-  // Opening the list counts as "seen" — clear unread badge like other apps.
-  useEffect(() => {
-    if (loading || didAutoMarkRef.current) return;
-    didAutoMarkRef.current = true;
-    if (notifications.some((item) => item.unread)) {
-      markAllAsRead();
-    }
-  }, [loading, notifications, markAllAsRead]);
 
   const handleNotificationClick = async (item) => {
     navigate(`/notification/${item.id}`);

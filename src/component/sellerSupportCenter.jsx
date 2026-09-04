@@ -455,7 +455,9 @@ const SellerSupportCenter = ({ variant = "buyer" }) => {
                         {request.needsSellerResponse && (
                           <div className="support-center-seller-reply">
                             <p className="support-center-seller-reply-label">
-                              Admin asked for your response
+                              {request.sellerResponses?.length || request.sellerResponse
+                                ? "Send another message to admin"
+                                : "Admin asked for your response"}
                             </p>
                             <textarea
                               rows={3}
@@ -483,7 +485,7 @@ const SellerSupportCenter = ({ variant = "buyer" }) => {
                             >
                               {sellerReplyLoadingId === request.mongoId
                                 ? "Sending..."
-                                : "Send Response to Admin"}
+                                : "Send Message to Admin"}
                             </Button>
                           </div>
                         )}
@@ -491,7 +493,9 @@ const SellerSupportCenter = ({ variant = "buyer" }) => {
                         {request.needsBuyerResponse && (
                           <div className="support-center-seller-reply">
                             <p className="support-center-seller-reply-label">
-                              Admin asked for your response
+                              {request.buyerResponses?.length || request.buyerResponse
+                                ? "Send another message to admin"
+                                : "Admin asked for your response"}
                             </p>
                             <textarea
                               rows={3}
@@ -519,7 +523,7 @@ const SellerSupportCenter = ({ variant = "buyer" }) => {
                             >
                               {buyerReplyLoadingId === request.mongoId
                                 ? "Sending..."
-                                : "Send Response to Admin"}
+                                : "Send Message to Admin"}
                             </Button>
                           </div>
                         )}
