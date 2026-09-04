@@ -70,7 +70,36 @@ const getOrderActions = (order) => {
     return CANCELLED_ORDER_ACTIONS;
   }
 
-  return order.actions ?? [];
+  const actions = [...(order.actions ?? [])];
+  const received =
+    order.fulfillmentStatus === "delivered" || order.status === "rental-active";
+  const alreadyReturned =
+    order.fulfillmentStatus === "returned" || order.status === "returned";
+  const canMarkReturn =
+    order.type === "rental" &&
+    order.paymentStatus === "paid" &&
+    received &&
+    !alreadyReturned;
+
+  if (canMarkReturn && !actions.some((action) => action.id === "mark-returned")) {
+    actions.push({
+      id: "mark-returned",
+      label: "Mark as Returned",
+      variant: "primary",
+    });
+  }
+
+  // Only keep mark-returned when buyer has confirmed receipt
+  return actions
+    .filter((action) => {
+      if (action.id !== "mark-returned") return true;
+      return canMarkReturn;
+    })
+    .map((action) =>
+      action.id === "mark-returned"
+        ? { ...action, disabled: false, disabledReason: undefined }
+        : action,
+    );
 };
 
 const getOrderStatusKey = (order) => {
@@ -119,11 +148,10 @@ const ProfileMyOrders = () => {
   const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const { orders, loading, error, refreshOrders, cancelOrder, removeOrder, confirmReceived, markReturned, acceptSettlement, disputeSettlement, disputeSaleDelivery } =
+  const { orders, loading, error, refreshOrders, cancelOrder, removeOrder, confirmReceived, markReturned, disputeSaleDelivery } =
     useBuyerOrders();
   const [cancelTarget, setCancelTarget] = useState(null);
   const [disputeTarget, setDisputeTarget] = useState(null);
-  const [disputeKind, setDisputeKind] = useState("settlement");
   const [disputeReason, setDisputeReason] = useState("");
   const [submittingDispute, setSubmittingDispute] = useState(false);
   const [actionError, setActionError] = useState("");
@@ -192,10 +220,6 @@ const ProfileMyOrders = () => {
     }
 
     if (action.id === "mark-returned") {
-      if (action.disabled) {
-        setActionError(action.disabledReason || "Return is not available yet");
-        return;
-      }
       setActionError("");
       try {
         await markReturned(order.id);
@@ -205,25 +229,7 @@ const ProfileMyOrders = () => {
       return;
     }
 
-    if (action.id === "accept-settlement") {
-      setActionError("");
-      try {
-        await acceptSettlement(order.id);
-      } catch (err) {
-        setActionError(err.message || "Failed to accept settlement");
-      }
-      return;
-    }
-
-    if (action.id === "dispute-settlement") {
-      setDisputeKind("settlement");
-      setDisputeTarget(order);
-      setDisputeReason("");
-      return;
-    }
-
     if (action.id === "dispute-delivery") {
-      setDisputeKind("delivery");
       setDisputeTarget(order);
       setDisputeReason("");
       return;
@@ -247,21 +253,13 @@ const ProfileMyOrders = () => {
   const submitDispute = async () => {
     if (!disputeTarget?.id) return;
     if (!disputeReason.trim()) {
-      setActionError(
-        disputeKind === "delivery"
-          ? "Please describe the delivery issue"
-          : "Please explain why you are disputing this settlement",
-      );
+      setActionError("Please describe the delivery issue");
       return;
     }
     setSubmittingDispute(true);
     setActionError("");
     try {
-      if (disputeKind === "delivery") {
-        await disputeSaleDelivery(disputeTarget.id, { disputeReason: disputeReason.trim() });
-      } else {
-        await disputeSettlement(disputeTarget.id, { disputeReason: disputeReason.trim() });
-      }
+      await disputeSaleDelivery(disputeTarget.id, { disputeReason: disputeReason.trim() });
       setDisputeTarget(null);
     } catch (err) {
       setActionError(err.message || "Failed to submit dispute");
@@ -406,21 +404,6 @@ const ProfileMyOrders = () => {
                             </span>
                           </div>
                         ) : null}
-                        {order.escrowSettlementStatus === "proposed" ? (
-                          <div className="profile-order-settlement-box">
-                            <p>
-                              <strong>Settlement proposed:</strong> Rent{" "}
-                              {formatPkr(order.rentalChargePkr)}, damage{" "}
-                              {formatPkr(order.damageDeductionPkr)}, your refund{" "}
-                              {formatPkr(order.refundAmountPkr)}
-                            </p>
-                            {order.settlementNote ? (
-                              <p className="profile-order-settlement-note">
-                                Seller note: {order.settlementNote}
-                              </p>
-                            ) : null}
-                          </div>
-                        ) : null}
                         {order.refundAmountPkr > 0 &&
                         (order.escrowStatus === "released" ||
                           order.paymentStatus === "refunded") ? (
@@ -562,6 +545,10 @@ const ProfileMyOrders = () => {
                       const actionClass = `profile-order-action profile-order-action--${action.variant} ${
                         action.alignEnd ? "profile-order-action--end" : ""
                       }`;
+                      const releasesPayment =
+                        action.id === "confirm-received" && order.type === "purchase";
+                      const paymentReleaseNote =
+                        "Confirming receipt releases payment to the seller.";
 
                       if (action.link) {
                         const route = getOrderActionRoute(action.id, order);
@@ -582,18 +569,30 @@ const ProfileMyOrders = () => {
                       }
 
                       return (
-                        <Button
-                          key={action.id}
-                          type="button"
-                          variant="ghost"
-                          className={`${actionClass}${action.disabled ? " profile-order-action--disabled" : ""}`}
-                          disabled={Boolean(action.disabled)}
-                          title={action.disabled ? action.disabledReason : undefined}
-                          onClick={() => handleOrderAction(action, order)}
-                        >
-                          {ActionIcon && <ActionIcon size={16} aria-hidden="true" />}
-                          {action.label}
-                        </Button>
+                        <div key={action.id} className="profile-order-action-wrap">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            className={`${actionClass}${action.disabled ? " profile-order-action--disabled" : ""}`}
+                            disabled={Boolean(action.disabled)}
+                            title={
+                              action.disabled
+                                ? action.disabledReason
+                                : releasesPayment
+                                  ? paymentReleaseNote
+                                  : undefined
+                            }
+                            onClick={() => handleOrderAction(action, order)}
+                          >
+                            {ActionIcon && <ActionIcon size={16} aria-hidden="true" />}
+                            {action.label}
+                          </Button>
+                          {releasesPayment && !action.disabled ? (
+                            <p className="profile-order-payment-release-note">
+                              {paymentReleaseNote}
+                            </p>
+                          ) : null}
+                        </div>
                       );
                     })}
                   </div>
@@ -668,27 +667,22 @@ const ProfileMyOrders = () => {
         <DialogContent className="profile-logout-modal profile-orders-dispute-dialog" showCloseButton={false}>
           <DialogHeader className="profile-logout-modal-header">
             <DialogTitle className="profile-logout-modal-title">
-              {disputeKind === "delivery" ? "Report Delivery Issue" : "Dispute Settlement"}
+              Report Delivery Issue
             </DialogTitle>
             <DialogDescription className="profile-logout-modal-description">
-              {disputeKind === "delivery"
-                ? "Tell admin what went wrong (not received, wrong item, not as pictured, etc.). Payment stays in escrow until admin resolves it."
-                : "Explain why you disagree with the seller's proposed split. An admin will review and set the final escrow amounts."}
+              Tell admin what went wrong (not received, wrong item, not as pictured, etc.).
+              Payment stays in escrow until admin resolves it.
             </DialogDescription>
           </DialogHeader>
           <div className="profile-orders-dispute-body">
             <Label htmlFor="profile-orders-dispute-reason" className="profile-orders-dispute-label">
-              {disputeKind === "delivery" ? "Delivery issue details" : "Dispute details"}
+              Delivery issue details
             </Label>
             <Textarea
               id="profile-orders-dispute-reason"
               className="profile-orders-dispute-textarea"
               rows={4}
-              placeholder={
-                disputeKind === "delivery"
-                  ? "Describe the delivery problem..."
-                  : "Describe the issue with the proposed rent or damage charges..."
-              }
+              placeholder="Describe the delivery problem..."
               value={disputeReason}
               onChange={(e) => setDisputeReason(e.target.value)}
             />

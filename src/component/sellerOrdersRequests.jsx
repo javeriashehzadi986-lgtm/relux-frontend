@@ -52,6 +52,10 @@ function OrderActions({ order, onAction }) {
     interactiveActions.some((action) => action.id === "approve") &&
     interactiveActions.some((action) => action.id === "reject");
 
+  const hasConfirmAndDispute =
+    interactiveActions.some((action) => action.id === "confirm-return") &&
+    interactiveActions.some((action) => action.id === "dispute-return");
+
   if (hasApproveReject) {
     const rejectAction = interactiveActions.find((action) => action.id === "reject");
     const approveAction = interactiveActions.find((action) => action.id === "approve");
@@ -85,6 +89,68 @@ function OrderActions({ order, onAction }) {
             className="orders-requests-btn-primary orders-requests-btn-full"
             disabled={Boolean(action.disabled)}
           onClick={() => !action.disabled && onAction(action.id, order.id)}
+          >
+            {action.label}
+          </Button>
+        ))}
+        {detailAction?.link ? (
+          <Button
+            type="button"
+            variant="outline"
+            className="orders-requests-btn-muted orders-requests-btn-full"
+            asChild
+          >
+            <Link to={`/dress/${order.dressId}`}>{detailAction.label}</Link>
+          </Button>
+        ) : null}
+      </>
+    );
+  }
+
+  if (hasConfirmAndDispute) {
+    const primaryAction = interactiveActions.find(
+      (action) => action.id === "confirm-return",
+    );
+    const disputeAction = interactiveActions.find(
+      (action) => action.id === "dispute-return",
+    );
+    const otherActions = interactiveActions.filter(
+      (action) =>
+        action.id !== primaryAction?.id && action.id !== disputeAction?.id,
+    );
+
+    return (
+      <>
+        <div className="orders-requests-actions orders-requests-actions--split">
+          <Button
+            type="button"
+            variant="outline"
+            className="orders-requests-btn-outline"
+            onClick={() => onAction(disputeAction.id, order.id)}
+          >
+            {disputeAction.label}
+          </Button>
+          <div className="orders-requests-confirm-wrap">
+            <Button
+              type="button"
+              className="orders-requests-btn-primary"
+              onClick={() => onAction(primaryAction.id, order.id)}
+            >
+              {primaryAction.label}
+            </Button>
+            <p className="orders-requests-payment-release-note">
+              Confirming return releases escrow payment to you (rental charge kept,
+              remainder refunded to buyer).
+            </p>
+          </div>
+        </div>
+        {otherActions.map((action) => (
+          <Button
+            key={action.id}
+            type="button"
+            className="orders-requests-btn-primary orders-requests-btn-full"
+            disabled={Boolean(action.disabled)}
+            onClick={() => !action.disabled && onAction(action.id, order.id)}
           >
             {action.label}
           </Button>
@@ -156,24 +222,23 @@ export function SellerOrdersRequestsContent() {
     rejectOrder,
     completeOrder,
     shipOrder,
-    proposeSettlement,
+    confirmReturn,
+    disputeReturn,
   } = useSellerOrders();
   const [activeFilter, setActiveFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [actionError, setActionError] = useState("");
-  const [settlementTarget, setSettlementTarget] = useState(null);
-  const [damageDeduction, setDamageDeduction] = useState("");
-  const [settlementNote, setSettlementNote] = useState("");
-  const [submittingSettlement, setSubmittingSettlement] = useState(false);
+  const [disputeTarget, setDisputeTarget] = useState(null);
+  const [disputeReason, setDisputeReason] = useState("");
+  const [submittingDispute, setSubmittingDispute] = useState(false);
 
   const handleOrderAction = async (actionId, orderId) => {
     setActionError("");
 
-    if (actionId === "propose-settlement") {
+    if (actionId === "dispute-return") {
       const order = orders.find((item) => item.id === orderId);
-      setSettlementTarget(order || { id: orderId });
-      setDamageDeduction("");
-      setSettlementNote("");
+      setDisputeTarget(order || { id: orderId });
+      setDisputeReason("");
       return;
     }
 
@@ -181,6 +246,7 @@ export function SellerOrdersRequestsContent() {
       approve: approveOrder,
       reject: rejectOrder,
       ship: shipOrder,
+      "confirm-return": confirmReturn,
       complete: completeOrder,
     };
 
@@ -194,20 +260,23 @@ export function SellerOrdersRequestsContent() {
     }
   };
 
-  const submitSettlementProposal = async () => {
-    if (!settlementTarget?.id) return;
-    setSubmittingSettlement(true);
+  const submitReturnDispute = async () => {
+    if (!disputeTarget?.id) return;
+    const reason = disputeReason.trim();
+    if (!reason) {
+      setActionError("Please describe the return issue.");
+      return;
+    }
+    setSubmittingDispute(true);
     setActionError("");
     try {
-      await proposeSettlement(settlementTarget.id, {
-        damageDeductionPkr: Number(damageDeduction) || 0,
-        settlementNote: settlementNote.trim(),
-      });
-      setSettlementTarget(null);
+      await disputeReturn(disputeTarget.id, { disputeReason: reason });
+      setDisputeTarget(null);
+      setDisputeReason("");
     } catch (err) {
-      setActionError(err.message || "Failed to propose settlement");
+      setActionError(err.message || "Failed to submit return dispute");
     } finally {
-      setSubmittingSettlement(false);
+      setSubmittingDispute(false);
     }
   };
 
@@ -381,8 +450,25 @@ export function SellerOrdersRequestsContent() {
                     <p className="orders-requests-item-brand">{order.brand}</p>
                     <div className="orders-requests-item-date">
                       <DateIcon type={order.dateIcon} />
-                      <span>{order.dateLabel}</span>
+                      <span>
+                        {order.orderCategory === "rental"
+                          ? order.dateLabel ||
+                            `${order.rentalDays || 1} day${
+                              Number(order.rentalDays) === 1 ? "" : "s"
+                            } rental`
+                          : order.dateLabel || "Sale order"}
+                      </span>
                     </div>
+                    {order.orderCategory === "rental" && (order.rentStart || order.rentEnd) ? (
+                      <p className="orders-requests-rental-meta">
+                        {order.rentalDays
+                          ? `${order.rentalDays} day${Number(order.rentalDays) === 1 ? "" : "s"}`
+                          : "Rental"}
+                        {order.rentStart && order.rentEnd
+                          ? ` requested · ${order.rentStart} → ${order.rentEnd}`
+                          : ""}
+                      </p>
+                    ) : null}
                   </div>
                 </div>
 
@@ -407,61 +493,52 @@ export function SellerOrdersRequestsContent() {
       </section>
 
       <Dialog
-        open={Boolean(settlementTarget)}
-        onOpenChange={(open) => !open && setSettlementTarget(null)}
+        open={Boolean(disputeTarget)}
+        onOpenChange={(open) => !open && setDisputeTarget(null)}
       >
-        <DialogContent className="orders-requests-settlement-dialog">
-          <DialogHeader>
-            <DialogTitle>Propose Escrow Settlement</DialogTitle>
+        <DialogContent className="orders-requests-return-dispute-dialog">
+          <DialogHeader className="orders-requests-return-dispute-header">
+            <DialogTitle>Report Return Issue</DialogTitle>
             <DialogDescription>
-              After inspecting the returned dress, propose how much rent and damage (if any)
-              should be deducted from the buyer&apos;s deposit. The buyer must accept before
-              funds are released.
+              Describe the problem with this return (damage, late return, missing item, not as
+              expected, etc.). Escrow stays held and admin will mediate with both parties — same
+              as resale delivery disputes.
             </DialogDescription>
           </DialogHeader>
-          <div className="orders-requests-settlement-form">
+          <div className="orders-requests-return-dispute-body">
             <Field>
-              <Label htmlFor="damage-deduction">Damage deduction (PKR)</Label>
-              <Input
-                id="damage-deduction"
-                type="number"
-                min="0"
-                placeholder="0"
-                value={damageDeduction}
-                onChange={(e) => setDamageDeduction(e.target.value)}
-              />
-            </Field>
-            <Field>
-              <Label htmlFor="settlement-note">Note to buyer (optional)</Label>
+              <Label htmlFor="return-dispute-reason">Issue details</Label>
               <Textarea
-                id="settlement-note"
-                rows={3}
-                placeholder="Explain any damage or charges..."
-                value={settlementNote}
-                onChange={(e) => setSettlementNote(e.target.value)}
+                id="return-dispute-reason"
+                className="orders-requests-return-dispute-textarea"
+                rows={4}
+                placeholder="Describe the return issue for admin..."
+                value={disputeReason}
+                onChange={(e) => setDisputeReason(e.target.value)}
               />
             </Field>
-            <p className="orders-requests-settlement-hint">
-              Rental charge is calculated automatically from the booked days. Total deductions
-              cannot exceed the security deposit.
-            </p>
+            {actionError ? (
+              <p className="orders-requests-error" role="alert">
+                {actionError}
+              </p>
+            ) : null}
           </div>
-          <DialogFooter>
+          <DialogFooter className="orders-requests-return-dispute-footer">
             <Button
               type="button"
               variant="outline"
-              onClick={() => setSettlementTarget(null)}
-              disabled={submittingSettlement}
+              onClick={() => setDisputeTarget(null)}
+              disabled={submittingDispute}
             >
               Cancel
             </Button>
             <Button
               type="button"
               className="orders-requests-btn-primary"
-              onClick={submitSettlementProposal}
-              disabled={submittingSettlement}
+              onClick={submitReturnDispute}
+              disabled={submittingDispute}
             >
-              {submittingSettlement ? "Sending..." : "Send to Buyer"}
+              {submittingDispute ? "Submitting..." : "Submit to Admin"}
             </Button>
           </DialogFooter>
         </DialogContent>

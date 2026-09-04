@@ -281,6 +281,13 @@
   flex-shrink: 0;
 }
 
+.orders-requests-rental-meta {
+  margin: 0.35rem 0 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #31685d;
+}
+
 .orders-requests-actions {
   display: flex;
   gap: 0.5rem;
@@ -391,6 +398,71 @@
   font-size: 0.8125rem;
   color: #5d605f;
   line-height: 1.5;
+}
+
+.orders-requests-return-dispute-dialog {
+  width: 100%;
+  max-width: 28rem !important;
+  gap: 0 !important;
+  padding: 1.75rem 1.75rem 1.5rem !important;
+}
+
+.orders-requests-return-dispute-header {
+  gap: 0.5rem !important;
+  padding: 0 0 1rem;
+  text-align: left;
+}
+
+.orders-requests-return-dispute-header [data-slot="dialog-title"] {
+  font-size: 1.125rem;
+  line-height: 1.35;
+}
+
+.orders-requests-return-dispute-header [data-slot="dialog-description"] {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: #5d605f;
+}
+
+.orders-requests-return-dispute-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.25rem 0 1.25rem;
+}
+
+.orders-requests-return-dispute-textarea {
+  min-height: 7rem;
+  width: 100%;
+  padding: 0.75rem 1rem !important;
+  border: 1px solid rgba(176, 178, 177, 0.35) !important;
+  border-radius: 0.75rem !important;
+  background: #ffffff !important;
+  font-size: 0.9375rem !important;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.orders-requests-return-dispute-textarea:focus-visible {
+  border-color: #31685d !important;
+  box-shadow: 0 0 0 3px rgba(49, 104, 93, 0.12) !important;
+}
+
+.orders-requests-return-dispute-footer {
+  gap: 0.75rem !important;
+  padding-top: 0.25rem;
+}
+
+@media (max-width: 640px) {
+  .orders-requests-return-dispute-dialog {
+    max-width: calc(100% - 2rem) !important;
+    padding: 1.25rem 1.25rem 1.125rem !important;
+  }
+
+  .orders-requests-return-dispute-body {
+    padding-bottom: 1rem;
+  }
 }
 
 @media (max-width: 768px) {

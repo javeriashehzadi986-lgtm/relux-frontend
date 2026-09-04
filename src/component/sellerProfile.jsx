@@ -935,7 +935,7 @@ function SellerProfileSection({ onLogoutClick }) {
                 )}
 
                 <p className="seller-profile-stripe-note">
-                  Buyers pay Relux Hub at checkout. After delivery or rental settlement,
+                  Buyers pay Relux Hub at checkout. After delivery or rental return confirmation,
                   your share is transferred to your Stripe Connect balance, then to your
                   bank.
                 </p>

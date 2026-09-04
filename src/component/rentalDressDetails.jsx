@@ -24,51 +24,22 @@ import { SellerReviewsSection } from "./sellerReviewsSection";
 import "./dressDetails.css";
 import "./rentalDressDetails.css";
 
-const MIN_RENTAL_DAYS = 1;
-const MAX_RENTAL_DAYS = 60;
-const DEFAULT_RENTAL_DAYS = 4;
-
 const toInputDate = (date) => date.toISOString().split("T")[0];
 
-const getEndDateFromStartAndDays = (start, days) => {
-  if (!start || !days) return "";
-  const startDate = new Date(`${start}T12:00:00`);
-  const endDate = new Date(startDate);
-  endDate.setDate(endDate.getDate() + days - 1);
-  return toInputDate(endDate);
-};
-
-const getDaysFromDateRange = (start, end) => {
-  if (!start || !end) return DEFAULT_RENTAL_DAYS;
+const getRentalDays = (start, end) => {
+  if (!start || !end) return 1;
   const startDate = new Date(`${start}T12:00:00`);
   const endDate = new Date(`${end}T12:00:00`);
   const diff = Math.round((endDate - startDate) / (1000 * 60 * 60 * 24));
-  return Math.max(MIN_RENTAL_DAYS, diff + 1);
+  return Math.max(1, diff + 1);
 };
 
-const clampRentalDays = (value) => {
-  const parsed = Number.parseInt(String(value), 10);
-  if (!Number.isFinite(parsed)) return DEFAULT_RENTAL_DAYS;
-  return Math.min(MAX_RENTAL_DAYS, Math.max(MIN_RENTAL_DAYS, parsed));
-};
-
-const getDefaultDates = (rentalDays = DEFAULT_RENTAL_DAYS) => {
+const getDefaultDates = () => {
   const start = new Date();
   start.setDate(start.getDate() + 14);
-  return {
-    start: toInputDate(start),
-    end: getEndDateFromStartAndDays(toInputDate(start), rentalDays),
-  };
-};
-
-const formatDisplayDate = (isoDate) => {
-  if (!isoDate) return "—";
-  return new Date(`${isoDate}T12:00:00`).toLocaleDateString(undefined, {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+  const end = new Date(start);
+  end.setDate(end.getDate() + 3);
+  return { start: toInputDate(start), end: toInputDate(end) };
 };
 
 const RentalDressDetails = ({ dress }) => {
@@ -77,7 +48,6 @@ const RentalDressDetails = ({ dress }) => {
   const defaults = useMemo(() => getDefaultDates(), []);
   const [activeImage, setActiveImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState(dress.listingSize ?? "M");
-  const [selectedRentalDays, setSelectedRentalDays] = useState(DEFAULT_RENTAL_DAYS);
   const [rentStart, setRentStart] = useState(defaults.start);
   const [rentEnd, setRentEnd] = useState(defaults.end);
   const minRentStart = useMemo(() => toInputDate(new Date()), []);
@@ -105,18 +75,14 @@ const RentalDressDetails = ({ dress }) => {
     if (pendingRequest.size) setSelectedSize(pendingRequest.size);
     if (pendingRequest.rentStart) setRentStart(pendingRequest.rentStart);
     if (pendingRequest.rentEnd) setRentEnd(pendingRequest.rentEnd);
-    if (pendingRequest.rentalDays) setSelectedRentalDays(pendingRequest.rentalDays);
   }, [pendingRequest]);
 
   const handleRentStartChange = (value) => {
     setRentStart(value);
-    setRentEnd(getEndDateFromStartAndDays(value, selectedRentalDays));
-  };
-
-  const handleRentalDaysChange = (rawValue) => {
-    const days = clampRentalDays(rawValue);
-    setSelectedRentalDays(days);
-    setRentEnd(getEndDateFromStartAndDays(rentStart, days));
+    if (rentEnd && value && rentEnd < value) {
+      setRentEnd(value);
+    }
+    setRequestError("");
   };
 
   const handleRentEndChange = (value) => {
@@ -126,13 +92,11 @@ const RentalDressDetails = ({ dress }) => {
       return;
     }
     setRequestError("");
-    const days = clampRentalDays(getDaysFromDateRange(rentStart, value));
-    setSelectedRentalDays(days);
-    setRentEnd(getEndDateFromStartAndDays(rentStart, days));
+    setRentEnd(value);
   };
 
   const gallery = dress.gallery ?? [dress.mainImage];
-  const rentalDays = selectedRentalDays;
+  const rentalDays = getRentalDays(rentStart, rentEnd);
   const rentalCharges = dress.dailyRate * rentalDays;
   const securityDeposit = dress.securityDeposit ?? dress.fullDressPrice;
   const totalPaidToday = securityDeposit;
@@ -155,20 +119,18 @@ const RentalDressDetails = ({ dress }) => {
     setRequestError("");
     setSubmitting(true);
     try {
-      const days = clampRentalDays(selectedRentalDays);
-      if (days !== selectedRentalDays) {
-        setSelectedRentalDays(days);
-        setRentEnd(getEndDateFromStartAndDays(rentStart, days));
-      }
       if (!rentStart || !rentEnd) {
         throw new Error("Please choose rent start and end dates");
+      }
+      if (rentEnd < rentStart) {
+        throw new Error("Rent end date must be on or after the start date.");
       }
       await requestRental({
         dressId: dress.id,
         size: selectedSize,
         rentStart,
-        rentEnd: getEndDateFromStartAndDays(rentStart, days),
-        rentalDays: days,
+        rentEnd,
+        rentalDays: getRentalDays(rentStart, rentEnd),
         sellerId: dress.sellerId,
         customerName: user.name,
       });
@@ -302,28 +264,6 @@ const RentalDressDetails = ({ dress }) => {
                   min={rentStart || minRentStart}
                   onChange={(e) => handleRentEndChange(e.target.value)}
                 />
-              </div>
-            </div>
-
-            <div className="rental-details-days">
-              <label className="rental-details-days-label" htmlFor="rental-days">
-                How many days?
-              </label>
-              <div className="rental-details-days-input-row">
-                <input
-                  id="rental-days"
-                  type="number"
-                  className="rental-details-days-input"
-                  min={MIN_RENTAL_DAYS}
-                  max={MAX_RENTAL_DAYS}
-                  step={1}
-                  value={selectedRentalDays}
-                  onChange={(e) => handleRentalDaysChange(e.target.value)}
-                />
-                <span className="rental-details-days-hint">
-                  Choose {MIN_RENTAL_DAYS}–{MAX_RENTAL_DAYS} days (ends{" "}
-                  {formatDisplayDate(rentEnd)})
-                </span>
               </div>
             </div>
 

@@ -85,9 +85,17 @@ export function useSellerOrders() {
     [refreshOrders],
   );
 
-  const proposeSettlement = useCallback(
+  const confirmReturn = useCallback(
+    async (orderId) => {
+      await api.confirmSellerOrderReturn(orderId);
+      await refreshOrders();
+    },
+    [refreshOrders],
+  );
+
+  const disputeReturn = useCallback(
     async (orderId, body = {}) => {
-      await api.proposeSellerSettlement(orderId, body);
+      await api.disputeSellerRentalReturn(orderId, body);
       await refreshOrders();
     },
     [refreshOrders],
@@ -102,6 +110,7 @@ export function useSellerOrders() {
     rejectOrder,
     completeOrder,
     shipOrder,
-    proposeSettlement,
+    confirmReturn,
+    disputeReturn,
   };
 }
