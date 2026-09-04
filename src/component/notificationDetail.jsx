@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatNotificationTime } from "@/hooks/useNotifications";
 import { getNotificationActions } from "@/utils/notificationActions";
+import { emitNotificationsUpdated } from "@/utils/notificationEvents";
 import api from "@/services/api";
 import "./notification.css";
 
@@ -87,6 +88,8 @@ export default function NotificationDetail() {
         const data = await api.getNotification(id);
         if (!cancelled) {
           setNotification(data.notification ?? null);
+          // Detail fetch marks the item read on the server — refresh nav badge.
+          emitNotificationsUpdated();
         }
       } catch (err) {
         if (!cancelled) {

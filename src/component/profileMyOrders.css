@@ -734,6 +734,43 @@
   color: #5d605f;
 }
 
+.profile-order-refund-box {
+  margin-top: 0.75rem;
+  padding: 0.875rem 1rem;
+  border-radius: 8px;
+  background: #f3f7f5;
+  border: 1px solid #c5d9d1;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.profile-order-refund-title {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 0.35rem;
+  font-weight: 600;
+  color: #31685d;
+}
+
+.profile-order-refund-amount {
+  margin: 0 0 0.35rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1f3d37;
+}
+
+.profile-order-refund-line {
+  margin: 0.15rem 0;
+  color: #5d605f;
+}
+
+.profile-order-refund-note {
+  margin: 0.5rem 0 0;
+  color: #5d605f;
+  font-size: 0.8125rem;
+}
+
 .profile-order-return-box {
   margin-top: 0.75rem;
   padding: 0.875rem 1rem;

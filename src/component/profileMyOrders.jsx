@@ -11,6 +11,7 @@ import {
   Search,
   ShieldCheck,
   ShoppingBag,
+  Banknote,
   User,
   Truck,
 } from "lucide-react";
@@ -418,6 +419,40 @@ const ProfileMyOrders = () => {
                                 Seller note: {order.settlementNote}
                               </p>
                             ) : null}
+                          </div>
+                        ) : null}
+                        {order.refundAmountPkr > 0 &&
+                        (order.escrowStatus === "released" ||
+                          order.paymentStatus === "refunded") ? (
+                          <div className="profile-order-refund-box">
+                            <p className="profile-order-refund-title">
+                              <Banknote size={16} aria-hidden="true" />
+                              Refund processed
+                            </p>
+                            <p className="profile-order-refund-amount">
+                              {formatPkr(order.refundAmountPkr)}
+                            </p>
+                            {order.refundedAt ? (
+                              <p className="profile-order-refund-line">
+                                Processed on{" "}
+                                {new Date(order.refundedAt).toLocaleString("en-PK", {
+                                  day: "numeric",
+                                  month: "short",
+                                  year: "numeric",
+                                  hour: "numeric",
+                                  minute: "2-digit",
+                                })}
+                              </p>
+                            ) : null}
+                            {order.refundReference ? (
+                              <p className="profile-order-refund-line">
+                                Reference: {order.refundReference}
+                              </p>
+                            ) : null}
+                            <p className="profile-order-refund-note">
+                              Returned to your original payment method. It may take 1–5
+                              business days to appear on your bank or card statement.
+                            </p>
                           </div>
                         ) : null}
                         {order.type === "rental" &&

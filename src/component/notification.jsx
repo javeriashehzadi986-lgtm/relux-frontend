@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   CheckCheck,
@@ -31,8 +31,6 @@ const ICONS = {
   system: Megaphone,
 };
 
-const NOTIFICATIONS_PREF_KEY = "relux-notifications-enabled";
-
 function NotificationBody({ message, highlight }) {
   if (!highlight) {
     return message;
@@ -61,6 +59,7 @@ function NotificationBody({ message, highlight }) {
 const Notification = () => {
   const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState("all");
+  const didAutoMarkRef = useRef(false);
   const {
     notifications,
     loading,
@@ -68,59 +67,15 @@ const Notification = () => {
     refresh,
     markAllAsRead,
   } = useNotifications(activeFilter);
-  const [notificationsEnabled, setNotificationsEnabled] = useState(() => {
-    try {
-      return localStorage.getItem(NOTIFICATIONS_PREF_KEY) === "true";
-    } catch {
-      return false;
+
+  // Opening the list counts as "seen" — clear unread badge like other apps.
+  useEffect(() => {
+    if (loading || didAutoMarkRef.current) return;
+    didAutoMarkRef.current = true;
+    if (notifications.some((item) => item.unread)) {
+      markAllAsRead();
     }
-  });
-  const [permissionMessage, setPermissionMessage] = useState("");
-
-  const handleNotificationToggle = async () => {
-    setPermissionMessage("");
-
-    if (notificationsEnabled) {
-      setNotificationsEnabled(false);
-      try {
-        localStorage.setItem(NOTIFICATIONS_PREF_KEY, "false");
-      } catch {
-        // ignore storage errors
-      }
-      return;
-    }
-
-    if ("Notification" in window) {
-      const permission = await Notification.requestPermission();
-
-      if (permission === "granted") {
-        setNotificationsEnabled(true);
-        try {
-          localStorage.setItem(NOTIFICATIONS_PREF_KEY, "true");
-        } catch {
-          // ignore storage errors
-        }
-        return;
-      }
-
-      if (permission === "denied") {
-        setPermissionMessage(
-          "Notifications are blocked in your browser. Enable them in browser settings to receive alerts.",
-        );
-        return;
-      }
-
-      setPermissionMessage("Notification permission was not granted.");
-      return;
-    }
-
-    setNotificationsEnabled(true);
-    try {
-      localStorage.setItem(NOTIFICATIONS_PREF_KEY, "true");
-    } catch {
-      // ignore storage errors
-    }
-  };
+  }, [loading, notifications, markAllAsRead]);
 
   const handleNotificationClick = async (item) => {
     navigate(`/notification/${item.id}`);
@@ -128,28 +83,6 @@ const Notification = () => {
 
   return (
     <div className="notification-page">
-      <div className="notification-permission-bar">
-        <span className="notification-permission-label">Allow browser alerts</span>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={notificationsEnabled}
-          aria-label="Allow browser alerts"
-          className={`notification-toggle ${
-            notificationsEnabled ? "notification-toggle--on" : ""
-          }`}
-          onClick={handleNotificationToggle}
-        >
-          <span className="notification-toggle-thumb" />
-        </button>
-      </div>
-
-      {permissionMessage && (
-        <p className="notification-permission-message" role="alert">
-          {permissionMessage}
-        </p>
-      )}
-
       <header className="notification-header">
         <div className="notification-header-copy">
           <h1>Notifications</h1>

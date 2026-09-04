@@ -455,7 +455,15 @@ export const api = {
       body: JSON.stringify(body),
     }),
 
+  openSellerStripeDashboard: () =>
+    request("/seller/stripe/dashboard-link", {
+      method: "POST",
+      body: JSON.stringify({}),
+    }),
+
   getSellerStripeStatus: () => request("/seller/stripe/status"),
+
+  getSellerStripePayouts: () => request("/seller/stripe/payouts"),
 
   // Seller Orders
   getMySellerOrders: () =>

@@ -377,6 +377,53 @@
   line-height: 1.5;
 }
 
+.seller-profile-payout-list {
+  margin: 0 0 1.25rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid #dfe5e1;
+  background: #fff;
+}
+
+.seller-profile-payout-list-title {
+  margin: 0 0 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #5f6b66;
+}
+
+.seller-profile-payout-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0;
+}
+
+.seller-profile-payout-item + .seller-profile-payout-item {
+  border-top: 1px solid #eef2ef;
+}
+
+.seller-profile-payout-item-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1f2a26;
+}
+
+.seller-profile-payout-item-meta {
+  margin: 0.2rem 0 0;
+  font-size: 0.8rem;
+  color: #707974;
+}
+
+.seller-profile-stripe-actions {
+  display: grid;
+  gap: 0.75rem;
+}
+
 .seller-profile-primary-btn {
   min-height: auto !important;
   border-radius: 9999px !important;

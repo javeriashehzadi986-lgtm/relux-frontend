@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import api from "@/services/api";
+import { emitNotificationsUpdated } from "@/utils/notificationEvents";
 
 export function formatNotificationTime(dateValue) {
   if (!dateValue) return "";
@@ -57,6 +58,7 @@ export function useNotifications(activeFilter = "all") {
         current.map((item) => ({ ...item, unread: false, read: true })),
       );
       setUnreadCount(0);
+      emitNotificationsUpdated();
     } catch (err) {
       setError(err.message || "Could not mark notifications as read");
     }
@@ -71,6 +73,7 @@ export function useNotifications(activeFilter = "all") {
         ),
       );
       setUnreadCount((count) => Math.max(0, count - 1));
+      emitNotificationsUpdated();
     } catch (err) {
       setError(err.message || "Could not update notification");
     }

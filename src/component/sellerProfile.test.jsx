@@ -52,10 +52,17 @@ vi.mock("@/hooks/useSellerReviews", () => ({
 vi.mock("@/services/api", () => ({
   default: {
     getSellerStripeStatus: vi.fn().mockResolvedValue({ stripeConnected: false }),
+    getSellerStripePayouts: vi.fn().mockResolvedValue({
+      stripeConnected: false,
+      totalEarnedLabel: "PKR 0",
+      recentPayouts: [],
+      stripeBalance: { availableLabel: "—", pendingLabel: "—" },
+    }),
     getSellerVerification: vi.fn().mockResolvedValue({
       verification: { verificationStatus: "approved" },
     }),
     createSellerStripeConnect: vi.fn(),
+    openSellerStripeDashboard: vi.fn(),
   },
 }));
 

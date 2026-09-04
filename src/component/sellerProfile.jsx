@@ -156,7 +156,9 @@ function SellerProfileSection({ onLogoutClick }) {
   const [saving, setSaving] = useState(false);
   const [stripeConnected, setStripeConnected] = useState(false);
   const [stripeConnecting, setStripeConnecting] = useState(false);
+  const [stripeDashboardLoading, setStripeDashboardLoading] = useState(false);
   const [stripeMessage, setStripeMessage] = useState("");
+  const [stripePayouts, setStripePayouts] = useState(null);
   const [searchParams] = useSearchParams();
   const {
     reviews,
@@ -164,6 +166,16 @@ function SellerProfileSection({ onLogoutClick }) {
     loading: reviewsLoading,
     error: reviewsError,
   } = useSellerReviews(user?.id);
+
+  const loadStripePayouts = async () => {
+    try {
+      const data = await api.getSellerStripePayouts();
+      setStripePayouts(data);
+      setStripeConnected(Boolean(data.stripeConnected));
+    } catch {
+      setStripePayouts(null);
+    }
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -177,6 +189,7 @@ function SellerProfileSection({ onLogoutClick }) {
       .catch(() => {
         if (!cancelled) setStripeConnected(false);
       });
+    loadStripePayouts().catch(() => {});
     return () => {
       cancelled = true;
     };
@@ -203,6 +216,7 @@ function SellerProfileSection({ onLogoutClick }) {
             ? "Stripe Connect is linked to your seller account."
             : "Finish Stripe onboarding to enable payouts.",
         );
+        return loadStripePayouts();
       })
       .catch((err) => {
         if (!cancelled) {
@@ -229,6 +243,23 @@ function SellerProfileSection({ onLogoutClick }) {
       setStripeMessage(err.message || "Could not start Stripe Connect");
     } finally {
       setStripeConnecting(false);
+    }
+  };
+
+  const handleOpenStripeDashboard = async () => {
+    setStripeDashboardLoading(true);
+    setStripeMessage("");
+    try {
+      const data = await api.openSellerStripeDashboard();
+      if (data.url) {
+        window.location.href = data.url;
+        return;
+      }
+      setStripeMessage("Stripe dashboard URL was not returned.");
+    } catch (err) {
+      setStripeMessage(err.message || "Could not open Stripe dashboard");
+    } finally {
+      setStripeDashboardLoading(false);
     }
   };
 
@@ -854,38 +885,99 @@ function SellerProfileSection({ onLogoutClick }) {
               <CardContent className="seller-profile-section-content">
                 <div className="seller-profile-payout-box">
                   <div className="seller-profile-payout-row">
-                    <span className="seller-profile-payout-label">Buyer checkout</span>
-                    <span className="seller-profile-payout-amount">Stripe</span>
+                    <span className="seller-profile-payout-label">Total earned (Relux)</span>
+                    <span className="seller-profile-payout-amount">
+                      {stripePayouts?.totalEarnedLabel || "PKR 0"}
+                    </span>
                   </div>
                   <div className="seller-profile-payout-row">
-                    <span className="seller-profile-payout-date">Seller payouts</span>
+                    <span className="seller-profile-payout-date">Stripe available</span>
                     <span className="seller-profile-payout-status">
-                      {stripeConnected ? "Connect linked" : "Connect required"}
+                      {stripePayouts?.stripeBalance?.availableLabel || "—"}
+                    </span>
+                  </div>
+                  <div className="seller-profile-payout-row">
+                    <span className="seller-profile-payout-date">Stripe pending</span>
+                    <span className="seller-profile-payout-status">
+                      {stripePayouts?.stripeBalance?.pendingLabel || "—"}
+                    </span>
+                  </div>
+                  <div className="seller-profile-payout-row">
+                    <span className="seller-profile-payout-date">Connect status</span>
+                    <span className="seller-profile-payout-status">
+                      {stripeConnected ? "Connected" : "Not connected"}
                     </span>
                   </div>
                 </div>
+
+                {stripePayouts?.recentPayouts?.length ? (
+                  <div className="seller-profile-payout-list">
+                    <p className="seller-profile-payout-list-title">Recent payouts</p>
+                    {stripePayouts.recentPayouts.map((payout) => (
+                      <div key={payout.id} className="seller-profile-payout-item">
+                        <div>
+                          <p className="seller-profile-payout-item-title">{payout.title}</p>
+                          <p className="seller-profile-payout-item-meta">
+                            Order {payout.orderId}
+                            {payout.releasedAt
+                              ? ` · ${new Date(payout.releasedAt).toLocaleDateString()}`
+                              : ""}
+                          </p>
+                        </div>
+                        <strong>{payout.amountLabel}</strong>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="seller-profile-stripe-note">
+                    Payouts appear here after escrow releases on completed orders.
+                  </p>
+                )}
+
                 <p className="seller-profile-stripe-note">
-                  Buyers pay Relux Hub at checkout. Link Stripe Connect so when escrow
-                  releases after delivery or rental settlement, your payout is transferred
-                  to your bank account automatically.
+                  Buyers pay Relux Hub at checkout. After delivery or rental settlement,
+                  your share is transferred to your Stripe Connect balance, then to your
+                  bank.
                 </p>
                 {stripeMessage ? (
                   <p className="seller-profile-stripe-note" role="status">
                     {stripeMessage}
                   </p>
                 ) : null}
-                <Button
-                  type="button"
-                  className="seller-profile-primary-btn seller-profile-primary-btn--full"
-                  onClick={handleConnectStripe}
-                  disabled={stripeConnecting}
-                >
-                  {stripeConnecting
-                    ? "Opening Stripe…"
-                    : stripeConnected
-                      ? "Manage Stripe Account"
-                      : "Connect Stripe Account"}
-                </Button>
+                <div className="seller-profile-stripe-actions">
+                  {!stripeConnected ? (
+                    <Button
+                      type="button"
+                      className="seller-profile-primary-btn seller-profile-primary-btn--full"
+                      onClick={handleConnectStripe}
+                      disabled={stripeConnecting}
+                    >
+                      {stripeConnecting ? "Opening Stripe…" : "Connect Stripe Account"}
+                    </Button>
+                  ) : (
+                    <>
+                      <Button
+                        type="button"
+                        className="seller-profile-primary-btn seller-profile-primary-btn--full"
+                        onClick={handleOpenStripeDashboard}
+                        disabled={stripeDashboardLoading}
+                      >
+                        {stripeDashboardLoading
+                          ? "Opening dashboard…"
+                          : "View Stripe Balance & Bank"}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="seller-profile-primary-btn--full"
+                        onClick={handleConnectStripe}
+                        disabled={stripeConnecting}
+                      >
+                        {stripeConnecting ? "Opening Stripe…" : "Update Stripe Details"}
+                      </Button>
+                    </>
+                  )}
+                </div>
               </CardContent>
             </Card>
 

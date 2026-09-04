@@ -31,6 +31,7 @@ const CITIES = [
 ];
 
 const OTHER_CITY = "__other__";
+const DELIVERY_CHARGES_PKR = 300;
 
 const formatPkr = (amount) => `PKR ${amount.toLocaleString("en-PK")}`;
 
@@ -156,7 +157,8 @@ const FinalizePurchase = () => {
   const winningBid = dress.currentBid ?? dress.startingBid ?? dress.salePrice ?? dress.price;
   const originalRetail =
     dress.originalRetailPrice ?? dress.estimatedValue ?? dress.salePrice ?? dress.price;
-  const totalAmount = winningBid;
+  const deliveryCharges = DELIVERY_CHARGES_PKR;
+  const totalAmount = Number(winningBid || 0) + deliveryCharges;
   const summaryImage = dress.image ?? dress.mainImage ?? dress.gallery?.[0];
 
   const resolvedCity =
@@ -387,14 +389,20 @@ const FinalizePurchase = () => {
                   <span>Your winning bid</span>
                   <span>{formatPkr(winningBid)}</span>
                 </div>
+                <div className="finalize-purchase-summary-row">
+                  <span>Delivery charges</span>
+                  <span>{formatPkr(deliveryCharges)}</span>
+                </div>
                 <div className="finalize-purchase-summary-total">
                   <span>Total to pay</span>
                   <span>{formatPkr(totalAmount)}</span>
                 </div>
               </div>
               <p className="finalize-purchase-breakdown-note">
-                You pay <strong>{formatPkr(winningBid)}</strong> for the item (your winning bid).
-                Stripe will show this amount before you confirm.
+                <strong>{formatPkr(winningBid)}</strong> is your winning bid for the item.{" "}
+                <strong>{formatPkr(deliveryCharges)}</strong> is a flat delivery fee for
+                shipping within Pakistan (same for every city). Stripe will show both before
+                you confirm.
               </p>
             </div>
           </div>
@@ -414,8 +422,11 @@ const FinalizePurchase = () => {
             <div className="finalize-purchase-delivery-note">
               <Truck size={20} aria-hidden="true" />
               <div>
-                <strong>Estimated Delivery</strong>
-                <p>{getEstimatedDelivery()}</p>
+                <strong>Delivery — {formatPkr(deliveryCharges)}</strong>
+                <p>
+                  Flat shipping fee within Pakistan. Estimated arrival:{" "}
+                  {getEstimatedDelivery()}.
+                </p>
               </div>
             </div>
 
@@ -439,7 +450,7 @@ const FinalizePurchase = () => {
             <p className="finalize-purchase-legal">
               By paying, you agree to Relux Hub&apos;s{" "}
               <Link to="/terms">Terms of Service</Link> and Resell Authenticity
-              Policies. Total includes your winning bid and delivery.
+              Policies. Total = winning bid + {formatPkr(deliveryCharges)} delivery.
             </p>
           </div>
         </aside>
