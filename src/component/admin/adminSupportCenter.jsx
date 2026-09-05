@@ -897,11 +897,17 @@ const AdminSupportCenter = () => {
                         </>
                       )}
                       <p>
-                        <strong>Buyer refund (proposed):</strong>{" "}
+                        <strong>
+                          {escrowAlreadyReleased ? "Buyer refund (final):" : "Buyer refund (proposed):"}
+                        </strong>{" "}
                         {formatPkr(orderSettlement.refundAmountPkr)}
                       </p>
                       <p>
-                        <strong>Seller payout (proposed):</strong>{" "}
+                        <strong>
+                          {escrowAlreadyReleased
+                            ? "Seller payout (final):"
+                            : "Seller payout (proposed):"}
+                        </strong>{" "}
                         {formatPkr(orderSettlement.sellerPayoutPkr)}
                       </p>
                       {orderSettlement.disputeReason ? (
