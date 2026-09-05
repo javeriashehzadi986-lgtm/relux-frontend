@@ -26,8 +26,6 @@ function renderOrders(orders) {
     removeOrder: vi.fn(),
     confirmReceived: vi.fn(),
     markReturned: vi.fn(),
-    acceptSettlement: vi.fn(),
-    disputeSettlement: vi.fn(),
     disputeSaleDelivery: vi.fn(),
   });
 

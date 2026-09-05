@@ -489,14 +489,19 @@ export const api = {
       method: "PATCH",
     }),
 
-  confirmSellerOrderReturn: (id, body) =>
-    request(`/seller/orders/${id}/settlement/propose`, {
-      method: "POST",
-      body: JSON.stringify(body || {}),
+  confirmSellerOrderReturn: (id) =>
+    request(`/seller/orders/${id}/confirm-return`, {
+      method: "PATCH",
     }),
 
   proposeSellerSettlement: (id, body) =>
     request(`/seller/orders/${id}/settlement/propose`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+
+  disputeSellerRentalReturn: (id, body) =>
+    request(`/seller/orders/${id}/return/dispute`, {
       method: "POST",
       body: JSON.stringify(body),
     }),

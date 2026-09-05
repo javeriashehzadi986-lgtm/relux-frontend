@@ -475,11 +475,27 @@
 .profile-order-actions {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-start;
   gap: 1rem;
   margin-top: 2rem;
   padding-top: 1.5rem;
   border-top: 1px solid rgba(176, 178, 177, 0.1);
+}
+
+.profile-order-action-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.4rem;
+  max-width: 16rem;
+}
+
+.profile-order-payment-release-note {
+  margin: 0;
+  padding: 0 0.25rem;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: #8a5a00;
 }
 
 .profile-order-action {
