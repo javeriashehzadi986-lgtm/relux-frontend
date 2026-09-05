@@ -82,14 +82,6 @@ const getChatMenuOptions = ({ listingId, isMuted, hasUnread, isSeller }) =>
       show: !isSeller,
       action: "report",
     },
-    {
-      id: "block",
-      label: isSeller ? "Block buyer" : "Block seller",
-      icon: "block",
-      show: true,
-      action: "block",
-      danger: true,
-    },
   ].filter((option) => option.show);
 
 const MessagesContent = () => {
@@ -112,7 +104,6 @@ const MessagesContent = () => {
     markAllRead,
     toggleMute,
     clearHistory,
-    blockConversation,
     selectConversation,
     markConversationRead,
     refreshActive,
@@ -232,10 +223,6 @@ const MessagesContent = () => {
               .join("\n"),
           });
           setActionNotice("Report submitted. Our support team will review this conversation.");
-        break;
-      case "block":
-          await blockConversation();
-          setActionNotice(`${partnerName ?? "User"} has been blocked.`);
         break;
       default:
         break;

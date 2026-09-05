@@ -326,9 +326,14 @@ const AdminSupportCenter = () => {
   const handleReleaseEscrow = async () => {
     if (!selectedReport?.orderId || !orderSettlement) return;
 
-    if (orderSettlementType === "rental" && !sellerReturnConfirmed) {
-      setActionError("Seller has not confirmed receiving the returned product yet.");
-      return;
+    if (orderSettlementType === "rental") {
+      const isReturnStage =
+        orderSettlement?.fulfillmentStatus === "returned" ||
+        Boolean(orderSettlement?.returnConfirmedAt);
+      if (isReturnStage && !sellerReturnConfirmed) {
+        setActionError("Seller has not confirmed receiving the returned product yet.");
+        return;
+      }
     }
 
     const sellerPayout =
@@ -384,11 +389,15 @@ const AdminSupportCenter = () => {
     orderSettlement?.escrowSettlementStatus === "admin_settled";
   const sellerReturnConfirmed = Boolean(orderSettlement?.returnConfirmedAt);
   const buyerReceiptConfirmed = Boolean(orderSettlement?.deliveryConfirmedAt);
+  const isRentalReturnStage =
+    orderSettlementType === "rental" &&
+    (orderSettlement?.fulfillmentStatus === "returned" ||
+      Boolean(orderSettlement?.returnConfirmedAt));
   const canReleaseEscrow =
     Boolean(orderSettlement) &&
     orderSettlement.escrowSettlementStatus === "disputed" &&
     !escrowAlreadyReleased &&
-    (orderSettlementType !== "rental" || sellerReturnConfirmed);
+    (!isRentalReturnStage || sellerReturnConfirmed);
   const canContactParties = canContactDisputeParties(selectedReport);
 
   const patchReport = async (body) => {
@@ -901,7 +910,7 @@ const AdminSupportCenter = () => {
                           </Button>
                         </div>
                       ) : orderSettlement.escrowSettlementStatus === "disputed" &&
-                        orderSettlementType === "rental" &&
+                        isRentalReturnStage &&
                         !sellerReturnConfirmed ? (
                         <p className="admin-reports-escrow-released-note">
                           Waiting for seller return confirmation before release.

@@ -35,8 +35,9 @@ const CITIES = [
 ];
 
 const OTHER_CITY = "__other__";
+const DELIVERY_CHARGES_PKR = 300;
 
-const formatPkr = (amount) => `PKR ${Math.round(amount).toLocaleString("en-PK")}`;
+const formatPkr = (amount) => `PKR ${Math.round(Number(amount) || 0).toLocaleString("en-PK")}`;
 
 const formatRentalPeriod = (start, end) => {
   if (!start || !end) return "Dates to be confirmed";
@@ -190,7 +191,15 @@ const FinalizeRentalCheckout = () => {
   const dailyRate = dress.dailyRate ?? dress.rentPrice ?? 0;
   const rentalDays = order.rentalDays || 1;
   const rentSubtotal = dailyRate * rentalDays;
-  const totalAmount = order.amountPkr > 0 ? order.amountPkr : deposit || rentSubtotal;
+  const deliveryCharges =
+    Number(order.deliveryChargesPkr) > 0
+      ? Number(order.deliveryChargesPkr)
+      : DELIVERY_CHARGES_PKR;
+  const depositDue = Number(order.itemAmountPkr) > 0 ? Number(order.itemAmountPkr) : deposit;
+  const totalAmount =
+    Number(order.amountPkr) > 0
+      ? Number(order.amountPkr)
+      : Number(depositDue || 0) + deliveryCharges;
   const summaryImage = dress.image ?? dress.mainImage ?? dress.gallery?.[0];
   const conditionLabel = getDressConditionLabel(dress);
 
@@ -426,8 +435,12 @@ const FinalizeRentalCheckout = () => {
                   </div>
                 ) : null}
                 <div className="finalize-purchase-summary-row">
-                  <span>Security deposit (due now)</span>
-                  <span>{formatPkr(deposit || totalAmount)}</span>
+                  <span>Security deposit (escrow)</span>
+                  <span>{formatPkr(depositDue || deposit)}</span>
+                </div>
+                <div className="finalize-purchase-summary-row">
+                  <span>Delivery charges</span>
+                  <span>{formatPkr(deliveryCharges)}</span>
                 </div>
                 <div className="finalize-purchase-summary-total">
                   <span>Due today</span>
@@ -452,11 +465,11 @@ const FinalizeRentalCheckout = () => {
             <div className="finalize-purchase-delivery-note">
               <CalendarDays size={18} aria-hidden="true" />
               <div>
-                <strong>Rental approved — escrow payment</strong>
+                <strong>Delivery — {formatPkr(deliveryCharges)}</strong>
                 <p>
-                  Pay the full dress deposit now. Funds are held in escrow on Relux Hub
-                  until the seller confirms your return. Rental charges are deducted and
-                  the remaining balance is refunded to you.
+                  Flat delivery fee within Pakistan. Pay the security deposit plus delivery
+                  now. Deposit is held in escrow until the seller confirms your return;
+                  rental charges are deducted and the remaining balance is refunded.
                 </p>
               </div>
             </div>

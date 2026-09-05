@@ -99,6 +99,23 @@
   background: rgba(225, 227, 224, 0.5);
 }
 
+.add-listing-upload-main.is-invalid {
+  border-color: #ba1a1a;
+  background: #fff5f5;
+}
+
+.add-listing-image-error {
+  margin: -0.35rem 0 0.85rem;
+  color: #ba1a1a;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.add-listing-required-mark {
+  color: #ba1a1a;
+  font-weight: 700;
+}
+
 .add-listing-upload-main p {
   margin: 0;
   font-size: 0.875rem;
@@ -720,7 +737,12 @@
   margin: 0;
   color: #ba1a1a;
   font-size: 0.875rem;
+  font-weight: 600;
   text-align: center;
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.65rem;
+  background: #fff5f5;
+  border: 1px solid #f0b4b4;
 }
 
 .add-listing-publish-btn {

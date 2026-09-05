@@ -127,6 +127,24 @@ export function useBuyerOrders() {
     [refreshOrders],
   );
 
+  const disputeRentalDelivery = useCallback(
+    async (orderId, body) => {
+      await api.disputeRentalDelivery(orderId, body);
+      await refreshOrders();
+    },
+    [refreshOrders],
+  );
+
+  const disputeDelivery = useCallback(
+    async (order, body) => {
+      if (order?.type === "rental") {
+        return disputeRentalDelivery(order.id, body);
+      }
+      return disputeSaleDelivery(order.id, body);
+    },
+    [disputeRentalDelivery, disputeSaleDelivery],
+  );
+
   return {
     orders,
     loading,
@@ -138,5 +156,7 @@ export function useBuyerOrders() {
     confirmReceived,
     markReturned,
     disputeSaleDelivery,
+    disputeRentalDelivery,
+    disputeDelivery,
   };
 }

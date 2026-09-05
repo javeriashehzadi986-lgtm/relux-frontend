@@ -525,6 +525,12 @@ export const api = {
       body: JSON.stringify(body),
     }),
 
+  disputeRentalDelivery: (id, body) =>
+    request(`/buyer/orders/${id}/rental-delivery/dispute`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+
   getAdminOrderSettlement: (id) => request(`/admin/orders/${id}/settlement`),
 
   resolveAdminOrderSettlement: (id, body) =>

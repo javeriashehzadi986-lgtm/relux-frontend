@@ -919,6 +919,13 @@ function SellerProfileSection({ onLogoutClick }) {
                           <p className="seller-profile-payout-item-title">{payout.title}</p>
                           <p className="seller-profile-payout-item-meta">
                             Order {payout.orderId}
+                            {payout.payoutStatus === "transferred"
+                              ? " · Sent to Stripe"
+                              : payout.payoutStatus === "ledger_only"
+                                ? " · Recorded (Connect incomplete)"
+                                : payout.payoutStatus === "failed"
+                                  ? " · Transfer failed"
+                                  : ""}
                             {payout.releasedAt
                               ? ` · ${new Date(payout.releasedAt).toLocaleDateString()}`
                               : ""}

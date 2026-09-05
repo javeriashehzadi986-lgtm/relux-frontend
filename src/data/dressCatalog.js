@@ -137,6 +137,7 @@ const enrichRentalDress = (dress) => {
     securityDepositFormatted: dress.securityDepositFormatted ?? formatRs(securityDeposit),
     fullDressPrice: securityDeposit,
     fullDressPriceFormatted: dress.fullDressPriceFormatted ?? formatRs(securityDeposit),
+    deliveryCharges: dress.deliveryCharges ?? 300,
     fabric: dress.fabric ?? dress.description ?? "",
     occasion: dress.occasion ?? "",
     careInstructions: dress.careInstructions ?? "Professional dry clean only.",

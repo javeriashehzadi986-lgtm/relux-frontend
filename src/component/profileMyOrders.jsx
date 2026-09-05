@@ -148,7 +148,7 @@ const ProfileMyOrders = () => {
   const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const { orders, loading, error, refreshOrders, cancelOrder, removeOrder, confirmReceived, markReturned, disputeSaleDelivery } =
+  const { orders, loading, error, refreshOrders, cancelOrder, removeOrder, confirmReceived, markReturned, disputeDelivery } =
     useBuyerOrders();
   const [cancelTarget, setCancelTarget] = useState(null);
   const [disputeTarget, setDisputeTarget] = useState(null);
@@ -259,7 +259,7 @@ const ProfileMyOrders = () => {
     setSubmittingDispute(true);
     setActionError("");
     try {
-      await disputeSaleDelivery(disputeTarget.id, { disputeReason: disputeReason.trim() });
+      await disputeDelivery(disputeTarget, { disputeReason: disputeReason.trim() });
       setDisputeTarget(null);
     } catch (err) {
       setActionError(err.message || "Failed to submit dispute");

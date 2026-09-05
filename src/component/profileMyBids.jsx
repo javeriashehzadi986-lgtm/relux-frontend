@@ -32,11 +32,22 @@ const BIDS_PER_PAGE = 6;
 const matchesBidFilter = (bid, filter) => {
   if (filter === "all") return true;
   if (filter === "active") {
+    // Live auctions only (still open)
     return bid.status === "winning" || bid.status === "outbid";
   }
   if (filter === "winning") {
-    // Live highest bidder + completed wins
-    return bid.status === "winning" || bid.status === "won";
+    // Currently highest bidder — auction still running
+    return bid.status === "winning";
+  }
+  if (filter === "won") {
+    return bid.status === "won";
+  }
+  if (filter === "outbid") {
+    // Outbid on a live auction (not ended losses — those are Expired)
+    return bid.status === "outbid";
+  }
+  if (filter === "expired") {
+    return bid.status === "expired";
   }
   return bid.status === filter;
 };
@@ -48,12 +59,14 @@ const ProfileMyBids = () => {
   const [currentPage, setCurrentPage] = useState(1);
 
   const filteredBids = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
     return bids.filter((bid) => {
       const matchesFilter = matchesBidFilter(bid, activeFilter);
-      const matchesSearch =
-        bid.title.toLowerCase().includes(searchQuery.trim().toLowerCase()) ||
-        bid.seller.toLowerCase().includes(searchQuery.trim().toLowerCase());
-      return matchesFilter && matchesSearch;
+      if (!matchesFilter) return false;
+      if (!query) return true;
+      const title = String(bid.title || "").toLowerCase();
+      const seller = String(bid.seller || "").toLowerCase();
+      return title.includes(query) || seller.includes(query);
     });
   }, [activeFilter, searchQuery, bids]);
 

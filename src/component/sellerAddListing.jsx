@@ -142,9 +142,13 @@ const SellerAddListing = () => {
   const [previewHeroImage, setPreviewHeroImage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [imageError, setImageError] = useState("");
   const listingImagesRef = useRef(null);
   const addThumbRef = useRef(null);
+  const imagesSectionRef = useRef(null);
   const listingFileMapRef = useRef(new Map());
+
+  const MIN_LISTING_IMAGES = 4;
 
   const { mains: mainOptions } = usePublicMainCategories();
   const selectedMain = mainOptions.find((item) => item.name === mainCategory);
@@ -254,6 +258,8 @@ const SellerAddListing = () => {
     });
     setPreviewImages((current) => [...current, ...entries]);
     setPreviewHeroImage((current) => current || entries[0]);
+    setImageError("");
+    setSubmitError("");
     event.target.value = "";
   };
 
@@ -273,9 +279,66 @@ const SellerAddListing = () => {
   const goToListings = () =>
     navigate("/sellerProfile?section=listings");
 
+  const showFormError = (message, { focusImages = false } = {}) => {
+    setSubmitError(message);
+    if (focusImages) {
+      setImageError(message);
+      imagesSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  };
+
   const handlePublish = async (event) => {
     event.preventDefault();
     setSubmitError("");
+    setImageError("");
+
+    if (previewImages.length < MIN_LISTING_IMAGES) {
+      showFormError(
+        `Please add at least ${MIN_LISTING_IMAGES} pictures from different angles before submitting.`,
+        { focusImages: true },
+      );
+      return;
+    }
+
+    if (!title.trim()) {
+      showFormError("Listing title is required.");
+      return;
+    }
+
+    if (listingType === "sale") {
+      if (!String(salePrice).trim()) {
+        showFormError("Sale price is required.");
+        return;
+      }
+      if (!String(startingBid).trim()) {
+        showFormError("Starting bid is required.");
+        return;
+      }
+      if (!String(minBid).trim()) {
+        showFormError("Minimum bid increment is required.");
+        return;
+      }
+      if (!auctionEndDate || !auctionEndTime) {
+        showFormError("Auction end date and time are required.");
+        return;
+      }
+      const resolvedAuctionEndDate = combineAuctionEnd(auctionEndDate, auctionEndTime);
+      const endAt = new Date(resolvedAuctionEndDate);
+      if (Number.isNaN(endAt.getTime()) || endAt.getTime() <= Date.now()) {
+        showFormError("Auction end must be a future date and time.");
+        return;
+      }
+    } else {
+      if (!String(rentPrice).trim()) {
+        showFormError("Daily rental price is required.");
+        return;
+      }
+      if (!String(itemPrice).trim()) {
+        showFormError("Item price / security deposit is required.");
+        return;
+      }
+    }
+
     setSubmitting(true);
 
     try {
@@ -284,18 +347,16 @@ const SellerAddListing = () => {
         listingFileMapRef.current,
       );
       const mainImage = preparedGallery[0] || "";
-
-      let resolvedAuctionEndDate = auctionEndDate;
-      if (listingType === "sale") {
-        if (!auctionEndDate || !auctionEndTime) {
-          throw new Error("Auction end date and time are required");
-        }
-        resolvedAuctionEndDate = combineAuctionEnd(auctionEndDate, auctionEndTime);
-        const endAt = new Date(resolvedAuctionEndDate);
-        if (Number.isNaN(endAt.getTime()) || endAt.getTime() <= Date.now()) {
-          throw new Error("Auction end must be a future date and time");
-        }
+      if (!mainImage || preparedGallery.length < MIN_LISTING_IMAGES) {
+        throw new Error(
+          `Please add at least ${MIN_LISTING_IMAGES} pictures from different angles before submitting.`,
+        );
       }
+
+      const resolvedAuctionEndDate =
+        listingType === "sale"
+          ? combineAuctionEnd(auctionEndDate, auctionEndTime)
+          : auctionEndDate;
 
       const payload = {
         title: title.trim(),
@@ -314,7 +375,7 @@ const SellerAddListing = () => {
         rentPrice,
         itemPrice,
         mainImage,
-        gallery: preparedGallery.length ? preparedGallery : [mainImage],
+        gallery: preparedGallery,
       };
 
       const isApiListing = editListingId && /^[a-f0-9]{24}$/i.test(editListingId);
@@ -327,7 +388,12 @@ const SellerAddListing = () => {
 
       goToListings();
     } catch (error) {
-      setSubmitError(error.message || "Failed to submit listing");
+      const message = error.message || "Failed to submit listing";
+      setSubmitError(message);
+      if (/photo|image/i.test(message)) {
+        setImageError(message);
+        imagesSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
     } finally {
       setSubmitting(false);
     }
@@ -352,62 +418,72 @@ const SellerAddListing = () => {
           </p>
         </header>
 
-        <form className="add-listing-layout" onSubmit={handlePublish}>
+        <form className="add-listing-layout" onSubmit={handlePublish} noValidate>
           <div className="add-listing-main">
-            <Card className="add-listing-section-card">
-              <CardHeader className="add-listing-section-header">
-                <CardTitle className="add-listing-section-title">
-                  Clothing Images
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="add-listing-section-content">
-                <label className="add-listing-upload-main" htmlFor="listing-images">
-                  <CloudUpload size={40} strokeWidth={1.5} />
-                  <p>Click to upload or drag and drop</p>
-                  <span>SVG, PNG, JPG or WEBP (MAX. 800x400px)</span>
-                  <input
-                    id="listing-images"
-                    ref={listingImagesRef}
-                    type="file"
-                    accept="image/svg+xml,image/png,image/jpeg,image/webp"
-                    multiple
-                    className="add-listing-upload-input"
-                    onChange={handleListingImagesChange}
-                  />
-                </label>
-                <div className="add-listing-thumb-grid">
-                  {previewImages.map((src, index) => (
-                    <div key={`${src}-${index}`} className="add-listing-thumb">
-                      <img src={src} alt={`Listing preview ${index + 1}`} />
-                      <button
-                        type="button"
-                        className="add-listing-thumb-remove"
-                        aria-label="Remove image"
-                        onClick={() => handleRemoveThumb(index)}
-                      >
-                        <X size={14} />
-                      </button>
-                    </div>
-                  ))}
-                  <button
-                    type="button"
-                    className="add-listing-thumb add-listing-thumb--add"
-                    onClick={() => addThumbRef.current?.click()}
+            <div ref={imagesSectionRef}>
+              <Card className={`add-listing-section-card${imageError ? " has-image-error" : ""}`}>
+                <CardHeader className="add-listing-section-header">
+                  <CardTitle className="add-listing-section-title">
+                    Clothing Images <span className="add-listing-required-mark">*</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="add-listing-section-content">
+                  <label
+                    className={`add-listing-upload-main${imageError ? " is-invalid" : ""}`}
+                    htmlFor="listing-images"
                   >
-                    <Plus size={22} />
-                  </button>
-                  <input
-                    ref={addThumbRef}
-                    type="file"
-                    accept="image/svg+xml,image/png,image/jpeg,image/webp"
-                    multiple
-                    className="add-listing-upload-input"
-                    hidden
-                    onChange={handleListingImagesChange}
-                  />
-                </div>
-              </CardContent>
-            </Card>
+                    <CloudUpload size={40} strokeWidth={1.5} />
+                    <p>Click to upload or drag and drop</p>
+                    <span>PNG, JPG or WEBP — at least 4 photos from different angles</span>
+                    <input
+                      id="listing-images"
+                      ref={listingImagesRef}
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp"
+                      multiple
+                      className="add-listing-upload-input"
+                      onChange={handleListingImagesChange}
+                    />
+                  </label>
+                  {imageError ? (
+                    <p className="add-listing-image-error" role="alert">
+                      {imageError}
+                    </p>
+                  ) : null}
+                  <div className="add-listing-thumb-grid">
+                    {previewImages.map((src, index) => (
+                      <div key={`${src}-${index}`} className="add-listing-thumb">
+                        <img src={src} alt={`Listing preview ${index + 1}`} />
+                        <button
+                          type="button"
+                          className="add-listing-thumb-remove"
+                          aria-label="Remove image"
+                          onClick={() => handleRemoveThumb(index)}
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      className="add-listing-thumb add-listing-thumb--add"
+                      onClick={() => addThumbRef.current?.click()}
+                    >
+                      <Plus size={22} />
+                    </button>
+                    <input
+                      ref={addThumbRef}
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp"
+                      multiple
+                      className="add-listing-upload-input"
+                      hidden
+                      onChange={handleListingImagesChange}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
 
             <Card className="add-listing-section-card add-listing-details-card">
               <CardHeader className="add-listing-section-header add-listing-details-header">
@@ -728,6 +804,11 @@ const SellerAddListing = () => {
             </Card>
 
             <div className="add-listing-actions">
+              {submitError ? (
+                <p className="add-listing-submit-error" role="alert">
+                  {submitError}
+                </p>
+              ) : null}
               <Button
                 type="submit"
                 className="add-listing-publish-btn"
@@ -735,9 +816,6 @@ const SellerAddListing = () => {
               >
                 {submitting ? "Submitting..." : "Submit for Review"}
               </Button>
-              {submitError ? (
-                <p className="add-listing-submit-error">{submitError}</p>
-              ) : null}
             </div>
 
             <Card className="add-listing-tip-card">
@@ -747,8 +825,8 @@ const SellerAddListing = () => {
                   <span>Seller Tip</span>
                 </div>
                 <p>
-                  Listings with at least 5 high-quality photos from different angles
-                  tend to sell 40% faster. Focus on lighting and clear detail shots!
+                  Add at least 4 high-quality photos from different angles. Clear
+                  lighting and detail shots help your listing sell faster.
                 </p>
               </CardContent>
             </Card>

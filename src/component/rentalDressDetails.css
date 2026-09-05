@@ -299,6 +299,19 @@
   margin-bottom: 1.5rem;
 }
 
+.rental-details-dates.is-invalid .rental-details-date-field {
+  outline: 1px solid #ba1a1a;
+  outline-offset: 6px;
+  border-radius: 0.35rem;
+}
+
+.rental-details-date-error {
+  margin: -0.75rem 0 1rem;
+  color: #ba1a1a;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
 .rental-details-date-field label {
   display: block;
   margin-bottom: 0.25rem;
@@ -442,6 +455,13 @@
   color: #31685d;
   background: #e3fff6;
   border: 1px solid #b4eedf;
+}
+
+.rental-details-pending-note--error {
+  color: #ba1a1a;
+  background: #fff5f5;
+  border-color: #f0b4b4;
+  font-weight: 600;
 }
 
 .rental-details-cancel-btn {

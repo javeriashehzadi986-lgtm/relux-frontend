@@ -239,13 +239,6 @@ const AdminContactMessages = () => {
               >
                 Mark Resolved
               </button>
-              <button
-                type="button"
-                disabled={actionLoading || selected.status === "new"}
-                onClick={() => updateStatus("new")}
-              >
-                Mark as New
-              </button>
             </div>
           </aside>
         )}

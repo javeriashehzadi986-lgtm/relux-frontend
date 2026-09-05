@@ -27,80 +27,83 @@ import "./rentalDressDetails.css";
 const toInputDate = (date) => date.toISOString().split("T")[0];
 
 const getRentalDays = (start, end) => {
-  if (!start || !end) return 1;
+  if (!start || !end) return 0;
   const startDate = new Date(`${start}T12:00:00`);
   const endDate = new Date(`${end}T12:00:00`);
   const diff = Math.round((endDate - startDate) / (1000 * 60 * 60 * 24));
   return Math.max(1, diff + 1);
 };
 
-const getDefaultDates = () => {
-  const start = new Date();
-  start.setDate(start.getDate() + 14);
-  const end = new Date(start);
-  end.setDate(end.getDate() + 3);
-  return { start: toInputDate(start), end: toInputDate(end) };
-};
-
 const RentalDressDetails = ({ dress }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const defaults = useMemo(() => getDefaultDates(), []);
   const [activeImage, setActiveImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState(dress.listingSize ?? "M");
-  const [rentStart, setRentStart] = useState(defaults.start);
-  const [rentEnd, setRentEnd] = useState(defaults.end);
+  const [rentStart, setRentStart] = useState("");
+  const [rentEnd, setRentEnd] = useState("");
   const minRentStart = useMemo(() => toInputDate(new Date()), []);
   const { isSaved, toggle: toggleWishlist } = useWishlist();
   const requireLogin = useRequireLogin();
   const { orders, requestRental, cancelOrder } = useBuyerOrders();
   const favorited = isSaved(dress.id);
   const [requestError, setRequestError] = useState("");
+  const [dateError, setDateError] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
 
-  const pendingRequest = useMemo(
+  const activeRequests = useMemo(
     () =>
-      orders.find(
+      orders.filter(
         (order) =>
           order.type === "rental" &&
           order.dressId === dress.id &&
-          order.status === "processing",
-      ) ?? null,
+          (order.status === "processing" || order.status === "awaiting-payment"),
+      ),
     [orders, dress.id],
   );
+  const activeRequest =
+    activeRequests.find((order) => order.status === "awaiting-payment") ||
+    activeRequests[0] ||
+    null;
+  const isApprovedAwaitingPay = activeRequest?.status === "awaiting-payment";
 
   useEffect(() => {
-    if (!pendingRequest) return;
-    if (pendingRequest.size) setSelectedSize(pendingRequest.size);
-    if (pendingRequest.rentStart) setRentStart(pendingRequest.rentStart);
-    if (pendingRequest.rentEnd) setRentEnd(pendingRequest.rentEnd);
-  }, [pendingRequest]);
+    if (!activeRequest) return;
+    if (activeRequest.size) setSelectedSize(activeRequest.size);
+    if (activeRequest.rentStart) setRentStart(activeRequest.rentStart);
+    if (activeRequest.rentEnd) setRentEnd(activeRequest.rentEnd);
+  }, [activeRequest]);
 
   const handleRentStartChange = (value) => {
     setRentStart(value);
     if (rentEnd && value && rentEnd < value) {
-      setRentEnd(value);
+      setRentEnd("");
     }
+    setDateError(false);
     setRequestError("");
   };
 
   const handleRentEndChange = (value) => {
-    if (!value) return;
-    if (rentStart && value < rentStart) {
-      setRequestError("Rent end date must be on or after the start date.");
+    if (rentStart && value && value < rentStart) {
+      setDateError(true);
+      setRequestError("Please select an end date on or after the start date.");
       return;
     }
-    setRequestError("");
     setRentEnd(value);
+    setDateError(false);
+    setRequestError("");
   };
 
   const gallery = dress.gallery ?? [dress.mainImage];
+  const datesSelected = Boolean(rentStart && rentEnd);
   const rentalDays = getRentalDays(rentStart, rentEnd);
-  const rentalCharges = dress.dailyRate * rentalDays;
+  const rentalCharges = datesSelected ? dress.dailyRate * rentalDays : 0;
   const securityDeposit = dress.securityDeposit ?? dress.fullDressPrice;
-  const totalPaidToday = securityDeposit;
-  const estimatedRefund = Math.max(0, securityDeposit - rentalCharges);
+  const deliveryCharges = dress.deliveryCharges ?? 300;
+  const totalPaidToday = Number(securityDeposit || 0) + Number(deliveryCharges || 0);
+  const estimatedRefund = datesSelected
+    ? Math.max(0, Number(securityDeposit || 0) - rentalCharges)
+    : Number(securityDeposit || 0);
 
   const availability = dress.availability ?? getListingAvailability(dress);
   const canRent = availability.canPurchase;
@@ -117,14 +120,21 @@ const RentalDressDetails = ({ dress }) => {
     }
 
     setRequestError("");
+    setDateError(false);
+
+    if (!rentStart || !rentEnd) {
+      setDateError(true);
+      setRequestError("Please select rental start and end dates before placing your order.");
+      return;
+    }
+    if (rentEnd < rentStart) {
+      setDateError(true);
+      setRequestError("Please select an end date on or after the start date.");
+      return;
+    }
+
     setSubmitting(true);
     try {
-      if (!rentStart || !rentEnd) {
-        throw new Error("Please choose rent start and end dates");
-      }
-      if (rentEnd < rentStart) {
-        throw new Error("Rent end date must be on or after the start date.");
-      }
       await requestRental({
         dressId: dress.id,
         size: selectedSize,
@@ -143,12 +153,16 @@ const RentalDressDetails = ({ dress }) => {
   };
 
   const handleCancelRequest = async () => {
-    if (!pendingRequest) return;
+    if (!activeRequest) return;
     if (!requireLogin(`/dress/${dress.id}`)) return;
 
     try {
-      await cancelOrder(pendingRequest.id);
+      await cancelOrder(activeRequest.id);
       setShowCancelModal(false);
+      setRentStart("");
+      setRentEnd("");
+      setRequestError("");
+      setDateError(false);
     } catch (error) {
       setRequestError(error.message || "Failed to cancel request");
       setShowCancelModal(false);
@@ -244,41 +258,57 @@ const RentalDressDetails = ({ dress }) => {
           />
 
           <div className="rental-details-booking">
-            <div className="rental-details-dates">
+            <div className={`rental-details-dates${dateError ? " is-invalid" : ""}`}>
               <div className="rental-details-date-field">
-                <label htmlFor="rent-start">Rent Start</label>
+                <label htmlFor="rent-start">Rent Start *</label>
                 <input
                   id="rent-start"
                   type="date"
                   value={rentStart}
                   min={minRentStart}
+                  required
+                  aria-invalid={dateError && !rentStart}
                   onChange={(e) => handleRentStartChange(e.target.value)}
                 />
               </div>
               <div className="rental-details-date-field">
-                <label htmlFor="rent-end">Rent End</label>
+                <label htmlFor="rent-end">Rent End *</label>
                 <input
                   id="rent-end"
                   type="date"
                   value={rentEnd}
                   min={rentStart || minRentStart}
+                  required
+                  aria-invalid={dateError && !rentEnd}
                   onChange={(e) => handleRentEndChange(e.target.value)}
                 />
               </div>
             </div>
+            {dateError && requestError ? (
+              <p className="rental-details-date-error" role="alert">
+                {requestError}
+              </p>
+            ) : null}
 
             <div className="rental-details-summary">
               <p className="rental-details-summary-title">Payment Summary</p>
               <div className="rental-details-summary-row">
-                <span>Refundable Security Deposit (Paid Today)</span>
+                <span>Refundable Security Deposit</span>
                 <span>{formatPkr(securityDeposit)}</span>
+              </div>
+              <div className="rental-details-summary-row">
+                <span>Delivery charges</span>
+                <span>{formatPkr(deliveryCharges)}</span>
               </div>
               <div className="rental-details-summary-row rental-details-summary-row--muted">
                 <span>
-                  Rental Charges ({dress.dailyRateFormatted} x {rentalDays}{" "}
-                  {rentalDays === 1 ? "Day" : "Days"}) — deducted after return
+                  {datesSelected
+                    ? `Rental Charges (${dress.dailyRateFormatted} x ${rentalDays} ${
+                        rentalDays === 1 ? "Day" : "Days"
+                      }) — deducted after return`
+                    : "Rental Charges — select start and end dates"}
                 </span>
-                <span>{formatPkr(rentalCharges)}</span>
+                <span>{datesSelected ? formatPkr(rentalCharges) : "—"}</span>
               </div>
               <div className="rental-details-summary-total">
                 <span>Total Paid Today</span>
@@ -291,23 +321,40 @@ const RentalDressDetails = ({ dress }) => {
             </div>
 
             <p className="rental-details-deposit-note">
-              The security deposit is charged via Stripe after the seller approves your
-              request. After the dress is returned and inspected, rental charges are
-              deducted from the deposit and the remaining balance is refunded.
+              After approval you pay the security deposit plus PKR 300 flat delivery via
+              Stripe. Deposit is held in escrow; after return and inspection, rental charges
+              are deducted and the remaining balance is refunded.
             </p>
           </div>
 
-          <div className="rental-details-actions">
+            <div className="rental-details-actions">
             {requestError ? (
-              <p className="rental-details-pending-note" role="alert">
+              <p
+                className={`rental-details-pending-note${
+                  dateError || /date/i.test(requestError)
+                    ? " rental-details-pending-note--error"
+                    : ""
+                }`}
+                role="alert"
+              >
                 {requestError}
               </p>
             ) : null}
-            {pendingRequest ? (
+            {activeRequest ? (
               <>
                 <p className="rental-details-pending-note">
-                  You have a pending rental request for this dress (Order{" "}
-                  <strong>{pendingRequest.id}</strong>).
+                  {isApprovedAwaitingPay ? (
+                    <>
+                      This rental was approved (Order <strong>{activeRequest.orderId || activeRequest.id}</strong>).
+                      Cancel it to request new dates, or proceed to checkout from My Orders.
+                    </>
+                  ) : (
+                    <>
+                      You have a pending rental request for this dress (Order{" "}
+                      <strong>{activeRequest.orderId || activeRequest.id}</strong>).
+                      Cancel it before placing a new request with different dates.
+                    </>
+                  )}
                 </p>
                 <Button
                   type="button"
@@ -395,7 +442,7 @@ const RentalDressDetails = ({ dress }) => {
         reviewPlaceholder="Share your experience renting from this seller..."
       />
 
-      {showCancelModal && pendingRequest && (
+      {showCancelModal && activeRequest && (
         <div
           className="rental-details-cancel-overlay"
           role="presentation"
@@ -407,11 +454,12 @@ const RentalDressDetails = ({ dress }) => {
           >
             <CardContent className="rental-details-cancel-modal-body">
               <h2 id="rental-cancel-title" className="rental-details-cancel-modal-title">
-                Cancel rental request?
+                Cancel this rental request?
               </h2>
               <p className="rental-details-cancel-modal-description">
-                This will withdraw your pending rental request. You can request again from this
-                page anytime and your existing order will be updated.
+                {isApprovedAwaitingPay
+                  ? "This will cancel your approved rental. You can then request the same dress again with new dates."
+                  : "This will withdraw your pending rental request. You can request again anytime with new dates."}
               </p>
             </CardContent>
             <CardContent className="rental-details-cancel-modal-actions">
