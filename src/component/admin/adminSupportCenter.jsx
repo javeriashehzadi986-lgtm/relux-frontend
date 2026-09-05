@@ -1,12 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  CheckCircle2,
   ChevronLeft,
   ChevronRight,
   Search,
   Send,
   X,
-  XCircle,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -80,30 +78,11 @@ const STATUS_LABELS = {
 const PAGE_SIZE = 10;
 
 const MODAL_CONFIG = {
-  resolve: {
-    icon: CheckCircle2,
-    iconClass: "admin-reports-modal-icon--resolve",
-    title: "Resolve Dispute / Request?",
-    description:
-      "Your typed message will be shown to the buyer and (if linked) the seller. Write your own decision first.",
-    confirmLabel: "Resolve",
-    confirmClass: "admin-reports-modal-confirm--resolve",
-  },
-  reject: {
-    icon: XCircle,
-    iconClass: "admin-reports-modal-icon--reject",
-    title: "Dismiss Request?",
-    description:
-      "The request will be closed. Your typed message will be shown to the user — write it in the reply box first.",
-    confirmLabel: "Dismiss",
-    confirmClass: "admin-reports-modal-confirm--reject",
-  },
   askSeller: {
     icon: Send,
     iconClass: "admin-reports-modal-icon--resolve",
     title: "Ask Seller for Response?",
-    description:
-      "Your typed message will be sent to the seller. Write exactly what you want them to see.",
+    description: "Your message will be sent to the seller in Support Center.",
     confirmLabel: "Contact Seller",
     confirmClass: "admin-reports-modal-confirm--resolve",
   },
@@ -111,8 +90,7 @@ const MODAL_CONFIG = {
     icon: Send,
     iconClass: "admin-reports-modal-icon--resolve",
     title: "Ask Buyer for Response?",
-    description:
-      "Your typed message will be sent to the buyer. Write exactly what you want them to see.",
+    description: "Your message will be sent to the buyer in Support Center.",
     confirmLabel: "Contact Buyer",
     confirmClass: "admin-reports-modal-confirm--resolve",
   },
@@ -120,8 +98,7 @@ const MODAL_CONFIG = {
     icon: Send,
     iconClass: "admin-reports-modal-icon--resolve",
     title: "Contact Buyer & Seller?",
-    description:
-      "Your typed message will be sent to both parties. Write exactly what you want them to see.",
+    description: "Your message will be sent to both parties in Support Center.",
     confirmLabel: "Contact Both",
     confirmClass: "admin-reports-modal-confirm--resolve",
   },
@@ -152,11 +129,6 @@ function canContactDisputeParties(report) {
   if (!report) return false;
   if (report.isDispute) return true;
   return Boolean(report.orderId && report.buyerId && report.sellerId);
-}
-
-function isMediationReady(report) {
-  if (!canContactDisputeParties(report)) return true;
-  return Boolean(report.mediationComplete);
 }
 
 function getInitials(name = "") {
@@ -316,11 +288,27 @@ const AdminSupportCenter = () => {
         const data = await api.getAdminOrderSettlement(selectedReport.orderId);
         if (!cancelled) {
           setOrderSettlement(data.settlement ?? null);
-          setOrderSettlementType(data.orderType || data.settlement?.orderType || "rental");
+          const nextType = data.orderType || data.settlement?.orderType || "rental";
+          setOrderSettlementType(nextType);
           setAdminRentalCharge(String(data.settlement?.rentalChargePkr ?? ""));
           setAdminDamageCharge(String(data.settlement?.damageDeductionPkr ?? ""));
-          setAdminSellerPayout(String(data.settlement?.sellerPayoutPkr ?? data.settlement?.itemAmountPkr ?? ""));
-          setAdminBuyerRefund(String(data.settlement?.refundAmountPkr ?? "0"));
+
+          const totalPaid = Number(data.settlement?.totalPaidPkr) || 0;
+          const isDisputedSale =
+            nextType === "sale" && data.settlement?.escrowSettlementStatus === "disputed";
+
+          if (isDisputedSale) {
+            // Order-not-received disputes: default full refund to buyer.
+            setAdminSellerPayout("0");
+            setAdminBuyerRefund(String(totalPaid || data.settlement?.itemAmountPkr || 0));
+          } else {
+            setAdminSellerPayout(
+              String(
+                data.settlement?.sellerPayoutPkr ?? data.settlement?.itemAmountPkr ?? "",
+              ),
+            );
+            setAdminBuyerRefund(String(data.settlement?.refundAmountPkr ?? "0"));
+          }
         }
       } catch {
         if (!cancelled) setOrderSettlement(null);
@@ -337,20 +325,31 @@ const AdminSupportCenter = () => {
 
   const handleReleaseEscrow = async () => {
     if (!selectedReport?.orderId || !orderSettlement) return;
-    const decision = replyText.trim();
-    if (!decision) {
-      setActionError(
-        "Write your own message/decision in the reply box before releasing escrow.",
-      );
+
+    if (orderSettlementType === "rental" && !sellerReturnConfirmed) {
+      setActionError("Seller has not confirmed receiving the returned product yet.");
       return;
     }
+
+    const sellerPayout =
+      orderSettlementType === "sale" && !buyerReceiptConfirmed
+        ? 0
+        : Number(adminSellerPayout) || 0;
+    const buyerRefund = Number(adminBuyerRefund) || 0;
+
+    if (orderSettlementType === "sale" && sellerPayout <= 0 && buyerRefund <= 0) {
+      setActionError("Enter a buyer refund amount greater than 0.");
+      return;
+    }
+
     setReleasingEscrow(true);
     setActionError("");
     try {
+      const decision = replyText.trim();
       if (orderSettlementType === "sale") {
         await api.resolveAdminSaleEscrow(selectedReport.orderId, {
-          sellerPayoutPkr: Number(adminSellerPayout) || 0,
-          refundAmountPkr: Number(adminBuyerRefund) || 0,
+          sellerPayoutPkr: sellerPayout,
+          refundAmountPkr: buyerRefund,
           decision,
           adminSettlementNote: decision,
         });
@@ -366,6 +365,7 @@ const AdminSupportCenter = () => {
       const data = await api.getAdminOrderSettlement(selectedReport.orderId);
       setOrderSettlement(data.settlement ?? null);
       setOrderSettlementType(data.orderType || data.settlement?.orderType || "rental");
+      setReplyText("");
     } catch (error) {
       setActionError(error.message || "Failed to release escrow");
     } finally {
@@ -382,29 +382,14 @@ const AdminSupportCenter = () => {
   const escrowAlreadyReleased =
     orderSettlement?.escrowStatus === "released" ||
     orderSettlement?.escrowSettlementStatus === "admin_settled";
+  const sellerReturnConfirmed = Boolean(orderSettlement?.returnConfirmedAt);
+  const buyerReceiptConfirmed = Boolean(orderSettlement?.deliveryConfirmedAt);
   const canReleaseEscrow =
     Boolean(orderSettlement) &&
     orderSettlement.escrowSettlementStatus === "disputed" &&
     !escrowAlreadyReleased &&
-    isMediationReady(selectedReport);
-  const mediationPending =
-    canContactDisputeParties(selectedReport) &&
-    selectedReport?.orderId &&
-    !isMediationReady(selectedReport) &&
-    !escrowAlreadyReleased;
+    (orderSettlementType !== "rental" || sellerReturnConfirmed);
   const canContactParties = canContactDisputeParties(selectedReport);
-  const waitingForSeller =
-    Boolean(selectedReport?.adminMessageToSeller) &&
-    !(
-      selectedReport?.sellerResponses?.length > 0 ||
-      selectedReport?.sellerResponse
-    );
-  const waitingForBuyer =
-    Boolean(selectedReport?.adminMessageToBuyer) &&
-    !(
-      selectedReport?.buyerResponses?.length > 0 ||
-      selectedReport?.buyerResponse
-    );
 
   const patchReport = async (body) => {
     if (!selectedReport) return;
@@ -421,26 +406,12 @@ const AdminSupportCenter = () => {
     }
   };
 
-  const handleMarkInProgress = async () => {
-    if (!selectedReport || isClosed) return;
-    try {
-      await patchReport({
-        status: "in_progress",
-        adminReply: replyText.trim() || selectedReport.adminReply || "",
-      });
-    } catch {
-      /* error already set */
-    }
-  };
-
   const handleConfirmModal = async () => {
     if (!selectedReport || !activeModal) return;
 
     const trimmedReply = replyText.trim();
     if (!trimmedReply) {
-      setActionError(
-        "Write your own message in the reply box first. Automatic messages are disabled.",
-      );
+      setActionError("Please enter a message first.");
       return;
     }
 
@@ -464,19 +435,8 @@ const AdminSupportCenter = () => {
         messageToBuyer: trimmedReply,
         adminReply: trimmedReply,
       };
-    } else if (activeModal === "resolve") {
-      body = {
-        status: "resolved",
-        decision: trimmedReply,
-        adminReply: trimmedReply,
-      };
     } else {
-      body = {
-        status: "resolved",
-        decision: trimmedReply,
-        adminReply: trimmedReply,
-        adminNote: "Dismissed by admin",
-      };
+      return;
     }
 
     try {
@@ -880,14 +840,13 @@ const AdminSupportCenter = () => {
                           Buyer dispute: {orderSettlement.disputeReason}
                         </blockquote>
                       ) : null}
-                      {mediationPending ? (
-                        <p className="admin-reports-mediation-note">
-                          Use &ldquo;Contact Both Parties&rdquo; and wait for buyer and seller to
-                          respond in Support Center before releasing escrow.
-                        </p>
-                      ) : null}
                       {canReleaseEscrow ? (
                         <div className="admin-reports-escrow-form">
+                          {actionError ? (
+                            <p className="admin-reports-banner-error" role="alert">
+                              {actionError}
+                            </p>
+                          ) : null}
                           {orderSettlementType === "sale" ? (
                             <>
                               <label>
@@ -897,6 +856,7 @@ const AdminSupportCenter = () => {
                                   min="0"
                                   value={adminSellerPayout}
                                   onChange={(e) => setAdminSellerPayout(e.target.value)}
+                                  disabled={!buyerReceiptConfirmed}
                                 />
                               </label>
                               <label>
@@ -940,10 +900,15 @@ const AdminSupportCenter = () => {
                             {releasingEscrow ? "Releasing..." : "Release Escrow & Resolve"}
                           </Button>
                         </div>
+                      ) : orderSettlement.escrowSettlementStatus === "disputed" &&
+                        orderSettlementType === "rental" &&
+                        !sellerReturnConfirmed ? (
+                        <p className="admin-reports-escrow-released-note">
+                          Waiting for seller return confirmation before release.
+                        </p>
                       ) : escrowAlreadyReleased ? (
                         <p className="admin-reports-escrow-released-note">
-                          Escrow has been released for this order. Buyer refund and seller payout
-                          notifications were sent.
+                          Escrow already released.
                         </p>
                       ) : null}
                     </div>
@@ -971,32 +936,10 @@ const AdminSupportCenter = () => {
                   rows={4}
                   disabled={actionLoading || isClosed}
                 />
-                <p className="admin-reports-reply-hint">
-                  {selectedReport.isDispute
-                    ? "Type your own message above, then use Contact / Resolve. No automatic text is sent."
-                    : "Type your own reply — this is what the user will see. No automatic text is sent."}
-                </p>
               </section>
             </div>
 
             <div className="admin-reports-detail-actions">
-              {!canContactParties && !isClosed ? (
-                <p className="admin-reports-action-hint">
-                  Contact buttons need a linked order dispute with both buyer and seller. Ask the
-                  user to re-submit with an order selected, or use Resolve for general requests.
-                </p>
-              ) : null}
-
-              {(waitingForSeller || waitingForBuyer) && !isClosed ? (
-                <p className="admin-reports-action-hint admin-reports-action-hint--waiting">
-                  {waitingForSeller && waitingForBuyer
-                    ? "Waiting for buyer and seller to respond in Support Center. You can send a follow-up message anytime."
-                    : waitingForSeller
-                      ? "Waiting for seller response. You can send a follow-up message anytime."
-                      : "Waiting for buyer response. You can send a follow-up message anytime."}
-                </p>
-              ) : null}
-
               <Button
                 type="button"
                 className="admin-reports-action-btn admin-reports-action-btn--primary"
@@ -1027,39 +970,6 @@ const AdminSupportCenter = () => {
                 >
                   <Send size={16} aria-hidden="true" />
                   Ask Buyer
-                </Button>
-              </div>
-
-              <Button
-                type="button"
-                variant="outline"
-                className="admin-reports-action-btn"
-                onClick={() => setActiveModal("resolve")}
-                disabled={actionLoading || isClosed}
-              >
-                <CheckCircle2 size={16} aria-hidden="true" />
-                Resolve with Decision
-              </Button>
-              <div className="admin-reports-action-row">
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="admin-reports-action-btn"
-                  onClick={handleMarkInProgress}
-                  disabled={
-                    actionLoading || isClosed || selectedReport.status === "in_progress"
-                  }
-                >
-                  Mark In Progress
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="admin-reports-action-btn"
-                  onClick={() => setActiveModal("reject")}
-                  disabled={actionLoading || isClosed}
-                >
-                  Dismiss
                 </Button>
               </div>
             </div>
