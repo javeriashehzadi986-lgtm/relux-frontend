@@ -26,7 +26,7 @@ const RENTAL_POLICY = [
   "Rental charges are deducted only after the dress is returned and inspected.",
   "The remaining balance is refunded to your original payment method or wallet.",
   "Items must be returned by 12 PM on the scheduled end date.",
-  "Late returns incur a fee of 50% of the daily rental rate per day.",
+  "Late returns incur an extra fee based on the rental charges for those days.",
   "Major damages or permanent stains will be deducted from the deposit.",
   "Rental is only confirmed once the seller accepts the booking request.",
 ];

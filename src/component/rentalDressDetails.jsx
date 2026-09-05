@@ -240,12 +240,8 @@ const RentalDressDetails = ({ dress }) => {
           </div>
 
           <div className="rental-details-pricing">
-            <p className="rental-details-daily-rate">
-              {dress.dailyRateFormatted} <span>/day</span>
-            </p>
-            <span className="rental-details-pricing-divider" aria-hidden="true" />
             <p className="rental-details-deposit">
-              Refundable Security Deposit (Full Dress Price):{" "}
+              Full dress payment (refundable deposit):{" "}
               <strong>{dress.securityDepositFormatted ?? dress.fullDressPriceFormatted}</strong>
             </p>
           </div>
@@ -303,10 +299,10 @@ const RentalDressDetails = ({ dress }) => {
               <div className="rental-details-summary-row rental-details-summary-row--muted">
                 <span>
                   {datesSelected
-                    ? `Rental Charges (${dress.dailyRateFormatted} x ${rentalDays} ${
-                        rentalDays === 1 ? "Day" : "Days"
-                      }) — deducted after return`
-                    : "Rental Charges — select start and end dates"}
+                    ? `Rental charges for ${rentalDays} ${
+                        rentalDays === 1 ? "day" : "days"
+                      } — deducted from your payment after return`
+                    : "Rental charges — select start and end dates"}
                 </span>
                 <span>{datesSelected ? formatPkr(rentalCharges) : "—"}</span>
               </div>
@@ -321,9 +317,11 @@ const RentalDressDetails = ({ dress }) => {
             </div>
 
             <p className="rental-details-deposit-note">
-              After approval you pay the security deposit plus PKR 300 flat delivery via
-              Stripe. Deposit is held in escrow; after return and inspection, rental charges
-              are deducted and the remaining balance is refunded.
+              After approval you pay the full dress amount as a refundable security deposit,
+              plus {formatPkr(deliveryCharges)} delivery via Stripe. That deposit is held in
+              escrow. After return, the rental charges for your selected days are deducted
+              from the same payment and the remaining balance is refunded. Delivery is
+              separate from the dress payment.
             </p>
           </div>
 

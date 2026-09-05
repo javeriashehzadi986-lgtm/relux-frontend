@@ -962,9 +962,9 @@ function SellerProfileSection({ onLogoutClick }) {
                 )}
 
                 <p className="seller-profile-stripe-note">
-                  Buyers pay Relux Hub at checkout. After delivery or rental return confirmation,
-                  your share is transferred to your Stripe Connect balance, then to your
-                  bank.
+                  Buyers pay Relux Hub at checkout (USD via Stripe). When you confirm a
+                  rental return — or a sale escrow releases — your share is sent to Stripe
+                  Connect automatically. No extra payout button needed.
                 </p>
                 {stripeMessage ? (
                   <p className="seller-profile-stripe-note" role="status">

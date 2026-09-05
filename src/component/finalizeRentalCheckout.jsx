@@ -36,8 +36,14 @@ const CITIES = [
 
 const OTHER_CITY = "__other__";
 const DELIVERY_CHARGES_PKR = 300;
+/** Must match Backend STRIPE_PKR_TO_CURRENCY — shown so buyers can verify Stripe USD. */
+const PKR_TO_USD_RATE = 280;
 
 const formatPkr = (amount) => `PKR ${Math.round(Number(amount) || 0).toLocaleString("en-PK")}`;
+const formatUsdFromPkr = (amount) => {
+  const usd = Math.max(0, Number(amount) || 0) / PKR_TO_USD_RATE;
+  return `$${usd.toFixed(2)}`;
+};
 
 const formatRentalPeriod = (start, end) => {
   if (!start || !end) return "Dates to be confirmed";
@@ -286,8 +292,8 @@ const FinalizeRentalCheckout = () => {
       <header className="finalize-purchase-header">
         <h1>Finalize Rental</h1>
         <p>
-          Your rental request was approved. Confirm delivery details and pay the security
-          deposit securely via Stripe.
+          Your rental was approved. Confirm delivery details and pay the full dress amount
+          plus delivery. You can verify the same totals on Stripe before paying.
         </p>
       </header>
 
@@ -428,25 +434,46 @@ const FinalizeRentalCheckout = () => {
                   <span>Duration</span>
                   <span>{rentalDays} day{rentalDays === 1 ? "" : "s"}</span>
                 </div>
-                {dailyRate > 0 ? (
-                  <div className="finalize-purchase-summary-row">
-                    <span>Rent ({formatPkr(dailyRate)}/day)</span>
-                    <span>{formatPkr(rentSubtotal)}</span>
-                  </div>
-                ) : null}
                 <div className="finalize-purchase-summary-row">
-                  <span>Security deposit (escrow)</span>
+                  <span>Full dress payment (refundable escrow)</span>
                   <span>{formatPkr(depositDue || deposit)}</span>
                 </div>
                 <div className="finalize-purchase-summary-row">
                   <span>Delivery charges</span>
                   <span>{formatPkr(deliveryCharges)}</span>
                 </div>
+                {rentSubtotal > 0 ? (
+                  <div className="finalize-purchase-summary-row finalize-purchase-summary-row--muted">
+                    <span>
+                      Rental charges for {rentalDays} day{rentalDays === 1 ? "" : "s"}{" "}
+                      (deducted after return — not an extra charge today)
+                    </span>
+                    <span>{formatPkr(rentSubtotal)}</span>
+                  </div>
+                ) : null}
                 <div className="finalize-purchase-summary-total">
-                  <span>Due today</span>
+                  <span>Total due today</span>
                   <span>{formatPkr(totalAmount)}</span>
                 </div>
+                <div className="finalize-purchase-summary-row">
+                  <span>Stripe will charge (USD equivalent)</span>
+                  <span>{formatUsdFromPkr(totalAmount)}</span>
+                </div>
               </div>
+              <p className="finalize-purchase-breakdown-note">
+                You pay <strong>{formatPkr(depositDue || deposit)}</strong> for the dress
+                (held in escrow) plus <strong>{formatPkr(deliveryCharges)}</strong> delivery.
+                Total <strong>{formatPkr(totalAmount)}</strong>
+                {rentSubtotal > 0 ? (
+                  <>
+                    . After return, about <strong>{formatPkr(rentSubtotal)}</strong> for your
+                    rental days is kept and the rest of the dress payment is refunded.
+                  </>
+                ) : (
+                  <>.</>
+                )}{" "}
+                Confirm the same dress + delivery lines on the Stripe page before paying.
+              </p>
             </div>
           </div>
 
@@ -465,11 +492,14 @@ const FinalizeRentalCheckout = () => {
             <div className="finalize-purchase-delivery-note">
               <CalendarDays size={18} aria-hidden="true" />
               <div>
-                <strong>Delivery — {formatPkr(deliveryCharges)}</strong>
+                <strong>
+                  Pay today — {formatPkr(totalAmount)} ({formatUsdFromPkr(totalAmount)})
+                </strong>
                 <p>
-                  Flat delivery fee within Pakistan. Pay the security deposit plus delivery
-                  now. Deposit is held in escrow until the seller confirms your return;
-                  rental charges are deducted and the remaining balance is refunded.
+                  Full dress payment {formatPkr(depositDue || deposit)} + delivery{" "}
+                  {formatPkr(deliveryCharges)}. Stripe shows the USD equivalent of these same
+                  amounts. After return, rental charges for your selected days are deducted
+                  from the dress payment and the rest is refunded.
                 </p>
               </div>
             </div>
@@ -486,12 +516,15 @@ const FinalizeRentalCheckout = () => {
               disabled={paying}
               onClick={handlePayWithStripe}
             >
-              {paying ? "Redirecting to Stripe…" : "Pay with Stripe"}
+              {paying
+                ? "Redirecting to Stripe…"
+                : `Pay ${formatPkr(totalAmount)} with Stripe`}
             </Button>
 
             <p className="finalize-purchase-legal">
-              By continuing you agree to Relux Hub rental and refund policies. Amounts are
-              shown in PKR; Stripe may display a converted total at checkout.
+              By continuing you agree to Relux Hub rental and refund policies. Verify the
+              dress payment and delivery lines on Stripe match {formatPkr(depositDue || deposit)}{" "}
+              + {formatPkr(deliveryCharges)}.
             </p>
           </div>
         </aside>
