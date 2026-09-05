@@ -2,6 +2,18 @@ import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { refreshPublicCatalog } from "@/data/catalogStore";
 import api from "@/services/api";
+import { connectOrderSocket, onOrderUpdated } from "@/services/orderSocket";
+
+function mergeOrderList(prev, nextOrder) {
+  if (!nextOrder?.id) return prev;
+  const idx = prev.findIndex((o) => String(o.id) === String(nextOrder.id));
+  if (idx === -1) {
+    return [nextOrder, ...prev];
+  }
+  const copy = [...prev];
+  copy[idx] = { ...copy[idx], ...nextOrder };
+  return copy;
+}
 
 export function useBuyerOrders() {
   const { user, isAuthenticated } = useAuth();
@@ -46,18 +58,56 @@ export function useBuyerOrders() {
     if (!isAuthenticated || user?.role !== "buyer") return undefined;
 
     const refreshOnFocus = () => {
-      refreshOrders();
+      refreshOrders({ silent: true });
+    };
+
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") {
+        refreshOrders({ silent: true });
+      }
     };
 
     window.addEventListener("focus", refreshOnFocus);
-    document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "visible") {
-        refreshOrders();
-      }
-    });
+    document.addEventListener("visibilitychange", onVisibility);
 
     return () => {
       window.removeEventListener("focus", refreshOnFocus);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [isAuthenticated, refreshOrders, user?.role]);
+
+  useEffect(() => {
+    if (!isAuthenticated || user?.role !== "buyer") return undefined;
+
+    const socket = connectOrderSocket();
+    if (!socket) return undefined;
+
+    let refreshTimer = null;
+    const scheduleSilentRefresh = () => {
+      if (refreshTimer) return;
+      refreshTimer = window.setTimeout(() => {
+        refreshTimer = null;
+        refreshOrders({ silent: true });
+      }, 250);
+    };
+
+    const handleOrderUpdated = (payload) => {
+      if (payload?.order) {
+        setOrders((prev) => mergeOrderList(prev, payload.order));
+      }
+      scheduleSilentRefresh();
+    };
+
+    const unsubscribe = onOrderUpdated(handleOrderUpdated);
+    const onConnect = () => {
+      scheduleSilentRefresh();
+    };
+    socket.on("connect", onConnect);
+
+    return () => {
+      if (refreshTimer) window.clearTimeout(refreshTimer);
+      socket.off("connect", onConnect);
+      unsubscribe();
     };
   }, [isAuthenticated, refreshOrders, user?.role]);
 

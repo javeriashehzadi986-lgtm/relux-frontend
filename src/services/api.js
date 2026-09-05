@@ -465,6 +465,11 @@ export const api = {
 
   getSellerStripePayouts: () => request("/seller/stripe/payouts"),
 
+  retrySellerStripePayouts: () =>
+    request("/seller/stripe/payouts/retry", {
+      method: "POST",
+    }),
+
   // Seller Orders
   getMySellerOrders: () =>
     request("/seller/orders/me"),

@@ -159,6 +159,7 @@ function SellerProfileSection({ onLogoutClick }) {
   const [stripeDashboardLoading, setStripeDashboardLoading] = useState(false);
   const [stripeMessage, setStripeMessage] = useState("");
   const [stripePayouts, setStripePayouts] = useState(null);
+  const [retryingPayouts, setRetryingPayouts] = useState(false);
   const [searchParams] = useSearchParams();
   const {
     reviews,
@@ -260,6 +261,25 @@ function SellerProfileSection({ onLogoutClick }) {
       setStripeMessage(err.message || "Could not open Stripe dashboard");
     } finally {
       setStripeDashboardLoading(false);
+    }
+  };
+
+  const pendingStripePayoutCount =
+    stripePayouts?.recentPayouts?.filter((payout) =>
+      ["ledger_only", "failed", "none", ""].includes(payout.payoutStatus || ""),
+    ).length || 0;
+
+  const handleRetryStripePayouts = async () => {
+    setRetryingPayouts(true);
+    setStripeMessage("");
+    try {
+      const data = await api.retrySellerStripePayouts();
+      setStripeMessage(data.message || "Payout retry finished.");
+      await loadStripePayouts();
+    } catch (err) {
+      setStripeMessage(err.message || "Could not retry Stripe payouts");
+    } finally {
+      setRetryingPayouts(false);
     }
   };
 
@@ -922,7 +942,7 @@ function SellerProfileSection({ onLogoutClick }) {
                             {payout.payoutStatus === "transferred"
                               ? " · Sent to Stripe"
                               : payout.payoutStatus === "ledger_only"
-                                ? " · Recorded (Connect incomplete)"
+                                ? " · Not sent to Stripe yet"
                                 : payout.payoutStatus === "failed"
                                   ? " · Transfer failed"
                                   : ""}
@@ -973,6 +993,19 @@ function SellerProfileSection({ onLogoutClick }) {
                           ? "Opening dashboard…"
                           : "View Stripe Balance & Bank"}
                       </Button>
+                      {pendingStripePayoutCount > 0 ? (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="seller-profile-primary-btn--full"
+                          onClick={handleRetryStripePayouts}
+                          disabled={retryingPayouts}
+                        >
+                          {retryingPayouts
+                            ? "Sending to Stripe…"
+                            : `Send ${pendingStripePayoutCount} pending payout(s) to Stripe`}
+                        </Button>
+                      ) : null}
                       <Button
                         type="button"
                         variant="outline"

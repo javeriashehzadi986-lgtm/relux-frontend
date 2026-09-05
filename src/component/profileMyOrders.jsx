@@ -157,12 +157,14 @@ const ProfileMyOrders = () => {
   const [actionError, setActionError] = useState("");
   const [refreshing, setRefreshing] = useState(false);
 
+  // Real-time updates come via Socket.IO (`order:updated`); keep a slow
+  // fallback poll in case the socket disconnects.
   useEffect(() => {
     const interval = window.setInterval(() => {
       if (document.visibilityState === "visible") {
         refreshOrders({ silent: true });
       }
-    }, 45000);
+    }, 120000);
 
     return () => window.clearInterval(interval);
   }, [refreshOrders]);

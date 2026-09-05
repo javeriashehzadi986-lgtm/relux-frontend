@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useMessaging } from "@/hooks/useMessaging";
-import api from "@/services/api";
 import "./messages.css";
 
 const useIsDesktop = () => {
@@ -45,44 +44,15 @@ const filterConversations = (conversations, filter, searchQuery, isSeller) => {
   });
 };
 
-const getChatMenuOptions = ({ listingId, isMuted, hasUnread, isSeller }) =>
-  [
-    {
-      id: "mark-read",
-      label: "Mark as read",
-      icon: "done_all",
-      show: hasUnread,
-      action: "markRead",
-    },
-    {
-      id: "view-listing",
-      label: isSeller ? "View my listing" : "View dress listing",
-      icon: isSeller ? "inventory_2" : "visibility",
-      show: Boolean(listingId),
-      action: "viewListing",
-    },
-    {
-      id: "mute",
-      label: isMuted ? "Unmute notifications" : "Mute notifications",
-      icon: isMuted ? "notifications" : "notifications_off",
-      show: true,
-      action: "toggleMute",
-    },
-    {
-      id: "clear",
-      label: "Clear chat history",
-      icon: "delete_sweep",
-      show: true,
-      action: "clearHistory",
-    },
-    {
-      id: "report",
-      label: "Report conversation",
-      icon: "flag",
-      show: !isSeller,
-      action: "report",
-    },
-  ].filter((option) => option.show);
+const getChatMenuOptions = () => [
+  {
+    id: "clear",
+    label: "Clear chat",
+    icon: "delete_sweep",
+    action: "clearHistory",
+    danger: true,
+  },
+];
 
 const MessagesContent = () => {
   const { conversationId } = useParams();
@@ -102,11 +72,8 @@ const MessagesContent = () => {
     sendMessage,
     notifyTyping,
     markAllRead,
-    toggleMute,
     clearHistory,
     selectConversation,
-    markConversationRead,
-    refreshActive,
   } = useMessaging(conversationId);
 
   const [message, setMessage] = useState("");
@@ -126,20 +93,9 @@ const MessagesContent = () => {
   );
 
   const hasUnread = conversations.some((conversation) => conversation.unread > 0);
-  const currentUnread =
-    (conversations.find((conversation) => conversation.id === activeId)?.unread ?? 0) > 0;
 
   const listingId = isSeller ? thread?.listingId : thread?.dressId;
-  const chatMenuOptions = useMemo(
-    () =>
-      getChatMenuOptions({
-        listingId,
-        isMuted: muted,
-        hasUnread: currentUnread,
-        isSeller,
-      }),
-    [listingId, muted, currentUnread, isSeller],
-  );
+  const chatMenuOptions = useMemo(() => getChatMenuOptions(), []);
 
   const showChatContent = Boolean(conversationId) || isDesktop;
   const hideSidebar = Boolean(conversationId) && !isDesktop;
@@ -185,47 +141,9 @@ const MessagesContent = () => {
     if (!activeId) return;
 
     try {
-    switch (action) {
-      case "markRead":
-          if (activeId) {
-            await markConversationRead(activeId);
-            await refreshActive();
-          }
-        setActionNotice("Conversation marked as read.");
-        break;
-        case "viewListing":
-          if (listingId) {
-            navigate(isSeller ? "/sellerProfile?section=listings" : `/dress/${listingId}`);
-        }
-        break;
-      case "toggleMute":
-          await toggleMute();
-          setActionNotice(
-            muted ? "Notifications unmuted." : "Notifications muted for this chat.",
-          );
-        break;
-      case "clearHistory":
-          await clearHistory();
+      if (action === "clearHistory") {
+        await clearHistory();
         setActionNotice("Chat history cleared.");
-        break;
-      case "report":
-          await api.createReport({
-            issueType: "Other",
-            subject: `Report conversation with ${partnerName ?? "user"}`,
-            message: [
-              `Conversation ID: ${activeId}`,
-              listingTitle ? `Listing: ${listingTitle}` : null,
-              `Reported by: ${isSeller ? "seller" : "buyer"}`,
-              "",
-              "This report was submitted from the messages screen.",
-            ]
-              .filter(Boolean)
-              .join("\n"),
-          });
-          setActionNotice("Report submitted. Our support team will review this conversation.");
-        break;
-      default:
-        break;
       }
     } catch (err) {
       setActionNotice(err.message || "Action failed.");

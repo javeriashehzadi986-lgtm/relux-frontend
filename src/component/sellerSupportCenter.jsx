@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/accordion";
 import api from "@/services/api";
 import { uploadSupportImage } from "@/utils/imageUpload";
+import { connectReportSocket, onReportUpdated } from "@/services/reportSocket";
 import "./sellerSupportCenter.css";
 
 const SELLER_ISSUE_TYPES = ["Listing", "Order", "Payment", "Other"];
@@ -104,17 +105,24 @@ const SellerSupportCenter = ({ variant = "buyer" }) => {
 
   const selectedOrder = orders.find((order) => order.id === orderId) || null;
 
-  const loadReports = async () => {
-    setLoadingRequests(true);
+  const loadReports = async (options = {}) => {
+    const silent = Boolean(options.silent);
+    if (!silent) {
+      setLoadingRequests(true);
+    }
     setListError("");
     try {
       const data = await api.getMyReports();
       setRequests(data.reports || []);
     } catch (error) {
-      setListError(error.message || "Could not load your requests");
-      setRequests([]);
+      if (!silent) {
+        setListError(error.message || "Could not load your requests");
+        setRequests([]);
+      }
     } finally {
-      setLoadingRequests(false);
+      if (!silent) {
+        setLoadingRequests(false);
+      }
     }
   };
 
@@ -136,6 +144,53 @@ const SellerSupportCenter = ({ variant = "buyer" }) => {
     boot();
     return () => {
       cancelled = true;
+    };
+  }, [variant]);
+
+  useEffect(() => {
+    const socket = connectReportSocket();
+    if (!socket) return undefined;
+
+    let refreshTimer = null;
+    const scheduleSilentRefresh = () => {
+      if (refreshTimer) return;
+      refreshTimer = window.setTimeout(() => {
+        refreshTimer = null;
+        loadReports({ silent: true });
+      }, 250);
+    };
+
+    const mergeRequest = (next) => {
+      if (!next?.mongoId && !next?.id) return;
+      setRequests((prev) => {
+        const key = next.mongoId || next.id;
+        const idx = prev.findIndex(
+          (item) => item.mongoId === key || item.id === key || item.id === next.id,
+        );
+        if (idx === -1) {
+          return [next, ...prev];
+        }
+        const copy = [...prev];
+        copy[idx] = { ...copy[idx], ...next };
+        return copy;
+      });
+    };
+
+    const handleReportUpdated = (payload) => {
+      if (payload?.report) {
+        mergeRequest(payload.report);
+      }
+      scheduleSilentRefresh();
+    };
+
+    const unsubscribe = onReportUpdated(handleReportUpdated);
+    const onConnect = () => scheduleSilentRefresh();
+    socket.on("connect", onConnect);
+
+    return () => {
+      if (refreshTimer) window.clearTimeout(refreshTimer);
+      socket.off("connect", onConnect);
+      unsubscribe();
     };
   }, [variant]);
 

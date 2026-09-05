@@ -35,6 +35,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import api from "@/services/api";
+import { connectReportSocket, onReportUpdated } from "@/services/reportSocket";
 import "./adminReportsComplaints.css";
 
 const ISSUE_TYPE_OPTIONS = [
@@ -196,22 +197,78 @@ const AdminSupportCenter = () => {
   const [settlementLoading, setSettlementLoading] = useState(false);
   const [releasingEscrow, setReleasingEscrow] = useState(false);
 
-  const loadReports = useCallback(async () => {
-    setLoading(true);
+  const loadReports = useCallback(async (options = {}) => {
+    const silent = Boolean(options.silent);
+    if (!silent) {
+      setLoading(true);
+    }
     setLoadError("");
     try {
       const data = await api.getAdminReports();
       setReports(data.reports ?? []);
     } catch (error) {
-      setLoadError(error.message || "Failed to load support requests");
-      setReports([]);
+      if (!silent) {
+        setLoadError(error.message || "Failed to load support requests");
+        setReports([]);
+      }
     } finally {
-      setLoading(false);
+      if (!silent) {
+        setLoading(false);
+      }
     }
   }, []);
 
   useEffect(() => {
     loadReports();
+  }, [loadReports]);
+
+  useEffect(() => {
+    const socket = connectReportSocket();
+    if (!socket) return undefined;
+
+    let refreshTimer = null;
+    const scheduleSilentRefresh = () => {
+      if (refreshTimer) return;
+      refreshTimer = window.setTimeout(() => {
+        refreshTimer = null;
+        loadReports({ silent: true });
+      }, 250);
+    };
+
+    const mergeReport = (next) => {
+      if (!next?.mongoId && !next?.id) return;
+      setReports((prev) => {
+        const idx = prev.findIndex(
+          (item) =>
+            item.mongoId === next.mongoId ||
+            item.id === next.id ||
+            item.mongoId === next.id,
+        );
+        if (idx === -1) {
+          return [next, ...prev];
+        }
+        const copy = [...prev];
+        copy[idx] = { ...copy[idx], ...next };
+        return copy;
+      });
+    };
+
+    const handleReportUpdated = (payload) => {
+      if (payload?.report && (payload.role === "admin" || payload.report.reportedBy)) {
+        mergeReport(payload.report);
+      }
+      scheduleSilentRefresh();
+    };
+
+    const unsubscribe = onReportUpdated(handleReportUpdated);
+    const onConnect = () => scheduleSilentRefresh();
+    socket.on("connect", onConnect);
+
+    return () => {
+      if (refreshTimer) window.clearTimeout(refreshTimer);
+      socket.off("connect", onConnect);
+      unsubscribe();
+    };
   }, [loadReports]);
 
   const filteredReports = useMemo(() => {
