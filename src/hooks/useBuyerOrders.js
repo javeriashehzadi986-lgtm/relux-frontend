@@ -102,11 +102,22 @@ export function useBuyerOrders() {
     const onConnect = () => {
       scheduleSilentRefresh();
     };
+    const onReconnect = () => {
+      scheduleSilentRefresh();
+    };
+
     socket.on("connect", onConnect);
+    socket.io?.on?.("reconnect", onReconnect);
+    if (socket.connected) {
+      scheduleSilentRefresh();
+    } else {
+      socket.connect();
+    }
 
     return () => {
       if (refreshTimer) window.clearTimeout(refreshTimer);
       socket.off("connect", onConnect);
+      socket.io?.off?.("reconnect", onReconnect);
       unsubscribe();
     };
   }, [isAuthenticated, refreshOrders, user?.role]);

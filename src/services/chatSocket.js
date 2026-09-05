@@ -1,79 +1,54 @@
-import { io } from "socket.io-client";
-import { api } from "./api";
-
-let socket = null;
-
-function getSocketUrl() {
-  if (import.meta.env.VITE_SOCKET_URL) {
-    return import.meta.env.VITE_SOCKET_URL;
-  }
-  return window.location.origin;
-}
+import {
+  connectRealtimeSocket,
+  disconnectRealtimeSocket,
+  getRealtimeSocket,
+} from "./realtimeSocket";
 
 export function connectChatSocket() {
-  const token = api.getToken();
-  if (!token) {
-    disconnectChatSocket();
-    return null;
-  }
-
-  if (socket?.connected) {
-    return socket;
-  }
-
-  if (socket) {
-    socket.auth = { token };
-    socket.connect();
-    return socket;
-  }
-
-  socket = io(getSocketUrl(), {
-    auth: { token },
-    autoConnect: true,
-    transports: ["websocket", "polling"],
-  });
-
-  return socket;
+  return connectRealtimeSocket();
 }
 
 export function getChatSocket() {
-  return socket;
+  return getRealtimeSocket();
 }
 
 export function disconnectChatSocket() {
-  if (socket) {
-    socket.disconnect();
-    socket = null;
-  }
+  disconnectRealtimeSocket();
 }
 
 export function joinConversation(conversationId) {
+  const socket = getRealtimeSocket();
   if (!socket?.connected || !conversationId) return;
   socket.emit("conversation:join", { conversationId });
 }
 
 export function leaveConversation(conversationId) {
+  const socket = getRealtimeSocket();
   if (!socket?.connected || !conversationId) return;
   socket.emit("conversation:leave", { conversationId });
 }
 
 export function emitConversationRead(conversationId) {
+  const socket = getRealtimeSocket();
   if (!socket?.connected || !conversationId) return;
   socket.emit("conversation:read", { conversationId });
 }
 
 export function emitTypingStart(conversationId) {
+  const socket = getRealtimeSocket();
   if (!socket?.connected || !conversationId) return;
   socket.emit("typing:start", { conversationId });
 }
 
 export function emitTypingStop(conversationId) {
+  const socket = getRealtimeSocket();
   if (!socket?.connected || !conversationId) return;
   socket.emit("typing:stop", { conversationId });
 }
 
 export function sendChatMessage(conversationId, text, image = "") {
   return new Promise((resolve, reject) => {
+    const socket = getRealtimeSocket();
     if (!socket?.connected) {
       reject(new Error("Chat connection is not ready"));
       return;

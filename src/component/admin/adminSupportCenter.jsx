@@ -190,8 +190,6 @@ const AdminSupportCenter = () => {
   const [page, setPage] = useState(1);
   const [orderSettlement, setOrderSettlement] = useState(null);
   const [orderSettlementType, setOrderSettlementType] = useState("rental");
-  const [adminRentalCharge, setAdminRentalCharge] = useState("");
-  const [adminDamageCharge, setAdminDamageCharge] = useState("");
   const [adminSellerPayout, setAdminSellerPayout] = useState("");
   const [adminBuyerRefund, setAdminBuyerRefund] = useState("");
   const [settlementLoading, setSettlementLoading] = useState(false);
@@ -263,6 +261,9 @@ const AdminSupportCenter = () => {
     const unsubscribe = onReportUpdated(handleReportUpdated);
     const onConnect = () => scheduleSilentRefresh();
     socket.on("connect", onConnect);
+    if (!socket.connected) {
+      socket.connect();
+    }
 
     return () => {
       if (refreshTimer) window.clearTimeout(refreshTimer);
@@ -347,21 +348,33 @@ const AdminSupportCenter = () => {
           setOrderSettlement(data.settlement ?? null);
           const nextType = data.orderType || data.settlement?.orderType || "rental";
           setOrderSettlementType(nextType);
-          setAdminRentalCharge(String(data.settlement?.rentalChargePkr ?? ""));
-          setAdminDamageCharge(String(data.settlement?.damageDeductionPkr ?? ""));
 
-          const totalPaid = Number(data.settlement?.totalPaidPkr) || 0;
-          const isDisputedSale =
-            nextType === "sale" && data.settlement?.escrowSettlementStatus === "disputed";
+          const totalPaid =
+            Number(data.settlement?.totalPaidPkr) ||
+            Number(data.settlement?.depositPkr) +
+              Number(data.settlement?.deliveryChargesPkr || 0) ||
+            Number(data.settlement?.itemAmountPkr) ||
+            0;
+          const isDisputed = data.settlement?.escrowSettlementStatus === "disputed";
 
-          if (isDisputedSale) {
-            // Order-not-received disputes: default full refund to buyer.
+          if (isDisputed) {
+            // Default disputed cases to full buyer refund (same for sale + rental).
             setAdminSellerPayout("0");
-            setAdminBuyerRefund(String(totalPaid || data.settlement?.itemAmountPkr || 0));
+            setAdminBuyerRefund(
+              String(
+                totalPaid ||
+                  data.settlement?.itemAmountPkr ||
+                  data.settlement?.depositPkr ||
+                  0,
+              ),
+            );
           } else {
             setAdminSellerPayout(
               String(
-                data.settlement?.sellerPayoutPkr ?? data.settlement?.itemAmountPkr ?? "",
+                data.settlement?.sellerPayoutPkr ??
+                  data.settlement?.itemAmountPkr ??
+                  data.settlement?.depositPkr ??
+                  "",
               ),
             );
             setAdminBuyerRefund(String(data.settlement?.refundAmountPkr ?? "0"));
@@ -383,24 +396,21 @@ const AdminSupportCenter = () => {
   const handleReleaseEscrow = async () => {
     if (!selectedReport?.orderId || !orderSettlement) return;
 
-    if (orderSettlementType === "rental") {
-      const isReturnStage =
-        orderSettlement?.fulfillmentStatus === "returned" ||
-        Boolean(orderSettlement?.returnConfirmedAt);
-      if (isReturnStage && !sellerReturnConfirmed) {
-        setActionError("Seller has not confirmed receiving the returned product yet.");
-        return;
-      }
-    }
-
-    const sellerPayout =
-      orderSettlementType === "sale" && !buyerReceiptConfirmed
-        ? 0
-        : Number(adminSellerPayout) || 0;
+    const sellerPayout = !buyerReceiptConfirmed ? 0 : Number(adminSellerPayout) || 0;
     const buyerRefund = Number(adminBuyerRefund) || 0;
 
-    if (orderSettlementType === "sale" && sellerPayout <= 0 && buyerRefund <= 0) {
-      setActionError("Enter a buyer refund amount greater than 0.");
+    if (sellerPayout <= 0 && buyerRefund <= 0) {
+      setActionError("Enter a buyer refund and/or seller payout amount.");
+      return;
+    }
+
+    const totalPaid =
+      Number(orderSettlement.totalPaidPkr) ||
+      Number(orderSettlement.depositPkr || 0) +
+        Number(orderSettlement.deliveryChargesPkr || 0) ||
+      0;
+    if (totalPaid > 0 && sellerPayout + buyerRefund > totalPaid) {
+      setActionError("Seller payout and buyer refund cannot exceed the total paid amount.");
       return;
     }
 
@@ -417,8 +427,8 @@ const AdminSupportCenter = () => {
         });
       } else {
         await api.resolveAdminOrderSettlement(selectedReport.orderId, {
-          rentalChargePkr: Number(adminRentalCharge) || 0,
-          damageDeductionPkr: Number(adminDamageCharge) || 0,
+          sellerPayoutPkr: sellerPayout,
+          refundAmountPkr: buyerRefund,
           decision,
           adminSettlementNote: decision,
         });
@@ -444,17 +454,11 @@ const AdminSupportCenter = () => {
   const escrowAlreadyReleased =
     orderSettlement?.escrowStatus === "released" ||
     orderSettlement?.escrowSettlementStatus === "admin_settled";
-  const sellerReturnConfirmed = Boolean(orderSettlement?.returnConfirmedAt);
   const buyerReceiptConfirmed = Boolean(orderSettlement?.deliveryConfirmedAt);
-  const isRentalReturnStage =
-    orderSettlementType === "rental" &&
-    (orderSettlement?.fulfillmentStatus === "returned" ||
-      Boolean(orderSettlement?.returnConfirmedAt));
   const canReleaseEscrow =
     Boolean(orderSettlement) &&
     orderSettlement.escrowSettlementStatus === "disputed" &&
-    !escrowAlreadyReleased &&
-    (!isRentalReturnStage || sellerReturnConfirmed);
+    !escrowAlreadyReleased;
   const canContactParties = canContactDisputeParties(selectedReport);
 
   const patchReport = async (body) => {
@@ -853,16 +857,21 @@ const AdminSupportCenter = () => {
                     <p>Loading settlement details...</p>
                   ) : orderSettlement ? (
                     <div className="admin-reports-escrow-card">
+                      <p>
+                        <strong>Total paid:</strong>{" "}
+                        {formatPkr(
+                          orderSettlement.totalPaidPkr ||
+                            (Number(orderSettlement.depositPkr) || 0) +
+                              (Number(orderSettlement.deliveryChargesPkr) || 0) ||
+                            orderSettlement.itemAmountPkr,
+                        )}
+                      </p>
+                      <p>
+                        <strong>Status:</strong>{" "}
+                        {orderSettlement.escrowSettlementStatus || "none"}
+                      </p>
                       {orderSettlementType === "sale" ? (
                         <>
-                          <p>
-                            <strong>Total paid:</strong>{" "}
-                            {formatPkr(orderSettlement.totalPaidPkr)}
-                          </p>
-                          <p>
-                            <strong>Status:</strong>{" "}
-                            {orderSettlement.escrowSettlementStatus || "none"}
-                          </p>
                           <p>
                             <strong>Item amount:</strong>{" "}
                             {formatPkr(orderSettlement.itemAmountPkr)}
@@ -870,7 +879,9 @@ const AdminSupportCenter = () => {
                           {orderSettlement.saleEscrowAutoReleaseAt ? (
                             <p>
                               <strong>Auto-release at:</strong>{" "}
-                              {new Date(orderSettlement.saleEscrowAutoReleaseAt).toLocaleString()}
+                              {new Date(
+                                orderSettlement.saleEscrowAutoReleaseAt,
+                              ).toLocaleString()}
                             </p>
                           ) : null}
                         </>
@@ -880,16 +891,8 @@ const AdminSupportCenter = () => {
                             <strong>Deposit:</strong> {formatPkr(orderSettlement.depositPkr)}
                           </p>
                           <p>
-                            <strong>Status:</strong>{" "}
-                            {orderSettlement.escrowSettlementStatus || "none"}
-                          </p>
-                          <p>
-                            <strong>Seller proposed rent:</strong>{" "}
-                            {formatPkr(orderSettlement.rentalChargePkr)}
-                          </p>
-                          <p>
-                            <strong>Seller proposed damage:</strong>{" "}
-                            {formatPkr(orderSettlement.damageDeductionPkr)}
+                            <strong>Delivery:</strong>{" "}
+                            {formatPkr(orderSettlement.deliveryChargesPkr)}
                           </p>
                         </>
                       )}
@@ -903,8 +906,14 @@ const AdminSupportCenter = () => {
                       </p>
                       {orderSettlement.disputeReason ? (
                         <blockquote className="admin-reports-description">
-                          Buyer dispute: {orderSettlement.disputeReason}
+                          Dispute reason: {orderSettlement.disputeReason}
                         </blockquote>
+                      ) : null}
+                      {!buyerReceiptConfirmed ? (
+                        <p className="admin-reports-escrow-released-note">
+                          Buyer has not confirmed receipt — seller payout must stay at 0
+                          (full or partial refund to buyer only).
+                        </p>
                       ) : null}
                       {canReleaseEscrow ? (
                         <div className="admin-reports-escrow-form">
@@ -913,50 +922,25 @@ const AdminSupportCenter = () => {
                               {actionError}
                             </p>
                           ) : null}
-                          {orderSettlementType === "sale" ? (
-                            <>
-                              <label>
-                                Seller payout (PKR)
-                                <Input
-                                  type="number"
-                                  min="0"
-                                  value={adminSellerPayout}
-                                  onChange={(e) => setAdminSellerPayout(e.target.value)}
-                                  disabled={!buyerReceiptConfirmed}
-                                />
-                              </label>
-                              <label>
-                                Buyer refund (PKR)
-                                <Input
-                                  type="number"
-                                  min="0"
-                                  value={adminBuyerRefund}
-                                  onChange={(e) => setAdminBuyerRefund(e.target.value)}
-                                />
-                              </label>
-                            </>
-                          ) : (
-                            <>
-                              <label>
-                                Final rent charge (PKR)
-                                <Input
-                                  type="number"
-                                  min="0"
-                                  value={adminRentalCharge}
-                                  onChange={(e) => setAdminRentalCharge(e.target.value)}
-                                />
-                              </label>
-                              <label>
-                                Final damage deduction (PKR)
-                                <Input
-                                  type="number"
-                                  min="0"
-                                  value={adminDamageCharge}
-                                  onChange={(e) => setAdminDamageCharge(e.target.value)}
-                                />
-                              </label>
-                            </>
-                          )}
+                          <label>
+                            Seller payout (PKR)
+                            <Input
+                              type="number"
+                              min="0"
+                              value={adminSellerPayout}
+                              onChange={(e) => setAdminSellerPayout(e.target.value)}
+                              disabled={!buyerReceiptConfirmed}
+                            />
+                          </label>
+                          <label>
+                            Buyer refund (PKR)
+                            <Input
+                              type="number"
+                              min="0"
+                              value={adminBuyerRefund}
+                              onChange={(e) => setAdminBuyerRefund(e.target.value)}
+                            />
+                          </label>
                           <Button
                             type="button"
                             className="admin-reports-action-btn admin-reports-action-btn--primary"
@@ -966,12 +950,6 @@ const AdminSupportCenter = () => {
                             {releasingEscrow ? "Releasing..." : "Release Escrow & Resolve"}
                           </Button>
                         </div>
-                      ) : orderSettlement.escrowSettlementStatus === "disputed" &&
-                        isRentalReturnStage &&
-                        !sellerReturnConfirmed ? (
-                        <p className="admin-reports-escrow-released-note">
-                          Waiting for seller return confirmation before release.
-                        </p>
                       ) : escrowAlreadyReleased ? (
                         <p className="admin-reports-escrow-released-note">
                           Escrow already released.

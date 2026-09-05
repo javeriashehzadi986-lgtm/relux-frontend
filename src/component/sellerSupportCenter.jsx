@@ -186,6 +186,9 @@ const SellerSupportCenter = ({ variant = "buyer" }) => {
     const unsubscribe = onReportUpdated(handleReportUpdated);
     const onConnect = () => scheduleSilentRefresh();
     socket.on("connect", onConnect);
+    if (!socket.connected) {
+      socket.connect();
+    }
 
     return () => {
       if (refreshTimer) window.clearTimeout(refreshTimer);
