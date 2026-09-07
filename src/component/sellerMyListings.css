@@ -284,6 +284,7 @@
   flex-direction: column;
   justify-content: space-between;
   min-width: 0;
+  overflow: visible;
 }
 
 .my-listing-more-btn {
@@ -302,15 +303,15 @@
   z-index: 1;
 }
 
-.my-listing-menu-wrap:has(.my-listing-menu) {
-  z-index: 30;
+.my-listing-menu-wrap.is-open {
+  z-index: 40;
 }
 
 .my-listing-menu {
   position: absolute;
   top: calc(100% + 0.35rem);
   right: 0;
-  z-index: 20;
+  z-index: 50;
   min-width: 11.5rem;
   margin: 0;
   padding: 0.35rem;
@@ -601,11 +602,6 @@
 
   .my-listing-summary-card-btn .my-listing-summary-card {
     width: 7.5rem;
-  }
-
-  .my-listing-menu {
-    right: auto;
-    left: 0;
   }
 }
 

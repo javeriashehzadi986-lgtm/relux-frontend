@@ -1,4 +1,11 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Link } from "react-router-dom";
 import {
   Search,
@@ -100,7 +107,45 @@ function canManageListing(item) {
 
 function ListingActionsMenu({ item, isOpen, onToggle, onClose, onDelete, deleting }) {
   const menuRef = useRef(null);
+  const buttonRef = useRef(null);
+  const [menuStyle, setMenuStyle] = useState(null);
   const canManage = canManageListing(item);
+
+  const updateMenuPosition = useCallback(() => {
+    const button = buttonRef.current;
+    if (!button) return;
+
+    const rect = button.getBoundingClientRect();
+    const menuWidth = 184;
+    const gap = 6;
+    const padding = 12;
+    const estimatedHeight = canManage ? 168 : 56;
+
+    let left = rect.right - menuWidth;
+    left = Math.max(padding, Math.min(left, window.innerWidth - menuWidth - padding));
+
+    const openDown = rect.bottom + gap + estimatedHeight <= window.innerHeight - padding;
+    const top = openDown
+      ? rect.bottom + gap
+      : Math.max(padding, rect.top - gap - estimatedHeight);
+
+    setMenuStyle({
+      position: "fixed",
+      top: `${Math.round(top)}px`,
+      left: `${Math.round(left)}px`,
+      right: "auto",
+      minWidth: `${menuWidth}px`,
+    });
+  }, [canManage]);
+
+  useLayoutEffect(() => {
+    if (!isOpen) {
+      setMenuStyle(null);
+      return undefined;
+    }
+    updateMenuPosition();
+    return undefined;
+  }, [isOpen, updateMenuPosition]);
 
   useEffect(() => {
     if (!isOpen) return undefined;
@@ -115,18 +160,23 @@ function ListingActionsMenu({ item, isOpen, onToggle, onClose, onDelete, deletin
       if (event.key === "Escape") onClose();
     };
 
+    window.addEventListener("resize", updateMenuPosition);
+    window.addEventListener("scroll", updateMenuPosition, true);
     document.addEventListener("mousedown", handlePointerDown);
     document.addEventListener("keydown", handleEscape);
 
     return () => {
+      window.removeEventListener("resize", updateMenuPosition);
+      window.removeEventListener("scroll", updateMenuPosition, true);
       document.removeEventListener("mousedown", handlePointerDown);
       document.removeEventListener("keydown", handleEscape);
     };
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, updateMenuPosition]);
 
   return (
-    <div className="my-listing-menu-wrap" ref={menuRef}>
+    <div className={`my-listing-menu-wrap${isOpen ? " is-open" : ""}`} ref={menuRef}>
       <Button
+        ref={buttonRef}
         type="button"
         variant="ghost"
         size="icon"
@@ -140,7 +190,12 @@ function ListingActionsMenu({ item, isOpen, onToggle, onClose, onDelete, deletin
       </Button>
 
       {isOpen && (
-        <ul className="my-listing-menu" role="menu" aria-label={`Actions for ${item.title}`}>
+        <ul
+          className="my-listing-menu"
+          role="menu"
+          aria-label={`Actions for ${item.title}`}
+          style={menuStyle || undefined}
+        >
           <li role="none">
             <Link
               to={`/dress/${item.id}`}
