@@ -197,6 +197,16 @@
   color: #303333;
 }
 
+.rental-details-daily-rate {
+  font-size: 1rem;
+  color: #303333;
+}
+
+.rental-details-daily-rate strong {
+  font-size: 1.25rem;
+  color: #303333;
+}
+
 .rental-details-attributes {
   display: flex;
   gap: 2.5rem;

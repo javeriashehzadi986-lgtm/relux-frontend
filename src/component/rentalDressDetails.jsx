@@ -240,6 +240,10 @@ const RentalDressDetails = ({ dress }) => {
           </div>
 
           <div className="rental-details-pricing">
+            <p className="rental-details-daily-rate">
+              Rent per day:{" "}
+              <strong>{dress.dailyRateFormatted ?? formatPkr(dress.dailyRate)}</strong>
+            </p>
             <p className="rental-details-deposit">
               Full dress payment (refundable deposit):{" "}
               <strong>{dress.securityDepositFormatted ?? dress.fullDressPriceFormatted}</strong>
