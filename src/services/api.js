@@ -209,6 +209,7 @@ export const api = {
   uploadListingImage: (file) => uploadRequest("/upload/listing", file),
   uploadVerificationImage: (file) => uploadRequest("/upload/verification", file),
   uploadSupportImage: (file) => uploadRequest("/upload/support", file),
+  uploadCategoryImage: (file) => uploadRequest("/upload/category", file),
 
   getAdminSellerApplications: () =>
     request("/admin/seller-verifications"),

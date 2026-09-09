@@ -50,6 +50,7 @@ const AdminCategoriesManagement = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
+  const [imageUploading, setImageUploading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategorySlug, setSelectedCategorySlug] = useState("female");
   const [modal, setModal] = useState(null);
@@ -116,7 +117,7 @@ const AdminCategoriesManagement = () => {
               name: item.name,
               icon: item.icon,
               iconVariant: item.iconVariant,
-              imageUrl: "",
+              imageUrl: item.imageUrl || item.image || "",
               productStyleKey: "",
             }
           : { ...emptyForm },
@@ -165,9 +166,32 @@ const AdminCategoriesManagement = () => {
     });
   };
 
+  const handleImagePick = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    setImageUploading(true);
+    setError("");
+    setSuccess("");
+    try {
+      const data = await api.uploadCategoryImage(file);
+      updateForm("imageUrl", data.url);
+    } catch (err) {
+      setError(err.message || "Could not upload image");
+    } finally {
+      setImageUploading(false);
+    }
+  };
+
   const saveModal = async (event) => {
     event.preventDefault();
     if (!modal) return;
+
+    if (modal.type === "main" && !modal.form.imageUrl.trim()) {
+      setError("Please add an image for the main category");
+      return;
+    }
 
     setActionLoading(true);
     setError("");
@@ -435,7 +459,16 @@ const AdminCategoriesManagement = () => {
                           <div className="admin-categories-sub-card-inner">
                             <div className="admin-categories-sub-card-main">
                               <div className="admin-categories-sub-thumb">
-                                <img src={subcategory.image} alt="" />
+                                {subcategory.image ? (
+                                  <img src={subcategory.image} alt="" />
+                                ) : (
+                                  <span
+                                    className="material-symbols-outlined"
+                                    aria-hidden="true"
+                                  >
+                                    checkroom
+                                  </span>
+                                )}
                               </div>
                               <div>
                                 <h5>{subcategory.name}</h5>
@@ -524,6 +557,35 @@ const AdminCategoriesManagement = () => {
 
               {modal.type === "main" ? (
                 <>
+                  <div className="admin-categories-image-field">
+                    <span className="admin-categories-image-field-label">
+                      Category image
+                    </span>
+                    {modal.form.imageUrl ? (
+                      <div className="admin-categories-image-preview">
+                        <img src={modal.form.imageUrl} alt="Category preview" />
+                      </div>
+                    ) : (
+                      <p className="admin-categories-image-hint">
+                        Required. JPG, PNG, or WEBP up to 5MB.
+                      </p>
+                    )}
+                    <label className="admin-categories-image-upload-btn">
+                      <span className="material-symbols-outlined">upload</span>
+                      {imageUploading
+                        ? "Uploading..."
+                        : modal.form.imageUrl
+                          ? "Replace image"
+                          : "Upload image"}
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp"
+                        onChange={handleImagePick}
+                        disabled={imageUploading || actionLoading}
+                        hidden
+                      />
+                    </label>
+                  </div>
                   <fieldset className="admin-categories-icon-picker">
                     <legend>Choose icon</legend>
                     <div className="admin-categories-icon-grid" role="listbox" aria-label="Category icons">
@@ -577,15 +639,6 @@ const AdminCategoriesManagement = () => {
                       required
                     />
                   </label>
-                  <label>
-                    Image URL (optional)
-                    <input
-                      type="url"
-                      value={modal.form.imageUrl}
-                      onChange={(e) => updateForm("imageUrl", e.target.value)}
-                      placeholder="https://..."
-                    />
-                  </label>
                 </>
               )}
 
@@ -593,7 +646,15 @@ const AdminCategoriesManagement = () => {
                 <button type="button" onClick={closeModal} disabled={actionLoading}>
                   Cancel
                 </button>
-                <button type="submit" disabled={actionLoading || !modal.form.name.trim()}>
+                <button
+                  type="submit"
+                  disabled={
+                    actionLoading ||
+                    imageUploading ||
+                    !modal.form.name.trim() ||
+                    (modal.type === "main" && !modal.form.imageUrl.trim())
+                  }
+                >
                   {actionLoading ? "Saving..." : "Save"}
                 </button>
               </div>
