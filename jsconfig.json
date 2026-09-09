@@ -1,17 +1,19 @@
 {
-  "files": [],
-  "references": [
-    // {
-    //   "path": "./tsconfig.app.json"
-    // },
-    // {
-    //   "path": "./tsconfig.node.json"
-    // }
-  ],
   "compilerOptions": {
-    "baseUrl": ".",
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "allowJs": true,
+    "checkJs": false,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "noEmit": true,
     "paths": {
       "@/*": ["./src/*"]
     }
-  }
+  },
+  "include": ["src", "vite.config.js"],
+  "exclude": ["node_modules", "dist"]
 }
