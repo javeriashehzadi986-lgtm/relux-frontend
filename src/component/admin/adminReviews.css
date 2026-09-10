@@ -440,3 +440,13 @@
   font-family: inherit;
   font-size: 0.875rem;
 }
+
+.admin-reviews-notice {
+  margin: 0 0 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  background: rgba(152, 201, 163, 0.25);
+  color: var(--admin-primary);
+  font-family: inherit;
+  font-size: 0.875rem;
+}

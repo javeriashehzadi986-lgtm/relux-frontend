@@ -4,6 +4,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { useAuth } from "@/context/AuthContext";
@@ -18,6 +19,21 @@ export function WishlistProvider({ children }) {
   const requireLogin = useRequireLogin();
   const [apiItems, setApiItems] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [notice, setNotice] = useState("");
+  const noticeTimer = useRef(null);
+
+  const showNotice = useCallback((message) => {
+    setNotice(message);
+    if (noticeTimer.current) window.clearTimeout(noticeTimer.current);
+    noticeTimer.current = window.setTimeout(() => setNotice(""), 4000);
+  }, []);
+
+  useEffect(
+    () => () => {
+      if (noticeTimer.current) window.clearTimeout(noticeTimer.current);
+    },
+    [],
+  );
 
   const loadWishlist = useCallback(async () => {
     if (!isAuthenticated) {
@@ -66,11 +82,11 @@ export function WishlistProvider({ children }) {
         await loadWishlist();
         return true;
       } catch (error) {
-        window.alert(error.message || "Could not save to wishlist");
+        showNotice(error.message || "Could not save to wishlist");
         return false;
       }
     },
-    [loadWishlist, requireLogin],
+    [loadWishlist, requireLogin, showNotice],
   );
 
   const remove = useCallback(
@@ -93,13 +109,13 @@ export function WishlistProvider({ children }) {
         await loadWishlist();
         return Boolean(data.saved);
       } catch (error) {
-        window.alert(error.message || "Could not update wishlist");
+        showNotice(error.message || "Could not update wishlist");
         return isSaved(
           typeof productOrId === "string" ? productOrId : productOrId.id,
         );
       }
     },
-    [loadWishlist, requireLogin, isSaved],
+    [loadWishlist, requireLogin, isSaved, showNotice],
   );
 
   const value = useMemo(
@@ -118,7 +134,31 @@ export function WishlistProvider({ children }) {
   );
 
   return (
-    <WishlistContext.Provider value={value}>{children}</WishlistContext.Provider>
+    <WishlistContext.Provider value={value}>
+      {children}
+      {notice ? (
+        <div
+          role="status"
+          aria-live="polite"
+          style={{
+            position: "fixed",
+            left: "50%",
+            bottom: "1.5rem",
+            transform: "translateX(-50%)",
+            zIndex: 60,
+            maxWidth: "90vw",
+            padding: "0.75rem 1.25rem",
+            borderRadius: "0.75rem",
+            background: "#303333",
+            color: "#fff",
+            fontSize: "0.875rem",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.18)",
+          }}
+        >
+          {notice}
+        </div>
+      ) : null}
+    </WishlistContext.Provider>
   );
 }
 

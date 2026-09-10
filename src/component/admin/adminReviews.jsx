@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Filter, Search, Star, UserSearch } from "lucide-react";
 import api from "@/services/api";
+import ConfirmDialog from "@/components/ConfirmDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -78,7 +79,9 @@ const AdminReviews = () => {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [actionError, setActionError] = useState("");
+  const [actionNotice, setActionNotice] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [ratingFilter, setRatingFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -87,24 +90,27 @@ const AdminReviews = () => {
   const [appliedStatus, setAppliedStatus] = useState("all");
   const [selectedReviewId, setSelectedReviewId] = useState(null);
 
-  const loadReviews = useCallback(async () => {
-    setLoading(true);
-    setLoadError("");
-    try {
-      const data = await api.getAdminReviews({
-        q: appliedSearch,
-        rating: appliedRating,
-        status: appliedStatus,
-      });
-      setReviews(data.reviews ?? []);
-      setStats(data.stats ?? DEFAULT_STATS);
-    } catch (error) {
-      setLoadError(error.message || "Failed to load reviews");
-      setReviews([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [appliedSearch, appliedRating, appliedStatus]);
+  const loadReviews = useCallback(
+    async ({ silent = false } = {}) => {
+      if (!silent) setLoading(true);
+      setLoadError("");
+      try {
+        const data = await api.getAdminReviews({
+          q: appliedSearch,
+          rating: appliedRating,
+          status: appliedStatus,
+        });
+        setReviews(data.reviews ?? []);
+        setStats(data.stats ?? DEFAULT_STATS);
+      } catch (error) {
+        setLoadError(error.message || "Failed to load reviews");
+        setReviews([]);
+      } finally {
+        if (!silent) setLoading(false);
+      }
+    },
+    [appliedSearch, appliedRating, appliedStatus],
+  );
 
   useEffect(() => {
     loadReviews();
@@ -121,26 +127,44 @@ const AdminReviews = () => {
     }
   }, [reviews, selectedReviewId]);
 
+  const selectReview = (id) => {
+    setSelectedReviewId(id);
+    setActionError("");
+    setActionNotice("");
+  };
+
   const handleApplyFilters = () => {
     setAppliedSearch(searchQuery);
     setAppliedRating(ratingFilter);
     setAppliedStatus(statusFilter);
   };
 
+  const NOTICE_BY_STATUS = {
+    active: "Review is now active — it shows on the seller profile and its listing.",
+    hidden: "Review hidden — it no longer shows anywhere on the site.",
+    flagged: "Review flagged for review.",
+  };
+
   const handleStatusUpdate = async (status) => {
-    if (!selectedReview) return;
+    if (!selectedReview || actionLoading) return;
+    const targetId = selectedReview.id;
     setActionLoading(true);
     setActionError("");
+    setActionNotice("");
     try {
-      const data = await api.updateAdminReviewStatus(selectedReview.id, { status });
-      setReviews((current) =>
-        current.map((review) =>
-          review.id === selectedReview.id ? data.review : review,
-        ),
-      );
+      const data = await api.updateAdminReviewStatus(targetId, { status });
+      if (data.review) {
+        setReviews((current) =>
+          current.map((review) => (review.id === targetId ? data.review : review)),
+        );
+      }
       if (data.stats) {
         setStats(data.stats);
       }
+      // Re-sync with the server so the list, stats and every other view agree.
+      await loadReviews({ silent: true });
+      setSelectedReviewId(targetId);
+      setActionNotice(NOTICE_BY_STATUS[status] || "Review updated.");
     } catch (error) {
       setActionError(error.message || "Failed to update review");
     } finally {
@@ -149,19 +173,20 @@ const AdminReviews = () => {
   };
 
   const handleDeleteReview = async () => {
-    if (!selectedReview) return;
-    if (!window.confirm("Permanently delete this review? This cannot be undone.")) {
-      return;
-    }
+    if (!selectedReview || actionLoading) return;
+    const targetId = selectedReview.id;
     setActionLoading(true);
     setActionError("");
+    setActionNotice("");
     try {
-      const data = await api.deleteAdminReview(selectedReview.id);
-      setReviews((current) => current.filter((review) => review.id !== selectedReview.id));
+      const data = await api.deleteAdminReview(targetId);
+      setConfirmDeleteOpen(false);
       setSelectedReviewId(null);
       if (data.stats) {
         setStats(data.stats);
       }
+      await loadReviews({ silent: true });
+      setActionNotice("Review permanently removed.");
     } catch (error) {
       setActionError(error.message || "Failed to delete review");
     } finally {
@@ -323,7 +348,7 @@ const AdminReviews = () => {
                             ? "admin-reviews-row admin-reviews-row--selected"
                             : "admin-reviews-row"
                         }
-                        onClick={() => setSelectedReviewId(review.id)}
+                        onClick={() => selectReview(review.id)}
                       >
                         <TableCell>
                           <div className="admin-reviews-reviewer">
@@ -415,6 +440,12 @@ const AdminReviews = () => {
               </p>
             )}
 
+            {actionNotice && !actionError && (
+              <p className="admin-reviews-notice" role="status">
+                {actionNotice}
+              </p>
+            )}
+
             <div className="admin-reviews-detail-actions">
               <Button
                 type="button"
@@ -422,7 +453,7 @@ const AdminReviews = () => {
                 disabled={actionLoading || selectedReview.status === "active"}
                 onClick={() => handleStatusUpdate("active")}
               >
-                Keep Active
+                {actionLoading ? "Working..." : "Set Active"}
               </Button>
               <Button
                 type="button"
@@ -438,7 +469,10 @@ const AdminReviews = () => {
                 variant="ghost"
                 className="admin-reviews-action-btn admin-reviews-action-btn--danger"
                 disabled={actionLoading}
-                onClick={handleDeleteReview}
+                onClick={() => {
+                  setActionError("");
+                  setConfirmDeleteOpen(true);
+                }}
               >
                 Remove
               </Button>
@@ -446,6 +480,18 @@ const AdminReviews = () => {
           </Card>
         )}
       </div>
+
+      <ConfirmDialog
+        open={confirmDeleteOpen}
+        onOpenChange={setConfirmDeleteOpen}
+        title="Delete this review?"
+        description="This permanently removes the review for everyone. This cannot be undone."
+        confirmLabel="Delete Review"
+        destructive
+        loading={actionLoading}
+        error={actionError}
+        onConfirm={handleDeleteReview}
+      />
     </div>
   );
 };

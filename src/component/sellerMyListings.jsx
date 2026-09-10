@@ -30,6 +30,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import ConfirmDialog from "@/components/ConfirmDialog";
 import api from "@/services/api";
 import { getListingAvailability } from "@/utils/productAvailability";
 import "./sellerMyListings.css";
@@ -255,6 +256,7 @@ export function SellerMyListingsContent() {
   const [searchQuery, setSearchQuery] = useState("");
   const [openMenuId, setOpenMenuId] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
+  const [listingToDelete, setListingToDelete] = useState(null);
   const [togglingId, setTogglingId] = useState(null);
   const [actionError, setActionError] = useState("");
 
@@ -292,18 +294,22 @@ export function SellerMyListingsContent() {
     return () => window.removeEventListener("focus", handleFocus);
   }, [loadListings]);
 
-  const handleDeleteListing = async (item) => {
-    const confirmed = window.confirm(
-      `Delete "${item.title}"? This removes the listing from Relux Hub.`,
-    );
-    if (!confirmed) return;
+  const handleDeleteListing = (item) => {
+    setActionError("");
+    setOpenMenuId(null);
+    setListingToDelete(item);
+  };
+
+  const confirmDeleteListing = async () => {
+    if (!listingToDelete) return;
+    const item = listingToDelete;
 
     setActionError("");
     setDeletingId(item.id);
     try {
       await api.deleteListing(item.id);
       setListings((current) => current.filter((listing) => listing.id !== item.id));
-      setOpenMenuId(null);
+      setListingToDelete(null);
     } catch (error) {
       setActionError(error.message || "Could not delete listing");
     } finally {
@@ -623,6 +629,24 @@ export function SellerMyListingsContent() {
           </Card>
         )}
       </section>
+
+      <ConfirmDialog
+        open={Boolean(listingToDelete)}
+        onOpenChange={(open) => {
+          if (!open) setListingToDelete(null);
+        }}
+        title="Delete this listing?"
+        description={
+          listingToDelete
+            ? `"${listingToDelete.title}" will be removed from Relux Hub. This cannot be undone.`
+            : ""
+        }
+        confirmLabel="Delete Listing"
+        destructive
+        loading={Boolean(deletingId)}
+        error={actionError}
+        onConfirm={confirmDeleteListing}
+      />
     </>
   );
 }

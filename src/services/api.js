@@ -390,8 +390,12 @@ export const api = {
     request("/bids/me"),
 
   // Reviews
-  getSellerReviews: (sellerId) =>
-    request(`/reviews/seller/${sellerId}`),
+  getSellerReviews: (sellerId, productId) =>
+    request(
+      productId
+        ? `/reviews/seller/${sellerId}?productId=${encodeURIComponent(productId)}`
+        : `/reviews/seller/${sellerId}`,
+    ),
 
   createSellerReview: (body) =>
     request("/reviews", {

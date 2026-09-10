@@ -12,6 +12,8 @@ export function useSellerReviews(dressOrSellerId) {
       ? normalizeMongoId(dressOrSellerId)
       : normalizeMongoId(dressOrSellerId?.sellerId);
   const dress = typeof dressOrSellerId === "object" ? dressOrSellerId : null;
+  // On a listing detail page we only want reviews left for THIS product.
+  const productId = isMongoListingId(dress?.id) ? String(dress.id) : null;
   const usesApi = Boolean(sellerId);
 
   const [reviews, setReviews] = useState([]);
@@ -35,7 +37,7 @@ export function useSellerReviews(dressOrSellerId) {
     setError("");
 
     try {
-      const data = await api.getSellerReviews(sellerId);
+      const data = await api.getSellerReviews(sellerId, productId);
       setReviews(data.reviews ?? []);
       setStats(data.stats ?? { average: 0, count: 0 });
       setSellerInfo(data.seller ?? null);
@@ -47,7 +49,7 @@ export function useSellerReviews(dressOrSellerId) {
     } finally {
       setLoading(false);
     }
-  }, [sellerId, usesApi]);
+  }, [sellerId, productId, usesApi]);
 
   useEffect(() => {
     load();
