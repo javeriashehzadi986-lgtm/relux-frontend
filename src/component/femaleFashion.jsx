@@ -24,6 +24,27 @@ import { useWishlist } from "@/hooks/useWishlist";
 
 const SIZES = LISTING_SIZE_OPTIONS;
 
+const PRODUCTS_PER_PAGE = 12;
+
+/** Build the list of page buttons to show: all pages when few, otherwise
+ *  first / last / a window around the current page, with "..." gaps. */
+function getPageItems(current, total) {
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, index) => index + 1);
+  }
+
+  const items = [1];
+  const start = Math.max(2, current - 1);
+  const end = Math.min(total - 1, current + 1);
+
+  if (start > 2) items.push("ellipsis-left");
+  for (let page = start; page <= end; page += 1) items.push(page);
+  if (end < total - 1) items.push("ellipsis-right");
+
+  items.push(total);
+  return items;
+}
+
 /** Shared fashion browse for any admin-managed main category slug. */
 export function FashionBrowse({ categorySlug = "female" }) {
   const [searchParams] = useSearchParams();
@@ -77,6 +98,39 @@ export function FashionBrowse({ categorySlug = "female" }) {
       sortBy,
     ],
   );
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE),
+  );
+  // Clamp so we never point past the last page (e.g. after filters shrink the list).
+  const page = Math.min(currentPage, totalPages);
+  const pagedProducts = filteredProducts.slice(
+    (page - 1) * PRODUCTS_PER_PAGE,
+    page * PRODUCTS_PER_PAGE,
+  );
+
+  // Any filter/sort/category change sends the user back to the first page.
+  const filterSignature = [
+    listingType,
+    selectedStyle,
+    selectedSize,
+    searchQuery,
+    sortBy,
+    categorySlug,
+  ].join("|");
+  const [lastFilterSignature, setLastFilterSignature] = useState(filterSignature);
+  if (filterSignature !== lastFilterSignature) {
+    setLastFilterSignature(filterSignature);
+    setCurrentPage(1);
+  }
+
+  const goToPage = (next) => {
+    setCurrentPage(Math.min(Math.max(1, next), totalPages));
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
 
   const selectStyle = (style) => {
     setSelectedStyle((current) => (current === style ? "" : style));
@@ -284,7 +338,7 @@ export function FashionBrowse({ categorySlug = "female" }) {
           <div className="female-products-grid">
             {!loading &&
               !error &&
-              filteredProducts.map((product) => (
+              pagedProducts.map((product) => (
               <Card key={product.id} className="female-product-card">
                 <div className="female-product-image-wrap">
                   <img alt={product.title} src={product.image} />
@@ -338,7 +392,7 @@ export function FashionBrowse({ categorySlug = "female" }) {
             ))}
           </div>
 
-          {!loading && !error && filteredProducts.length > 0 && (
+          {!loading && !error && totalPages > 1 && (
           <div className="female-pagination">
             <Button
               type="button"
@@ -346,34 +400,32 @@ export function FashionBrowse({ categorySlug = "female" }) {
               size="icon"
               className="female-page-btn female-page-btn--nav"
               aria-label="Previous page"
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+              disabled={page === 1}
+              onClick={() => goToPage(page - 1)}
             >
               <ChevronLeft size={20} />
             </Button>
             <div className="female-page-numbers">
-              {[1, 2, 3].map((page) => (
-                <Button
-                  key={page}
-                  type="button"
-                  variant="ghost"
-                  className={`female-page-btn ${
-                    currentPage === page ? "female-page-btn--active" : ""
-                  }`}
-                  onClick={() => setCurrentPage(page)}
-                >
-                  {page}
-                </Button>
-              ))}
-              <span className="female-page-ellipsis">...</span>
-              <Button
-                type="button"
-                variant="ghost"
-                className="female-page-btn"
-                onClick={() => setCurrentPage(12)}
-              >
-                12
-              </Button>
+              {getPageItems(page, totalPages).map((item) =>
+                typeof item === "number" ? (
+                  <Button
+                    key={item}
+                    type="button"
+                    variant="ghost"
+                    className={`female-page-btn ${
+                      page === item ? "female-page-btn--active" : ""
+                    }`}
+                    aria-current={page === item ? "page" : undefined}
+                    onClick={() => goToPage(item)}
+                  >
+                    {item}
+                  </Button>
+                ) : (
+                  <span key={item} className="female-page-ellipsis">
+                    ...
+                  </span>
+                ),
+              )}
             </div>
             <Button
               type="button"
@@ -381,8 +433,8 @@ export function FashionBrowse({ categorySlug = "female" }) {
               size="icon"
               className="female-page-btn female-page-btn--nav"
               aria-label="Next page"
-              disabled={currentPage === 12}
-              onClick={() => setCurrentPage((page) => Math.min(12, page + 1))}
+              disabled={page === totalPages}
+              onClick={() => goToPage(page + 1)}
             >
               <ChevronRight size={20} />
             </Button>

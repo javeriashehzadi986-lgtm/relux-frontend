@@ -26,6 +26,7 @@ const NAV_ITEMS = [
   { to: "/categories", label: "Categories" },
   { to: "/becomeASeller", label: "Become a Seller" },
   { to: "/about", label: "About" },
+  
 ];
 
 const Navbar = () => {

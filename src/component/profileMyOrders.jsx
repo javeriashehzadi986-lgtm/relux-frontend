@@ -42,7 +42,10 @@ const FILTER_TABS = [
 
 const getOrderActionRoute = (actionId, order) => {
   if (actionId === "checkout") {
-    return `/orders/${order.id}/checkout`;
+    // Won auctions finalise on the listing checkout page; rentals on the order page.
+    return order.type === "purchase"
+      ? `/dress/${order.dressId}/checkout`
+      : `/orders/${order.id}/checkout`;
   }
   if (actionId === "details" || actionId === "rent-again") {
     return `/dress/${order.dressId}`;

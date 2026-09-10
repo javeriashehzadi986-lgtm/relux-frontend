@@ -310,12 +310,24 @@ const SellerAddListing = () => {
         showFormError("Sale price is required.");
         return;
       }
+      if (!(Number(salePrice) > 0)) {
+        showFormError("Sale price must be greater than 0.");
+        return;
+      }
       if (!String(startingBid).trim()) {
         showFormError("Starting bid is required.");
         return;
       }
+      if (!(Number(startingBid) > 0)) {
+        showFormError("Starting bid must be greater than 0.");
+        return;
+      }
       if (!String(minBid).trim()) {
         showFormError("Minimum bid increment is required.");
+        return;
+      }
+      if (!(Number(minBid) > 0)) {
+        showFormError("Minimum bid increment must be greater than 0.");
         return;
       }
       if (!auctionEndDate || !auctionEndTime) {
@@ -333,8 +345,16 @@ const SellerAddListing = () => {
         showFormError("Daily rental price is required.");
         return;
       }
+      if (!(Number(rentPrice) > 0)) {
+        showFormError("Daily rental price must be greater than 0.");
+        return;
+      }
       if (!String(itemPrice).trim()) {
         showFormError("Item price / security deposit is required.");
+        return;
+      }
+      if (!(Number(itemPrice) > 0)) {
+        showFormError("Item price / security deposit must be greater than 0.");
         return;
       }
     }
@@ -637,7 +657,7 @@ const SellerAddListing = () => {
                       <Input
                         id="sale-price"
                         type="number"
-                        min="0"
+                        min="0.01"
                         step="0.01"
                         placeholder="0.00"
                         className="add-listing-input"
@@ -655,7 +675,7 @@ const SellerAddListing = () => {
                         <Input
                           id="starting-bid"
                           type="number"
-                          min="0"
+                          min="0.01"
                           step="0.01"
                           placeholder="0.00"
                           className="add-listing-input"
@@ -669,7 +689,7 @@ const SellerAddListing = () => {
                         <Input
                           id="min-bid"
                           type="number"
-                          min="0"
+                          min="0.01"
                           step="0.01"
                           placeholder="0.00"
                           className="add-listing-input"
@@ -714,7 +734,7 @@ const SellerAddListing = () => {
                       <Input
                         id="rent-price"
                         type="number"
-                        min="0"
+                        min="0.01"
                         step="0.01"
                         placeholder="0.00"
                         className="add-listing-input"
@@ -732,7 +752,7 @@ const SellerAddListing = () => {
                         <Input
                           id="item-price"
                           type="number"
-                          min="0"
+                          min="0.01"
                           step="0.01"
                           placeholder="0.00"
                           className="add-listing-input"

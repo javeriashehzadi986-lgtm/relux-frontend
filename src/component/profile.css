@@ -15,7 +15,7 @@
   flex-direction: column;
   width: 18rem;
   height: calc(100vh - 5.5rem);
-  padding: 3rem 1.5rem 2rem;
+  padding: 1.75rem 1.5rem 1.5rem;
   background: #faf9f8;
   border-right: 1px solid #e1e3e2;
 }
@@ -23,12 +23,12 @@
 .profile-sidebar-nav {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.35rem;
   flex: 1;
 }
 
 .profile-sidebar-heading {
-  margin: 0 0 1.5rem;
+  margin: 0 0 1rem;
   padding: 0 1.5rem;
   font-family: "Newsreader", serif;
   font-size: 1.5rem;
@@ -127,7 +127,7 @@
 
 .profile-sidebar-footer {
   margin-top: auto;
-  padding-top: 1rem;
+  padding-top: 0.75rem;
 }
 
 .profile-sidebar-link--logout {

@@ -24,6 +24,20 @@
   word-break: break-word;
 }
 
+/* Compact the user block inside the fixed sidebar so the footer (Logout)
+   stays fully visible on shorter / scaled-up screens without scrolling. */
+.profile-sidebar .seller-profile-sidebar-user {
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+  padding-bottom: 0.85rem;
+}
+
+.profile-sidebar .seller-profile-sidebar-user .seller-dashboard-avatar {
+  width: 2.75rem;
+  height: 2.75rem;
+  font-size: 0.9rem;
+}
+
 .seller-profile-top {
   display: flex;
   flex-direction: column;

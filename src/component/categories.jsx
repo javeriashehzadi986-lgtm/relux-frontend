@@ -28,7 +28,6 @@ const Categories = () => {
           subtitle: category.subtitle || `Browse ${category.name} fashion on Relux Hub.`,
           to: category.to || `/category/${category.slug}`,
           image: category.image,
-          totalListings: category.totalListings ?? 0,
         }));
 
         if (!cancelled) {
@@ -91,11 +90,6 @@ const Categories = () => {
                 <CardDescription className="categories-card-subtitle">
                   {category.subtitle}
                 </CardDescription>
-                {typeof category.totalListings === "number" && (
-                  <p className="categories-card-count">
-                    {category.totalListings} listings
-                  </p>
-                )}
               </CardContent>
             </Card>
           </article>

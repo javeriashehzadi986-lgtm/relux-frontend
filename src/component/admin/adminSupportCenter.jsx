@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
+  CheckCircle2,
   ChevronLeft,
   ChevronRight,
   Search,
@@ -101,6 +102,15 @@ const MODAL_CONFIG = {
     title: "Contact Buyer & Seller?",
     description: "Your message will be sent to both parties in Support Center.",
     confirmLabel: "Contact Both",
+    confirmClass: "admin-reports-modal-confirm--resolve",
+  },
+  resolve: {
+    icon: CheckCircle2,
+    iconClass: "admin-reports-modal-icon--resolve",
+    title: "Resolve this request?",
+    description:
+      "It will be marked Resolved and the reporter is notified of the outcome. Any escrow freeze on the linked order is lifted.",
+    confirmLabel: "Resolve Request",
     confirmClass: "admin-reports-modal-confirm--resolve",
   },
 };
@@ -488,12 +498,34 @@ const AdminSupportCenter = () => {
     if (!selectedReport || !activeModal) return;
 
     const trimmedReply = replyText.trim();
+
+    let body;
+    if (activeModal === "resolve") {
+      const decisionText =
+        trimmedReply ||
+        (escrowAlreadyReleased
+          ? "Payment has been released to the relevant party. Dispute resolved."
+          : "Resolved by admin.");
+      body = {
+        status: "resolved",
+        decision: decisionText,
+        adminReply: decisionText,
+      };
+      try {
+        setActionError("");
+        await patchReport(body);
+        setActiveModal(null);
+      } catch {
+        /* keep modal open so admin can retry; error shown in banner */
+      }
+      return;
+    }
+
     if (!trimmedReply) {
       setActionError("Please enter a message first.");
       return;
     }
 
-    let body;
     if (activeModal === "askSeller") {
       body = {
         askSeller: true,
@@ -1080,6 +1112,17 @@ const AdminSupportCenter = () => {
                   Ask Buyer
                 </Button>
               </div>
+
+              <Button
+                type="button"
+                variant="outline"
+                className="admin-reports-action-btn admin-reports-action-btn--resolve"
+                onClick={() => setActiveModal("resolve")}
+                disabled={actionLoading || isClosed}
+              >
+                <CheckCircle2 size={16} aria-hidden="true" />
+                {selectedReport.isDispute ? "Resolve Dispute" : "Mark Resolved"}
+              </Button>
             </div>
           </Card>
         )}
