@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
-import { BadgeCheck, CalendarDays, ShieldCheck, Truck } from "lucide-react";
+import { CalendarDays, ShieldCheck, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   getDressConditionLabel,

@@ -69,8 +69,8 @@ export function usePublicMainCategories() {
  */
 export function usePublicStyleFilters(mainSlug) {
   const [styles, setStyles] = useState([]);
-  const [loading, setLoading] = useState(Boolean(mainSlug));
-  const [error, setError] = useState("");
+  const [, setLoading] = useState(Boolean(mainSlug));
+  const [, setError] = useState("");
 
   useEffect(() => {
     if (!mainSlug) {

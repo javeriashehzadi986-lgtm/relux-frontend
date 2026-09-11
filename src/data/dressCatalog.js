@@ -43,7 +43,7 @@ const getCategoryBreadcrumb = (categoryLabel) => {
   return "Women";
 };
 
-const resolveDressConditionLabel = (dress, listingType = dress.listingType) => {
+const resolveDressConditionLabel = (dress) => {
   if (dress.listingCondition) return dress.listingCondition;
   const label = dress.conditionStatus ?? dress.condition;
   if (label) return normalizeListingCondition(label);

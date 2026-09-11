@@ -70,18 +70,6 @@ const resolveSection = (sectionFromQuery, stateSection) => {
   return "profile";
 };
 
-const defaultProfile = {
-  fullName: "",
-  email: "",
-  phone: "",
-  city: "",
-  address: "",
-  returnContactName: "",
-  returnPhone: "",
-  returnCity: "",
-  returnAddress: "",
-};
-
 function userToProfile(user) {
   return {
     fullName: user?.name ?? "",

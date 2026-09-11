@@ -81,15 +81,6 @@ export async function uploadSupportImage(file) {
   return data.url;
 }
 
-function isStoredImageUrl(src) {
-  return (
-    typeof src === "string" &&
-    (src.startsWith("https://") ||
-      src.startsWith("http://") ||
-      src.startsWith("data:"))
-  );
-}
-
 export async function resolveListingImageSource(src, fileMap) {
   if (!src) return "";
   if (src.startsWith("https://") || src.startsWith("http://")) {
