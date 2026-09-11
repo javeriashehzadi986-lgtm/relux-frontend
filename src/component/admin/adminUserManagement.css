@@ -361,7 +361,8 @@
   color: var(--admin-on-surface-variant);
 }
 
-.admin-users-status-badge--suspended {
+.admin-users-status-badge--suspended,
+.admin-users-status-badge--banned {
   background: var(--admin-error-container);
   color: var(--admin-on-error-container);
 }

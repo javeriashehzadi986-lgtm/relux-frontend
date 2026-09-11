@@ -715,7 +715,7 @@ const Profile = ({ section: sectionProp }) => {
               </CardTitle>
               <CardDescription className="profile-logout-modal-description">
                 {hasPassword
-                  ? "This action cannot be undone. Enter your password to permanently deactivate your buyer account."
+                  ? "This action cannot be undone. Enter your password to permanently delete your buyer account."
                   : "This action cannot be undone. You signed in with Google, so confirm below to delete your account — no Relux password needed."}
               </CardDescription>
             </CardHeader>

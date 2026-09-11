@@ -13,6 +13,7 @@ const STATUS_LABELS = {
   pending: "Pending",
   suspended: "Suspended",
   rejected: "Rejected",
+  banned: "Banned",
 };
 
 const PAGE_SIZE = 10;
@@ -124,21 +125,6 @@ const AdminUserManagement = () => {
       current.map((user) => (user.id === updated.id ? updated : user)),
     );
     setSelectedUserId(updated.id);
-  };
-
-  const handleApprove = async () => {
-    if (!selectedUser) return;
-    setActionLoading(true);
-    setActionError("");
-    try {
-      const data = await api.approveAdminUser(selectedUser.id);
-      applyUpdatedUser(data.user);
-      await loadUsers();
-    } catch (error) {
-      setActionError(error.message || "Failed to approve user");
-    } finally {
-      setActionLoading(false);
-    }
   };
 
   const handleSuspend = async () => {
@@ -270,6 +256,7 @@ const AdminUserManagement = () => {
                 <option value="active">Active</option>
                 <option value="pending">Pending</option>
                 <option value="suspended">Suspended</option>
+                <option value="banned">Banned</option>
                 <option value="rejected">Rejected</option>
               </select>
             </label>
@@ -463,17 +450,7 @@ const AdminUserManagement = () => {
               </div>
 
               <div className="admin-users-panel-actions">
-                {selectedUser.status === "pending" && (
-                  <button
-                    type="button"
-                    className="admin-users-panel-btn-primary"
-                    onClick={handleApprove}
-                    disabled={actionLoading}
-                  >
-                    {actionLoading ? "Saving..." : "Approve Verification"}
-                  </button>
-                )}
-                {selectedUser.status !== "suspended" ? (
+                {selectedUser.status !== "banned" ? (
                   <button
                     type="button"
                     className="admin-users-panel-btn-danger"

@@ -133,13 +133,9 @@ function SellerProfileSection({ onLogoutClick }) {
   const profile = useMemo(() => userToProfile(user), [user]);
   const [isEditing, setIsEditing] = useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
-  const [showDeactivateConfirm, setShowDeactivateConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [deactivatePassword, setDeactivatePassword] = useState("");
   const [deletePassword, setDeletePassword] = useState("");
-  const [deactivateError, setDeactivateError] = useState("");
   const [deleteError, setDeleteError] = useState("");
-  const [deactivating, setDeactivating] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
@@ -329,25 +325,6 @@ function SellerProfileSection({ onLogoutClick }) {
       ? user?.hasPassword === true
       : Boolean(user?.hasPassword);
 
-  const handleAccountDeactivate = async () => {
-    setDeactivateError("");
-    setDeactivating(true);
-    try {
-      if (hasPassword) {
-        await deactivateAccount({ password: deactivatePassword });
-      } else {
-        await deactivateAccount({ confirm: true });
-      }
-      setShowDeactivateConfirm(false);
-      setDeactivatePassword("");
-      navigate("/login", { replace: true });
-    } catch (error) {
-      setDeactivateError(error.message || "Could not deactivate account");
-    } finally {
-      setDeactivating(false);
-    }
-  };
-
   const handleAccountDelete = async () => {
     setDeleteError("");
     setDeleting(true);
@@ -399,12 +376,6 @@ function SellerProfileSection({ onLogoutClick }) {
     } finally {
       setChangingPassword(false);
     }
-  };
-
-  const openDeactivateConfirm = () => {
-    setDeactivatePassword("");
-    setDeactivateError("");
-    setShowDeactivateConfirm(true);
   };
 
   const openDeleteConfirm = () => {
@@ -1035,20 +1006,11 @@ function SellerProfileSection({ onLogoutClick }) {
                   </CardTitle>
                 </div>
                 <CardDescription className="seller-profile-danger-desc">
-                  Deactivating hides your listings until you sign in again. Deleting
-                  permanently removes your seller account and listings.
+                  Deleting permanently removes your seller account and listings.
                 </CardDescription>
               </CardHeader>
               <CardContent className="seller-profile-section-content">
                 <div className="seller-profile-danger-actions">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="seller-profile-deactivate-btn"
-                    onClick={openDeactivateConfirm}
-                  >
-                    Deactivate Account
-                  </Button>
                   <Button
                     type="button"
                     className="seller-profile-delete-btn"
@@ -1122,82 +1084,6 @@ function SellerProfileSection({ onLogoutClick }) {
             </Card>
           </>
         )}
-
-      {showDeactivateConfirm && (
-        <div
-          className="profile-logout-overlay"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="seller-deactivate-account-title"
-          onClick={() => setShowDeactivateConfirm(false)}
-        >
-          <Card
-            className="profile-logout-modal"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <CardHeader className="profile-logout-modal-header">
-              <CardTitle
-                id="seller-deactivate-account-title"
-                className="profile-logout-modal-title"
-              >
-                Deactivate account?
-              </CardTitle>
-              <CardDescription className="profile-logout-modal-description">
-                {hasPassword
-                  ? "Your seller account will be deactivated and your active listings will be hidden. Enter your password to confirm."
-                  : "Your seller account will be deactivated and your active listings will be hidden. Confirm below — no Relux password needed for Google accounts."}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="profile-logout-modal-body">
-              {hasPassword ? (
-                <Field className="profile-delete-password-field profile-password-field">
-                  <div className="profile-password-header">
-                    <FieldLabel htmlFor="seller-deactivate-password">Current Password</FieldLabel>
-                    <Link
-                      to="/forgot-password"
-                      className="profile-forgot-link"
-                      onClick={() => setShowDeactivateConfirm(false)}
-                    >
-                      Forgot Password?
-                    </Link>
-                  </div>
-                  <Input
-                    id="seller-deactivate-password"
-                    type="password"
-                    value={deactivatePassword}
-                    onChange={(event) => setDeactivatePassword(event.target.value)}
-                    autoComplete="current-password"
-                    required
-                  />
-                </Field>
-              ) : null}
-              {deactivateError ? (
-                <p className="profile-delete-error" role="alert">
-                  {deactivateError}
-                </p>
-              ) : null}
-            </CardContent>
-            <CardContent className="profile-logout-modal-actions">
-              <Button
-                type="button"
-                variant="ghost"
-                className="profile-logout-cancel-btn"
-                onClick={() => setShowDeactivateConfirm(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="button"
-                className="profile-logout-confirm-btn"
-                disabled={deactivating || (hasPassword && !deactivatePassword)}
-                onClick={handleAccountDeactivate}
-              >
-                {deactivating ? "Deactivating..." : "Deactivate"}
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      )}
 
       {showDeleteConfirm && (
         <div
