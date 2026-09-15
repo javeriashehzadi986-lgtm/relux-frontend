@@ -81,6 +81,12 @@ export async function uploadSupportImage(file) {
   return data.url;
 }
 
+export async function uploadChatImage(file) {
+  const prepared = await prepareImageForUpload(file);
+  const data = await api.uploadChatImage(prepared);
+  return data.url;
+}
+
 export async function resolveListingImageSource(src, fileMap) {
   if (!src) return "";
   if (src.startsWith("https://") || src.startsWith("http://")) {

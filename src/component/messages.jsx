@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useMessaging } from "@/hooks/useMessaging";
+import { uploadChatImage } from "@/utils/imageUpload";
 import "./messages.css";
 
 const useIsDesktop = () => {
@@ -194,15 +195,10 @@ const MessagesContent = () => {
     setSending(true);
 
     try {
-      const dataUrl = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = () => reject(new Error("Could not read image"));
-        reader.readAsDataURL(file);
-      });
+      const imageUrl = await uploadChatImage(file);
 
       const caption = message.trim() || "Shared an image";
-      await sendMessage(caption, String(dataUrl));
+      await sendMessage(caption, imageUrl);
     setMessage("");
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";

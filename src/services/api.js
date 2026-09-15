@@ -210,6 +210,7 @@ export const api = {
   uploadVerificationImage: (file) => uploadRequest("/upload/verification", file),
   uploadSupportImage: (file) => uploadRequest("/upload/support", file),
   uploadCategoryImage: (file) => uploadRequest("/upload/category", file),
+  uploadChatImage: (file) => uploadRequest("/upload/chat", file),
 
   getAdminSellerApplications: () =>
     request("/admin/seller-verifications"),
