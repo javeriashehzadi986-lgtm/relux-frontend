@@ -156,7 +156,6 @@ const BecomeASeller = () => {
                 })}
               </ul>
             </div>
-
             <Card className="seller-testimonial-card py-0 gap-0 ring-0 shadow-none">
               <CardContent className="seller-testimonial-content">
                 <p className="seller-testimonial-quote">
