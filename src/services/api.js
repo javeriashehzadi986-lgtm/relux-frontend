@@ -372,6 +372,11 @@ export const api = {
       method: "DELETE",
     }),
 
+  deleteConversation: (id) =>
+    request(`/messages/conversations/${id}`, {
+      method: "DELETE",
+    }),
+
   blockConversation: (id) =>
     request(`/messages/conversations/${id}/block`, {
       method: "PATCH",

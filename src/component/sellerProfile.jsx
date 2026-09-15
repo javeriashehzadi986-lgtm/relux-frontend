@@ -33,11 +33,7 @@ import { SellerMyListingsContent } from "./sellerMyListings";
 import { SellerOrdersRequestsContent } from "./sellerOrdersRequests";
 import SellerSupportCenter from "./sellerSupportCenter";
 import "./profile.css";
-import "./sellerDashboard.css";
 import "./sellerProfile.css";
-import "./sellerMyListings.css";
-import "./sellerOrdersRequests.css";
-import "./sellerSupportCenter.css";
 import DashboardMobileNav from "./DashboardMobileNav";
 
 const SIDEBAR_ITEMS = [

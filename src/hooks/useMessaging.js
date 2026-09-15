@@ -102,8 +102,7 @@ export function useMessaging(conversationParam) {
     }
 
     try {
-      await loadConversation(conversationParam);
-      await loadConversations();
+      await Promise.all([loadConversation(conversationParam), loadConversations()]);
     } catch {
       const data = await openListingConversation(conversationParam, location.state ?? {});
       if (data.conversation?.id !== conversationParam) {
@@ -268,8 +267,7 @@ export function useMessaging(conversationParam) {
 
   const refreshActive = useCallback(async () => {
     if (!activeId) return;
-    await loadConversation(activeId);
-    await loadConversations();
+    await Promise.all([loadConversation(activeId), loadConversations()]);
   }, [activeId, loadConversation, loadConversations]);
 
   const sendMessage = useCallback(
@@ -315,8 +313,10 @@ export function useMessaging(conversationParam) {
 
   const markAllRead = useCallback(async () => {
     await api.markAllConversationsRead();
-    await loadConversations();
-    if (activeId) await loadConversation(activeId);
+    await Promise.all([
+      loadConversations(),
+      ...(activeId ? [loadConversation(activeId)] : []),
+    ]);
   }, [activeId, loadConversation, loadConversations]);
 
   const toggleMute = useCallback(async () => {
@@ -338,12 +338,18 @@ export function useMessaging(conversationParam) {
     navigate("/messages");
   }, [activeId, loadConversations, navigate]);
 
+  const deleteConversation = useCallback(async () => {
+    if (!activeId) return;
+    await api.deleteConversation(activeId);
+    await loadConversations();
+    navigate("/messages");
+  }, [activeId, loadConversations, navigate]);
+
   const selectConversation = useCallback(
-    async (id) => {
-      await markConversationRead(id);
+    (id) => {
       navigate(`/messages/${id}`);
     },
-    [markConversationRead, navigate],
+    [navigate],
   );
 
   return {
@@ -364,6 +370,7 @@ export function useMessaging(conversationParam) {
     toggleMute,
     clearHistory,
     blockConversation,
+    deleteConversation,
     selectConversation,
     markConversationRead,
     refreshActive,

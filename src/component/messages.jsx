@@ -36,10 +36,8 @@ const filterConversations = (conversations, filter, searchQuery, isSeller) => {
 
   return list.filter((conversation) => {
     const name = isSeller ? conversation.buyerName : conversation.sellerName;
-    const title = isSeller ? conversation.listingTitle : conversation.dressTitle;
     return (
       name?.toLowerCase().includes(query) ||
-      title?.toLowerCase().includes(query) ||
       conversation.preview?.toLowerCase().includes(query)
     );
   });
@@ -51,6 +49,13 @@ const getChatMenuOptions = () => [
     label: "Clear chat",
     icon: "delete_sweep",
     action: "clearHistory",
+    danger: true,
+  },
+  {
+    id: "delete",
+    label: "Delete chat",
+    icon: "delete_forever",
+    action: "deleteChat",
     danger: true,
   },
 ];
@@ -74,6 +79,7 @@ const MessagesContent = () => {
     notifyTyping,
     markAllRead,
     clearHistory,
+    deleteConversation,
     selectConversation,
   } = useMessaging(conversationId);
 
@@ -81,6 +87,7 @@ const MessagesContent = () => {
   const [chatFilter, setChatFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [actionNotice, setActionNotice] = useState("");
   const [sending, setSending] = useState(false);
   const [attachError, setAttachError] = useState("");
@@ -95,7 +102,6 @@ const MessagesContent = () => {
 
   const hasUnread = conversations.some((conversation) => conversation.unread > 0);
 
-  const listingId = isSeller ? thread?.listingId : thread?.dressId;
   const chatMenuOptions = useMemo(() => getChatMenuOptions(), []);
 
   const showChatContent = Boolean(conversationId) || isDesktop;
@@ -104,7 +110,6 @@ const MessagesContent = () => {
 
   const partnerName = isSeller ? thread?.buyerName : thread?.sellerName;
   const partnerFirstName = isSeller ? thread?.buyerFirstName : thread?.sellerFirstName;
-  const listingTitle = isSeller ? thread?.listingTitle : thread?.dressTitle;
 
   useEffect(() => {
     setMessage("");
@@ -141,6 +146,12 @@ const MessagesContent = () => {
   const handleMenuAction = async (action) => {
     if (!activeId) return;
 
+    if (action === "deleteChat") {
+      setMenuOpen(false);
+      setConfirmDeleteOpen(true);
+      return;
+    }
+
     try {
       if (action === "clearHistory") {
         await clearHistory();
@@ -151,6 +162,15 @@ const MessagesContent = () => {
     }
 
     setMenuOpen(false);
+  };
+
+  const handleConfirmDelete = async () => {
+    setConfirmDeleteOpen(false);
+    try {
+      await deleteConversation();
+    } catch (err) {
+      setActionNotice(err.message || "Failed to delete chat.");
+    }
   };
 
   const handleSend = async (image = "") => {
@@ -309,8 +329,6 @@ const MessagesContent = () => {
             {filteredConversations.length > 0 ? (
               filteredConversations.map((conversation) => {
                 const name = isSeller ? conversation.buyerName : conversation.sellerName;
-                const title = isSeller ? conversation.listingTitle : conversation.dressTitle;
-                const image = isSeller ? conversation.listingImage : conversation.dressImage;
 
                 return (
                 <button
@@ -335,10 +353,6 @@ const MessagesContent = () => {
                       </span>
                     </div>
                       <p className="seller-chat-conversation-preview">{conversation.preview}</p>
-                    <div className="seller-chat-conversation-dress">
-                        <img src={image} alt="" />
-                        <span>{title}</span>
-                    </div>
                   </div>
                   {conversation.unread ? (
                       <span className="seller-chat-unread" aria-label={`${conversation.unread} unread`}>
@@ -412,30 +426,6 @@ const MessagesContent = () => {
                   </div>
                 </div>
                 <div className="seller-chat-header-right">
-                  <div className="seller-chat-discussing">
-                    <span className="seller-chat-discussing-label">
-                      {isSeller ? "Listing" : "Discussing"}
-                    </span>
-                    <span className="seller-chat-discussing-title">{listingTitle}</span>
-                  </div>
-                  {listingId ? (
-                  <Link
-                      to={
-                        isSeller
-                          ? "/sellerProfile?section=listings"
-                          : `/dress/${listingId}`
-                      }
-                    className="seller-chat-view-dress-btn"
-                    aria-label={isSeller ? "View my listing" : "View dress listing"}
-                  >
-                    <span className="material-symbols-outlined" aria-hidden="true">
-                        {isSeller ? "inventory_2" : "visibility"}
-                    </span>
-                    <span className="seller-chat-view-dress-label">
-                      {isSeller ? "My Listing" : "View Dress"}
-                    </span>
-                  </Link>
-                  ) : null}
                   <div className="seller-chat-more-wrap" ref={menuRef}>
                     <button
                       type="button"
@@ -598,6 +588,45 @@ const MessagesContent = () => {
           )}
         </section>
       </div>
+
+      {confirmDeleteOpen ? (
+        <div
+          className="seller-chat-confirm-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="seller-chat-delete-title"
+          onClick={() => setConfirmDeleteOpen(false)}
+        >
+          <div
+            className="seller-chat-confirm-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <h3 id="seller-chat-delete-title" className="seller-chat-confirm-title">
+              Delete this chat?
+            </h3>
+            <p className="seller-chat-confirm-description">
+              This will permanently delete the conversation and all its messages.
+              This cannot be undone.
+            </p>
+            <div className="seller-chat-confirm-actions">
+              <button
+                type="button"
+                className="seller-chat-confirm-cancel-btn"
+                onClick={() => setConfirmDeleteOpen(false)}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="seller-chat-confirm-delete-btn"
+                onClick={handleConfirmDelete}
+              >
+                Delete Chat
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 };

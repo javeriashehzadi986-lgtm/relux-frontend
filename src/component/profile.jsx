@@ -27,7 +27,6 @@ import {
 import "./profile.css";
 import ProfileMyBids from "./profileMyBids";
 import ProfileMyOrders from "./profileMyOrders";
-import ProfileWishlist from "./profileWishlist";
 import ProfileSupportCenter from "./profileSupportCenter";
 import DashboardMobileNav from "./DashboardMobileNav";
 import { useAuth } from "@/context/AuthContext";
@@ -42,7 +41,6 @@ const SIDEBAR_ITEMS = [
 function getMobileNavTitle(activeSection) {
   const match = SIDEBAR_ITEMS.find((item) => item.id === activeSection);
   if (match) return match.label;
-  if (activeSection === "wishlist") return "My Wishlist";
   return "Dashboard";
 }
 
@@ -71,7 +69,6 @@ function getInitials(name) {
 const VALID_SECTIONS = new Set([
   "orders",
   "bids",
-  "wishlist",
   "support",
   "profile",
 ]);
@@ -276,10 +273,6 @@ const Profile = ({ section: sectionProp }) => {
 
     if (activeSection === "bids") {
       return <ProfileMyBids />;
-    }
-
-    if (activeSection === "wishlist") {
-      return <ProfileWishlist />;
     }
 
     if (activeSection === "support") {
@@ -644,7 +637,6 @@ const Profile = ({ section: sectionProp }) => {
         className={`profile-main ${
           activeSection === "bids" ||
           activeSection === "orders" ||
-          activeSection === "wishlist" ||
           activeSection === "support"
             ? "profile-main--wide"
             : ""

@@ -30,6 +30,7 @@ import ForgotPassword from "./component/forgotPassword";
 import ResetPassword from "./component/resetPassword";
 import VerifyEmail from "./component/verifyEmail";
 import Profile from "./component/profile";
+import ProfileWishlist from "./component/profileWishlist";
 import SellerProfile from "./component/sellerProfile";
 import SellerAddListing from "./component/sellerAddListing";
 import SellerPending from "./component/sellerPending";
@@ -49,7 +50,6 @@ import AdminRentalOrders from "./component/admin/AdminRentalOrders";
 import AdminCategoriesManagement from "./component/admin/AdminCategoriesManagement";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import SellerRoute from "./routes/SellerRoute";
-import WishlistRoute from "./routes/WishlistRoute";
 
 const DressChatRedirect = () => {
   const { id } = useParams();
@@ -235,7 +235,9 @@ function App() {
             path="/wishlist"
             element={
               <ProtectedRoute>
-                <WishlistRoute />
+                <section className="profile-wishlist-page" style={{ padding: "1.5rem" }}>
+                  <ProfileWishlist />
+                </section>
               </ProtectedRoute>
             }
           />
