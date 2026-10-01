@@ -6,6 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { applyAuctionApiData, isMongoListingId, mapApiListingToDress } from "@/data/dressCatalog";
 import api from "@/services/api";
+import { useAuth } from "@/context/AuthContext";
 import { useRequireLogin } from "@/hooks/useRequireLogin";
 import { useAuctionSocket } from "@/hooks/useAuctionSocket";
 import { useWishlist } from "@/hooks/useWishlist";
@@ -22,6 +23,7 @@ const formatCountdown = ({ hours, minutes, seconds }) =>
 const DressDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [dress, setDress] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
@@ -147,6 +149,11 @@ const DressDetails = () => {
     setBidError("");
 
     if (!requireLogin()) return;
+
+    if (user?.role !== "buyer") {
+      setBidError("Only buyer accounts can place bids.");
+      return;
+    }
 
     const amount = Number(String(bidAmount).replace(/[^\d.]/g, ""));
 

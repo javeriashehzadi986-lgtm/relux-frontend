@@ -1,6 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import api from "@/services/api";
-import { syncLocalWishlistToServer } from "@/data/wishlistStore";
 import {
   connectRealtimeSocket,
   disconnectRealtimeSocket,
@@ -29,11 +28,10 @@ export function AuthProvider({ children }) {
 
     api
       .getMe()
-      .then(async (data) => {
+      .then((data) => {
         setUser(data.user);
         api.setStoredUser(data.user);
         connectRealtimeSocket();
-        await syncLocalWishlistToServer(api).catch(() => {});
       })
       .catch(() => {
         api.setToken(null);
@@ -59,7 +57,6 @@ export function AuthProvider({ children }) {
     api.setStoredUser(data.user);
     setUser(data.user);
     connectRealtimeSocket();
-    await syncLocalWishlistToServer(api).catch(() => {});
     return data.user;
   }, []);
 
@@ -69,7 +66,6 @@ export function AuthProvider({ children }) {
     api.setStoredUser(data.user);
     setUser(data.user);
     connectRealtimeSocket();
-    await syncLocalWishlistToServer(api).catch(() => {});
     return data;
   }, []);
 
@@ -80,7 +76,6 @@ export function AuthProvider({ children }) {
       api.setStoredUser(data.user);
       setUser(data.user);
       connectRealtimeSocket();
-      await syncLocalWishlistToServer(api).catch(() => {});
     }
     return data;
   }, []);
@@ -90,7 +85,6 @@ export function AuthProvider({ children }) {
     api.setStoredUser(userData);
     setUser(userData);
     connectRealtimeSocket();
-    await syncLocalWishlistToServer(api).catch(() => {});
     return userData;
   }, []);
 
@@ -138,7 +132,6 @@ export function AuthProvider({ children }) {
     api.setStoredUser(data.user);
     setUser(data.user);
     connectRealtimeSocket();
-    await syncLocalWishlistToServer(api).catch(() => {});
     return data;
   }, []);
 
